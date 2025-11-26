@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Q54: Construct Binary Tree from Preorder and Inorder</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f5f7fa; min-height: 100vh; padding: 20px; }
+        .container { max-width: 1200px; margin: 0 auto; }
+        
+        .problem-info { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 16px; padding: 25px 30px; margin-bottom: 25px; color: white; }
+        .problem-info h1 { font-size: 1.8em; margin-bottom: 10px; }
+        .problem-info p { font-size: 1.1em; opacity: 0.95; line-height: 1.6; }
+        .problem-meta { display: flex; gap: 20px; margin-top: 15px; flex-wrap: wrap; }
+        .meta-tag { background: rgba(255,255,255,0.2); padding: 6px 14px; border-radius: 20px; font-size: 0.9em; }
+        
+        .code-section { background: white; border-radius: 16px; padding: 25px; margin-bottom: 25px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
+        .code-section h3 { color: #333; margin-bottom: 15px; }
+        .code-block { background: #1e1e1e; border-radius: 12px; padding: 20px; overflow-x: auto; }
+        .code-block pre { margin: 0; font-family: 'Consolas', monospace; font-size: 12px; line-height: 1.5; color: #d4d4d4; }
+        .code-block .keyword { color: #569cd6; }
+        .code-block .function { color: #dcdcaa; }
+        .code-block .comment { color: #6a9955; }
+        
+        .visualization-section { background: white; border-radius: 16px; padding: 25px; margin-bottom: 25px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
+        .visualization-section h3 { color: #333; margin-bottom: 20px; }
+        
+        .controls { display: flex; gap: 12px; margin-bottom: 25px; flex-wrap: wrap; }
+        .btn { padding: 12px 28px; font-size: 1em; border: none; border-radius: 10px; cursor: pointer; font-weight: 500; }
+        .btn-primary { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; }
+        .btn-success { background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); color: white; }
+        .btn-warning { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white; }
+        .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        
+        .status-message { background: #e8f4fd; border-left: 4px solid #2196f3; padding: 15px 20px; border-radius: 0 10px 10px 0; margin-bottom: 20px; color: #1565c0; }
+        
+        .arrays-section { display: flex; gap: 30px; flex-wrap: wrap; margin-bottom: 25px; }
+        .array-box { flex: 1; min-width: 250px; }
+        .array-title { font-size: 0.9em; font-weight: 600; margin-bottom: 12px; color: #555; }
+        .array-container { display: flex; gap: 6px; flex-wrap: wrap; padding: 15px; background: #fafafa; border-radius: 12px; border: 1px solid #e0e0e0; }
+        .array-item { width: 45px; height: 45px; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 1.1em; border-radius: 8px; background: #e3f2fd; border: 2px solid #2196f3; color: #1565c0; }
+        .array-item.root { background: #4caf50; border-color: #388e3c; color: white; }
+        .array-item.left { background: #fff3e0; border-color: #ff9800; }
+        .array-item.right { background: #e8f5e9; border-color: #4caf50; }
+        .array-item.used { background: #bdbdbd; border-color: #9e9e9e; color: #666; }
+        
+        .tree-container { display: flex; justify-content: center; }
+        svg { background: #fafafa; border-radius: 12px; border: 1px solid #e0e0e0; }
+        
+        .legend { display: flex; gap: 20px; margin-bottom: 15px; flex-wrap: wrap; justify-content: center; }
+        .legend-item { display: flex; align-items: center; gap: 8px; font-size: 0.9em; }
+        .legend-box { width: 20px; height: 20px; border-radius: 4px; border: 2px solid; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="problem-info">
+            <h1>Q54: Construct Binary Tree from Preorder and Inorder</h1>
+            <p>Build tree using preorder (root first) to identify root, and inorder to split left/right subtrees. Divide and conquer approach.</p>
+            <div class="problem-meta">
+                <span class="meta-tag">📁 Divide & Conquer</span>
+                <span class="meta-tag">⏱️ O(n)</span>
+                <span class="meta-tag">💡 Tree Construction</span>
+            </div>
+        </div>
+        
+        <div class="code-section">
+            <h3>💻 Python Solution</h3>
+            <div class="code-block">
+                <pre><span class="keyword">def</span> <span class="function">buildTree</span>(preorder: List[int], inorder: List[int]) -> TreeNode:
+    <span class="keyword">if</span> inorder:
+        <span class="comment"># 전위 순회 결과는 중위 순회 분할 인덱스</span>
+        index = inorder.index(preorder.pop(0))
+
+        <span class="comment"># 중위 순회 결과 분할 정복</span>
+        node = TreeNode(inorder[index])
+        node.left = buildTree(preorder, inorder[0:index])
+        node.right = buildTree(preorder, inorder[index + 1:])
+
+        <span class="keyword">return</span> node</pre>
+            </div>
+        </div>
+        
+        <div class="visualization-section">
+            <h3>🎬 Visualization</h3>
+            
+            <div class="controls">
+                <button class="btn btn-primary" id="stepBtn" onclick="step()">Step</button>
+                <button class="btn btn-success" id="autoBtn" onclick="toggleAuto()">Auto Run</button>
+                <button class="btn btn-warning" onclick="reset()">Reset</button>
+            </div>
+            
+            <div class="legend">
+                <div class="legend-item"><div class="legend-box" style="background: #4caf50; border-color: #388e3c;"></div> Root (from preorder)</div>
+                <div class="legend-item"><div class="legend-box" style="background: #fff3e0; border-color: #ff9800;"></div> Left Subtree</div>
+                <div class="legend-item"><div class="legend-box" style="background: #e8f5e9; border-color: #4caf50;"></div> Right Subtree</div>
+            </div>
+            
+            <div class="status-message" id="statusMessage">
+                preorder = [3,9,20,15,7], inorder = [9,3,15,20,7]. Build the tree.
+            </div>
+            
+            <div class="arrays-section">
+                <div class="array-box">
+                    <div class="array-title">📋 Preorder (Root → Left → Right)</div>
+                    <div class="array-container" id="preorderArray"></div>
+                </div>
+                <div class="array-box">
+                    <div class="array-title">📋 Inorder (Left → Root → Right)</div>
+                    <div class="array-container" id="inorderArray"></div>
+                </div>
+            </div>
+            
+            <div class="tree-container">
+                <svg id="tree" width="500" height="280"></svg>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // preorder = [3, 9, 20, 15, 7]
+        // inorder = [9, 3, 15, 20, 7]
+        // Tree:
+        //       3
+        //      / \
+        //     9   20
+        //        /  \
+        //       15   7
+        
+        const preorder = [3, 9, 20, 15, 7];
+        const inorder = [9, 3, 15, 20, 7];
+        
+        const steps = [
+            {
+                root: 3,
+                preorderUsed: [0],
+                inorderHighlight: { root: 1, left: [0, 0], right: [2, 4] },
+                message: 'Pop 3 from preorder. Find in inorder at index 1. Left=[9], Right=[15,20,7]',
+                treeNodes: [{ val: 3, x: 250, y: 40 }],
+                treeEdges: []
+            },
+            {
+                root: 9,
+                preorderUsed: [0, 1],
+                inorderHighlight: { root: 0, left: null, right: null },
+                message: 'Pop 9 from preorder. Index 0 in inorder. No left/right. Create leaf.',
+                treeNodes: [
+                    { val: 3, x: 250, y: 40 },
+                    { val: 9, x: 125, y: 120 }
+                ],
+                treeEdges: [{ from: { x: 250, y: 40 }, to: { x: 125, y: 120 } }]
+            },
+            {
+                root: 20,
+                preorderUsed: [0, 1, 2],
+                inorderHighlight: { root: 3, left: [2, 2], right: [4, 4] },
+                message: 'Pop 20 from preorder. Index 3 in [15,20,7]. Left=[15], Right=[7]',
+                treeNodes: [
+                    { val: 3, x: 250, y: 40 },
+                    { val: 9, x: 125, y: 120 },
+                    { val: 20, x: 375, y: 120 }
+                ],
+                treeEdges: [
+                    { from: { x: 250, y: 40 }, to: { x: 125, y: 120 } },
+                    { from: { x: 250, y: 40 }, to: { x: 375, y: 120 } }
+                ]
+            },
+            {
+                root: 15,
+                preorderUsed: [0, 1, 2, 3],
+                inorderHighlight: { root: 2, left: null, right: null },
+                message: 'Pop 15 from preorder. Create left child of 20.',
+                treeNodes: [
+                    { val: 3, x: 250, y: 40 },
+                    { val: 9, x: 125, y: 120 },
+                    { val: 20, x: 375, y: 120 },
+                    { val: 15, x: 310, y: 200 }
+                ],
+                treeEdges: [
+                    { from: { x: 250, y: 40 }, to: { x: 125, y: 120 } },
+                    { from: { x: 250, y: 40 }, to: { x: 375, y: 120 } },
+                    { from: { x: 375, y: 120 }, to: { x: 310, y: 200 } }
+                ]
+            },
+            {
+                root: 7,
+                preorderUsed: [0, 1, 2, 3, 4],
+                inorderHighlight: { root: 4, left: null, right: null },
+                message: 'Pop 7 from preorder. Create right child of 20. Done!',
+                treeNodes: [
+                    { val: 3, x: 250, y: 40 },
+                    { val: 9, x: 125, y: 120 },
+                    { val: 20, x: 375, y: 120 },
+                    { val: 15, x: 310, y: 200 },
+                    { val: 7, x: 440, y: 200 }
+                ],
+                treeEdges: [
+                    { from: { x: 250, y: 40 }, to: { x: 125, y: 120 } },
+                    { from: { x: 250, y: 40 }, to: { x: 375, y: 120 } },
+                    { from: { x: 375, y: 120 }, to: { x: 310, y: 200 } },
+                    { from: { x: 375, y: 120 }, to: { x: 440, y: 200 } }
+                ]
+            }
+        ];
+        
+        let stepIndex = 0;
+        let autoInterval = null;
+        
+        function init() {
+            stepIndex = 0;
+            renderArrays({});
+            renderTree([], []);
+        }
+        
+        function renderArrays(highlight) {
+            const preorderContainer = document.getElementById('preorderArray');
+            const inorderContainer = document.getElementById('inorderArray');
+            
+            preorderContainer.innerHTML = preorder.map((val, i) => {
+                let cls = 'array-item';
+                if (highlight.preorderUsed && highlight.preorderUsed.includes(i)) cls += ' used';
+                if (highlight.currentRoot === i) cls += ' root';
+                return `<div class="${cls}">${val}</div>`;
+            }).join('');
+            
+            inorderContainer.innerHTML = inorder.map((val, i) => {
+                let cls = 'array-item';
+                if (highlight.inorder) {
+                    if (highlight.inorder.root === i) cls += ' root';
+                    else if (highlight.inorder.left && i >= highlight.inorder.left[0] && i <= highlight.inorder.left[1]) cls += ' left';
+                    else if (highlight.inorder.right && i >= highlight.inorder.right[0] && i <= highlight.inorder.right[1]) cls += ' right';
+                }
+                return `<div class="${cls}">${val}</div>`;
+            }).join('');
+        }
+        
+        function renderTree(nodes, edges) {
+            const svg = d3.select("#tree");
+            svg.selectAll("*").remove();
+            
+            edges.forEach(edge => {
+                svg.append("line")
+                    .attr("x1", edge.from.x).attr("y1", edge.from.y)
+                    .attr("x2", edge.to.x).attr("y2", edge.to.y)
+                    .attr("stroke", "#999")
+                    .attr("stroke-width", 2);
+            });
+            
+            nodes.forEach((node, i) => {
+                const isNew = (i === nodes.length - 1);
+                
+                svg.append("circle")
+                    .attr("cx", node.x)
+                    .attr("cy", node.y)
+                    .attr("r", 25)
+                    .attr("fill", isNew ? "#4caf50" : "#667eea")
+                    .attr("stroke", "#333")
+                    .attr("stroke-width", 2);
+                
+                svg.append("text")
+                    .attr("x", node.x)
+                    .attr("y", node.y + 5)
+                    .attr("text-anchor", "middle")
+                    .attr("fill", "white")
+                    .attr("font-weight", "bold")
+                    .attr("font-size", "14px")
+                    .text(node.val);
+            });
+        }
+        
+        function step() {
+            if (stepIndex >= steps.length) {
+                document.getElementById('statusMessage').textContent = '✅ Tree construction complete!';
+                document.getElementById('stepBtn').disabled = true;
+                stopAuto();
+                return;
+            }
+            
+            const s = steps[stepIndex];
+            
+            renderArrays({
+                preorderUsed: s.preorderUsed,
+                currentRoot: s.preorderUsed[s.preorderUsed.length - 1],
+                inorder: s.inorderHighlight
+            });
+            
+            renderTree(s.treeNodes, s.treeEdges);
+            document.getElementById('statusMessage').textContent = s.message;
+            
+            stepIndex++;
+            
+            if (stepIndex >= steps.length) {
+                setTimeout(() => {
+                    document.getElementById('statusMessage').textContent = '✅ Tree construction complete!';
+                    document.getElementById('stepBtn').disabled = true;
+                    stopAuto();
+                }, 300);
+            }
+        }
+        
+        function toggleAuto() {
+            if (autoInterval) { stopAuto(); }
+            else {
+                document.getElementById('autoBtn').textContent = 'Pause';
+                autoInterval = setInterval(step, 1200);
+            }
+        }
+        
+        function stopAuto() {
+            if (autoInterval) { clearInterval(autoInterval); autoInterval = null; }
+            document.getElementById('autoBtn').textContent = 'Auto Run';
+        }
+        
+        function reset() {
+            stopAuto();
+            document.getElementById('stepBtn').disabled = false;
+            document.getElementById('statusMessage').textContent = 
+                'preorder = [3,9,20,15,7], inorder = [9,3,15,20,7]. Build the tree.';
+            init();
+        }
+        
+        init();
+    </script>
+</body>
+</html>

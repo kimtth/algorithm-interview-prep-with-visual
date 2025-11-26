@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Single Number - XOR</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; padding: 20px; }
+        .container { max-width: 900px; margin: 0 auto; }
+        h1 { text-align: center; color: white; margin-bottom: 10px; }
+        .subtitle { text-align: center; color: rgba(255,255,255,0.9); margin-bottom: 20px; font-size: 14px; }
+        .controls { display: flex; justify-content: center; gap: 15px; margin-bottom: 20px; }
+        button { background: white; color: #667eea; border: none; padding: 10px 25px; border-radius: 25px; cursor: pointer; font-weight: 600; }
+        button:disabled { opacity: 0.5; cursor: not-allowed; }
+        .panel { background: white; border-radius: 15px; padding: 20px; margin-bottom: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
+        .panel-title { font-size: 16px; font-weight: bold; color: #333; margin-bottom: 15px; border-bottom: 2px solid #667eea; padding-bottom: 10px; }
+        .array-container { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; }
+        .array-item { width: 55px; height: 55px; display: flex; align-items: center; justify-content: center; border-radius: 10px; font-weight: bold; font-size: 20px; transition: all 0.3s; }
+        .default { background: #f5f7fa; border: 2px solid #ddd; }
+        .current { background: #2196f3; color: white; border: 2px solid #1976d2; transform: scale(1.1); }
+        .processed { background: #e0e0e0; border: 2px solid #bbb; color: #888; }
+        .result { background: #4caf50; color: white; border: 2px solid #2e7d32; }
+        .xor-display { text-align: center; padding: 20px; margin-top: 15px; }
+        .xor-formula { font-family: monospace; font-size: 20px; background: #f5f7fa; padding: 15px; border-radius: 10px; }
+        .binary-row { display: flex; justify-content: center; gap: 20px; margin: 10px 0; font-family: monospace; }
+        .binary-label { width: 100px; text-align: right; }
+        .binary-value { color: #667eea; }
+        .xor-result { margin-top: 15px; font-size: 28px; font-weight: bold; color: #667eea; }
+        .status-box { background: #f5f7fa; border-radius: 10px; padding: 15px; font-family: monospace; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔢 Single Number</h1>
+        <p class="subtitle">XOR All Elements - O(n) Time, O(1) Space</p>
+
+        <div class="controls">
+            <button id="stepBtn">Step</button>
+            <button id="autoBtn">Auto Run</button>
+            <button id="resetBtn">Reset</button>
+        </div>
+
+        <div class="panel">
+            <div class="panel-title">📊 Array (Each number appears twice except one)</div>
+            <div class="array-container" id="array"></div>
+        </div>
+
+        <div class="panel">
+            <div class="panel-title">⊕ XOR Operation</div>
+            <div class="xor-display">
+                <div class="xor-formula" id="formula">result = 0</div>
+                <div class="binary-row">
+                    <span class="binary-label">result:</span>
+                    <span class="binary-value" id="bin-result">00000000</span>
+                </div>
+                <div class="binary-row" id="bin-current-row" style="display:none;">
+                    <span class="binary-label">current:</span>
+                    <span class="binary-value" id="bin-current">00000000</span>
+                </div>
+                <div class="xor-result">Result: <span id="result-val">0</span></div>
+            </div>
+        </div>
+
+        <div class="panel">
+            <div class="panel-title">📋 Status</div>
+            <div class="status-box" id="status">Key insight: a ⊕ a = 0 and a ⊕ 0 = a. Pairs cancel out!</div>
+        </div>
+    </div>
+
+    <script>
+        const nums = [4, 1, 2, 1, 2];
+        let idx = 0;
+        let result = 0;
+        let done = false;
+        let autoInterval = null;
+
+        function toBinary(n) {
+            return (n >>> 0).toString(2).padStart(8, '0');
+        }
+
+        function render() {
+            document.getElementById('array').innerHTML = nums.map((v, i) => {
+                let cls = 'array-item default';
+                if (done && v === result) cls = 'array-item result';
+                else if (i === idx - 1) cls = 'array-item current';
+                else if (i < idx - 1) cls = 'array-item processed';
+                return `<div class="${cls}">${v}</div>`;
+            }).join('');
+
+            document.getElementById('result-val').textContent = result;
+            document.getElementById('bin-result').textContent = toBinary(result);
+        }
+
+        function step() {
+            if (done) return;
+
+            if (idx >= nums.length) {
+                done = true;
+                document.getElementById('formula').textContent = `Final result = ${result}`;
+                document.getElementById('status').innerHTML = 
+                    `✅ Single number is ${result}! All pairs cancelled out via XOR.`;
+                document.getElementById('stepBtn').disabled = true;
+                document.getElementById('autoBtn').disabled = true;
+                document.getElementById('bin-current-row').style.display = 'none';
+                stopAuto();
+                render();
+                return;
+            }
+
+            const cur = nums[idx];
+            const prev = result;
+            result ^= cur;
+
+            document.getElementById('formula').textContent = `${prev} ⊕ ${cur} = ${result}`;
+            document.getElementById('bin-current-row').style.display = 'flex';
+            document.getElementById('bin-current').textContent = toBinary(cur);
+            document.getElementById('status').innerHTML = 
+                `Step ${idx + 1}: result = ${prev} XOR ${cur} = ${result}`;
+
+            idx++;
+            render();
+        }
+
+        function reset() {
+            stopAuto();
+            idx = 0;
+            result = 0;
+            done = false;
+            document.getElementById('formula').textContent = 'result = 0';
+            document.getElementById('bin-current-row').style.display = 'none';
+            document.getElementById('stepBtn').disabled = false;
+            document.getElementById('autoBtn').disabled = false;
+            document.getElementById('status').innerHTML = 'Key insight: a ⊕ a = 0 and a ⊕ 0 = a. Pairs cancel out!';
+            render();
+        }
+
+        function stopAuto() {
+            if (autoInterval) { clearInterval(autoInterval); autoInterval = null; }
+            document.getElementById('autoBtn').textContent = 'Auto Run';
+        }
+
+        document.getElementById('stepBtn').onclick = () => { stopAuto(); step(); };
+        document.getElementById('autoBtn').onclick = () => {
+            if (autoInterval) { stopAuto(); }
+            else { autoInterval = setInterval(step, 800); document.getElementById('autoBtn').textContent = '⏸ Pause'; }
+        };
+        document.getElementById('resetBtn').onclick = reset;
+
+        render();
+    </script>
+</body>
+</html>

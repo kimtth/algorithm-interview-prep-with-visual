@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Intersection of Two Arrays - Two Pointers</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; padding: 20px; }
+        .container { max-width: 1000px; margin: 0 auto; }
+        h1 { text-align: center; color: white; margin-bottom: 10px; }
+        .subtitle { text-align: center; color: rgba(255,255,255,0.9); margin-bottom: 20px; font-size: 14px; }
+        .controls { display: flex; justify-content: center; gap: 15px; margin-bottom: 20px; flex-wrap: wrap; }
+        button { background: white; color: #667eea; border: none; padding: 10px 25px; border-radius: 25px; cursor: pointer; font-weight: 600; }
+        button:disabled { opacity: 0.5; cursor: not-allowed; }
+        .panel { background: white; border-radius: 15px; padding: 20px; margin-bottom: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
+        .panel-title { font-size: 16px; font-weight: bold; color: #333; margin-bottom: 15px; border-bottom: 2px solid #667eea; padding-bottom: 10px; }
+        .array-row { display: flex; align-items: center; margin: 15px 0; }
+        .array-label { width: 80px; font-weight: bold; color: #667eea; }
+        .array-container { display: flex; gap: 5px; flex-wrap: wrap; }
+        .array-item { width: 45px; height: 55px; display: flex; flex-direction: column; align-items: center; justify-content: center; border-radius: 8px; font-weight: bold; transition: all 0.3s; position: relative; }
+        .array-item .ptr { font-size: 10px; position: absolute; top: -15px; }
+        .default { background: #f5f7fa; border: 2px solid #ddd; }
+        .pointer-i { background: #2196f3; color: white; border: 2px solid #1976d2; }
+        .pointer-j { background: #9c27b0; color: white; border: 2px solid #7b1fa2; }
+        .match { background: #4caf50; color: white; border: 2px solid #2e7d32; }
+        .result-container { min-height: 50px; display: flex; gap: 5px; flex-wrap: wrap; padding: 10px; background: #f5f7fa; border-radius: 10px; }
+        .array-item.added { background: #ff9800; color: white; border: 2px solid #f57c00; }
+        .status-box { background: #f5f7fa; border-radius: 10px; padding: 15px; font-family: monospace; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 Intersection of Two Arrays</h1>
+        <p class="subtitle">Two Pointers O(n log n) - Sort both, then compare</p>
+
+        <div class="controls">
+            <button id="stepBtn">Step</button>
+            <button id="autoBtn">Auto Run</button>
+            <button id="resetBtn">Reset</button>
+        </div>
+
+        <div class="panel">
+            <div class="panel-title">📊 Sorted Arrays</div>
+            <div class="array-row">
+                <span class="array-label">nums1:</span>
+                <div class="array-container" id="nums1"></div>
+            </div>
+            <div class="array-row">
+                <span class="array-label">nums2:</span>
+                <div class="array-container" id="nums2"></div>
+            </div>
+        </div>
+
+        <div class="panel">
+            <div class="panel-title">✅ Result (Unique Intersection)</div>
+            <div class="result-container" id="result"></div>
+        </div>
+
+        <div class="panel">
+            <div class="panel-title">📋 Status</div>
+            <div class="status-box" id="status">Click "Step" to start. Arrays will be sorted first.</div>
+        </div>
+    </div>
+
+    <script>
+        const original1 = [4, 9, 5];
+        const original2 = [9, 4, 9, 8, 4];
+        let nums1 = [], nums2 = [];
+        const result = new Set();
+        let i = 0, j = 0;
+        let phase = 'init';
+        let autoInterval = null;
+
+        function render() {
+            document.getElementById('nums1').innerHTML = nums1.map((val, idx) => {
+                let cls = 'array-item default';
+                let ptr = '';
+                if (phase === 'compare' && idx === i) { 
+                    cls = 'array-item pointer-i'; 
+                    ptr = '<span class="ptr">i↓</span>';
+                }
+                return `<div class="${cls}">${ptr}${val}</div>`;
+            }).join('');
+
+            document.getElementById('nums2').innerHTML = nums2.map((val, idx) => {
+                let cls = 'array-item default';
+                let ptr = '';
+                if (phase === 'compare' && idx === j) {
+                    cls = 'array-item pointer-j';
+                    ptr = '<span class="ptr">j↓</span>';
+                }
+                return `<div class="${cls}">${ptr}${val}</div>`;
+            }).join('');
+
+            document.getElementById('result').innerHTML = 
+                [...result].map(v => `<div class="array-item added">${v}</div>`).join('') || 
+                '<span style="color:#999;">Empty</span>';
+        }
+
+        function step() {
+            if (phase === 'init') {
+                nums1 = [...original1].sort((a, b) => a - b);
+                nums2 = [...original2].sort((a, b) => a - b);
+                phase = 'compare';
+                document.getElementById('status').innerHTML = 
+                    `Sorted: nums1=[${nums1.join(',')}], nums2=[${nums2.join(',')}]`;
+                render();
+                return;
+            }
+
+            if (phase === 'done') return;
+
+            if (i >= nums1.length || j >= nums2.length) {
+                phase = 'done';
+                document.getElementById('status').innerHTML = 
+                    `✅ Complete! Intersection: [${[...result].join(', ')}]`;
+                document.getElementById('stepBtn').disabled = true;
+                document.getElementById('autoBtn').disabled = true;
+                stopAuto();
+                render();
+                return;
+            }
+
+            const v1 = nums1[i], v2 = nums2[j];
+            
+            if (v1 === v2) {
+                if (!result.has(v1)) {
+                    result.add(v1);
+                    document.getElementById('status').innerHTML = 
+                        `Match! nums1[${i}]=${v1} == nums2[${j}]=${v2}. Add ${v1}. Move both pointers.`;
+                } else {
+                    document.getElementById('status').innerHTML = 
+                        `Match! ${v1} already in result. Move both pointers.`;
+                }
+                i++; j++;
+            } else if (v1 < v2) {
+                document.getElementById('status').innerHTML = 
+                    `nums1[${i}]=${v1} < nums2[${j}]=${v2}. Move i forward.`;
+                i++;
+            } else {
+                document.getElementById('status').innerHTML = 
+                    `nums1[${i}]=${v1} > nums2[${j}]=${v2}. Move j forward.`;
+                j++;
+            }
+
+            render();
+        }
+
+        function reset() {
+            stopAuto();
+            nums1 = []; nums2 = [];
+            i = 0; j = 0;
+            result.clear();
+            phase = 'init';
+            document.getElementById('stepBtn').disabled = false;
+            document.getElementById('autoBtn').disabled = false;
+            document.getElementById('status').innerHTML = 'Click "Step" to start. Arrays will be sorted first.';
+            document.getElementById('nums1').innerHTML = original1.map(v => `<div class="array-item default">${v}</div>`).join('');
+            document.getElementById('nums2').innerHTML = original2.map(v => `<div class="array-item default">${v}</div>`).join('');
+            document.getElementById('result').innerHTML = '<span style="color:#999;">Empty</span>';
+        }
+
+        function stopAuto() {
+            if (autoInterval) { clearInterval(autoInterval); autoInterval = null; }
+            document.getElementById('autoBtn').textContent = 'Auto Run';
+        }
+
+        document.getElementById('stepBtn').onclick = () => { stopAuto(); step(); };
+        document.getElementById('autoBtn').onclick = () => {
+            if (autoInterval) { stopAuto(); }
+            else { autoInterval = setInterval(step, 700); document.getElementById('autoBtn').textContent = '⏸ Pause'; }
+        };
+        document.getElementById('resetBtn').onclick = reset;
+
+        reset();
+    </script>
+</body>
+</html>

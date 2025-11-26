@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Q42: Maximum Depth of Binary Tree - BFS</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f5f7fa; min-height: 100vh; padding: 20px; }
+        .container { max-width: 1200px; margin: 0 auto; }
+        
+        .problem-info { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 16px; padding: 25px 30px; margin-bottom: 25px; color: white; }
+        .problem-info h1 { font-size: 1.8em; margin-bottom: 10px; }
+        .problem-info p { font-size: 1.1em; opacity: 0.95; line-height: 1.6; }
+        .problem-meta { display: flex; gap: 20px; margin-top: 15px; flex-wrap: wrap; }
+        .meta-tag { background: rgba(255,255,255,0.2); padding: 6px 14px; border-radius: 20px; font-size: 0.9em; }
+        
+        .code-section { background: white; border-radius: 16px; padding: 25px; margin-bottom: 25px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
+        .code-section h3 { color: #333; margin-bottom: 15px; }
+        .code-block { background: #1e1e1e; border-radius: 12px; padding: 20px; overflow-x: auto; }
+        .code-block pre { margin: 0; font-family: 'Consolas', monospace; font-size: 13px; line-height: 1.5; color: #d4d4d4; }
+        .code-block .keyword { color: #569cd6; }
+        .code-block .function { color: #dcdcaa; }
+        .code-block .comment { color: #6a9955; }
+        .code-block .number { color: #b5cea8; }
+        
+        .visualization-section { background: white; border-radius: 16px; padding: 25px; margin-bottom: 25px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
+        .visualization-section h3 { color: #333; margin-bottom: 20px; }
+        
+        .controls { display: flex; gap: 12px; margin-bottom: 25px; flex-wrap: wrap; }
+        .btn { padding: 12px 28px; font-size: 1em; border: none; border-radius: 10px; cursor: pointer; font-weight: 500; transition: all 0.2s; }
+        .btn-primary { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; }
+        .btn-success { background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); color: white; }
+        .btn-warning { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white; }
+        .btn:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+        .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+        
+        .status-message { background: #e8f4fd; border-left: 4px solid #2196f3; padding: 15px 20px; border-radius: 0 10px 10px 0; margin-bottom: 20px; color: #1565c0; }
+        
+        .tree-container { display: flex; justify-content: center; margin-bottom: 20px; }
+        svg { background: #fafafa; border-radius: 12px; border: 1px solid #e0e0e0; }
+        
+        .info-section { display: flex; gap: 20px; flex-wrap: wrap; margin-bottom: 20px; justify-content: center; }
+        .info-box { padding: 15px 25px; border-radius: 12px; background: #f9f9f9; text-align: center; }
+        .info-label { font-size: 0.85em; color: #666; margin-bottom: 5px; }
+        .info-value { font-size: 2em; font-weight: 600; color: #333; }
+        .info-box.highlight { background: #e8f5e9; }
+        .info-box.highlight .info-value { color: #2e7d32; }
+        
+        .queue-section { padding: 20px; background: #e3f2fd; border-radius: 12px; margin-bottom: 20px; }
+        .queue-title { font-size: 0.9em; font-weight: 600; color: #1565c0; margin-bottom: 12px; }
+        .queue-items { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
+        .queue-item { width: 45px; height: 45px; display: flex; align-items: center; justify-content: center; background: white; border: 2px solid #2196f3; border-radius: 8px; font-weight: 600; font-size: 1.1em; }
+        
+        .legend { display: flex; gap: 20px; margin-bottom: 15px; flex-wrap: wrap; justify-content: center; }
+        .legend-item { display: flex; align-items: center; gap: 8px; font-size: 0.9em; }
+        .legend-circle { width: 18px; height: 18px; border-radius: 50%; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="problem-info">
+            <h1>Q42: Maximum Depth of Binary Tree</h1>
+            <p>Find the maximum depth (height) of a binary tree using BFS level-by-level traversal.</p>
+            <div class="problem-meta">
+                <span class="meta-tag">📁 Tree</span>
+                <span class="meta-tag">⏱️ O(n)</span>
+                <span class="meta-tag">💡 BFS Level Order</span>
+            </div>
+        </div>
+        
+        <div class="code-section">
+            <h3>💻 Python Solution</h3>
+            <div class="code-block">
+                <pre><span class="keyword">def</span> <span class="function">maxDepth</span>(root: TreeNode) -> int:
+    <span class="keyword">if</span> root <span class="keyword">is</span> None:
+        <span class="keyword">return</span> <span class="number">0</span>
+    queue = collections.deque([root])
+    depth = <span class="number">0</span>
+    
+    <span class="keyword">while</span> queue:
+        depth += <span class="number">1</span>
+        <span class="comment"># Process all nodes at current level</span>
+        <span class="keyword">for</span> _ <span class="keyword">in</span> range(len(queue)):
+            cur_root = queue.popleft()
+            <span class="keyword">if</span> cur_root.left:
+                queue.append(cur_root.left)
+            <span class="keyword">if</span> cur_root.right:
+                queue.append(cur_root.right)
+    <span class="keyword">return</span> depth  <span class="comment"># BFS iterations == depth</span></pre>
+            </div>
+        </div>
+        
+        <div class="visualization-section">
+            <h3>🎬 Visualization</h3>
+            
+            <div class="controls">
+                <button class="btn btn-primary" id="stepBtn" onclick="step()">Step</button>
+                <button class="btn btn-success" id="autoBtn" onclick="toggleAuto()">Auto Run</button>
+                <button class="btn btn-warning" onclick="reset()">Reset</button>
+            </div>
+            
+            <div class="legend">
+                <div class="legend-item"><div class="legend-circle" style="background: #3498db;"></div> Unvisited</div>
+                <div class="legend-item"><div class="legend-circle" style="background: #f39c12;"></div> Current Level</div>
+                <div class="legend-item"><div class="legend-circle" style="background: #27ae60;"></div> Visited</div>
+            </div>
+            
+            <div class="status-message" id="statusMessage">
+                Tree: [3, 9, 20, 4, 6, 15, 7]. Click Step to start BFS traversal.
+            </div>
+            
+            <div class="info-section">
+                <div class="info-box highlight">
+                    <div class="info-label">Current Depth</div>
+                    <div class="info-value" id="depthValue">0</div>
+                </div>
+            </div>
+            
+            <div class="tree-container">
+                <svg id="tree" width="600" height="300"></svg>
+            </div>
+            
+            <div class="queue-section">
+                <div class="queue-title">📚 Queue (nodes at current level)</div>
+                <div class="queue-items" id="queueDisplay"><span style="color:#999">Empty</span></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const treeData = {
+            val: 3,
+            left: { val: 9, left: { val: 4 }, right: { val: 6 } },
+            right: { val: 20, left: { val: 15 }, right: { val: 7 } }
+        };
+        
+        let nodes = [];
+        let links = [];
+        let queue = [];
+        let depth = 0;
+        let currentLevel = [];
+        let visited = new Set();
+        let done = false;
+        let autoInterval = null;
+        
+        function buildTree(node, x, y, dx, depth = 0, parent = null) {
+            if (!node) return;
+            const nodeData = { val: node.val, x, y, depth, id: nodes.length };
+            nodes.push(nodeData);
+            if (parent !== null) {
+                links.push({ source: parent, target: nodeData });
+            }
+            if (node.left) buildTree(node.left, x - dx, y + 70, dx / 2, depth + 1, nodeData);
+            if (node.right) buildTree(node.right, x + dx, y + 70, dx / 2, depth + 1, nodeData);
+        }
+        
+        function init() {
+            nodes = [];
+            links = [];
+            queue = [];
+            currentLevel = [];
+            visited = new Set();
+            depth = 0;
+            done = false;
+            
+            buildTree(treeData, 300, 50, 120);
+            queue = [nodes[0]];
+            renderTree();
+            renderQueue();
+        }
+        
+        function renderTree() {
+            const svg = d3.select("#tree");
+            svg.selectAll("*").remove();
+            
+            // Draw links
+            links.forEach(link => {
+                svg.append("line")
+                    .attr("x1", link.source.x)
+                    .attr("y1", link.source.y)
+                    .attr("x2", link.target.x)
+                    .attr("y2", link.target.y)
+                    .attr("stroke", "#999")
+                    .attr("stroke-width", 2);
+            });
+            
+            // Draw nodes
+            nodes.forEach(node => {
+                let fill = "#3498db";
+                if (visited.has(node.id)) fill = "#27ae60";
+                if (currentLevel.includes(node.id)) fill = "#f39c12";
+                
+                svg.append("circle")
+                    .attr("cx", node.x)
+                    .attr("cy", node.y)
+                    .attr("r", 25)
+                    .attr("fill", fill)
+                    .attr("stroke", "#333")
+                    .attr("stroke-width", 2);
+                
+                svg.append("text")
+                    .attr("x", node.x)
+                    .attr("y", node.y + 5)
+                    .attr("text-anchor", "middle")
+                    .attr("fill", "white")
+                    .attr("font-weight", "bold")
+                    .attr("font-size", "14px")
+                    .text(node.val);
+            });
+        }
+        
+        function renderQueue() {
+            const container = document.getElementById('queueDisplay');
+            if (queue.length === 0) {
+                container.innerHTML = '<span style="color:#999">Empty</span>';
+            } else {
+                container.innerHTML = queue.map(n => 
+                    `<div class="queue-item">${n.val}</div>`
+                ).join('');
+            }
+        }
+        
+        function step() {
+            if (done) {
+                document.getElementById('stepBtn').disabled = true;
+                stopAuto();
+                return;
+            }
+            
+            if (queue.length === 0) {
+                done = true;
+                currentLevel = [];
+                document.getElementById('statusMessage').textContent = 
+                    `✅ BFS Complete! Maximum Depth = ${depth}`;
+                document.getElementById('stepBtn').disabled = true;
+                stopAuto();
+                renderTree();
+                return;
+            }
+            
+            // Process entire level
+            depth++;
+            document.getElementById('depthValue').textContent = depth;
+            
+            const levelSize = queue.length;
+            currentLevel = queue.map(n => n.id);
+            const levelVals = queue.map(n => n.val);
+            
+            // Mark all as visited and collect children
+            const nextQueue = [];
+            queue.forEach(node => {
+                visited.add(node.id);
+                // Find children
+                links.forEach(link => {
+                    if (link.source.id === node.id) {
+                        nextQueue.push(link.target);
+                    }
+                });
+            });
+            
+            queue = nextQueue;
+            
+            document.getElementById('statusMessage').textContent = 
+                `Level ${depth}: Processed nodes [${levelVals.join(', ')}]. Added ${nextQueue.length} children.`;
+            
+            renderTree();
+            renderQueue();
+        }
+        
+        function toggleAuto() {
+            if (autoInterval) { stopAuto(); }
+            else {
+                document.getElementById('autoBtn').textContent = 'Pause';
+                autoInterval = setInterval(step, 1000);
+            }
+        }
+        
+        function stopAuto() {
+            if (autoInterval) { clearInterval(autoInterval); autoInterval = null; }
+            document.getElementById('autoBtn').textContent = 'Auto Run';
+        }
+        
+        function reset() {
+            stopAuto();
+            document.getElementById('stepBtn').disabled = false;
+            document.getElementById('statusMessage').textContent = 
+                'Tree: [3, 9, 20, 4, 6, 15, 7]. Click Step to start BFS traversal.';
+            document.getElementById('depthValue').textContent = '0';
+            init();
+        }
+        
+        init();
+    </script>
+</body>
+</html>

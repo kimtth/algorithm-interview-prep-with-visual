@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sum of Two Integers - Bit Manipulation</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; padding: 20px; }
+        .container { max-width: 950px; margin: 0 auto; }
+        h1 { text-align: center; color: white; margin-bottom: 10px; }
+        .subtitle { text-align: center; color: rgba(255,255,255,0.9); margin-bottom: 20px; font-size: 14px; }
+        .controls { display: flex; justify-content: center; gap: 15px; margin-bottom: 20px; }
+        button { background: white; color: #667eea; border: none; padding: 10px 25px; border-radius: 25px; cursor: pointer; font-weight: 600; }
+        button:disabled { opacity: 0.5; cursor: not-allowed; }
+        .panel { background: white; border-radius: 15px; padding: 20px; margin-bottom: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
+        .panel-title { font-size: 16px; font-weight: bold; color: #333; margin-bottom: 15px; border-bottom: 2px solid #667eea; padding-bottom: 10px; }
+        .binary-row { display: flex; align-items: center; gap: 10px; margin: 10px 0; }
+        .binary-label { width: 120px; font-weight: bold; text-align: right; font-size: 14px; }
+        .bits-container { display: flex; gap: 3px; }
+        .bit { width: 32px; height: 38px; display: flex; align-items: center; justify-content: center; border-radius: 6px; font-weight: bold; font-size: 16px; font-family: monospace; }
+        .bit-0 { background: #f5f7fa; border: 2px solid #ddd; }
+        .bit-1 { background: #667eea; color: white; border: 2px solid #5a67d8; }
+        .bit-carry { background: #ff9800; color: white; border: 2px solid #f57c00; }
+        .decimal { font-size: 14px; color: #666; margin-left: 15px; font-family: monospace; }
+        .divider { border-top: 2px dashed #ddd; margin: 15px 0; }
+        .formula { text-align: center; background: #f5f7fa; padding: 15px; border-radius: 10px; margin: 15px 0; font-family: monospace; font-size: 16px; }
+        .result-box { text-align: center; padding: 20px; background: linear-gradient(135deg, #667eea, #764ba2); border-radius: 10px; color: white; }
+        .result-value { font-size: 36px; font-weight: bold; }
+        .status-box { background: #f5f7fa; border-radius: 10px; padding: 15px; font-family: monospace; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>➕ Sum of Two Integers (No + or -)</h1>
+        <p class="subtitle">Bit Manipulation - XOR for sum, AND+shift for carry</p>
+
+        <div class="controls">
+            <button id="stepBtn">Step</button>
+            <button id="autoBtn">Auto Run</button>
+            <button id="resetBtn">Reset</button>
+        </div>
+
+        <div class="panel">
+            <div class="panel-title">🔢 Iteration <span id="iter-num">0</span></div>
+            <div id="binary-display"></div>
+            <div class="formula" id="formula">a + b = (a XOR b) + (a AND b) << 1</div>
+        </div>
+
+        <div class="panel">
+            <div class="panel-title">📊 Result</div>
+            <div class="result-box">
+                <div class="result-value"><span id="a-init">1</span> + <span id="b-init">2</span> = <span id="result">?</span></div>
+            </div>
+        </div>
+
+        <div class="panel">
+            <div class="panel-title">📋 Status</div>
+            <div class="status-box" id="status">XOR gives sum without carry. AND+shift gives carry. Repeat until no carry.</div>
+        </div>
+    </div>
+
+    <script>
+        const INIT_A = 1, INIT_B = 2;
+        const BITS = 8;
+        let a = INIT_A, b = INIT_B;
+        let iteration = 0;
+        let done = false;
+        let autoInterval = null;
+
+        document.getElementById('a-init').textContent = INIT_A;
+        document.getElementById('b-init').textContent = INIT_B;
+
+        function toBits(n) {
+            return ((n >>> 0) & 0xFF).toString(2).padStart(BITS, '0').split('');
+        }
+
+        function render() {
+            document.getElementById('iter-num').textContent = iteration;
+
+            const display = document.getElementById('binary-display');
+            const aBits = toBits(a);
+            const bBits = toBits(b);
+
+            let html = `
+                <div class="binary-row">
+                    <span class="binary-label">a:</span>
+                    <div class="bits-container">${aBits.map(bit => `<div class="bit bit-${bit}">${bit}</div>`).join('')}</div>
+                    <span class="decimal">= ${a}</span>
+                </div>
+                <div class="binary-row">
+                    <span class="binary-label">b (carry):</span>
+                    <div class="bits-container">${bBits.map(bit => `<div class="bit ${bit === '1' ? 'bit-carry' : 'bit-0'}">${bit}</div>`).join('')}</div>
+                    <span class="decimal">= ${b}</span>
+                </div>
+            `;
+
+            if (!done && b !== 0) {
+                const xorBits = toBits(a ^ b);
+                const andBits = toBits((a & b) << 1);
+                html += `
+                    <div class="divider"></div>
+                    <div class="binary-row">
+                        <span class="binary-label">a XOR b:</span>
+                        <div class="bits-container">${xorBits.map(bit => `<div class="bit bit-${bit}">${bit}</div>`).join('')}</div>
+                        <span class="decimal">= ${a ^ b}</span>
+                    </div>
+                    <div class="binary-row">
+                        <span class="binary-label">(a AND b) << 1:</span>
+                        <div class="bits-container">${andBits.map(bit => `<div class="bit ${bit === '1' ? 'bit-carry' : 'bit-0'}">${bit}</div>`).join('')}</div>
+                        <span class="decimal">= ${(a & b) << 1}</span>
+                    </div>
+                `;
+            }
+
+            display.innerHTML = html;
+            document.getElementById('result').textContent = done ? a : '?';
+        }
+
+        function step() {
+            if (done) return;
+
+            if (b === 0) {
+                done = true;
+                document.getElementById('formula').textContent = `Carry is 0! Result = ${a}`;
+                document.getElementById('status').innerHTML = `✅ No more carry! ${INIT_A} + ${INIT_B} = ${a}`;
+                document.getElementById('stepBtn').disabled = true;
+                document.getElementById('autoBtn').disabled = true;
+                stopAuto();
+                render();
+                return;
+            }
+
+            const newA = a ^ b;
+            const newB = (a & b) << 1;
+            
+            document.getElementById('status').innerHTML = 
+                `Iteration ${iteration + 1}: a=${a} XOR b=${b} → ${newA}, carry=(${a} AND ${b})<<1 → ${newB}`;
+
+            a = newA;
+            b = newB;
+            iteration++;
+
+            render();
+        }
+
+        function reset() {
+            stopAuto();
+            a = INIT_A;
+            b = INIT_B;
+            iteration = 0;
+            done = false;
+            document.getElementById('formula').textContent = 'a + b = (a XOR b) + (a AND b) << 1';
+            document.getElementById('stepBtn').disabled = false;
+            document.getElementById('autoBtn').disabled = false;
+            document.getElementById('status').innerHTML = 'XOR gives sum without carry. AND+shift gives carry. Repeat until no carry.';
+            render();
+        }
+
+        function stopAuto() {
+            if (autoInterval) { clearInterval(autoInterval); autoInterval = null; }
+            document.getElementById('autoBtn').textContent = 'Auto Run';
+        }
+
+        document.getElementById('stepBtn').onclick = () => { stopAuto(); step(); };
+        document.getElementById('autoBtn').onclick = () => {
+            if (autoInterval) { stopAuto(); }
+            else { autoInterval = setInterval(step, 1000); document.getElementById('autoBtn').textContent = '⏸ Pause'; }
+        };
+        document.getElementById('resetBtn').onclick = reset;
+
+        render();
+    </script>
+</body>
+</html>

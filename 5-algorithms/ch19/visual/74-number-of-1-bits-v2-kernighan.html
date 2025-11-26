@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Q74: Number of 1 Bits - Kernighan's Algorithm</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; padding: 20px; }
+        .container { max-width: 1000px; margin: 0 auto; background: white; border-radius: 20px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); overflow: hidden; }
+        .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 30px; color: white; }
+        .header h1 { font-size: 1.8em; margin-bottom: 10px; }
+        .header p { opacity: 0.9; font-size: 0.95em; }
+        .problem-info { background: #f8f9fa; padding: 20px; border-bottom: 1px solid #eee; }
+        .problem-info h3 { color: #333; margin-bottom: 10px; }
+        .problem-info p { color: #666; line-height: 1.6; }
+        .code-section { background: #1e1e1e; padding: 20px; margin: 20px; border-radius: 10px; }
+        .code-section h3 { color: #9cdcfe; margin-bottom: 15px; font-size: 0.9em; }
+        .code-section pre { color: #d4d4d4; font-family: 'Consolas', monospace; font-size: 0.85em; line-height: 1.5; }
+        .keyword { color: #569cd6; }
+        .function { color: #dcdcaa; }
+        .comment { color: #6a9955; }
+        .number { color: #b5cea8; }
+        .controls { padding: 20px; display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; background: #f8f9fa; }
+        .btn { padding: 12px 24px; font-size: 1em; cursor: pointer; border: none; border-radius: 8px; transition: all 0.3s; }
+        .btn-primary { background: linear-gradient(135deg, #667eea, #764ba2); color: white; }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4); }
+        .btn-success { background: linear-gradient(135deg, #11998e, #38ef7d); color: white; }
+        .btn-warning { background: linear-gradient(135deg, #f093fb, #f5576c); color: white; }
+        .visualization { padding: 30px; min-height: 400px; }
+        .status { padding: 15px 20px; background: #e8f5e9; text-align: center; font-weight: 500; color: #2e7d32; }
+        .step-info { background: #fff3e0; padding: 15px 20px; text-align: center; color: #ef6c00; font-weight: 500; }
+        .bit-display { display: flex; justify-content: center; gap: 3px; margin: 15px 0; }
+        .bit { width: 35px; height: 40px; display: flex; align-items: center; justify-content: center; border-radius: 5px; font-weight: bold; font-family: monospace; font-size: 1.1em; transition: all 0.3s; }
+        .bit-0 { background: #e3f2fd; color: #1976d2; border: 2px solid #1976d2; }
+        .bit-1 { background: #4caf50; color: white; border: 2px solid #2e7d32; }
+        .bit-removed { background: #ffcdd2; color: #c62828; border: 2px solid #c62828; opacity: 0.5; }
+        .operation { background: #f3e5f5; padding: 15px; border-radius: 10px; margin: 15px 0; text-align: center; }
+        .operation h4 { color: #7b1fa2; margin-bottom: 10px; }
+        .operation code { background: #263238; color: #aed581; padding: 5px 10px; border-radius: 5px; font-family: monospace; }
+        .counter { font-size: 2em; text-align: center; margin: 20px 0; color: #333; }
+        .result-display { text-align: center; margin-top: 20px; font-size: 1.5em; color: #333; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔢 Q74: Number of 1 Bits (Hamming Weight)</h1>
+            <p>LeetCode #191 | File: 74-2.py | Approach: Kernighan's Bit Manipulation</p>
+        </div>
+        
+        <div class="problem-info">
+            <h3>📋 Problem Description</h3>
+            <p>Count the number of '1' bits in the binary representation of an unsigned integer.</p>
+            <p style="margin-top: 10px;"><strong>Key Insight:</strong> <code>n &= n - 1</code> removes the rightmost 1-bit. 
+            Count iterations until n becomes 0. Only O(k) operations where k is the number of 1-bits!</p>
+        </div>
+
+        <div class="code-section">
+            <h3>📄 Python Solution (74-2.py)</h3>
+            <pre><span class="keyword">class</span> <span class="function">Solution</span>:
+    <span class="keyword">def</span> <span class="function">hammingWeight</span>(self, n: <span class="keyword">int</span>) -> <span class="keyword">int</span>:
+        count = <span class="number">0</span>
+        <span class="keyword">while</span> n:
+            n &= n - <span class="number">1</span>  <span class="comment"># Remove rightmost 1-bit</span>
+            count += <span class="number">1</span>
+        <span class="keyword">return</span> count</pre>
+        </div>
+
+        <div class="controls">
+            <button class="btn btn-primary" onclick="step()">Step</button>
+            <button class="btn btn-success" onclick="toggleAutoRun()">Auto Run</button>
+            <button class="btn btn-warning" onclick="reset()">Reset</button>
+        </div>
+
+        <div class="step-info" id="stepInfo">Click "Step" or "Auto Run" to begin visualization</div>
+        
+        <div class="visualization" id="viz">
+            <p style="text-align: center; margin-bottom: 10px;"><strong>Input: n = 11 (binary: 00001011)</strong></p>
+            <div class="bit-display" id="bitDisplay"></div>
+            <div class="operation" id="operation">
+                <h4>Kernighan's Trick</h4>
+                <p><code>n &= n - 1</code> removes the rightmost 1-bit</p>
+            </div>
+            <div class="counter">Count: <span id="count">0</span></div>
+            <div class="result-display" id="result"></div>
+        </div>
+
+        <div class="status" id="status">Ready to visualize Kernighan's algorithm</div>
+    </div>
+
+    <script>
+        let n = 11; // 00001011
+        let count = 0;
+        let currentStep = 0;
+        let autoRunning = false;
+        let autoRunInterval;
+        let removedPositions = [];
+
+        function toBinary(num, bits = 8) {
+            return num.toString(2).padStart(bits, '0');
+        }
+
+        function renderBits() {
+            const container = document.getElementById('bitDisplay');
+            container.innerHTML = '';
+            const binary = toBinary(n);
+            
+            for (let i = 0; i < binary.length; i++) {
+                const bit = document.createElement('div');
+                bit.className = `bit bit-${binary[i]}`;
+                bit.textContent = binary[i];
+                container.appendChild(bit);
+            }
+        }
+
+        function step() {
+            if (n === 0 && currentStep > 0) {
+                document.getElementById('stepInfo').textContent = `Done! n=0, no more 1-bits. Total count: ${count}`;
+                document.getElementById('result').innerHTML = 
+                    `<span style="color: #4caf50;">Hamming Weight of 11 = <strong>${count}</strong></span>`;
+                document.getElementById('status').textContent = 
+                    'Kernighan\'s algorithm: O(k) where k = number of 1-bits!';
+                return;
+            }
+
+            if (currentStep === 0) {
+                document.getElementById('stepInfo').textContent = 
+                    `Initial: n=${n} (${toBinary(n)}), count=0`;
+                renderBits();
+            } else {
+                const oldN = n;
+                const nMinus1 = n - 1;
+                n = n & (n - 1);
+                count++;
+                
+                document.getElementById('operation').innerHTML = `
+                    <h4>Step ${currentStep}</h4>
+                    <p><code>${oldN} & ${nMinus1} = ${n}</code></p>
+                    <p>${toBinary(oldN)} & ${toBinary(nMinus1)} = ${toBinary(n)}</p>
+                `;
+                
+                document.getElementById('stepInfo').textContent = 
+                    `n &= n-1: ${oldN} → ${n}. Rightmost 1 removed! count=${count}`;
+                document.getElementById('count').textContent = count;
+                renderBits();
+            }
+
+            currentStep++;
+        }
+
+        function toggleAutoRun() {
+            autoRunning = !autoRunning;
+            const btn = document.querySelector('.btn-success');
+            if (autoRunning) {
+                btn.textContent = 'Pause';
+                autoRunInterval = setInterval(() => {
+                    if (n === 0 && currentStep > 0) {
+                        step();
+                        toggleAutoRun();
+                        return;
+                    }
+                    step();
+                }, 1200);
+            } else {
+                btn.textContent = 'Auto Run';
+                clearInterval(autoRunInterval);
+            }
+        }
+
+        function reset() {
+            n = 11;
+            count = 0;
+            currentStep = 0;
+            removedPositions = [];
+            if (autoRunning) toggleAutoRun();
+            document.getElementById('stepInfo').textContent = 'Click "Step" or "Auto Run" to begin visualization';
+            document.getElementById('status').textContent = 'Ready to visualize Kernighan\'s algorithm';
+            document.getElementById('result').innerHTML = '';
+            document.getElementById('count').textContent = '0';
+            document.getElementById('operation').innerHTML = `
+                <h4>Kernighan's Trick</h4>
+                <p><code>n &= n - 1</code> removes the rightmost 1-bit</p>
+            `;
+            renderBits();
+        }
+
+        // Initialize
+        renderBits();
+    </script>
+</body>
+</html>

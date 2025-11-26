@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Search 2D Matrix - Staircase</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; padding: 20px; }
+        .container { max-width: 900px; margin: 0 auto; }
+        h1 { text-align: center; color: white; margin-bottom: 10px; }
+        .subtitle { text-align: center; color: rgba(255,255,255,0.9); margin-bottom: 20px; font-size: 14px; }
+        .controls { display: flex; justify-content: center; gap: 15px; margin-bottom: 20px; flex-wrap: wrap; }
+        button { background: white; color: #667eea; border: none; padding: 10px 25px; border-radius: 25px; cursor: pointer; font-weight: 600; }
+        button:disabled { opacity: 0.5; cursor: not-allowed; }
+        .target-display { background: white; padding: 8px 20px; border-radius: 20px; font-weight: bold; }
+        .panel { background: white; border-radius: 15px; padding: 20px; margin-bottom: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
+        .panel-title { font-size: 16px; font-weight: bold; color: #333; margin-bottom: 15px; border-bottom: 2px solid #667eea; padding-bottom: 10px; }
+        .matrix { display: flex; flex-direction: column; align-items: center; gap: 5px; }
+        .matrix-row { display: flex; gap: 5px; }
+        .matrix-cell { width: 55px; height: 55px; display: flex; align-items: center; justify-content: center; border-radius: 8px; font-weight: bold; font-size: 18px; transition: all 0.3s; }
+        .default { background: #f5f7fa; border: 2px solid #ddd; }
+        .current { background: #2196f3; color: white; border: 2px solid #1976d2; box-shadow: 0 4px 15px rgba(33, 150, 243, 0.5); }
+        .visited { background: #e0e0e0; border: 2px solid #bbb; color: #888; }
+        .found { background: #4caf50; color: white; border: 2px solid #2e7d32; }
+        .info-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; text-align: center; }
+        .info-item { background: #f5f7fa; padding: 15px; border-radius: 10px; }
+        .info-label { font-size: 12px; color: #666; }
+        .info-value { font-size: 24px; font-weight: bold; color: #667eea; }
+        .status-box { background: #f5f7fa; border-radius: 10px; padding: 15px; font-family: monospace; }
+        .arrow { font-size: 12px; color: #999; margin: 5px 0; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 Search 2D Matrix II</h1>
+        <p class="subtitle">Staircase Search O(m+n) - Start from top-right corner</p>
+
+        <div class="controls">
+            <button id="stepBtn">Step</button>
+            <button id="autoBtn">Auto Run</button>
+            <button id="resetBtn">Reset</button>
+            <div class="target-display">Target: <span id="target">5</span></div>
+        </div>
+
+        <div class="panel">
+            <div class="panel-title">📊 Matrix (Rows & Columns Sorted)</div>
+            <div class="arrow">← smaller values | larger values →</div>
+            <div class="matrix" id="matrix"></div>
+            <div class="arrow">↓ larger values</div>
+        </div>
+
+        <div class="panel">
+            <div class="panel-title">📊 Current Position</div>
+            <div class="info-grid">
+                <div class="info-item">
+                    <div class="info-label">Row</div>
+                    <div class="info-value" id="row-val">0</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Column</div>
+                    <div class="info-value" id="col-val">3</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Value</div>
+                    <div class="info-value" id="cur-val">?</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="panel">
+            <div class="panel-title">📋 Status</div>
+            <div class="status-box" id="status">Start from top-right corner. Click "Step" to search.</div>
+        </div>
+    </div>
+
+    <script>
+        const matrix = [
+            [1,  4,  7, 11, 15],
+            [2,  5,  8, 12, 19],
+            [3,  6,  9, 16, 22],
+            [10, 13, 14, 17, 24],
+            [18, 21, 23, 26, 30]
+        ];
+        const target = 5;
+        let row = 0, col = matrix[0].length - 1;
+        const visited = new Set();
+        let found = false, done = false;
+        let autoInterval = null;
+
+        document.getElementById('target').textContent = target;
+
+        function render() {
+            const matrixEl = document.getElementById('matrix');
+            matrixEl.innerHTML = matrix.map((r, ri) => 
+                `<div class="matrix-row">${r.map((v, ci) => {
+                    let cls = 'matrix-cell default';
+                    const key = `${ri},${ci}`;
+                    if (found && ri === row && ci === col) cls = 'matrix-cell found';
+                    else if (ri === row && ci === col) cls = 'matrix-cell current';
+                    else if (visited.has(key)) cls = 'matrix-cell visited';
+                    return `<div class="${cls}">${v}</div>`;
+                }).join('')}</div>`
+            ).join('');
+
+            document.getElementById('row-val').textContent = row;
+            document.getElementById('col-val').textContent = col;
+            document.getElementById('cur-val').textContent = (row >= 0 && col >= 0 && row < matrix.length && col < matrix[0].length) ? matrix[row][col] : '-';
+        }
+
+        function step() {
+            if (done) return;
+
+            if (row >= matrix.length || col < 0) {
+                done = true;
+                document.getElementById('status').innerHTML = `❌ Target ${target} not found in matrix.`;
+                document.getElementById('stepBtn').disabled = true;
+                document.getElementById('autoBtn').disabled = true;
+                stopAuto();
+                return;
+            }
+
+            const val = matrix[row][col];
+            visited.add(`${row},${col}`);
+
+            if (val === target) {
+                found = true;
+                done = true;
+                document.getElementById('status').innerHTML = 
+                    `✅ Found! matrix[${row}][${col}] = ${val} = target ${target}`;
+                document.getElementById('stepBtn').disabled = true;
+                document.getElementById('autoBtn').disabled = true;
+                stopAuto();
+            } else if (val > target) {
+                document.getElementById('status').innerHTML = 
+                    `matrix[${row}][${col}] = ${val} > ${target}. Move LEFT (smaller values).`;
+                col--;
+            } else {
+                document.getElementById('status').innerHTML = 
+                    `matrix[${row}][${col}] = ${val} < ${target}. Move DOWN (larger values).`;
+                row++;
+            }
+
+            render();
+        }
+
+        function reset() {
+            stopAuto();
+            row = 0;
+            col = matrix[0].length - 1;
+            visited.clear();
+            found = false;
+            done = false;
+            document.getElementById('stepBtn').disabled = false;
+            document.getElementById('autoBtn').disabled = false;
+            document.getElementById('status').innerHTML = 'Start from top-right corner. Click "Step" to search.';
+            render();
+        }
+
+        function stopAuto() {
+            if (autoInterval) { clearInterval(autoInterval); autoInterval = null; }
+            document.getElementById('autoBtn').textContent = 'Auto Run';
+        }
+
+        document.getElementById('stepBtn').onclick = () => { stopAuto(); step(); };
+        document.getElementById('autoBtn').onclick = () => {
+            if (autoInterval) { stopAuto(); }
+            else { autoInterval = setInterval(step, 800); document.getElementById('autoBtn').textContent = '⏸ Pause'; }
+        };
+        document.getElementById('resetBtn').onclick = reset;
+
+        render();
+    </script>
+</body>
+</html>

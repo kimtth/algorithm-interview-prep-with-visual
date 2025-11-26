@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Two Sum II - Two Pointers</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; padding: 20px; }
+        .container { max-width: 1000px; margin: 0 auto; }
+        h1 { text-align: center; color: white; margin-bottom: 10px; }
+        .subtitle { text-align: center; color: rgba(255,255,255,0.9); margin-bottom: 20px; font-size: 14px; }
+        .controls { display: flex; justify-content: center; gap: 15px; margin-bottom: 20px; flex-wrap: wrap; }
+        button { background: white; color: #667eea; border: none; padding: 10px 25px; border-radius: 25px; cursor: pointer; font-weight: 600; }
+        button:disabled { opacity: 0.5; cursor: not-allowed; }
+        .target-display { background: white; padding: 8px 20px; border-radius: 20px; font-weight: bold; }
+        .panel { background: white; border-radius: 15px; padding: 20px; margin-bottom: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
+        .panel-title { font-size: 16px; font-weight: bold; color: #333; margin-bottom: 15px; border-bottom: 2px solid #667eea; padding-bottom: 10px; }
+        .array-container { display: flex; justify-content: center; gap: 5px; margin: 20px 0; }
+        .array-item { width: 50px; height: 55px; display: flex; flex-direction: column; align-items: center; justify-content: center; border-radius: 8px; font-weight: bold; position: relative; transition: all 0.3s; }
+        .array-item .value { font-size: 18px; }
+        .array-item .index { font-size: 10px; position: absolute; bottom: 2px; color: #999; }
+        .array-item.default { background: #f5f7fa; border: 2px solid #ddd; }
+        .array-item.left { background: #2196f3; color: white; border: 2px solid #1976d2; }
+        .array-item.right { background: #9c27b0; color: white; border: 2px solid #7b1fa2; }
+        .array-item.found { background: #4caf50; color: white; border: 2px solid #2e7d32; }
+        .pointer { position: absolute; font-size: 10px; font-weight: bold; }
+        .pointer.left-ptr { top: -18px; color: #2196f3; }
+        .pointer.right-ptr { top: -18px; color: #9c27b0; }
+        .sum-display { text-align: center; padding: 20px; background: #f5f7fa; border-radius: 10px; margin: 15px 0; }
+        .sum-formula { font-size: 24px; font-family: monospace; }
+        .sum-result { margin-top: 10px; font-size: 18px; }
+        .sum-result.too-small { color: #2196f3; }
+        .sum-result.too-big { color: #9c27b0; }
+        .sum-result.equal { color: #4caf50; }
+        .status-box { background: #f5f7fa; border-radius: 10px; padding: 15px; font-family: monospace; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎯 Two Sum II - Sorted Array</h1>
+        <p class="subtitle">O(n) Two Pointers - Array is sorted!</p>
+
+        <div class="controls">
+            <button id="stepBtn">Step</button>
+            <button id="autoBtn">Auto Run</button>
+            <button id="resetBtn">Reset</button>
+            <div class="target-display">Target: <span id="target">9</span></div>
+        </div>
+
+        <div class="panel">
+            <div class="panel-title">📊 Sorted Array</div>
+            <div class="array-container" id="array"></div>
+            <div class="sum-display">
+                <div class="sum-formula" id="formula">nums[left] + nums[right] = ?</div>
+                <div class="sum-result" id="sum-result">-</div>
+            </div>
+        </div>
+
+        <div class="panel">
+            <div class="panel-title">📊 Status</div>
+            <div class="status-box" id="status">Click "Step" or "Auto Run" to find two numbers</div>
+        </div>
+    </div>
+
+    <script>
+        const nums = [2, 7, 11, 15];
+        const target = 9;
+        let left = 0, right = nums.length - 1;
+        let found = false;
+        let autoInterval = null;
+
+        document.getElementById('target').textContent = target;
+
+        function render() {
+            const container = document.getElementById('array');
+            container.innerHTML = nums.map((val, i) => {
+                let cls = 'array-item default';
+                let pointers = '';
+                
+                if (found && (i === left || i === right)) {
+                    cls = 'array-item found';
+                } else if (i === left) {
+                    cls = 'array-item left';
+                    pointers = '<span class="pointer left-ptr">L↓</span>';
+                } else if (i === right) {
+                    cls = 'array-item right';
+                    pointers = '<span class="pointer right-ptr">R↓</span>';
+                }
+                
+                return `<div class="${cls}">${pointers}<span class="value">${val}</span><span class="index">[${i}]</span></div>`;
+            }).join('');
+
+            const sum = nums[left] + nums[right];
+            document.getElementById('formula').textContent = 
+                `nums[${left}] + nums[${right}] = ${nums[left]} + ${nums[right]} = ${sum}`;
+            
+            const resultEl = document.getElementById('sum-result');
+            if (sum < target) {
+                resultEl.textContent = `${sum} < ${target} → Move left pointer right`;
+                resultEl.className = 'sum-result too-small';
+            } else if (sum > target) {
+                resultEl.textContent = `${sum} > ${target} → Move right pointer left`;
+                resultEl.className = 'sum-result too-big';
+            } else {
+                resultEl.textContent = `${sum} = ${target} → Found!`;
+                resultEl.className = 'sum-result equal';
+            }
+        }
+
+        function step() {
+            if (found || left >= right) return;
+
+            const sum = nums[left] + nums[right];
+            
+            if (sum === target) {
+                found = true;
+                document.getElementById('status').innerHTML = 
+                    `✅ Found! nums[${left}] + nums[${right}] = ${nums[left]} + ${nums[right]} = ${target}. Return [${left+1}, ${right+1}]`;
+                document.getElementById('stepBtn').disabled = true;
+                document.getElementById('autoBtn').disabled = true;
+                stopAuto();
+            } else if (sum < target) {
+                document.getElementById('status').innerHTML = 
+                    `Sum ${sum} < target ${target}. Need larger sum → move left pointer right.`;
+                left++;
+            } else {
+                document.getElementById('status').innerHTML = 
+                    `Sum ${sum} > target ${target}. Need smaller sum → move right pointer left.`;
+                right--;
+            }
+
+            render();
+        }
+
+        function reset() {
+            stopAuto();
+            left = 0;
+            right = nums.length - 1;
+            found = false;
+            document.getElementById('stepBtn').disabled = false;
+            document.getElementById('autoBtn').disabled = false;
+            document.getElementById('status').innerHTML = 'Click "Step" or "Auto Run" to find two numbers';
+            render();
+        }
+
+        function stopAuto() {
+            if (autoInterval) { clearInterval(autoInterval); autoInterval = null; }
+            document.getElementById('autoBtn').textContent = 'Auto Run';
+        }
+
+        document.getElementById('stepBtn').onclick = () => { stopAuto(); step(); };
+        document.getElementById('autoBtn').onclick = () => {
+            if (autoInterval) { stopAuto(); }
+            else { autoInterval = setInterval(step, 800); document.getElementById('autoBtn').textContent = '⏸ Pause'; }
+        };
+        document.getElementById('resetBtn').onclick = reset;
+
+        render();
+    </script>
+</body>
+</html>

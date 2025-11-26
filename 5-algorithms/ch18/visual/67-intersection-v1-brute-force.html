@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Intersection of Two Arrays - Brute Force</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; padding: 20px; }
+        .container { max-width: 1000px; margin: 0 auto; }
+        h1 { text-align: center; color: white; margin-bottom: 10px; }
+        .subtitle { text-align: center; color: rgba(255,255,255,0.9); margin-bottom: 20px; font-size: 14px; }
+        .controls { display: flex; justify-content: center; gap: 15px; margin-bottom: 20px; flex-wrap: wrap; }
+        button { background: white; color: #667eea; border: none; padding: 10px 25px; border-radius: 25px; cursor: pointer; font-weight: 600; }
+        button:disabled { opacity: 0.5; cursor: not-allowed; }
+        .panel { background: white; border-radius: 15px; padding: 20px; margin-bottom: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
+        .panel-title { font-size: 16px; font-weight: bold; color: #333; margin-bottom: 15px; border-bottom: 2px solid #667eea; padding-bottom: 10px; }
+        .array-row { display: flex; align-items: center; margin: 15px 0; }
+        .array-label { width: 80px; font-weight: bold; color: #667eea; }
+        .array-container { display: flex; gap: 5px; flex-wrap: wrap; }
+        .array-item { width: 45px; height: 45px; display: flex; align-items: center; justify-content: center; border-radius: 8px; font-weight: bold; transition: all 0.3s; }
+        .default { background: #f5f7fa; border: 2px solid #ddd; }
+        .checking-i { background: #2196f3; color: white; border: 2px solid #1976d2; }
+        .checking-j { background: #9c27b0; color: white; border: 2px solid #7b1fa2; }
+        .match { background: #4caf50; color: white; border: 2px solid #2e7d32; }
+        .added { background: #ff9800; color: white; border: 2px solid #f57c00; }
+        .result-container { min-height: 50px; display: flex; gap: 5px; flex-wrap: wrap; padding: 10px; background: #f5f7fa; border-radius: 10px; }
+        .status-box { background: #f5f7fa; border-radius: 10px; padding: 15px; font-family: monospace; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 Intersection of Two Arrays</h1>
+        <p class="subtitle">Brute Force O(n²) - Nested Loops with Set</p>
+
+        <div class="controls">
+            <button id="stepBtn">Step</button>
+            <button id="autoBtn">Auto Run</button>
+            <button id="resetBtn">Reset</button>
+        </div>
+
+        <div class="panel">
+            <div class="panel-title">📊 Arrays</div>
+            <div class="array-row">
+                <span class="array-label">nums1:</span>
+                <div class="array-container" id="nums1"></div>
+            </div>
+            <div class="array-row">
+                <span class="array-label">nums2:</span>
+                <div class="array-container" id="nums2"></div>
+            </div>
+        </div>
+
+        <div class="panel">
+            <div class="panel-title">✅ Result (Unique Intersection)</div>
+            <div class="result-container" id="result"></div>
+        </div>
+
+        <div class="panel">
+            <div class="panel-title">📋 Status</div>
+            <div class="status-box" id="status">Click "Step" to start finding intersection</div>
+        </div>
+    </div>
+
+    <script>
+        const nums1 = [1, 2, 2, 1];
+        const nums2 = [2, 2];
+        const result = new Set();
+        let i = 0, j = 0;
+        let done = false;
+        let autoInterval = null;
+
+        function render() {
+            document.getElementById('nums1').innerHTML = nums1.map((val, idx) => {
+                let cls = 'array-item default';
+                if (idx === i) cls = 'array-item checking-i';
+                return `<div class="${cls}">${val}</div>`;
+            }).join('');
+
+            document.getElementById('nums2').innerHTML = nums2.map((val, idx) => {
+                let cls = 'array-item default';
+                if (i < nums1.length && idx === j) cls = 'array-item checking-j';
+                return `<div class="${cls}">${val}</div>`;
+            }).join('');
+
+            document.getElementById('result').innerHTML = 
+                [...result].map(v => `<div class="array-item added">${v}</div>`).join('') || 
+                '<span style="color:#999;">Empty</span>';
+        }
+
+        function step() {
+            if (done) return;
+
+            if (i >= nums1.length) {
+                done = true;
+                document.getElementById('status').innerHTML = 
+                    `✅ Complete! Intersection: [${[...result].join(', ')}]`;
+                document.getElementById('stepBtn').disabled = true;
+                document.getElementById('autoBtn').disabled = true;
+                stopAuto();
+                render();
+                return;
+            }
+
+            const v1 = nums1[i], v2 = nums2[j];
+            
+            if (v1 === v2) {
+                if (!result.has(v1)) {
+                    result.add(v1);
+                    document.getElementById('status').innerHTML = 
+                        `Match! nums1[${i}]=${v1} == nums2[${j}]=${v2}. Added ${v1} to result.`;
+                } else {
+                    document.getElementById('status').innerHTML = 
+                        `Match! nums1[${i}]=${v1} == nums2[${j}]=${v2}. Already in result, skip.`;
+                }
+            } else {
+                document.getElementById('status').innerHTML = 
+                    `No match: nums1[${i}]=${v1} != nums2[${j}]=${v2}`;
+            }
+
+            j++;
+            if (j >= nums2.length) { j = 0; i++; }
+
+            render();
+        }
+
+        function reset() {
+            stopAuto();
+            i = 0; j = 0;
+            result.clear();
+            done = false;
+            document.getElementById('stepBtn').disabled = false;
+            document.getElementById('autoBtn').disabled = false;
+            document.getElementById('status').innerHTML = 'Click "Step" to start finding intersection';
+            render();
+        }
+
+        function stopAuto() {
+            if (autoInterval) { clearInterval(autoInterval); autoInterval = null; }
+            document.getElementById('autoBtn').textContent = 'Auto Run';
+        }
+
+        document.getElementById('stepBtn').onclick = () => { stopAuto(); step(); };
+        document.getElementById('autoBtn').onclick = () => {
+            if (autoInterval) { stopAuto(); }
+            else { autoInterval = setInterval(step, 600); document.getElementById('autoBtn').textContent = '⏸ Pause'; }
+        };
+        document.getElementById('resetBtn').onclick = reset;
+
+        render();
+    </script>
+</body>
+</html>

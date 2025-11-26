@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Binary Search - Index Method</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; padding: 20px; }
+        .container { max-width: 900px; margin: 0 auto; }
+        h1 { text-align: center; color: white; margin-bottom: 10px; text-shadow: 2px 2px 4px rgba(0,0,0,0.3); }
+        .subtitle { text-align: center; color: rgba(255,255,255,0.9); margin-bottom: 20px; font-size: 14px; }
+        .controls { display: flex; justify-content: center; gap: 15px; margin-bottom: 20px; flex-wrap: wrap; align-items: center; }
+        button { background: white; color: #667eea; border: none; padding: 10px 25px; border-radius: 25px; cursor: pointer; font-weight: 600; transition: all 0.3s; }
+        button:hover { transform: scale(1.05); box-shadow: 0 5px 20px rgba(0,0,0,0.2); }
+        button:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+        .target-display { background: white; padding: 8px 20px; border-radius: 20px; font-weight: bold; }
+        .panel { background: white; border-radius: 15px; padding: 20px; margin-bottom: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
+        .panel-title { font-size: 16px; font-weight: bold; color: #333; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 2px solid #667eea; }
+        .array-container { display: flex; justify-content: center; gap: 5px; margin: 20px 0; }
+        .array-item { width: 55px; height: 50px; display: flex; flex-direction: column; align-items: center; justify-content: center; border-radius: 8px; font-weight: bold; transition: all 0.3s; position: relative; }
+        .array-item .value { font-size: 18px; }
+        .array-item .index { font-size: 10px; color: #999; position: absolute; bottom: 2px; }
+        .array-item.default { background: #f5f7fa; border: 2px solid #ddd; }
+        .array-item.scanning { background: #ff9800; border: 2px solid #f57c00; color: white; animation: pulse 0.5s ease-in-out; }
+        .array-item.found { background: #4caf50; border: 2px solid #2e7d32; color: white; }
+        @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.1); } }
+        .warning-box { background: #fff3e0; border-left: 4px solid #ff9800; padding: 15px; margin: 15px 0; border-radius: 0 10px 10px 0; }
+        .warning-box h4 { color: #e65100; margin-bottom: 5px; }
+        .status-box { background: #f5f7fa; border-radius: 10px; padding: 15px; font-family: monospace; }
+        .code-box { background: #1e1e1e; color: #d4d4d4; padding: 15px; border-radius: 10px; font-family: 'Consolas', monospace; font-size: 13px; }
+        .code-box .highlight { background: #264f78; display: block; margin: 0 -15px; padding: 0 15px; }
+        .complexity-note { text-align: center; margin-top: 15px; padding: 10px; background: #ffebee; border-radius: 10px; color: #c62828; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 Binary Search - Index Method</h1>
+        <p class="subtitle">O(n) - Simple but NOT binary search! (Linear scan)</p>
+
+        <div class="controls">
+            <button id="stepBtn">Step</button>
+            <button id="autoBtn">Auto Run</button>
+            <button id="resetBtn">Reset</button>
+            <div class="target-display">Target: <span id="target">9</span></div>
+        </div>
+
+        <div class="warning-box">
+            <h4>⚠️ Note</h4>
+            <p>This solution uses Python's list.index() which is O(n) linear search, NOT O(log n) binary search!</p>
+        </div>
+
+        <div class="panel">
+            <div class="panel-title">📊 Array (Linear Scan)</div>
+            <div class="array-container" id="array"></div>
+            <div class="complexity-note">
+                ⏱️ Time Complexity: O(n) - scans from left to right
+            </div>
+        </div>
+
+        <div class="panel">
+            <div class="panel-title">📊 Status</div>
+            <div class="status-box" id="status">Click "Step" or "Auto Run" to search using index()</div>
+        </div>
+
+        <div class="panel">
+            <div class="panel-title">💻 Algorithm</div>
+            <div class="code-box" id="code">
+<span id="line1">def search(nums, target):</span>
+<span id="line2">    try:</span>
+<span id="line3">        return nums.index(target)  # O(n) linear scan!</span>
+<span id="line4">    except ValueError:</span>
+<span id="line5">        return -1</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const nums = [-1, 0, 3, 5, 9, 12];
+        const target = 9;
+        let scanIndex = -1;
+        let found = -1;
+        let autoInterval = null;
+
+        document.getElementById('target').textContent = target;
+
+        function renderArray() {
+            const container = document.getElementById('array');
+            
+            container.innerHTML = nums.map((val, i) => {
+                let cls = 'array-item default';
+                
+                if (found === i) {
+                    cls = 'array-item found';
+                } else if (i === scanIndex) {
+                    cls = 'array-item scanning';
+                }
+                
+                return `<div class="${cls}"><span class="value">${val}</span><span class="index">[${i}]</span></div>`;
+            }).join('');
+        }
+
+        function highlightCode(lineNum) {
+            document.querySelectorAll('.code-box span').forEach(span => {
+                span.classList.remove('highlight');
+            });
+            if (lineNum) {
+                const line = document.getElementById(`line${lineNum}`);
+                if (line) line.classList.add('highlight');
+            }
+        }
+
+        function executeStep() {
+            if (found >= 0) return;
+
+            scanIndex++;
+            
+            if (scanIndex >= nums.length) {
+                highlightCode(5);
+                document.getElementById('status').innerHTML = 
+                    `❌ Scanned all elements. Target ${target} not found. Return -1<br>
+                    (Would raise ValueError, caught by except)`;
+                document.getElementById('stepBtn').disabled = true;
+                document.getElementById('autoBtn').disabled = true;
+                stopAuto();
+            } else if (nums[scanIndex] === target) {
+                highlightCode(3);
+                found = scanIndex;
+                document.getElementById('status').innerHTML = 
+                    `✅ Found at index ${scanIndex}! nums.index(${target}) = ${scanIndex}<br>
+                    (Took ${scanIndex + 1} comparisons vs log₂(${nums.length})≈${Math.ceil(Math.log2(nums.length))} for binary search)`;
+                document.getElementById('stepBtn').disabled = true;
+                document.getElementById('autoBtn').disabled = true;
+                stopAuto();
+            } else {
+                highlightCode(3);
+                document.getElementById('status').innerHTML = 
+                    `Scanning index ${scanIndex}: nums[${scanIndex}] = ${nums[scanIndex]} ≠ ${target}`;
+            }
+
+            renderArray();
+        }
+
+        function reset() {
+            stopAuto();
+            scanIndex = -1;
+            found = -1;
+            
+            document.getElementById('stepBtn').disabled = false;
+            document.getElementById('autoBtn').disabled = false;
+            document.getElementById('status').innerHTML = 'Click "Step" or "Auto Run" to search using index()';
+            highlightCode(null);
+            renderArray();
+        }
+
+        function stopAuto() {
+            if (autoInterval) {
+                clearInterval(autoInterval);
+                autoInterval = null;
+                document.getElementById('autoBtn').textContent = 'Auto Run';
+            }
+        }
+
+        document.getElementById('stepBtn').addEventListener('click', () => {
+            stopAuto();
+            executeStep();
+        });
+
+        document.getElementById('autoBtn').addEventListener('click', () => {
+            if (autoInterval) {
+                stopAuto();
+            } else {
+                autoInterval = setInterval(executeStep, 500);
+                document.getElementById('autoBtn').textContent = '⏸ Pause';
+            }
+        });
+
+        document.getElementById('resetBtn').addEventListener('click', reset);
+
+        // Initialize
+        renderArray();
+    </script>
+</body>
+</html>

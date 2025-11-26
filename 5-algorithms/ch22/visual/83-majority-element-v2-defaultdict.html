@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Q83: Majority Element - defaultdict</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; padding: 20px; }
+        .container { max-width: 1000px; margin: 0 auto; background: white; border-radius: 20px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); overflow: hidden; }
+        .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 30px; color: white; }
+        .header h1 { font-size: 1.8em; margin-bottom: 10px; }
+        .header p { opacity: 0.9; font-size: 0.95em; }
+        .problem-info { background: #f8f9fa; padding: 20px; border-bottom: 1px solid #eee; }
+        .problem-info h3 { color: #333; margin-bottom: 10px; }
+        .problem-info p { color: #666; line-height: 1.6; }
+        .code-section { background: #1e1e1e; padding: 20px; margin: 20px; border-radius: 10px; }
+        .code-section h3 { color: #9cdcfe; margin-bottom: 15px; font-size: 0.9em; }
+        .code-section pre { color: #d4d4d4; font-family: 'Consolas', monospace; font-size: 0.85em; line-height: 1.5; }
+        .keyword { color: #569cd6; }
+        .function { color: #dcdcaa; }
+        .comment { color: #6a9955; }
+        .number { color: #b5cea8; }
+        .controls { padding: 20px; display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; background: #f8f9fa; }
+        .btn { padding: 12px 24px; font-size: 1em; cursor: pointer; border: none; border-radius: 8px; transition: all 0.3s; }
+        .btn-primary { background: linear-gradient(135deg, #667eea, #764ba2); color: white; }
+        .btn-success { background: linear-gradient(135deg, #11998e, #38ef7d); color: white; }
+        .btn-warning { background: linear-gradient(135deg, #f093fb, #f5576c); color: white; }
+        .visualization { padding: 20px; }
+        .status { padding: 15px 20px; background: #e8f5e9; text-align: center; font-weight: 500; color: #2e7d32; }
+        .step-info { background: #fff3e0; padding: 15px 20px; text-align: center; color: #ef6c00; font-weight: 500; }
+        .array-display { display: flex; justify-content: center; gap: 8px; flex-wrap: wrap; margin: 20px 0; }
+        .array-item { width: 50px; height: 50px; display: flex; align-items: center; justify-content: center; border-radius: 10px; font-weight: bold; font-size: 1.3em; background: #e0e0e0; }
+        .array-item.processed { background: #bbdefb; }
+        .array-item.current { background: #2196f3; color: white; transform: scale(1.1); }
+        .counter-display { display: flex; justify-content: center; gap: 20px; flex-wrap: wrap; margin: 20px 0; }
+        .counter-item { padding: 15px 25px; border-radius: 10px; text-align: center; background: #f5f5f5; min-width: 80px; }
+        .counter-item.majority { background: #4caf50; color: white; }
+        .counter-key { font-size: 1.5em; font-weight: bold; }
+        .counter-value { font-size: 1em; color: #666; }
+        .counter-item.majority .counter-value { color: white; }
+        .result-display { text-align: center; margin: 20px 0; padding: 20px; background: #f5f5f5; border-radius: 10px; font-size: 1.5em; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🗳️ Q83: Majority Element</h1>
+            <p>LeetCode #169 | File: 83-2.py | Approach: defaultdict Counter</p>
+        </div>
+        
+        <div class="problem-info">
+            <h3>📋 Problem Description</h3>
+            <p>Find the majority element (appears more than n/2 times).</p>
+            <p style="margin-top: 10px;"><strong>Key Insight:</strong> Use defaultdict to count occurrences. 
+            Return element when count exceeds n/2.</p>
+        </div>
+
+        <div class="code-section">
+            <h3>📄 Python Solution (83-2.py)</h3>
+            <pre><span class="keyword">import</span> collections
+<span class="keyword">from</span> typing <span class="keyword">import</span> List
+
+<span class="keyword">class</span> <span class="function">Solution</span>:
+    <span class="keyword">def</span> <span class="function">majorityElement</span>(self, nums: List[<span class="keyword">int</span>]) -> <span class="keyword">int</span>:
+        counts = collections.<span class="function">defaultdict</span>(<span class="keyword">int</span>)
+        <span class="keyword">for</span> num <span class="keyword">in</span> nums:
+            <span class="keyword">if</span> counts[num] == <span class="number">0</span>:
+                counts[num] = nums.<span class="function">count</span>(num)
+            <span class="keyword">if</span> counts[num] > <span class="function">len</span>(nums) // <span class="number">2</span>:
+                <span class="keyword">return</span> num</pre>
+        </div>
+
+        <div class="controls">
+            <button class="btn btn-primary" onclick="step()">Step</button>
+            <button class="btn btn-success" onclick="toggleAutoRun()">Auto Run</button>
+            <button class="btn btn-warning" onclick="reset()">Reset</button>
+        </div>
+
+        <div class="step-info" id="stepInfo">Click "Step" to find the majority element</div>
+        
+        <div class="visualization">
+            <h4 style="text-align: center; margin-bottom: 10px;">Input Array (n=7, majority > 3)</h4>
+            <div class="array-display" id="arrayDisplay"></div>
+            
+            <h4 style="text-align: center; margin: 20px 0 10px;">Counter (defaultdict)</h4>
+            <div class="counter-display" id="counterDisplay"></div>
+            
+            <div class="result-display" id="result"></div>
+        </div>
+
+        <div class="status" id="status">Ready to find majority element</div>
+    </div>
+
+    <script>
+        const nums = [2, 2, 1, 1, 1, 2, 2];
+        const counts = {};
+        let currentIdx = -1;
+        let majorityFound = null;
+        let autoRunning = false;
+        let autoRunInterval;
+
+        function renderArray() {
+            const container = document.getElementById('arrayDisplay');
+            container.innerHTML = '';
+            nums.forEach((num, i) => {
+                const item = document.createElement('div');
+                item.className = 'array-item';
+                if (i < currentIdx) item.classList.add('processed');
+                if (i === currentIdx) item.classList.add('current');
+                item.textContent = num;
+                container.appendChild(item);
+            });
+        }
+
+        function renderCounter() {
+            const container = document.getElementById('counterDisplay');
+            container.innerHTML = '';
+            const threshold = Math.floor(nums.length / 2);
+            Object.entries(counts).forEach(([key, value]) => {
+                const item = document.createElement('div');
+                item.className = 'counter-item';
+                if (value > threshold) item.classList.add('majority');
+                item.innerHTML = `<div class="counter-key">${key}</div>
+                                  <div class="counter-value">count: ${value}</div>`;
+                container.appendChild(item);
+            });
+        }
+
+        function step() {
+            if (majorityFound !== null) return;
+            
+            currentIdx++;
+            
+            if (currentIdx >= nums.length) {
+                document.getElementById('stepInfo').textContent = 'Array exhausted (should not happen with valid input)';
+                return;
+            }
+
+            const num = nums[currentIdx];
+            const threshold = Math.floor(nums.length / 2);
+
+            // First time seeing this number? Count all occurrences
+            if (!counts[num]) {
+                const count = nums.filter(x => x === num).length;
+                counts[num] = count;
+                
+                if (count > threshold) {
+                    majorityFound = num;
+                    document.getElementById('stepInfo').textContent = 
+                        `Found ${num}! Count ${count} > ${threshold} (n/2). Majority element!`;
+                    document.getElementById('result').innerHTML = 
+                        `<span style="color: #4caf50;">Majority Element: <strong>${num}</strong></span>`;
+                    document.getElementById('status').textContent = 
+                        'defaultdict stores count on first encounter, early exit when majority found';
+                } else {
+                    document.getElementById('stepInfo').textContent = 
+                        `Counted ${num}: ${count} times. ${count} ≤ ${threshold}, continue searching...`;
+                }
+            } else {
+                document.getElementById('stepInfo').textContent = 
+                    `Seen ${num} before (count=${counts[num]}), skip counting`;
+            }
+
+            renderArray();
+            renderCounter();
+        }
+
+        function toggleAutoRun() {
+            autoRunning = !autoRunning;
+            const btn = document.querySelector('.btn-success');
+            if (autoRunning) {
+                btn.textContent = 'Pause';
+                autoRunInterval = setInterval(() => {
+                    if (majorityFound !== null || currentIdx >= nums.length - 1) {
+                        step(); toggleAutoRun(); return;
+                    }
+                    step();
+                }, 800);
+            } else {
+                btn.textContent = 'Auto Run';
+                clearInterval(autoRunInterval);
+            }
+        }
+
+        function reset() {
+            currentIdx = -1;
+            majorityFound = null;
+            Object.keys(counts).forEach(k => delete counts[k]);
+            if (autoRunning) toggleAutoRun();
+            document.getElementById('stepInfo').textContent = 'Click "Step" to find the majority element';
+            document.getElementById('status').textContent = 'Ready to find majority element';
+            document.getElementById('result').innerHTML = '';
+            renderArray();
+            renderCounter();
+        }
+
+        renderArray();
+        renderCounter();
+    </script>
+</body>
+</html>

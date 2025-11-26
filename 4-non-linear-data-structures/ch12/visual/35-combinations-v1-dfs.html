@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Q35: Combinations - DFS</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f5f7fa; min-height: 100vh; padding: 20px; }
+        .container { max-width: 1200px; margin: 0 auto; }
+        
+        .problem-info { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 16px; padding: 25px 30px; margin-bottom: 25px; color: white; }
+        .problem-info h1 { font-size: 1.8em; margin-bottom: 10px; }
+        .problem-info p { font-size: 1.1em; opacity: 0.95; line-height: 1.6; }
+        .problem-meta { display: flex; gap: 20px; margin-top: 15px; flex-wrap: wrap; }
+        .meta-tag { background: rgba(255,255,255,0.2); padding: 6px 14px; border-radius: 20px; font-size: 0.9em; }
+        
+        .code-section { background: white; border-radius: 16px; padding: 25px; margin-bottom: 25px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
+        .code-section h3 { color: #333; margin-bottom: 15px; }
+        .code-block { background: #1e1e1e; border-radius: 12px; padding: 20px; overflow-x: auto; }
+        .code-block pre { margin: 0; font-family: 'Consolas', monospace; font-size: 13px; line-height: 1.5; color: #d4d4d4; }
+        .code-block .keyword { color: #569cd6; }
+        .code-block .function { color: #dcdcaa; }
+        .code-block .comment { color: #6a9955; }
+        
+        .visualization-section { background: white; border-radius: 16px; padding: 25px; margin-bottom: 25px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
+        .visualization-section h3 { color: #333; margin-bottom: 20px; }
+        
+        .controls { display: flex; gap: 12px; margin-bottom: 25px; flex-wrap: wrap; }
+        .btn { padding: 12px 28px; font-size: 1em; border: none; border-radius: 10px; cursor: pointer; font-weight: 500; }
+        .btn-primary { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; }
+        .btn-success { background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); color: white; }
+        .btn-warning { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white; }
+        .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        
+        .status-message { background: #e8f4fd; border-left: 4px solid #2196f3; padding: 15px 20px; border-radius: 0 10px 10px 0; margin-bottom: 20px; color: #1565c0; }
+        
+        .params-display { display: flex; gap: 20px; margin-bottom: 20px; }
+        .param-box { padding: 15px 25px; background: #f9f9f9; border-radius: 12px; text-align: center; }
+        .param-label { font-size: 0.85em; color: #666; }
+        .param-value { font-size: 1.5em; font-weight: 600; color: #667eea; }
+        
+        .state-display { display: flex; gap: 30px; margin-bottom: 20px; flex-wrap: wrap; }
+        .state-box { flex: 1; min-width: 150px; padding: 15px; background: #f9f9f9; border-radius: 12px; }
+        .state-label { font-size: 0.85em; color: #666; margin-bottom: 8px; }
+        .state-items { display: flex; gap: 8px; flex-wrap: wrap; }
+        .state-item { width: 36px; height: 36px; display: flex; justify-content: center; align-items: center; font-size: 1.1em; font-weight: 600; border-radius: 8px; background: #e3f2fd; border: 2px solid #2196f3; color: #1565c0; }
+        
+        .results-section { background: #e8f5e9; border-radius: 12px; padding: 20px; }
+        .results-label { font-size: 0.9em; color: #2e7d32; margin-bottom: 10px; }
+        .results-grid { display: flex; flex-wrap: wrap; gap: 10px; }
+        .result-item { padding: 8px 14px; background: #4caf50; color: white; border-radius: 8px; font-family: monospace; }
+        
+        #treeCanvas { width: 100%; height: 300px; margin-top: 20px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="problem-info">
+            <h1>Q35: Combinations - DFS</h1>
+            <p>Given n and k, return all possible combinations of k numbers chosen from the range [1, n].</p>
+            <div class="problem-meta">
+                <span class="meta-tag">📁 Backtracking</span>
+                <span class="meta-tag">⏱️ O(C(n,k))</span>
+                <span class="meta-tag">💡 DFS with start index</span>
+            </div>
+        </div>
+        
+        <div class="code-section">
+            <h3>💻 Python Solution</h3>
+            <div class="code-block">
+                <pre><span class="keyword">def</span> <span class="function">combine</span>(n: int, k: int) -> List[List[int]]:
+    results = []
+
+    <span class="keyword">def</span> <span class="function">dfs</span>(elements, start: int, k: int):
+        <span class="keyword">if</span> k == 0:
+            results.append(elements[:])
+            <span class="keyword">return</span>
+
+        <span class="comment"># Start from current position to avoid duplicates</span>
+        <span class="keyword">for</span> i <span class="keyword">in</span> range(start, n + 1):
+            elements.append(i)
+            dfs(elements, i + 1, k - 1)
+            elements.pop()  <span class="comment"># Backtrack</span>
+
+    dfs([], 1, k)
+    <span class="keyword">return</span> results</pre>
+            </div>
+        </div>
+        
+        <div class="visualization-section">
+            <h3>🎬 Visualization</h3>
+            
+            <div class="controls">
+                <button class="btn btn-primary" id="stepBtn" onclick="step()">Step</button>
+                <button class="btn btn-success" id="autoBtn" onclick="toggleAuto()">Auto Run</button>
+                <button class="btn btn-warning" onclick="reset()">Reset</button>
+            </div>
+            
+            <div class="status-message" id="statusMessage">
+                n=4, k=2: Generate all combinations of 2 numbers from [1,2,3,4].
+            </div>
+            
+            <div class="params-display">
+                <div class="param-box">
+                    <div class="param-label">n (range)</div>
+                    <div class="param-value">4</div>
+                </div>
+                <div class="param-box">
+                    <div class="param-label">k (choose)</div>
+                    <div class="param-value">2</div>
+                </div>
+                <div class="param-box">
+                    <div class="param-label">C(4,2)</div>
+                    <div class="param-value">6</div>
+                </div>
+            </div>
+            
+            <div class="state-display">
+                <div class="state-box">
+                    <div class="state-label">Current Elements</div>
+                    <div class="state-items" id="elementsDisplay"></div>
+                </div>
+                <div class="state-box">
+                    <div class="state-label">Start Index</div>
+                    <div class="state-items" id="startDisplay"></div>
+                </div>
+                <div class="state-box">
+                    <div class="state-label">Remaining k</div>
+                    <div class="state-items" id="kDisplay"></div>
+                </div>
+            </div>
+            
+            <div class="results-section">
+                <div class="results-label">Results:</div>
+                <div class="results-grid" id="resultsGrid"></div>
+            </div>
+            
+            <svg id="treeCanvas"></svg>
+        </div>
+    </div>
+
+    <script>
+        const n = 4, k = 2;
+        let results = [];
+        let stack = [];
+        let currentElements = [];
+        let currentStart = 1;
+        let currentK = k;
+        let autoInterval = null;
+        let treeNodes = [{id: 'root', path: '[]', parent: null}];
+        
+        function init() {
+            results = [];
+            stack = [{elements: [], start: 1, k: k}];
+            currentElements = [];
+            currentStart = 1;
+            currentK = k;
+            treeNodes = [{id: 'root', path: '[]', parent: null}];
+            render();
+        }
+        
+        function render() {
+            // Elements
+            const elemContainer = document.getElementById('elementsDisplay');
+            elemContainer.innerHTML = currentElements.length ? 
+                currentElements.map(e => `<div class="state-item">${e}</div>`).join('') :
+                '<span style="color:#999">[]</span>';
+            
+            // Start
+            document.getElementById('startDisplay').innerHTML = 
+                `<div class="state-item">${currentStart}</div>`;
+            
+            // K
+            document.getElementById('kDisplay').innerHTML = 
+                `<div class="state-item">${currentK}</div>`;
+            
+            // Results
+            const resultsContainer = document.getElementById('resultsGrid');
+            resultsContainer.innerHTML = '';
+            results.forEach(r => {
+                const item = document.createElement('span');
+                item.className = 'result-item';
+                item.textContent = `[${r.join(', ')}]`;
+                resultsContainer.appendChild(item);
+            });
+            
+            renderTree();
+        }
+        
+        function renderTree() {
+            const svg = d3.select('#treeCanvas');
+            svg.selectAll('*').remove();
+            
+            const width = svg.node().getBoundingClientRect().width || 800;
+            const height = 300;
+            svg.attr('height', height);
+            
+            if (treeNodes.length <= 1) return;
+            
+            const root = d3.stratify()
+                .id(d => d.id)
+                .parentId(d => d.parent)(treeNodes);
+            
+            const treeLayout = d3.tree().size([width - 60, height - 60]);
+            treeLayout(root);
+            
+            svg.selectAll('.link')
+                .data(root.links())
+                .enter()
+                .append('line')
+                .attr('x1', d => d.source.x + 30)
+                .attr('y1', d => d.source.y + 20)
+                .attr('x2', d => d.target.x + 30)
+                .attr('y2', d => d.target.y + 20)
+                .attr('stroke', '#ccc')
+                .attr('stroke-width', 2);
+            
+            const nodes = svg.selectAll('.node')
+                .data(root.descendants())
+                .enter()
+                .append('g')
+                .attr('transform', d => `translate(${d.x + 30}, ${d.y + 20})`);
+            
+            nodes.append('circle')
+                .attr('r', 18)
+                .attr('fill', d => {
+                    if (results.some(r => JSON.stringify(r) === d.data.path)) return '#4caf50';
+                    if (JSON.stringify(currentElements) === d.data.path) return '#ff9800';
+                    return '#667eea';
+                });
+            
+            nodes.append('text')
+                .attr('dy', 5)
+                .attr('text-anchor', 'middle')
+                .attr('fill', 'white')
+                .attr('font-size', '10px')
+                .text(d => d.data.path);
+        }
+        
+        function step() {
+            if (stack.length === 0) {
+                document.getElementById('statusMessage').textContent = 
+                    `✅ Done! Found ${results.length} combinations.`;
+                document.getElementById('stepBtn').disabled = true;
+                stopAuto();
+                return;
+            }
+            
+            const state = stack.pop();
+            currentElements = state.elements;
+            currentStart = state.start;
+            currentK = state.k;
+            
+            if (state.k === 0) {
+                results.push([...state.elements]);
+                document.getElementById('statusMessage').textContent = 
+                    `Found combination: [${state.elements.join(', ')}]`;
+                render();
+                return;
+            }
+            
+            // Push children in reverse order
+            for (let i = n; i >= state.start; i--) {
+                const nextElements = [...state.elements, i];
+                stack.push({elements: nextElements, start: i + 1, k: state.k - 1});
+                
+                const nodeId = JSON.stringify(nextElements);
+                if (!treeNodes.find(node => node.id === nodeId)) {
+                    treeNodes.push({
+                        id: nodeId,
+                        path: nodeId,
+                        parent: JSON.stringify(state.elements) || 'root'
+                    });
+                }
+            }
+            
+            document.getElementById('statusMessage').textContent = 
+                `At [${state.elements.join(', ')}], choosing from ${state.start} to ${n}, need ${state.k} more`;
+            render();
+        }
+        
+        function toggleAuto() {
+            if (autoInterval) { stopAuto(); }
+            else {
+                document.getElementById('autoBtn').textContent = 'Pause';
+                autoInterval = setInterval(step, 500);
+            }
+        }
+        
+        function stopAuto() {
+            if (autoInterval) { clearInterval(autoInterval); autoInterval = null; }
+            document.getElementById('autoBtn').textContent = 'Auto Run';
+        }
+        
+        function reset() {
+            stopAuto();
+            document.getElementById('stepBtn').disabled = false;
+            document.getElementById('statusMessage').textContent = 'n=4, k=2: Generate all combinations of 2 numbers from [1,2,3,4].';
+            init();
+        }
+        
+        init();
+    </script>
+</body>
+</html>

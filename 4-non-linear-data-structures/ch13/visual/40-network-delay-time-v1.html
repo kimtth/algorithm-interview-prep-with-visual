@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Q40: Network Delay Time - Dijkstra's Algorithm</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f5f7fa; min-height: 100vh; padding: 20px; }
+        .container { max-width: 1200px; margin: 0 auto; }
+        
+        .problem-info { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 16px; padding: 25px 30px; margin-bottom: 25px; color: white; }
+        .problem-info h1 { font-size: 1.8em; margin-bottom: 10px; }
+        .problem-info p { font-size: 1.1em; opacity: 0.95; line-height: 1.6; }
+        .problem-meta { display: flex; gap: 20px; margin-top: 15px; flex-wrap: wrap; }
+        .meta-tag { background: rgba(255,255,255,0.2); padding: 6px 14px; border-radius: 20px; font-size: 0.9em; }
+        
+        .code-section { background: white; border-radius: 16px; padding: 25px; margin-bottom: 25px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
+        .code-section h3 { color: #333; margin-bottom: 15px; }
+        .code-block { background: #1e1e1e; border-radius: 12px; padding: 20px; overflow-x: auto; }
+        .code-block pre { margin: 0; font-family: 'Consolas', monospace; font-size: 13px; line-height: 1.5; color: #d4d4d4; }
+        .code-block .keyword { color: #569cd6; }
+        .code-block .function { color: #dcdcaa; }
+        .code-block .comment { color: #6a9955; }
+        .code-block .number { color: #b5cea8; }
+        
+        .visualization-section { background: white; border-radius: 16px; padding: 25px; margin-bottom: 25px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
+        .visualization-section h3 { color: #333; margin-bottom: 20px; }
+        
+        .controls { display: flex; gap: 12px; margin-bottom: 25px; flex-wrap: wrap; }
+        .btn { padding: 12px 28px; font-size: 1em; border: none; border-radius: 10px; cursor: pointer; font-weight: 500; transition: all 0.2s; }
+        .btn-primary { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; }
+        .btn-success { background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); color: white; }
+        .btn-warning { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white; }
+        .btn:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+        .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+        
+        .status-message { background: #e8f4fd; border-left: 4px solid #2196f3; padding: 15px 20px; border-radius: 0 10px 10px 0; margin-bottom: 20px; color: #1565c0; }
+        
+        .graph-container { display: flex; justify-content: center; margin-bottom: 20px; }
+        svg { background: #fafafa; border-radius: 12px; border: 1px solid #e0e0e0; }
+        
+        .data-display { display: flex; gap: 20px; flex-wrap: wrap; margin-bottom: 20px; }
+        .data-section { flex: 1; min-width: 280px; padding: 20px; border-radius: 12px; }
+        .queue-section { background: #f3e5f5; }
+        .dist-section { background: #e8f5e9; }
+        .data-title { font-size: 0.9em; font-weight: 600; margin-bottom: 12px; }
+        .queue-title { color: #7b1fa2; }
+        .dist-title { color: #2e7d32; }
+        
+        .queue-items, .dist-items { display: flex; flex-wrap: wrap; gap: 8px; }
+        .queue-item { padding: 8px 14px; background: white; border: 2px solid #9c27b0; border-radius: 8px; font-weight: 500; }
+        .dist-item { padding: 8px 14px; background: white; border: 2px solid #4caf50; border-radius: 8px; font-weight: 500; }
+        
+        .legend { display: flex; gap: 20px; margin-bottom: 15px; flex-wrap: wrap; }
+        .legend-item { display: flex; align-items: center; gap: 8px; font-size: 0.9em; }
+        .legend-circle { width: 18px; height: 18px; border-radius: 50%; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="problem-info">
+            <h1>Q40: Network Delay Time</h1>
+            <p>Given a network of n nodes, find the time it takes for a signal to reach all nodes from source K using Dijkstra's algorithm.</p>
+            <div class="problem-meta">
+                <span class="meta-tag">📁 Graph</span>
+                <span class="meta-tag">⏱️ O((V+E) log V)</span>
+                <span class="meta-tag">💡 Dijkstra's Algorithm</span>
+            </div>
+        </div>
+        
+        <div class="code-section">
+            <h3>💻 Python Solution</h3>
+            <div class="code-block">
+                <pre><span class="keyword">def</span> <span class="function">networkDelayTime</span>(times: List[List[int]], N: int, K: int) -> int:
+    graph = collections.defaultdict(list)
+    <span class="keyword">for</span> u, v, w <span class="keyword">in</span> times:
+        graph[u].append((v, w))
+    
+    Q = [(<span class="number">0</span>, K)]  <span class="comment"># (time, node)</span>
+    dist = collections.defaultdict(int)
+    
+    <span class="keyword">while</span> Q:
+        time, node = heapq.heappop(Q)
+        <span class="keyword">if</span> node <span class="keyword">not in</span> dist:
+            dist[node] = time
+            <span class="keyword">for</span> v, w <span class="keyword">in</span> graph[node]:
+                alt = time + w
+                heapq.heappush(Q, (alt, v))
+    
+    <span class="keyword">if</span> len(dist) == N:
+        <span class="keyword">return</span> max(dist.values())
+    <span class="keyword">return</span> -<span class="number">1</span></pre>
+            </div>
+        </div>
+        
+        <div class="visualization-section">
+            <h3>🎬 Visualization</h3>
+            
+            <div class="controls">
+                <button class="btn btn-primary" id="stepBtn" onclick="step()">Step</button>
+                <button class="btn btn-success" id="autoBtn" onclick="toggleAuto()">Auto Run</button>
+                <button class="btn btn-warning" onclick="reset()">Reset</button>
+            </div>
+            
+            <div class="legend">
+                <div class="legend-item"><div class="legend-circle" style="background: #3498db;"></div> Unvisited</div>
+                <div class="legend-item"><div class="legend-circle" style="background: #f39c12;"></div> Current</div>
+                <div class="legend-item"><div class="legend-circle" style="background: #27ae60;"></div> Visited</div>
+                <div class="legend-item"><div class="legend-circle" style="background: #e74c3c;"></div> Source (K)</div>
+            </div>
+            
+            <div class="status-message" id="statusMessage">
+                Network: 4 nodes, source K=2. Dijkstra finds shortest paths to all nodes.
+            </div>
+            
+            <div class="graph-container">
+                <svg id="graph" width="500" height="300"></svg>
+            </div>
+            
+            <div class="data-display">
+                <div class="data-section queue-section">
+                    <div class="data-title queue-title">📚 Priority Queue (time, node)</div>
+                    <div class="queue-items" id="queueDisplay"><span style="color:#999">Empty</span></div>
+                </div>
+                <div class="data-section dist-section">
+                    <div class="data-title dist-title">📏 Distances (node: time)</div>
+                    <div class="dist-items" id="distDisplay"><span style="color:#999">Empty</span></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const nodes = [
+            {id: 1, x: 100, y: 150},
+            {id: 2, x: 250, y: 80},
+            {id: 3, x: 250, y: 220},
+            {id: 4, x: 400, y: 150}
+        ];
+        
+        const edges = [
+            {from: 2, to: 1, weight: 1},
+            {from: 2, to: 3, weight: 1},
+            {from: 3, to: 4, weight: 1}
+        ];
+        
+        const K = 2;
+        const N = 4;
+        let dist = {};
+        let heap = [];
+        let visited = new Set();
+        let currentNode = -1;
+        let done = false;
+        let autoInterval = null;
+        
+        function init() {
+            dist = {};
+            heap = [[0, K]];
+            visited = new Set();
+            currentNode = -1;
+            done = false;
+            renderGraph();
+            renderQueue();
+            renderDist();
+        }
+        
+        function renderGraph(highlightEdge = null) {
+            const svg = d3.select("#graph");
+            svg.selectAll("*").remove();
+            
+            // Arrow marker
+            svg.append("defs").append("marker")
+                .attr("id", "arrow")
+                .attr("viewBox", "0 -5 10 10")
+                .attr("refX", 8)
+                .attr("refY", 0)
+                .attr("markerWidth", 6)
+                .attr("markerHeight", 6)
+                .attr("orient", "auto")
+                .append("path")
+                .attr("d", "M0,-5L10,0L0,5")
+                .attr("fill", "#666");
+            
+            // Draw edges
+            edges.forEach(e => {
+                const from = nodes.find(n => n.id === e.from);
+                const to = nodes.find(n => n.id === e.to);
+                
+                let color = "#666";
+                let width = 2;
+                if (highlightEdge && highlightEdge.from === e.from && highlightEdge.to === e.to) {
+                    color = "#f39c12";
+                    width = 3;
+                }
+                
+                const dx = to.x - from.x;
+                const dy = to.y - from.y;
+                const len = Math.sqrt(dx*dx + dy*dy);
+                const ux = dx / len;
+                const uy = dy / len;
+                
+                svg.append("line")
+                    .attr("x1", from.x + ux * 30)
+                    .attr("y1", from.y + uy * 30)
+                    .attr("x2", to.x - ux * 35)
+                    .attr("y2", to.y - uy * 35)
+                    .attr("stroke", color)
+                    .attr("stroke-width", width)
+                    .attr("marker-end", "url(#arrow)");
+                
+                svg.append("text")
+                    .attr("x", (from.x + to.x) / 2 + 12)
+                    .attr("y", (from.y + to.y) / 2)
+                    .attr("font-size", "14px")
+                    .attr("font-weight", "bold")
+                    .attr("fill", "#e74c3c")
+                    .text(e.weight);
+            });
+            
+            // Draw nodes
+            nodes.forEach(node => {
+                let fill = "#3498db";
+                if (visited.has(node.id)) fill = "#27ae60";
+                if (node.id === currentNode) fill = "#f39c12";
+                if (node.id === K && !visited.has(K)) fill = "#e74c3c";
+                
+                svg.append("circle")
+                    .attr("cx", node.x)
+                    .attr("cy", node.y)
+                    .attr("r", 28)
+                    .attr("fill", fill)
+                    .attr("stroke", "#333")
+                    .attr("stroke-width", 2);
+                
+                svg.append("text")
+                    .attr("x", node.x)
+                    .attr("y", node.y + 6)
+                    .attr("text-anchor", "middle")
+                    .attr("font-size", "18px")
+                    .attr("font-weight", "bold")
+                    .attr("fill", "white")
+                    .text(node.id);
+                
+                if (node.id === K) {
+                    svg.append("text")
+                        .attr("x", node.x)
+                        .attr("y", node.y - 38)
+                        .attr("text-anchor", "middle")
+                        .attr("font-size", "12px")
+                        .attr("font-weight", "bold")
+                        .attr("fill", "#e74c3c")
+                        .text("START (K)");
+                }
+            });
+        }
+        
+        function renderQueue() {
+            const container = document.getElementById('queueDisplay');
+            if (heap.length === 0) {
+                container.innerHTML = '<span style="color:#999">Empty</span>';
+            } else {
+                const sorted = [...heap].sort((a, b) => a[0] - b[0]);
+                container.innerHTML = sorted.map(([t, n]) => 
+                    `<div class="queue-item">(${t}, ${n})</div>`
+                ).join('');
+            }
+        }
+        
+        function renderDist() {
+            const container = document.getElementById('distDisplay');
+            if (Object.keys(dist).length === 0) {
+                container.innerHTML = '<span style="color:#999">Empty</span>';
+            } else {
+                container.innerHTML = Object.entries(dist)
+                    .sort((a, b) => parseInt(a[0]) - parseInt(b[0]))
+                    .map(([n, t]) => `<div class="dist-item">${n}: ${t}</div>`)
+                    .join('');
+            }
+        }
+        
+        function step() {
+            if (done || heap.length === 0) {
+                if (Object.keys(dist).length === N) {
+                    const maxDist = Math.max(...Object.values(dist));
+                    document.getElementById('statusMessage').textContent = 
+                        `✅ Complete! All ${N} nodes reached. Max delay time = ${maxDist}`;
+                } else {
+                    document.getElementById('statusMessage').textContent = 
+                        `❌ Not all nodes reachable. Only ${Object.keys(dist).length} of ${N} reached.`;
+                }
+                done = true;
+                document.getElementById('stepBtn').disabled = true;
+                stopAuto();
+                return;
+            }
+            
+            // Pop minimum
+            heap.sort((a, b) => a[0] - b[0]);
+            const [time, node] = heap.shift();
+            
+            if (visited.has(node)) {
+                document.getElementById('statusMessage').textContent = 
+                    `Node ${node} already visited (time=${time}), skipping.`;
+                renderQueue();
+                return;
+            }
+            
+            currentNode = node;
+            visited.add(node);
+            dist[node] = time;
+            
+            // Add neighbors
+            edges.filter(e => e.from === node).forEach(e => {
+                if (!visited.has(e.to)) {
+                    heap.push([time + e.weight, e.to]);
+                }
+            });
+            
+            document.getElementById('statusMessage').textContent = 
+                `Visited node ${node} with distance ${time}. Added unvisited neighbors to queue.`;
+            
+            renderGraph();
+            renderQueue();
+            renderDist();
+        }
+        
+        function toggleAuto() {
+            if (autoInterval) { stopAuto(); }
+            else {
+                document.getElementById('autoBtn').textContent = 'Pause';
+                autoInterval = setInterval(step, 800);
+            }
+        }
+        
+        function stopAuto() {
+            if (autoInterval) { clearInterval(autoInterval); autoInterval = null; }
+            document.getElementById('autoBtn').textContent = 'Auto Run';
+        }
+        
+        function reset() {
+            stopAuto();
+            document.getElementById('stepBtn').disabled = false;
+            document.getElementById('statusMessage').textContent = 
+                'Network: 4 nodes, source K=2. Dijkstra finds shortest paths to all nodes.';
+            init();
+        }
+        
+        init();
+    </script>
+</body>
+</html>

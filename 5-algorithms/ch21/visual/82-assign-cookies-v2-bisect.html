@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Q82: Assign Cookies - Binary Search</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; padding: 20px; }
+        .container { max-width: 1000px; margin: 0 auto; background: white; border-radius: 20px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); overflow: hidden; }
+        .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 30px; color: white; }
+        .header h1 { font-size: 1.8em; margin-bottom: 10px; }
+        .header p { opacity: 0.9; font-size: 0.95em; }
+        .problem-info { background: #f8f9fa; padding: 20px; border-bottom: 1px solid #eee; }
+        .problem-info h3 { color: #333; margin-bottom: 10px; }
+        .problem-info p { color: #666; line-height: 1.6; }
+        .code-section { background: #1e1e1e; padding: 20px; margin: 20px; border-radius: 10px; }
+        .code-section h3 { color: #9cdcfe; margin-bottom: 15px; font-size: 0.9em; }
+        .code-section pre { color: #d4d4d4; font-family: 'Consolas', monospace; font-size: 0.8em; line-height: 1.4; }
+        .keyword { color: #569cd6; }
+        .function { color: #dcdcaa; }
+        .comment { color: #6a9955; }
+        .number { color: #b5cea8; }
+        .controls { padding: 20px; display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; background: #f8f9fa; }
+        .btn { padding: 12px 24px; font-size: 1em; cursor: pointer; border: none; border-radius: 8px; transition: all 0.3s; }
+        .btn-primary { background: linear-gradient(135deg, #667eea, #764ba2); color: white; }
+        .btn-success { background: linear-gradient(135deg, #11998e, #38ef7d); color: white; }
+        .btn-warning { background: linear-gradient(135deg, #f093fb, #f5576c); color: white; }
+        .visualization { padding: 30px; min-height: 350px; }
+        .status { padding: 15px 20px; background: #e8f5e9; text-align: center; font-weight: 500; color: #2e7d32; }
+        .step-info { background: #fff3e0; padding: 15px 20px; text-align: center; color: #ef6c00; font-weight: 500; }
+        .section { margin: 15px 0; padding: 15px; background: #f5f5f5; border-radius: 10px; }
+        .section h4 { margin-bottom: 10px; color: #333; }
+        .items-row { display: flex; gap: 10px; flex-wrap: wrap; }
+        .item { width: 50px; height: 50px; display: flex; align-items: center; justify-content: center; border-radius: 10px; font-weight: bold; font-size: 1.2em; transition: all 0.3s; }
+        .child { background: #e3f2fd; color: #1976d2; border: 2px solid #1976d2; }
+        .child.satisfied { background: #4caf50; color: white; border-color: #2e7d32; }
+        .cookie { background: #fff3e0; color: #ff9800; border: 2px solid #ff9800; }
+        .cookie.used { opacity: 0.4; }
+        .cookie.checking { background: #2196f3; color: white; border-color: #1565c0; }
+        .result-display { text-align: center; margin-top: 20px; font-size: 1.5em; color: #333; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🍪 Q82: Assign Cookies</h1>
+            <p>LeetCode #455 | File: 82-2.py | Approach: Binary Search (bisect_right)</p>
+        </div>
+        
+        <div class="problem-info">
+            <h3>📋 Problem Description</h3>
+            <p>Maximize content children. Child i is content if cookie size ≥ greed[i].</p>
+            <p style="margin-top: 10px;"><strong>Key Insight:</strong> Sort both arrays. For each cookie, 
+            use bisect_right to find how many children can be satisfied. If more than current result, increment.</p>
+        </div>
+
+        <div class="code-section">
+            <h3>📄 Python Solution (82-2.py)</h3>
+            <pre><span class="keyword">import</span> bisect
+<span class="keyword">from</span> typing <span class="keyword">import</span> List
+
+<span class="keyword">class</span> <span class="function">Solution</span>:
+    <span class="keyword">def</span> <span class="function">findContentChildren</span>(self, g: List[<span class="keyword">int</span>], s: List[<span class="keyword">int</span>]) -> <span class="keyword">int</span>:
+        g.<span class="function">sort</span>()
+        s.<span class="function">sort</span>()
+        result = <span class="number">0</span>
+        <span class="keyword">for</span> i <span class="keyword">in</span> s:
+            <span class="comment"># Find how many children can be satisfied</span>
+            index = bisect.<span class="function">bisect_right</span>(g, i)
+            <span class="keyword">if</span> index > result:
+                result += <span class="number">1</span>
+        <span class="keyword">return</span> result</pre>
+        </div>
+
+        <div class="controls">
+            <button class="btn btn-primary" onclick="step()">Step</button>
+            <button class="btn btn-success" onclick="toggleAutoRun()">Auto Run</button>
+            <button class="btn btn-warning" onclick="reset()">Reset</button>
+        </div>
+
+        <div class="step-info" id="stepInfo">Click "Step" to begin</div>
+        
+        <div class="visualization" id="viz">
+            <div class="section">
+                <h4>👶 Children (greed factors, sorted): [1, 2, 3]</h4>
+                <div class="items-row" id="childrenRow"></div>
+            </div>
+            <div class="section">
+                <h4>🍪 Cookies (sizes, sorted): [1, 1]</h4>
+                <div class="items-row" id="cookiesRow"></div>
+            </div>
+            <div style="text-align: center; margin: 15px 0;">
+                <span style="font-size: 1.2em;">Content children: <strong id="resultCount">0</strong></span>
+            </div>
+            <div class="result-display" id="result"></div>
+        </div>
+
+        <div class="status" id="status">Ready to assign cookies</div>
+    </div>
+
+    <script>
+        const g = [1, 2, 3]; // sorted greed
+        const s = [1, 1];   // sorted cookies
+        let result = 0;
+        let currentCookieIdx = -1;
+        let satisfiedChildren = [];
+        let autoRunning = false;
+        let autoRunInterval;
+
+        function bisectRight(arr, x) {
+            let lo = 0, hi = arr.length;
+            while (lo < hi) {
+                const mid = Math.floor((lo + hi) / 2);
+                if (arr[mid] <= x) lo = mid + 1;
+                else hi = mid;
+            }
+            return lo;
+        }
+
+        function renderChildren() {
+            const row = document.getElementById('childrenRow');
+            row.innerHTML = '';
+            g.forEach((greed, i) => {
+                const item = document.createElement('div');
+                item.className = 'item child';
+                if (satisfiedChildren.includes(i)) item.classList.add('satisfied');
+                item.textContent = greed;
+                row.appendChild(item);
+            });
+        }
+
+        function renderCookies() {
+            const row = document.getElementById('cookiesRow');
+            row.innerHTML = '';
+            s.forEach((size, i) => {
+                const item = document.createElement('div');
+                item.className = 'item cookie';
+                if (i < currentCookieIdx) item.classList.add('used');
+                if (i === currentCookieIdx) item.classList.add('checking');
+                item.textContent = size;
+                row.appendChild(item);
+            });
+        }
+
+        function step() {
+            currentCookieIdx++;
+            
+            if (currentCookieIdx >= s.length) {
+                document.getElementById('stepInfo').textContent = `Done! ${result} children satisfied`;
+                document.getElementById('result').innerHTML = 
+                    `<span style="color: #4caf50;">Answer: <strong>${result}</strong></span>`;
+                document.getElementById('status').textContent = 
+                    'Binary search finds satisfiable children quickly!';
+                return;
+            }
+
+            const cookieSize = s[currentCookieIdx];
+            const index = bisectRight(g, cookieSize);
+            
+            let desc = `Cookie ${currentCookieIdx} (size=${cookieSize}): bisect_right gives ${index}. `;
+            
+            if (index > result) {
+                satisfiedChildren.push(result);
+                result++;
+                desc += `${index} > ${result-1}, so we can satisfy 1 more child!`;
+            } else {
+                desc += `${index} ≤ ${result}, no new child can be satisfied.`;
+            }
+
+            document.getElementById('stepInfo').textContent = desc;
+            document.getElementById('resultCount').textContent = result;
+            renderChildren();
+            renderCookies();
+        }
+
+        function toggleAutoRun() {
+            autoRunning = !autoRunning;
+            const btn = document.querySelector('.btn-success');
+            if (autoRunning) {
+                btn.textContent = 'Pause';
+                autoRunInterval = setInterval(() => {
+                    if (currentCookieIdx >= s.length - 1) {
+                        step(); toggleAutoRun(); return;
+                    }
+                    step();
+                }, 1200);
+            } else {
+                btn.textContent = 'Auto Run';
+                clearInterval(autoRunInterval);
+            }
+        }
+
+        function reset() {
+            result = 0;
+            currentCookieIdx = -1;
+            satisfiedChildren = [];
+            if (autoRunning) toggleAutoRun();
+            document.getElementById('stepInfo').textContent = 'Click "Step" to begin';
+            document.getElementById('status').textContent = 'Ready to assign cookies';
+            document.getElementById('result').innerHTML = '';
+            document.getElementById('resultCount').textContent = '0';
+            renderChildren();
+            renderCookies();
+        }
+
+        renderChildren();
+        renderCookies();
+    </script>
+</body>
+</html>

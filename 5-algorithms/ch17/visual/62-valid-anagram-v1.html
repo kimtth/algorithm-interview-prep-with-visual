@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Valid Anagram</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; padding: 20px; }
+        .container { max-width: 1000px; margin: 0 auto; }
+        h1 { text-align: center; color: white; margin-bottom: 10px; text-shadow: 2px 2px 4px rgba(0,0,0,0.3); }
+        .subtitle { text-align: center; color: rgba(255,255,255,0.9); margin-bottom: 20px; font-size: 14px; }
+        .controls { display: flex; justify-content: center; gap: 15px; margin-bottom: 20px; flex-wrap: wrap; }
+        button { background: white; color: #667eea; border: none; padding: 10px 25px; border-radius: 25px; cursor: pointer; font-weight: 600; transition: all 0.3s; }
+        button:hover { transform: scale(1.05); box-shadow: 0 5px 20px rgba(0,0,0,0.2); }
+        button:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+        .panel { background: white; border-radius: 15px; padding: 20px; margin-bottom: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
+        .panel-title { font-size: 16px; font-weight: bold; color: #333; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 2px solid #667eea; }
+        .strings-row { display: flex; justify-content: space-around; margin-bottom: 20px; }
+        .string-box { text-align: center; }
+        .string-label { font-size: 14px; color: #666; margin-bottom: 10px; }
+        .string-chars { display: flex; gap: 5px; justify-content: center; }
+        .char-box { width: 40px; height: 45px; background: #f5f7fa; border: 2px solid #667eea; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: bold; transition: all 0.3s; }
+        .char-box.sorting { background: #ff9800; color: white; border-color: #f57c00; }
+        .char-box.sorted { background: #4caf50; color: white; border-color: #2e7d32; }
+        .char-box.match { background: #667eea; color: white; }
+        .char-box.mismatch { background: #f44336; color: white; border-color: #d32f2f; }
+        .comparison-area { display: flex; align-items: center; justify-content: center; gap: 30px; padding: 20px; background: #f5f7fa; border-radius: 10px; }
+        .sorted-string { font-family: monospace; font-size: 24px; padding: 10px 20px; background: white; border-radius: 8px; border: 2px solid #667eea; }
+        .equals-sign { font-size: 30px; color: #667eea; font-weight: bold; }
+        .result-icon { font-size: 40px; }
+        .status-box { background: #f5f7fa; border-radius: 10px; padding: 15px; font-family: monospace; text-align: center; }
+        .result-box { padding: 20px; border-radius: 10px; text-align: center; font-size: 24px; font-weight: bold; }
+        .result-box.success { background: #e8f5e9; color: #2e7d32; }
+        .result-box.fail { background: #ffebee; color: #c62828; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔤 Valid Anagram</h1>
+        <p class="subtitle">O(n log n) - Sort both strings and compare</p>
+
+        <div class="controls">
+            <button id="stepBtn">Step</button>
+            <button id="autoBtn">Auto Run</button>
+            <button id="resetBtn">Reset</button>
+        </div>
+
+        <div class="panel">
+            <div class="panel-title">📝 Input Strings</div>
+            <div class="strings-row">
+                <div class="string-box">
+                    <div class="string-label">String s</div>
+                    <div class="string-chars" id="string-s"></div>
+                </div>
+                <div class="string-box">
+                    <div class="string-label">String t</div>
+                    <div class="string-chars" id="string-t"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="panel">
+            <div class="panel-title">🔄 Sorted Strings</div>
+            <div class="comparison-area">
+                <div>
+                    <div class="string-label">sorted(s)</div>
+                    <div class="sorted-string" id="sorted-s">-</div>
+                </div>
+                <div class="equals-sign" id="equals">=?</div>
+                <div>
+                    <div class="string-label">sorted(t)</div>
+                    <div class="sorted-string" id="sorted-t">-</div>
+                </div>
+                <div class="result-icon" id="result-icon">❓</div>
+            </div>
+        </div>
+
+        <div class="panel">
+            <div class="panel-title">📊 Status</div>
+            <div class="status-box" id="status">Click "Step" or "Auto Run" to check if strings are anagrams</div>
+        </div>
+
+        <div class="panel" id="result-panel" style="display:none;">
+            <div class="result-box" id="result"></div>
+        </div>
+    </div>
+
+    <script>
+        const s = "anagram";
+        const t = "nagaram";
+        let sortedS = [];
+        let sortedT = [];
+        let step = 0;
+        let autoInterval = null;
+
+        function renderStrings() {
+            document.getElementById('string-s').innerHTML = s.split('').map((c, i) => 
+                `<div class="char-box" id="s-${i}">${c}</div>`
+            ).join('');
+            
+            document.getElementById('string-t').innerHTML = t.split('').map((c, i) => 
+                `<div class="char-box" id="t-${i}">${c}</div>`
+            ).join('');
+        }
+
+        function updateSorted() {
+            document.getElementById('sorted-s').textContent = sortedS.length > 0 ? sortedS.join('') : '-';
+            document.getElementById('sorted-t').textContent = sortedT.length > 0 ? sortedT.join('') : '-';
+        }
+
+        function executeStep() {
+            switch(step) {
+                case 0:
+                    // Highlight string s
+                    s.split('').forEach((_, i) => {
+                        document.getElementById(`s-${i}`).classList.add('sorting');
+                    });
+                    document.getElementById('status').innerHTML = 'Step 1: Sorting string s...';
+                    step++;
+                    break;
+                    
+                case 1:
+                    // Sort s
+                    sortedS = s.split('').sort();
+                    s.split('').forEach((_, i) => {
+                        document.getElementById(`s-${i}`).classList.remove('sorting');
+                        document.getElementById(`s-${i}`).classList.add('sorted');
+                    });
+                    updateSorted();
+                    document.getElementById('status').innerHTML = `sorted(s) = "${sortedS.join('')}"`;
+                    step++;
+                    break;
+                    
+                case 2:
+                    // Highlight string t
+                    t.split('').forEach((_, i) => {
+                        document.getElementById(`t-${i}`).classList.add('sorting');
+                    });
+                    document.getElementById('status').innerHTML = 'Step 2: Sorting string t...';
+                    step++;
+                    break;
+                    
+                case 3:
+                    // Sort t
+                    sortedT = t.split('').sort();
+                    t.split('').forEach((_, i) => {
+                        document.getElementById(`t-${i}`).classList.remove('sorting');
+                        document.getElementById(`t-${i}`).classList.add('sorted');
+                    });
+                    updateSorted();
+                    document.getElementById('status').innerHTML = `sorted(t) = "${sortedT.join('')}"`;
+                    step++;
+                    break;
+                    
+                case 4:
+                    // Compare
+                    const isAnagram = sortedS.join('') === sortedT.join('');
+                    
+                    document.getElementById('equals').textContent = isAnagram ? '=' : '≠';
+                    document.getElementById('result-icon').textContent = isAnagram ? '✅' : '❌';
+                    
+                    document.getElementById('result-panel').style.display = 'block';
+                    const resultBox = document.getElementById('result');
+                    resultBox.className = 'result-box ' + (isAnagram ? 'success' : 'fail');
+                    resultBox.textContent = isAnagram ? 
+                        '✅ Valid Anagram! Both strings have the same characters.' :
+                        '❌ Not an Anagram! Characters do not match.';
+                    
+                    document.getElementById('status').innerHTML = 
+                        `Compare: "${sortedS.join('')}" ${isAnagram ? '==' : '!='} "${sortedT.join('')}" → ${isAnagram ? 'True' : 'False'}`;
+                    
+                    document.getElementById('stepBtn').disabled = true;
+                    document.getElementById('autoBtn').disabled = true;
+                    stopAuto();
+                    step++;
+                    break;
+            }
+        }
+
+        function reset() {
+            stopAuto();
+            sortedS = [];
+            sortedT = [];
+            step = 0;
+            
+            document.getElementById('stepBtn').disabled = false;
+            document.getElementById('autoBtn').disabled = false;
+            document.getElementById('status').innerHTML = 'Click "Step" or "Auto Run" to check if strings are anagrams';
+            document.getElementById('result-panel').style.display = 'none';
+            document.getElementById('equals').textContent = '=?';
+            document.getElementById('result-icon').textContent = '❓';
+            
+            renderStrings();
+            updateSorted();
+        }
+
+        function stopAuto() {
+            if (autoInterval) {
+                clearInterval(autoInterval);
+                autoInterval = null;
+                document.getElementById('autoBtn').textContent = 'Auto Run';
+            }
+        }
+
+        document.getElementById('stepBtn').addEventListener('click', () => {
+            stopAuto();
+            executeStep();
+        });
+
+        document.getElementById('autoBtn').addEventListener('click', () => {
+            if (autoInterval) {
+                stopAuto();
+            } else {
+                autoInterval = setInterval(executeStep, 800);
+                document.getElementById('autoBtn').textContent = '⏸ Pause';
+            }
+        });
+
+        document.getElementById('resetBtn').addEventListener('click', reset);
+
+        // Initialize
+        renderStrings();
+    </script>
+</body>
+</html>

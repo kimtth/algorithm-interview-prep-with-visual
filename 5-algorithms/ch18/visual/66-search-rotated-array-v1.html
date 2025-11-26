@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Search in Rotated Sorted Array</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; padding: 20px; }
+        .container { max-width: 1100px; margin: 0 auto; }
+        h1 { text-align: center; color: white; margin-bottom: 10px; text-shadow: 2px 2px 4px rgba(0,0,0,0.3); }
+        .subtitle { text-align: center; color: rgba(255,255,255,0.9); margin-bottom: 20px; font-size: 14px; }
+        .controls { display: flex; justify-content: center; gap: 15px; margin-bottom: 20px; flex-wrap: wrap; align-items: center; }
+        button { background: white; color: #667eea; border: none; padding: 10px 25px; border-radius: 25px; cursor: pointer; font-weight: 600; transition: all 0.3s; }
+        button:hover { transform: scale(1.05); box-shadow: 0 5px 20px rgba(0,0,0,0.2); }
+        button:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+        .target-display { background: white; padding: 8px 20px; border-radius: 20px; font-weight: bold; }
+        .panel { background: white; border-radius: 15px; padding: 20px; margin-bottom: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
+        .panel-title { font-size: 16px; font-weight: bold; color: #333; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 2px solid #667eea; }
+        .array-container { display: flex; justify-content: center; gap: 5px; margin: 20px 0; }
+        .array-item { width: 55px; height: 55px; display: flex; flex-direction: column; align-items: center; justify-content: center; border-radius: 8px; font-weight: bold; transition: all 0.3s; position: relative; }
+        .array-item .value { font-size: 18px; }
+        .array-item .index { font-size: 10px; color: #999; position: absolute; bottom: 2px; }
+        .array-item.in-range { background: #e3f2fd; border: 2px solid #2196f3; }
+        .array-item.out-range { background: #f5f5f5; border: 2px solid #ddd; color: #999; }
+        .array-item.pivot { background: #9c27b0; border: 2px solid #7b1fa2; color: white; }
+        .array-item.mid { background: #ff9800; border: 2px solid #f57c00; color: white; }
+        .array-item.found { background: #4caf50; border: 2px solid #2e7d32; color: white; }
+        .pointer { position: absolute; font-size: 10px; font-weight: bold; }
+        .pointer.left { top: -18px; color: #2196f3; }
+        .pointer.right { top: -18px; color: #9c27b0; }
+        .pointer.mid { bottom: -18px; color: #ff9800; }
+        .pointer.pivot-ptr { bottom: -18px; color: #9c27b0; }
+        .phase-indicator { display: flex; justify-content: center; gap: 20px; margin-bottom: 15px; }
+        .phase-item { padding: 8px 20px; border-radius: 20px; background: #f5f7fa; }
+        .phase-item.active { background: #667eea; color: white; }
+        .phase-item.done { background: #4caf50; color: white; }
+        .vars-box { display: flex; justify-content: center; gap: 20px; flex-wrap: wrap; margin: 15px 0; }
+        .var-item { padding: 8px 15px; background: #f5f7fa; border-radius: 15px; font-family: monospace; font-size: 13px; }
+        .var-item.highlight { background: #667eea; color: white; }
+        .status-box { background: #f5f7fa; border-radius: 10px; padding: 15px; font-family: monospace; }
+        .code-box { background: #1e1e1e; color: #d4d4d4; padding: 15px; border-radius: 10px; font-family: 'Consolas', monospace; font-size: 11px; overflow-x: auto; }
+        .code-box .highlight { background: #264f78; display: block; margin: 0 -15px; padding: 0 15px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔄 Search in Rotated Sorted Array</h1>
+        <p class="subtitle">O(log n) - Find pivot first, then binary search with offset</p>
+
+        <div class="controls">
+            <button id="stepBtn">Step</button>
+            <button id="autoBtn">Auto Run</button>
+            <button id="resetBtn">Reset</button>
+            <div class="target-display">Target: <span id="target">0</span></div>
+        </div>
+
+        <div class="phase-indicator">
+            <div class="phase-item" id="phase1">Phase 1: Find Pivot</div>
+            <div class="phase-item" id="phase2">Phase 2: Binary Search</div>
+        </div>
+
+        <div class="panel">
+            <div class="panel-title">📊 Rotated Sorted Array</div>
+            <div class="array-container" id="array"></div>
+            <div class="vars-box" id="vars"></div>
+        </div>
+
+        <div class="panel">
+            <div class="panel-title">📊 Status</div>
+            <div class="status-box" id="status">Click "Step" or "Auto Run" to search in rotated array</div>
+        </div>
+
+        <div class="panel">
+            <div class="panel-title">💻 Algorithm</div>
+            <div class="code-box" id="code">
+<span id="line1"># Phase 1: Find pivot (minimum element)</span>
+<span id="line2">left, right = 0, len(nums) - 1</span>
+<span id="line3">while left < right:</span>
+<span id="line4">    mid = left + (right - left) // 2</span>
+<span id="line5">    if nums[mid] > nums[right]:</span>
+<span id="line6">        left = mid + 1</span>
+<span id="line7">    else:</span>
+<span id="line8">        right = mid</span>
+<span id="line9">pivot = left</span>
+<span id="line10"></span>
+<span id="line11"># Phase 2: Binary search with pivot offset</span>
+<span id="line12">left, right = 0, len(nums) - 1</span>
+<span id="line13">while left <= right:</span>
+<span id="line14">    mid = left + (right - left) // 2</span>
+<span id="line15">    mid_pivot = (mid + pivot) % len(nums)</span>
+<span id="line16">    if nums[mid_pivot] < target: left = mid + 1</span>
+<span id="line17">    elif nums[mid_pivot] > target: right = mid - 1</span>
+<span id="line18">    else: return mid_pivot</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const nums = [4, 5, 6, 7, 0, 1, 2];
+        const target = 0;
+        let phase = 1; // 1: find pivot, 2: binary search
+        let left = 0, right = nums.length - 1;
+        let mid = -1;
+        let pivot = -1;
+        let midPivot = -1;
+        let found = -1;
+        let subPhase = 'loop'; // 'loop', 'calc', 'compare'
+        let autoInterval = null;
+
+        document.getElementById('target').textContent = target;
+
+        function renderArray() {
+            const container = document.getElementById('array');
+            
+            container.innerHTML = nums.map((val, i) => {
+                let cls = 'array-item';
+                let pointers = '';
+                
+                if (found === i) {
+                    cls += ' found';
+                } else if (phase === 1) {
+                    if (i >= left && i <= right) {
+                        cls += ' in-range';
+                        if (i === mid) cls = 'array-item mid';
+                    } else {
+                        cls += ' out-range';
+                    }
+                    if (pivot >= 0 && i === pivot) cls = 'array-item pivot';
+                } else {
+                    if (i === midPivot) cls = 'array-item mid';
+                    else if (i === pivot) cls += ' pivot';
+                    else cls += ' in-range';
+                }
+                
+                if (phase === 1) {
+                    if (i === left) pointers += '<span class="pointer left">L↓</span>';
+                    if (i === right) pointers += '<span class="pointer right">R↓</span>';
+                    if (i === mid && mid >= 0) pointers += '<span class="pointer mid">↑mid</span>';
+                } else {
+                    if (i === midPivot && midPivot >= 0) pointers += '<span class="pointer mid">↑mid_pivot</span>';
+                }
+                if (pivot >= 0 && i === pivot && phase === 2) {
+                    pointers += '<span class="pointer pivot-ptr" style="color:#9c27b0;">↑pivot</span>';
+                }
+                
+                return `<div class="${cls}">${pointers}<span class="value">${val}</span><span class="index">[${i}]</span></div>`;
+            }).join('');
+        }
+
+        function renderVars() {
+            const container = document.getElementById('vars');
+            let html = `<div class="var-item">left=${left}</div>
+                        <div class="var-item">right=${right}</div>`;
+            
+            if (mid >= 0) html += `<div class="var-item">mid=${mid}</div>`;
+            if (pivot >= 0) html += `<div class="var-item highlight">pivot=${pivot}</div>`;
+            if (phase === 2 && midPivot >= 0) {
+                html += `<div class="var-item">mid_pivot=${midPivot}</div>`;
+            }
+            
+            container.innerHTML = html;
+        }
+
+        function updatePhaseIndicator() {
+            document.getElementById('phase1').classList.remove('active', 'done');
+            document.getElementById('phase2').classList.remove('active', 'done');
+            
+            if (phase === 1) {
+                document.getElementById('phase1').classList.add('active');
+            } else {
+                document.getElementById('phase1').classList.add('done');
+                document.getElementById('phase2').classList.add('active');
+            }
+        }
+
+        function highlightCode(lineNum) {
+            document.querySelectorAll('.code-box span').forEach(span => {
+                span.classList.remove('highlight');
+            });
+            if (lineNum) {
+                const line = document.getElementById(`line${lineNum}`);
+                if (line) line.classList.add('highlight');
+            }
+        }
+
+        function executeStep() {
+            if (found >= 0) return;
+
+            if (phase === 1) {
+                // Find pivot
+                if (subPhase === 'loop') {
+                    highlightCode(3);
+                    if (left < right) {
+                        document.getElementById('status').innerHTML = 
+                            `Phase 1: left (${left}) < right (${right}). Continue searching for pivot.`;
+                        subPhase = 'calc';
+                    } else {
+                        pivot = left;
+                        highlightCode(9);
+                        document.getElementById('status').innerHTML = 
+                            `Phase 1 complete! Pivot found at index ${pivot}. Minimum value is ${nums[pivot]}.`;
+                        
+                        // Reset for phase 2
+                        phase = 2;
+                        left = 0;
+                        right = nums.length - 1;
+                        mid = -1;
+                        subPhase = 'loop';
+                        updatePhaseIndicator();
+                    }
+                } else if (subPhase === 'calc') {
+                    mid = left + Math.floor((right - left) / 2);
+                    highlightCode(4);
+                    document.getElementById('status').innerHTML = 
+                        `Calculate mid = ${left} + (${right} - ${left}) / 2 = ${mid}`;
+                    subPhase = 'compare';
+                } else if (subPhase === 'compare') {
+                    if (nums[mid] > nums[right]) {
+                        highlightCode(6);
+                        document.getElementById('status').innerHTML = 
+                            `nums[${mid}]=${nums[mid]} > nums[${right}]=${nums[right]}. Pivot is in right half. left = ${mid + 1}`;
+                        left = mid + 1;
+                    } else {
+                        highlightCode(8);
+                        document.getElementById('status').innerHTML = 
+                            `nums[${mid}]=${nums[mid]} <= nums[${right}]=${nums[right]}. Pivot is in left half. right = ${mid}`;
+                        right = mid;
+                    }
+                    subPhase = 'loop';
+                }
+            } else {
+                // Binary search with pivot
+                if (subPhase === 'loop') {
+                    highlightCode(13);
+                    if (left <= right) {
+                        document.getElementById('status').innerHTML = 
+                            `Phase 2: left (${left}) <= right (${right}). Continue binary search.`;
+                        subPhase = 'calc';
+                    } else {
+                        highlightCode(17);
+                        document.getElementById('status').innerHTML = 
+                            `❌ Target ${target} not found. Return -1`;
+                        document.getElementById('stepBtn').disabled = true;
+                        document.getElementById('autoBtn').disabled = true;
+                        stopAuto();
+                    }
+                } else if (subPhase === 'calc') {
+                    mid = left + Math.floor((right - left) / 2);
+                    midPivot = (mid + pivot) % nums.length;
+                    highlightCode(15);
+                    document.getElementById('status').innerHTML = 
+                        `mid=${mid}, mid_pivot = (${mid} + ${pivot}) % ${nums.length} = ${midPivot}. nums[${midPivot}] = ${nums[midPivot]}`;
+                    subPhase = 'compare';
+                } else if (subPhase === 'compare') {
+                    if (nums[midPivot] < target) {
+                        highlightCode(16);
+                        document.getElementById('status').innerHTML = 
+                            `nums[${midPivot}]=${nums[midPivot]} < ${target}. Search right: left = ${mid + 1}`;
+                        left = mid + 1;
+                        subPhase = 'loop';
+                    } else if (nums[midPivot] > target) {
+                        highlightCode(17);
+                        document.getElementById('status').innerHTML = 
+                            `nums[${midPivot}]=${nums[midPivot]} > ${target}. Search left: right = ${mid - 1}`;
+                        right = mid - 1;
+                        subPhase = 'loop';
+                    } else {
+                        highlightCode(18);
+                        found = midPivot;
+                        document.getElementById('status').innerHTML = 
+                            `✅ Found! nums[${midPivot}] = ${target}. Return ${midPivot}`;
+                        document.getElementById('stepBtn').disabled = true;
+                        document.getElementById('autoBtn').disabled = true;
+                        stopAuto();
+                    }
+                }
+            }
+
+            renderArray();
+            renderVars();
+        }
+
+        function reset() {
+            stopAuto();
+            phase = 1;
+            left = 0;
+            right = nums.length - 1;
+            mid = -1;
+            pivot = -1;
+            midPivot = -1;
+            found = -1;
+            subPhase = 'loop';
+            
+            document.getElementById('stepBtn').disabled = false;
+            document.getElementById('autoBtn').disabled = false;
+            document.getElementById('status').innerHTML = 'Click "Step" or "Auto Run" to search in rotated array';
+            highlightCode(null);
+            updatePhaseIndicator();
+            renderArray();
+            renderVars();
+        }
+
+        function stopAuto() {
+            if (autoInterval) {
+                clearInterval(autoInterval);
+                autoInterval = null;
+                document.getElementById('autoBtn').textContent = 'Auto Run';
+            }
+        }
+
+        document.getElementById('stepBtn').addEventListener('click', () => {
+            stopAuto();
+            executeStep();
+        });
+
+        document.getElementById('autoBtn').addEventListener('click', () => {
+            if (autoInterval) {
+                stopAuto();
+            } else {
+                autoInterval = setInterval(executeStep, 700);
+                document.getElementById('autoBtn').textContent = '⏸ Pause';
+            }
+        });
+
+        document.getElementById('resetBtn').addEventListener('click', reset);
+
+        // Initialize
+        updatePhaseIndicator();
+        renderArray();
+        renderVars();
+    </script>
+</body>
+</html>

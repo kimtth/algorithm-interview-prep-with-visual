@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Q45: Invert Binary Tree (v3 - DFS Preorder)</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f5f7fa; min-height: 100vh; padding: 20px; }
+        .container { max-width: 1200px; margin: 0 auto; }
+        
+        .problem-info { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 16px; padding: 25px 30px; margin-bottom: 25px; color: white; }
+        .problem-info h1 { font-size: 1.8em; margin-bottom: 10px; }
+        .problem-info p { font-size: 1.1em; opacity: 0.95; line-height: 1.6; }
+        .problem-meta { display: flex; gap: 20px; margin-top: 15px; flex-wrap: wrap; }
+        .meta-tag { background: rgba(255,255,255,0.2); padding: 6px 14px; border-radius: 20px; font-size: 0.9em; }
+        
+        .code-section { background: white; border-radius: 16px; padding: 25px; margin-bottom: 25px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
+        .code-section h3 { color: #333; margin-bottom: 15px; }
+        .code-block { background: #1e1e1e; border-radius: 12px; padding: 20px; overflow-x: auto; }
+        .code-block pre { margin: 0; font-family: 'Consolas', monospace; font-size: 12px; line-height: 1.5; color: #d4d4d4; }
+        .code-block .keyword { color: #569cd6; }
+        .code-block .function { color: #dcdcaa; }
+        .code-block .comment { color: #6a9955; }
+        
+        .visualization-section { background: white; border-radius: 16px; padding: 25px; margin-bottom: 25px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
+        .visualization-section h3 { color: #333; margin-bottom: 20px; }
+        
+        .controls { display: flex; gap: 12px; margin-bottom: 25px; flex-wrap: wrap; }
+        .btn { padding: 12px 28px; font-size: 1em; border: none; border-radius: 10px; cursor: pointer; font-weight: 500; }
+        .btn-primary { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; }
+        .btn-success { background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); color: white; }
+        .btn-warning { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white; }
+        .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        
+        .status-message { background: #e8f4fd; border-left: 4px solid #2196f3; padding: 15px 20px; border-radius: 0 10px 10px 0; margin-bottom: 20px; color: #1565c0; }
+        
+        .split-view { display: flex; gap: 30px; flex-wrap: wrap; }
+        .tree-section { flex: 2; min-width: 350px; }
+        .stack-section { flex: 1; min-width: 180px; }
+        
+        .tree-container { display: flex; justify-content: center; }
+        svg { background: #fafafa; border-radius: 12px; border: 1px solid #e0e0e0; }
+        
+        .stack-container { background: #f3e5f5; border-radius: 12px; padding: 20px; }
+        .stack-title { font-size: 0.9em; font-weight: 600; color: #7b1fa2; margin-bottom: 15px; }
+        .stack-items { display: flex; flex-direction: column-reverse; gap: 8px; min-height: 200px; }
+        .stack-item { padding: 10px 14px; background: white; border-radius: 8px; border: 2px solid #ce93d8; font-weight: 500; text-align: center; }
+        .stack-item.current { background: #ff9800; color: white; border-color: #e65100; }
+        .stack-empty { color: #999; text-align: center; padding: 20px; }
+        
+        .legend { display: flex; gap: 20px; margin-bottom: 15px; flex-wrap: wrap; justify-content: center; }
+        .legend-item { display: flex; align-items: center; gap: 8px; font-size: 0.9em; }
+        .legend-circle { width: 18px; height: 18px; border-radius: 50%; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="problem-info">
+            <h1>Q45: Invert Binary Tree (v3 - DFS Preorder)</h1>
+            <p>Iterative DFS with stack. Swap children top-down (preorder): process node first, then push children. Uses LIFO order.</p>
+            <div class="problem-meta">
+                <span class="meta-tag">📁 Binary Tree</span>
+                <span class="meta-tag">⏱️ O(n)</span>
+                <span class="meta-tag">💡 Iterative DFS</span>
+            </div>
+        </div>
+        
+        <div class="code-section">
+            <h3>💻 Python Solution</h3>
+            <div class="code-block">
+                <pre><span class="keyword">def</span> <span class="function">invertTree</span>(root: TreeNode) -> TreeNode:
+    stack = collections.deque([root])
+
+    <span class="keyword">while</span> stack:
+        node = stack.pop()
+        <span class="comment"># 부모 노드 부터 하향식 스왑</span>
+        <span class="keyword">if</span> node:
+            node.left, node.right = node.right, node.left
+
+            stack.append(node.left)
+            stack.append(node.right)
+
+    <span class="keyword">return</span> root</pre>
+            </div>
+        </div>
+        
+        <div class="visualization-section">
+            <h3>🎬 Visualization</h3>
+            
+            <div class="controls">
+                <button class="btn btn-primary" id="stepBtn" onclick="step()">Step</button>
+                <button class="btn btn-success" id="autoBtn" onclick="toggleAuto()">Auto Run</button>
+                <button class="btn btn-warning" onclick="reset()">Reset</button>
+            </div>
+            
+            <div class="legend">
+                <div class="legend-item"><div class="legend-circle" style="background: #3498db;"></div> Unprocessed</div>
+                <div class="legend-item"><div class="legend-circle" style="background: #ff9800;"></div> Current</div>
+                <div class="legend-item"><div class="legend-circle" style="background: #4caf50;"></div> Swapped</div>
+            </div>
+            
+            <div class="status-message" id="statusMessage">
+                Tree: [4, 2, 7, 1, 3, 6, 9]. DFS preorder inversion with stack.
+            </div>
+            
+            <div class="split-view">
+                <div class="tree-section">
+                    <div class="tree-container">
+                        <svg id="tree" width="400" height="250"></svg>
+                    </div>
+                </div>
+                
+                <div class="stack-section">
+                    <div class="stack-container">
+                        <div class="stack-title">📚 Stack (LIFO)</div>
+                        <div class="stack-items" id="stackItems">
+                            <div class="stack-empty">Empty</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Initial tree:
+        //       4
+        //      / \
+        //     2   7
+        //    / \ / \
+        //   1  3 6  9
+        
+        // After inversion:
+        //       4
+        //      / \
+        //     7   2
+        //    / \ / \
+        //   9  6 3  1
+        
+        const initialPositions = {
+            4: { x: 200, y: 40, left: 2, right: 7 },
+            2: { x: 100, y: 120, left: 1, right: 3 },
+            7: { x: 300, y: 120, left: 6, right: 9 },
+            1: { x: 50, y: 200, left: null, right: null },
+            3: { x: 150, y: 200, left: null, right: null },
+            6: { x: 250, y: 200, left: null, right: null },
+            9: { x: 350, y: 200, left: null, right: null }
+        };
+        
+        let tree = {};
+        let stack = [];
+        let swapped = new Set();
+        let currentNode = null;
+        let stepIndex = 0;
+        let autoInterval = null;
+        
+        function deepCopy(obj) {
+            return JSON.parse(JSON.stringify(obj));
+        }
+        
+        function init() {
+            tree = deepCopy(initialPositions);
+            stack = [4];
+            swapped = new Set();
+            currentNode = null;
+            stepIndex = 0;
+            
+            renderTree();
+            renderStack();
+        }
+        
+        function renderTree() {
+            const svg = d3.select("#tree");
+            svg.selectAll("*").remove();
+            
+            // Draw edges
+            Object.entries(tree).forEach(([nodeId, node]) => {
+                const id = parseInt(nodeId);
+                if (node.left !== null) {
+                    const child = tree[node.left];
+                    svg.append("line")
+                        .attr("x1", node.x).attr("y1", node.y)
+                        .attr("x2", child.x).attr("y2", child.y)
+                        .attr("stroke", "#999")
+                        .attr("stroke-width", 2);
+                }
+                if (node.right !== null) {
+                    const child = tree[node.right];
+                    svg.append("line")
+                        .attr("x1", node.x).attr("y1", node.y)
+                        .attr("x2", child.x).attr("y2", child.y)
+                        .attr("stroke", "#999")
+                        .attr("stroke-width", 2);
+                }
+            });
+            
+            // Draw nodes
+            Object.entries(tree).forEach(([nodeId, node]) => {
+                const id = parseInt(nodeId);
+                let fill = "#3498db";
+                if (swapped.has(id)) fill = "#4caf50";
+                if (id === currentNode) fill = "#ff9800";
+                
+                svg.append("circle")
+                    .attr("cx", node.x)
+                    .attr("cy", node.y)
+                    .attr("r", 25)
+                    .attr("fill", fill)
+                    .attr("stroke", "#333")
+                    .attr("stroke-width", 2);
+                
+                svg.append("text")
+                    .attr("x", node.x)
+                    .attr("y", node.y + 5)
+                    .attr("text-anchor", "middle")
+                    .attr("fill", "white")
+                    .attr("font-weight", "bold")
+                    .attr("font-size", "14px")
+                    .text(id);
+            });
+        }
+        
+        function renderStack() {
+            const container = document.getElementById('stackItems');
+            if (stack.length === 0) {
+                container.innerHTML = '<div class="stack-empty">Empty</div>';
+            } else {
+                container.innerHTML = stack.map((id, i) => {
+                    return `<div class="stack-item">${id}</div>`;
+                }).join('');
+            }
+        }
+        
+        function step() {
+            if (stack.length === 0) {
+                document.getElementById('statusMessage').textContent = '✅ Complete! Tree inverted using DFS preorder.';
+                document.getElementById('stepBtn').disabled = true;
+                stopAuto();
+                currentNode = null;
+                renderTree();
+                return;
+            }
+            
+            const nodeId = stack.pop();
+            currentNode = nodeId;
+            const node = tree[nodeId];
+            
+            // Swap children
+            const tempLeft = node.left;
+            const tempRight = node.right;
+            node.left = tempRight;
+            node.right = tempLeft;
+            
+            // Also swap positions for visualization
+            if (tempLeft !== null && tempRight !== null) {
+                const leftChild = tree[tempLeft];
+                const rightChild = tree[tempRight];
+                const tempX = leftChild.x;
+                leftChild.x = rightChild.x;
+                rightChild.x = tempX;
+            }
+            
+            swapped.add(nodeId);
+            
+            let msg = `Pop ${nodeId}. Swap children: ${tempLeft || 'null'} ↔ ${tempRight || 'null'}. `;
+            
+            // Push children (after swap)
+            const toAdd = [];
+            if (node.left !== null) {
+                stack.push(node.left);
+                toAdd.push(node.left);
+            }
+            if (node.right !== null) {
+                stack.push(node.right);
+                toAdd.push(node.right);
+            }
+            
+            if (toAdd.length > 0) {
+                msg += `Push [${toAdd.join(', ')}].`;
+            }
+            
+            document.getElementById('statusMessage').textContent = msg;
+            
+            renderTree();
+            renderStack();
+            
+            if (stack.length === 0) {
+                setTimeout(() => {
+                    document.getElementById('statusMessage').textContent = '✅ Complete! Tree inverted using DFS preorder.';
+                    document.getElementById('stepBtn').disabled = true;
+                    stopAuto();
+                    currentNode = null;
+                    renderTree();
+                }, 300);
+            }
+        }
+        
+        function toggleAuto() {
+            if (autoInterval) { stopAuto(); }
+            else {
+                document.getElementById('autoBtn').textContent = 'Pause';
+                autoInterval = setInterval(step, 900);
+            }
+        }
+        
+        function stopAuto() {
+            if (autoInterval) { clearInterval(autoInterval); autoInterval = null; }
+            document.getElementById('autoBtn').textContent = 'Auto Run';
+        }
+        
+        function reset() {
+            stopAuto();
+            document.getElementById('stepBtn').disabled = false;
+            document.getElementById('statusMessage').textContent = 
+                'Tree: [4, 2, 7, 1, 3, 6, 9]. DFS preorder inversion with stack.';
+            init();
+        }
+        
+        init();
+    </script>
+</body>
+</html>

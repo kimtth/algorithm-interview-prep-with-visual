@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Q28: Design HashMap</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f5f7fa; min-height: 100vh; padding: 20px; }
+        .container { max-width: 1200px; margin: 0 auto; }
+        
+        .problem-info { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 16px; padding: 25px 30px; margin-bottom: 25px; color: white; }
+        .problem-info h1 { font-size: 1.8em; margin-bottom: 10px; }
+        .problem-info p { font-size: 1.1em; opacity: 0.95; line-height: 1.6; }
+        .problem-meta { display: flex; gap: 20px; margin-top: 15px; flex-wrap: wrap; }
+        .meta-tag { background: rgba(255,255,255,0.2); padding: 6px 14px; border-radius: 20px; font-size: 0.9em; }
+        
+        .code-section { background: white; border-radius: 16px; padding: 25px; margin-bottom: 25px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
+        .code-section h3 { color: #333; margin-bottom: 15px; }
+        .code-block { background: #1e1e1e; border-radius: 12px; padding: 20px; overflow-x: auto; }
+        .code-block pre { margin: 0; font-family: 'Consolas', monospace; font-size: 12px; line-height: 1.4; color: #d4d4d4; }
+        .code-block .keyword { color: #569cd6; }
+        .code-block .function { color: #dcdcaa; }
+        .code-block .comment { color: #6a9955; }
+        
+        .visualization-section { background: white; border-radius: 16px; padding: 25px; margin-bottom: 25px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
+        .visualization-section h3 { color: #333; margin-bottom: 20px; }
+        
+        .controls { display: flex; gap: 12px; margin-bottom: 25px; flex-wrap: wrap; }
+        .btn { padding: 12px 28px; font-size: 1em; border: none; border-radius: 10px; cursor: pointer; font-weight: 500; }
+        .btn-primary { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; }
+        .btn-success { background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); color: white; }
+        .btn-warning { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white; }
+        .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        
+        .status-message { background: #e8f4fd; border-left: 4px solid #2196f3; padding: 15px 20px; border-radius: 0 10px 10px 0; margin-bottom: 20px; color: #1565c0; }
+        
+        .hash-table { display: flex; flex-direction: column; gap: 8px; }
+        .bucket-row { display: flex; align-items: center; gap: 10px; padding: 8px; background: #f9f9f9; border-radius: 8px; }
+        .bucket-index { min-width: 40px; font-weight: 600; color: #667eea; }
+        .bucket-content { display: flex; gap: 5px; align-items: center; flex-wrap: wrap; }
+        .hash-node { padding: 8px 12px; background: #e3f2fd; border: 2px solid #2196f3; border-radius: 6px; font-size: 0.9em; }
+        .hash-node.new { background: #e8f5e9; border-color: #4caf50; animation: nodeIn 0.4s ease; }
+        .hash-node.highlight { background: #fff3e0; border-color: #ff9800; }
+        .bucket-arrow { color: #667eea; }
+        
+        @keyframes nodeIn { from { transform: scale(0); } to { transform: scale(1); } }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="problem-info">
+            <h1>Q28: Design HashMap</h1>
+            <p>Design a HashMap without using built-in hash table libraries. Handle collisions with chaining.</p>
+            <div class="problem-meta">
+                <span class="meta-tag">📁 Hash Table</span>
+                <span class="meta-tag">⏱️ O(1) average</span>
+                <span class="meta-tag">💡 Separate Chaining</span>
+            </div>
+        </div>
+        
+        <div class="code-section">
+            <h3>💻 Python Solution - Separate Chaining</h3>
+            <div class="code-block">
+                <pre><span class="keyword">class</span> <span class="function">MyHashMap</span>:
+    <span class="keyword">def</span> <span class="function">__init__</span>(self):
+        self.size = 1000
+        self.table = defaultdict(ListNode)
+
+    <span class="keyword">def</span> <span class="function">put</span>(self, key: int, value: int):
+        index = key % self.size  <span class="comment"># Hash function</span>
+        <span class="comment"># Handle collision with linked list</span>
+        ...
+
+    <span class="keyword">def</span> <span class="function">get</span>(self, key: int) -> int:
+        index = key % self.size
+        <span class="comment"># Search in linked list at index</span>
+        ...</pre>
+            </div>
+        </div>
+        
+        <div class="visualization-section">
+            <h3>🎬 Visualization (size = 5)</h3>
+            
+            <div class="controls">
+                <button class="btn btn-primary" id="stepBtn" onclick="step()">Step</button>
+                <button class="btn btn-success" id="autoBtn" onclick="toggleAuto()">Auto Run</button>
+                <button class="btn btn-warning" onclick="reset()">Reset</button>
+            </div>
+            
+            <div class="status-message" id="statusMessage">
+                Operations: put(1,1), put(6,6), put(2,2), get(1), remove(6)
+            </div>
+            
+            <div class="hash-table" id="hashTable"></div>
+        </div>
+    </div>
+
+    <script>
+        const SIZE = 5;
+        let table = {};
+        let stepIndex = 0;
+        let autoInterval = null;
+        let newNode = null;
+        
+        const operations = [
+            { op: 'put', key: 1, val: 1, msg: 'put(1,1): hash(1)=1%5=1, insert at bucket 1' },
+            { op: 'put', key: 6, val: 6, msg: 'put(6,6): hash(6)=6%5=1, collision! Chain at bucket 1' },
+            { op: 'put', key: 2, val: 2, msg: 'put(2,2): hash(2)=2%5=2, insert at bucket 2' },
+            { op: 'get', key: 1, msg: 'get(1): hash(1)=1, search bucket 1, found value 1' },
+            { op: 'remove', key: 6, msg: 'remove(6): hash(6)=1, remove from bucket 1 chain' },
+            { op: 'done', msg: '✅ Done! HashMap operations demonstrated.' }
+        ];
+        
+        function init() {
+            table = {};
+            for (let i = 0; i < SIZE; i++) table[i] = [];
+            stepIndex = 0;
+            newNode = null;
+            renderTable();
+        }
+        
+        function renderTable() {
+            const container = document.getElementById('hashTable');
+            container.innerHTML = '';
+            
+            for (let i = 0; i < SIZE; i++) {
+                const row = document.createElement('div');
+                row.className = 'bucket-row';
+                row.innerHTML = `<span class="bucket-index">[${i}]</span>`;
+                
+                const content = document.createElement('div');
+                content.className = 'bucket-content';
+                
+                if (table[i].length === 0) {
+                    content.innerHTML = '<span style="color:#999;">empty</span>';
+                } else {
+                    table[i].forEach((item, j) => {
+                        if (j > 0) {
+                            const arrow = document.createElement('span');
+                            arrow.className = 'bucket-arrow';
+                            arrow.textContent = '→';
+                            content.appendChild(arrow);
+                        }
+                        const node = document.createElement('div');
+                        node.className = 'hash-node';
+                        if (newNode && newNode.bucket === i && newNode.key === item.key) {
+                            node.classList.add('new');
+                        }
+                        node.textContent = `(${item.key}:${item.val})`;
+                        content.appendChild(node);
+                    });
+                }
+                
+                row.appendChild(content);
+                container.appendChild(row);
+            }
+        }
+        
+        function step() {
+            if (stepIndex >= operations.length) return;
+            
+            const op = operations[stepIndex];
+            document.getElementById('statusMessage').textContent = op.msg;
+            newNode = null;
+            
+            if (op.op === 'put') {
+                const bucket = op.key % SIZE;
+                const existing = table[bucket].findIndex(n => n.key === op.key);
+                if (existing >= 0) {
+                    table[bucket][existing].val = op.val;
+                } else {
+                    table[bucket].push({ key: op.key, val: op.val });
+                    newNode = { bucket, key: op.key };
+                }
+            } else if (op.op === 'remove') {
+                const bucket = op.key % SIZE;
+                table[bucket] = table[bucket].filter(n => n.key !== op.key);
+            } else if (op.op === 'done') {
+                document.getElementById('stepBtn').disabled = true;
+                stopAuto();
+            }
+            
+            renderTable();
+            stepIndex++;
+        }
+        
+        function toggleAuto() {
+            if (autoInterval) { stopAuto(); }
+            else {
+                document.getElementById('autoBtn').textContent = 'Pause';
+                autoInterval = setInterval(() => {
+                    if (stepIndex >= operations.length) stopAuto();
+                    else step();
+                }, 1000);
+            }
+        }
+        
+        function stopAuto() {
+            if (autoInterval) { clearInterval(autoInterval); autoInterval = null; }
+            document.getElementById('autoBtn').textContent = 'Auto Run';
+        }
+        
+        function reset() {
+            stopAuto();
+            document.getElementById('stepBtn').disabled = false;
+            document.getElementById('statusMessage').textContent = 'Operations: put(1,1), put(6,6), put(2,2), get(1), remove(6)';
+            init();
+        }
+        
+        init();
+    </script>
+</body>
+</html>

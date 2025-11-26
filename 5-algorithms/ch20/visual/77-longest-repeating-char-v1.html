@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Longest Repeating Character Replacement</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; padding: 20px; }
+        .container { max-width: 900px; margin: 0 auto; }
+        h1 { text-align: center; color: white; margin-bottom: 10px; }
+        .subtitle { text-align: center; color: rgba(255,255,255,0.9); margin-bottom: 20px; font-size: 14px; }
+        .controls { display: flex; justify-content: center; gap: 15px; margin-bottom: 20px; flex-wrap: wrap; }
+        button { background: white; color: #667eea; border: none; padding: 10px 25px; border-radius: 25px; cursor: pointer; font-weight: 600; }
+        button:disabled { opacity: 0.5; cursor: not-allowed; }
+        .info-box { background: white; padding: 8px 15px; border-radius: 20px; font-weight: bold; }
+        .panel { background: white; border-radius: 15px; padding: 20px; margin-bottom: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
+        .panel-title { font-size: 16px; font-weight: bold; color: #333; margin-bottom: 15px; border-bottom: 2px solid #667eea; padding-bottom: 10px; }
+        .string-container { display: flex; justify-content: center; gap: 4px; margin: 15px 0; }
+        .char { width: 40px; height: 50px; display: flex; flex-direction: column; align-items: center; justify-content: center; border-radius: 6px; font-weight: bold; position: relative; transition: all 0.3s; }
+        .char .letter { font-size: 20px; }
+        .char .idx { font-size: 9px; position: absolute; bottom: 2px; color: #999; }
+        .default { background: #f5f7fa; border: 2px solid #ddd; }
+        .in-window { background: #e3f2fd; border: 2px solid #2196f3; }
+        .most-freq { background: #4caf50; color: white; border: 2px solid #2e7d32; }
+        .to-replace { background: #ff9800; color: white; border: 2px solid #f57c00; }
+        .info-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; text-align: center; }
+        .info-item { background: #f5f7fa; padding: 15px; border-radius: 10px; }
+        .info-label { font-size: 12px; color: #666; margin-bottom: 5px; }
+        .info-value { font-size: 24px; font-weight: bold; color: #667eea; }
+        .result-box { text-align: center; padding: 20px; background: linear-gradient(135deg, #667eea, #764ba2); border-radius: 10px; color: white; }
+        .result-value { font-size: 48px; font-weight: bold; }
+        .status-box { background: #f5f7fa; border-radius: 10px; padding: 15px; font-family: monospace; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔄 Longest Repeating Character Replacement</h1>
+        <p class="subtitle">Sliding Window - Replace at most k characters</p>
+
+        <div class="controls">
+            <button id="stepBtn">Step</button>
+            <button id="autoBtn">Auto Run</button>
+            <button id="resetBtn">Reset</button>
+            <div class="info-box">k = 2 (max replacements)</div>
+        </div>
+
+        <div class="panel">
+            <div class="panel-title">📝 String</div>
+            <div class="string-container" id="str"></div>
+        </div>
+
+        <div class="panel">
+            <div class="panel-title">📊 Window Statistics</div>
+            <div class="info-grid">
+                <div class="info-item">
+                    <div class="info-label">Window Size</div>
+                    <div class="info-value" id="win-size">0</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Max Freq Char</div>
+                    <div class="info-value" id="max-char">-</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Max Frequency</div>
+                    <div class="info-value" id="max-freq">0</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Need to Replace</div>
+                    <div class="info-value" id="to-replace">0</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="panel">
+            <div class="panel-title">🏆 Longest Valid Window</div>
+            <div class="result-box">
+                <div class="result-value" id="result">0</div>
+            </div>
+        </div>
+
+        <div class="panel">
+            <div class="panel-title">📋 Status</div>
+            <div class="status-box" id="status">window_size - max_freq ≤ k means we can make window valid with ≤k replacements</div>
+        </div>
+    </div>
+
+    <script>
+        const s = "AABABBA";
+        const k = 1;
+        let left = 0, right = 0;
+        let counts = {};
+        let maxFreq = 0;
+        let maxLen = 0;
+        let done = false;
+        let autoInterval = null;
+
+        function getMaxFreqChar() {
+            let maxC = '-', maxF = 0;
+            for (const c in counts) {
+                if (counts[c] > maxF) { maxF = counts[c]; maxC = c; }
+            }
+            return { char: maxC, freq: maxF };
+        }
+
+        function render() {
+            const { char: maxChar, freq } = getMaxFreqChar();
+            
+            document.getElementById('str').innerHTML = s.split('').map((c, i) => {
+                let cls = 'char default';
+                if (i >= left && i < right) {
+                    if (c === maxChar) cls = 'char most-freq';
+                    else cls = 'char to-replace';
+                }
+                return `<div class="${cls}"><span class="letter">${c}</span><span class="idx">${i}</span></div>`;
+            }).join('');
+
+            const winSize = right - left;
+            document.getElementById('win-size').textContent = winSize;
+            document.getElementById('max-char').textContent = maxChar;
+            document.getElementById('max-freq').textContent = freq;
+            document.getElementById('to-replace').textContent = winSize - freq;
+            document.getElementById('result').textContent = maxLen;
+        }
+
+        function step() {
+            if (done) return;
+
+            if (right >= s.length) {
+                done = true;
+                document.getElementById('status').innerHTML = 
+                    `✅ Done! Longest substring with at most ${k} replacements: ${maxLen}`;
+                document.getElementById('stepBtn').disabled = true;
+                document.getElementById('autoBtn').disabled = true;
+                stopAuto();
+                render();
+                return;
+            }
+
+            // Expand window
+            const c = s[right];
+            counts[c] = (counts[c] || 0) + 1;
+            maxFreq = Math.max(maxFreq, counts[c]);
+            right++;
+
+            // Shrink if invalid
+            const windowSize = right - left;
+            const toReplace = windowSize - maxFreq;
+
+            if (toReplace > k) {
+                counts[s[left]]--;
+                left++;
+                document.getElementById('status').innerHTML = 
+                    `Window invalid (need ${toReplace} > ${k} replacements). Shrink left.`;
+            } else {
+                maxLen = Math.max(maxLen, right - left);
+                document.getElementById('status').innerHTML = 
+                    `Added '${c}'. Window size ${right-left}, max freq ${maxFreq}, need ${toReplace} ≤ ${k}. Valid! Max = ${maxLen}`;
+            }
+
+            render();
+        }
+
+        function reset() {
+            stopAuto();
+            left = 0; right = 0;
+            counts = {};
+            maxFreq = 0;
+            maxLen = 0;
+            done = false;
+            document.getElementById('stepBtn').disabled = false;
+            document.getElementById('autoBtn').disabled = false;
+            document.getElementById('status').innerHTML = 'window_size - max_freq ≤ k means we can make window valid with ≤k replacements';
+            render();
+        }
+
+        function stopAuto() {
+            if (autoInterval) { clearInterval(autoInterval); autoInterval = null; }
+            document.getElementById('autoBtn').textContent = 'Auto Run';
+        }
+
+        document.getElementById('stepBtn').onclick = () => { stopAuto(); step(); };
+        document.getElementById('autoBtn').onclick = () => {
+            if (autoInterval) { stopAuto(); }
+            else { autoInterval = setInterval(step, 700); document.getElementById('autoBtn').textContent = '⏸ Pause'; }
+        };
+        document.getElementById('resetBtn').onclick = reset;
+
+        render();
+    </script>
+</body>
+</html>

@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Q83: Majority Element - Sorted Middle</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; padding: 20px; }
+        .container { max-width: 900px; margin: 0 auto; background: white; border-radius: 20px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); overflow: hidden; }
+        .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 30px; color: white; }
+        .header h1 { font-size: 1.8em; margin-bottom: 10px; }
+        .header p { opacity: 0.9; font-size: 0.95em; }
+        .problem-info { background: #f8f9fa; padding: 20px; border-bottom: 1px solid #eee; }
+        .problem-info h3 { color: #333; margin-bottom: 10px; }
+        .problem-info p { color: #666; line-height: 1.6; }
+        .code-section { background: #1e1e1e; padding: 20px; margin: 20px; border-radius: 10px; }
+        .code-section h3 { color: #9cdcfe; margin-bottom: 15px; font-size: 0.9em; }
+        .code-section pre { color: #d4d4d4; font-family: 'Consolas', monospace; font-size: 0.9em; line-height: 1.5; }
+        .keyword { color: #569cd6; }
+        .function { color: #dcdcaa; }
+        .number { color: #b5cea8; }
+        .controls { padding: 20px; display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; background: #f8f9fa; }
+        .btn { padding: 12px 24px; font-size: 1em; cursor: pointer; border: none; border-radius: 8px; transition: all 0.3s; }
+        .btn-primary { background: linear-gradient(135deg, #667eea, #764ba2); color: white; }
+        .btn-success { background: linear-gradient(135deg, #11998e, #38ef7d); color: white; }
+        .btn-warning { background: linear-gradient(135deg, #f093fb, #f5576c); color: white; }
+        .visualization { padding: 30px; }
+        .status { padding: 15px 20px; background: #e8f5e9; text-align: center; font-weight: 500; color: #2e7d32; }
+        .step-info { background: #fff3e0; padding: 15px 20px; text-align: center; color: #ef6c00; font-weight: 500; }
+        .array-section { margin: 20px 0; }
+        .array-section h4 { text-align: center; margin-bottom: 15px; color: #333; }
+        .array-display { display: flex; justify-content: center; gap: 8px; flex-wrap: wrap; }
+        .array-item { width: 55px; height: 55px; display: flex; align-items: center; justify-content: center; border-radius: 10px; font-weight: bold; font-size: 1.4em; transition: all 0.5s; }
+        .array-item.unsorted { background: #e0e0e0; color: #666; }
+        .array-item.sorted { background: #e3f2fd; color: #1976d2; }
+        .array-item.middle { background: #4caf50; color: white; transform: scale(1.15); box-shadow: 0 4px 15px rgba(76,175,80,0.4); }
+        .arrow { text-align: center; font-size: 2em; margin: 20px 0; color: #667eea; }
+        .result-display { text-align: center; margin: 20px 0; padding: 25px; background: #f5f5f5; border-radius: 10px; font-size: 1.5em; }
+        .insight { background: #e8f5e9; padding: 15px; border-radius: 10px; margin: 20px 0; text-align: center; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🗳️ Q83: Majority Element - Sorted Middle</h1>
+            <p>LeetCode #169 | File: 83-4.py | Approach: Sort and Return Middle</p>
+        </div>
+        
+        <div class="problem-info">
+            <h3>📋 Problem Description</h3>
+            <p>Find the majority element (appears more than n/2 times).</p>
+            <p style="margin-top: 10px;"><strong>Key Insight:</strong> If an element appears more than n/2 times, 
+            after sorting it MUST occupy the middle position. Simple one-liner!</p>
+        </div>
+
+        <div class="code-section">
+            <h3>📄 Python Solution (83-4.py) - One Liner!</h3>
+            <pre><span class="keyword">from</span> typing <span class="keyword">import</span> List
+
+<span class="keyword">class</span> <span class="function">Solution</span>:
+    <span class="keyword">def</span> <span class="function">majorityElement</span>(self, nums: List[<span class="keyword">int</span>]) -> <span class="keyword">int</span>:
+        <span class="keyword">return</span> <span class="function">sorted</span>(nums)[<span class="function">len</span>(nums) // <span class="number">2</span>]</pre>
+        </div>
+
+        <div class="controls">
+            <button class="btn btn-primary" onclick="step()">Step</button>
+            <button class="btn btn-success" onclick="toggleAutoRun()">Auto Run</button>
+            <button class="btn btn-warning" onclick="reset()">Reset</button>
+        </div>
+
+        <div class="step-info" id="stepInfo">Click "Step" to see the elegant solution</div>
+        
+        <div class="visualization">
+            <div class="array-section">
+                <h4>Original Array</h4>
+                <div class="array-display" id="originalArray"></div>
+            </div>
+            
+            <div class="arrow" id="arrow" style="opacity: 0;">↓ sorted() ↓</div>
+            
+            <div class="array-section">
+                <h4>Sorted Array</h4>
+                <div class="array-display" id="sortedArray"></div>
+            </div>
+            
+            <div class="insight" id="insight" style="opacity: 0;">
+                The majority element (>n/2 occurrences) must occupy index n//2 after sorting!
+            </div>
+            
+            <div class="result-display" id="result"></div>
+        </div>
+
+        <div class="status" id="status">Ready to find majority element</div>
+    </div>
+
+    <script>
+        const nums = [2, 2, 1, 1, 1, 2, 2];
+        const sorted = [...nums].sort((a, b) => a - b);
+        const middleIdx = Math.floor(nums.length / 2);
+        
+        let currentStep = 0;
+        let autoRunning = false;
+        let autoRunInterval;
+
+        function renderOriginal() {
+            const container = document.getElementById('originalArray');
+            container.innerHTML = '';
+            nums.forEach(num => {
+                const item = document.createElement('div');
+                item.className = 'array-item unsorted';
+                item.textContent = num;
+                container.appendChild(item);
+            });
+        }
+
+        function renderSorted(highlight = false) {
+            const container = document.getElementById('sortedArray');
+            container.innerHTML = '';
+            sorted.forEach((num, i) => {
+                const item = document.createElement('div');
+                item.className = 'array-item sorted';
+                if (highlight && i === middleIdx) {
+                    item.classList.add('middle');
+                }
+                item.textContent = num;
+                container.appendChild(item);
+            });
+        }
+
+        function step() {
+            currentStep++;
+            
+            if (currentStep === 1) {
+                document.getElementById('arrow').style.opacity = '1';
+                document.getElementById('stepInfo').textContent = 
+                    `Step 1: Sort the array → [${sorted.join(', ')}]`;
+                renderSorted(false);
+            } else if (currentStep === 2) {
+                document.getElementById('stepInfo').textContent = 
+                    `Step 2: Find middle index = len(${nums.length}) // 2 = ${middleIdx}`;
+                document.getElementById('insight').style.opacity = '1';
+            } else if (currentStep === 3) {
+                renderSorted(true);
+                document.getElementById('stepInfo').textContent = 
+                    `Step 3: Return sorted[${middleIdx}] = ${sorted[middleIdx]}`;
+                document.getElementById('result').innerHTML = 
+                    `<span style="color: #4caf50;">Majority Element: <strong>${sorted[middleIdx]}</strong></span>`;
+                document.getElementById('status').textContent = 
+                    'O(n log n) time complexity due to sorting. Elegant one-liner!';
+            }
+        }
+
+        function toggleAutoRun() {
+            autoRunning = !autoRunning;
+            const btn = document.querySelector('.btn-success');
+            if (autoRunning) {
+                btn.textContent = 'Pause';
+                autoRunInterval = setInterval(() => {
+                    if (currentStep >= 3) {
+                        toggleAutoRun(); return;
+                    }
+                    step();
+                }, 1200);
+            } else {
+                btn.textContent = 'Auto Run';
+                clearInterval(autoRunInterval);
+            }
+        }
+
+        function reset() {
+            currentStep = 0;
+            if (autoRunning) toggleAutoRun();
+            document.getElementById('stepInfo').textContent = 'Click "Step" to see the elegant solution';
+            document.getElementById('status').textContent = 'Ready to find majority element';
+            document.getElementById('result').innerHTML = '';
+            document.getElementById('arrow').style.opacity = '0';
+            document.getElementById('insight').style.opacity = '0';
+            document.getElementById('sortedArray').innerHTML = '';
+            renderOriginal();
+        }
+
+        renderOriginal();
+    </script>
+</body>
+</html>
