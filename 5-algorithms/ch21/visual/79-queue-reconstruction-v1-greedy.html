@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Queue Reconstruction by Height</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; padding: 20px; }
+        .container { max-width: 1000px; margin: 0 auto; }
+        h1 { text-align: center; color: white; margin-bottom: 10px; }
+        .subtitle { text-align: center; color: rgba(255,255,255,0.9); margin-bottom: 20px; font-size: 14px; }
+        .controls { display: flex; justify-content: center; gap: 15px; margin-bottom: 20px; }
+        button { background: white; color: #667eea; border: none; padding: 10px 25px; border-radius: 25px; cursor: pointer; font-weight: 600; }
+        button:disabled { opacity: 0.5; cursor: not-allowed; }
+        .panel { background: white; border-radius: 15px; padding: 20px; margin-bottom: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
+        .panel-title { font-size: 16px; font-weight: bold; color: #333; margin-bottom: 15px; border-bottom: 2px solid #667eea; padding-bottom: 10px; }
+        .people-container { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; padding: 15px; }
+        .person { display: flex; flex-direction: column; align-items: center; padding: 10px; border-radius: 10px; transition: all 0.3s; min-width: 70px; }
+        .person.waiting { background: #f5f7fa; border: 2px solid #ddd; }
+        .person.current { background: #2196f3; color: white; border: 2px solid #1976d2; }
+        .person.placed { background: #4caf50; color: white; border: 2px solid #2e7d32; }
+        .person-icon { font-size: 30px; }
+        .person-info { font-weight: bold; margin-top: 5px; }
+        .queue-container { display: flex; justify-content: center; gap: 10px; min-height: 100px; padding: 15px; background: #f5f7fa; border-radius: 10px; }
+        .queue-slot { width: 70px; height: 100px; display: flex; flex-direction: column; align-items: center; justify-content: center; border: 2px dashed #ddd; border-radius: 10px; }
+        .queue-slot.filled { background: #e8f5e9; border: 2px solid #4caf50; }
+        .status-box { background: #f5f7fa; border-radius: 10px; padding: 15px; font-family: monospace; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>👥 Queue Reconstruction by Height</h1>
+        <p class="subtitle">Greedy - Sort by height desc, then insert at position k</p>
+
+        <div class="controls">
+            <button id="stepBtn">Step</button>
+            <button id="autoBtn">Auto Run</button>
+            <button id="resetBtn">Reset</button>
+        </div>
+
+        <div class="panel">
+            <div class="panel-title">📋 People to Place (sorted by height desc, k asc)</div>
+            <div class="people-container" id="people"></div>
+        </div>
+
+        <div class="panel">
+            <div class="panel-title">🎯 Reconstructed Queue</div>
+            <div class="queue-container" id="queue"></div>
+        </div>
+
+        <div class="panel">
+            <div class="panel-title">📋 Status</div>
+            <div class="status-box" id="status">Sort by height descending. Insert each person at index k.</div>
+        </div>
+    </div>
+
+    <script>
+        const people = [[7,0], [4,4], [7,1], [5,0], [6,1], [5,2]];
+        let sorted = [];
+        let queue = [];
+        let idx = 0;
+        let phase = 'sort';
+        let done = false;
+        let autoInterval = null;
+
+        function render() {
+            const data = phase === 'sort' ? people : sorted;
+            document.getElementById('people').innerHTML = data.map((p, i) => {
+                let cls = 'person waiting';
+                if (phase === 'insert' && i < idx) cls = 'person placed';
+                if (phase === 'insert' && i === idx) cls = 'person current';
+                return `<div class="${cls}">
+                    <div class="person-icon">👤</div>
+                    <div class="person-info">h=${p[0]}, k=${p[1]}</div>
+                </div>`;
+            }).join('');
+
+            document.getElementById('queue').innerHTML = queue.length > 0
+                ? queue.map(p => `<div class="queue-slot filled">
+                    <div style="font-size:24px;">👤</div>
+                    <div style="font-weight:bold;">[${p[0]},${p[1]}]</div>
+                </div>`).join('')
+                : '<div style="color:#999;">Empty - waiting for insertions</div>';
+        }
+
+        function step() {
+            if (done) return;
+
+            if (phase === 'sort') {
+                sorted = [...people].sort((a, b) => b[0] - a[0] || a[1] - b[1]);
+                phase = 'insert';
+                document.getElementById('status').innerHTML = 
+                    `Sorted by height desc, k asc: ${sorted.map(p => `[${p}]`).join(', ')}`;
+                render();
+                return;
+            }
+
+            if (idx >= sorted.length) {
+                done = true;
+                document.getElementById('status').innerHTML = 
+                    `✅ Queue reconstructed! Result: ${queue.map(p => `[${p}]`).join(', ')}`;
+                document.getElementById('stepBtn').disabled = true;
+                document.getElementById('autoBtn').disabled = true;
+                stopAuto();
+                render();
+                return;
+            }
+
+            const person = sorted[idx];
+            queue.splice(person[1], 0, person);
+            
+            document.getElementById('status').innerHTML = 
+                `Insert [${person[0]},${person[1]}] at position ${person[1]}. There are ${person[1]} taller people before.`;
+
+            idx++;
+            render();
+        }
+
+        function reset() {
+            stopAuto();
+            sorted = [];
+            queue = [];
+            idx = 0;
+            phase = 'sort';
+            done = false;
+            document.getElementById('stepBtn').disabled = false;
+            document.getElementById('autoBtn').disabled = false;
+            document.getElementById('status').innerHTML = 'Sort by height descending. Insert each person at index k.';
+            render();
+        }
+
+        function stopAuto() {
+            if (autoInterval) { clearInterval(autoInterval); autoInterval = null; }
+            document.getElementById('autoBtn').textContent = 'Auto Run';
+        }
+
+        document.getElementById('stepBtn').onclick = () => { stopAuto(); step(); };
+        document.getElementById('autoBtn').onclick = () => {
+            if (autoInterval) { stopAuto(); }
+            else { autoInterval = setInterval(step, 800); document.getElementById('autoBtn').textContent = '⏸ Pause'; }
+        };
+        document.getElementById('resetBtn').onclick = reset;
+
+        render();
+    </script>
+</body>
+</html>

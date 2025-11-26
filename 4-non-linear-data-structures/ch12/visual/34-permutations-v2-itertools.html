@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Q34: Permutations - itertools</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f5f7fa; min-height: 100vh; padding: 20px; }
+        .container { max-width: 1000px; margin: 0 auto; }
+        
+        .problem-info { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 16px; padding: 25px 30px; margin-bottom: 25px; color: white; }
+        .problem-info h1 { font-size: 1.8em; margin-bottom: 10px; }
+        .problem-info p { font-size: 1.1em; opacity: 0.95; line-height: 1.6; }
+        .problem-meta { display: flex; gap: 20px; margin-top: 15px; flex-wrap: wrap; }
+        .meta-tag { background: rgba(255,255,255,0.2); padding: 6px 14px; border-radius: 20px; font-size: 0.9em; }
+        
+        .code-section { background: white; border-radius: 16px; padding: 25px; margin-bottom: 25px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
+        .code-section h3 { color: #333; margin-bottom: 15px; }
+        .code-block { background: #1e1e1e; border-radius: 12px; padding: 20px; overflow-x: auto; }
+        .code-block pre { margin: 0; font-family: 'Consolas', monospace; font-size: 14px; line-height: 1.6; color: #d4d4d4; }
+        .code-block .keyword { color: #569cd6; }
+        .code-block .function { color: #dcdcaa; }
+        .code-block .module { color: #4ec9b0; }
+        
+        .visualization-section { background: white; border-radius: 16px; padding: 25px; margin-bottom: 25px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
+        .visualization-section h3 { color: #333; margin-bottom: 20px; }
+        
+        .controls { display: flex; gap: 12px; margin-bottom: 25px; flex-wrap: wrap; }
+        .btn { padding: 12px 28px; font-size: 1em; border: none; border-radius: 10px; cursor: pointer; font-weight: 500; }
+        .btn-primary { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; }
+        .btn-success { background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); color: white; }
+        .btn-warning { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white; }
+        .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        
+        .status-message { background: #e8f4fd; border-left: 4px solid #2196f3; padding: 15px 20px; border-radius: 0 10px 10px 0; margin-bottom: 20px; color: #1565c0; }
+        
+        .step-indicator { display: flex; gap: 20px; margin-bottom: 25px; flex-wrap: wrap; }
+        .step-item { padding: 12px 24px; background: #f0f0f0; border-radius: 10px; color: #999; font-weight: 500; }
+        .step-item.active { background: #667eea; color: white; }
+        .step-item.done { background: #4caf50; color: white; }
+        
+        .input-display { padding: 20px; background: #f9f9f9; border-radius: 12px; margin-bottom: 20px; text-align: center; }
+        .input-array { display: flex; gap: 10px; justify-content: center; }
+        .input-item { width: 50px; height: 50px; display: flex; justify-content: center; align-items: center; font-size: 1.4em; font-weight: 600; background: #667eea; color: white; border-radius: 10px; }
+        
+        .itertools-box { padding: 25px; background: linear-gradient(135deg, #e8f5e9, #c8e6c9); border-radius: 12px; margin-bottom: 20px; text-align: center; }
+        .itertools-label { font-size: 0.9em; color: #2e7d32; margin-bottom: 10px; }
+        .itertools-code { font-family: 'Consolas', monospace; font-size: 1.3em; color: #1b5e20; }
+        
+        .results-section { background: #fff3e0; border-radius: 12px; padding: 20px; }
+        .results-label { font-size: 0.9em; color: #e65100; margin-bottom: 15px; }
+        .results-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 10px; }
+        .result-item { padding: 12px; background: white; border: 2px solid #ff9800; border-radius: 8px; text-align: center; font-family: monospace; font-size: 1.1em; transition: all 0.3s; }
+        .result-item.show { background: #ff9800; color: white; border-color: #ff9800; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="problem-info">
+            <h1>Q34: Permutations - itertools</h1>
+            <p>Generate all permutations using Python's itertools.permutations() for elegant one-liner solution.</p>
+            <div class="problem-meta">
+                <span class="meta-tag">📁 itertools</span>
+                <span class="meta-tag">⏱️ O(n!)</span>
+                <span class="meta-tag">💡 Pythonic One-liner</span>
+            </div>
+        </div>
+        
+        <div class="code-section">
+            <h3>💻 Python Solution</h3>
+            <div class="code-block">
+                <pre><span class="keyword">import</span> <span class="module">itertools</span>
+
+<span class="keyword">def</span> <span class="function">permute</span>(nums: List[int]) -> List[List[int]]:
+    <span class="keyword">return</span> list(itertools.permutations(nums))</pre>
+            </div>
+        </div>
+        
+        <div class="visualization-section">
+            <h3>🎬 Visualization</h3>
+            
+            <div class="controls">
+                <button class="btn btn-primary" id="stepBtn" onclick="step()">Step</button>
+                <button class="btn btn-success" id="autoBtn" onclick="toggleAuto()">Auto Run</button>
+                <button class="btn btn-warning" onclick="reset()">Reset</button>
+            </div>
+            
+            <div class="step-indicator">
+                <div class="step-item" id="step1">1. Input</div>
+                <div class="step-item" id="step2">2. itertools.permutations()</div>
+                <div class="step-item" id="step3">3. Convert to list</div>
+            </div>
+            
+            <div class="status-message" id="statusMessage">
+                One-liner solution using itertools.permutations()
+            </div>
+            
+            <div class="input-display">
+                <div style="margin-bottom: 10px; color: #666;">Input: nums</div>
+                <div class="input-array" id="inputArray"></div>
+            </div>
+            
+            <div class="itertools-box" id="itertoolsBox" style="display: none;">
+                <div class="itertools-label">itertools.permutations(nums)</div>
+                <div class="itertools-code">Returns iterator of all n! permutations</div>
+            </div>
+            
+            <div class="results-section" id="resultsSection" style="display: none;">
+                <div class="results-label">list(itertools.permutations([1, 2, 3])) → 3! = 6 permutations</div>
+                <div class="results-grid" id="resultsGrid"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const nums = [1, 2, 3];
+        const allPerms = [
+            [1, 2, 3], [1, 3, 2], [2, 1, 3], [2, 3, 1], [3, 1, 2], [3, 2, 1]
+        ];
+        
+        let currentStep = 0;
+        let showIndex = 0;
+        let autoInterval = null;
+        
+        function init() {
+            currentStep = 0;
+            showIndex = 0;
+            
+            // Render input
+            const inputContainer = document.getElementById('inputArray');
+            inputContainer.innerHTML = '';
+            nums.forEach(n => {
+                const item = document.createElement('div');
+                item.className = 'input-item';
+                item.textContent = n;
+                inputContainer.appendChild(item);
+            });
+            
+            render();
+        }
+        
+        function render() {
+            // Step indicators
+            document.getElementById('step1').className = 'step-item' + (currentStep >= 1 ? ' done' : '');
+            document.getElementById('step2').className = 'step-item' + (currentStep >= 2 ? ' done' : '');
+            document.getElementById('step3').className = 'step-item' + (currentStep >= 3 ? ' done' : '');
+            
+            // Sections visibility
+            document.getElementById('itertoolsBox').style.display = currentStep >= 2 ? 'block' : 'none';
+            document.getElementById('resultsSection').style.display = currentStep >= 3 ? 'block' : 'none';
+            
+            // Results
+            if (currentStep >= 3) {
+                const resultsContainer = document.getElementById('resultsGrid');
+                resultsContainer.innerHTML = '';
+                allPerms.forEach((perm, i) => {
+                    const item = document.createElement('div');
+                    item.className = 'result-item' + (i < showIndex ? ' show' : '');
+                    item.textContent = `(${perm.join(', ')})`;
+                    resultsContainer.appendChild(item);
+                });
+            }
+        }
+        
+        function step() {
+            if (currentStep < 3) {
+                currentStep++;
+                if (currentStep === 1) {
+                    document.getElementById('statusMessage').textContent = 
+                        'Step 1: Input array [1, 2, 3]';
+                } else if (currentStep === 2) {
+                    document.getElementById('statusMessage').textContent = 
+                        'Step 2: itertools.permutations() generates all permutations lazily';
+                } else if (currentStep === 3) {
+                    document.getElementById('statusMessage').textContent = 
+                        'Step 3: Convert iterator to list, revealing all permutations';
+                }
+                render();
+            } else if (showIndex < allPerms.length) {
+                showIndex++;
+                document.getElementById('statusMessage').textContent = 
+                    `Showing permutation ${showIndex}/${allPerms.length}: (${allPerms[showIndex-1].join(', ')})`;
+                render();
+            } else {
+                document.getElementById('statusMessage').textContent = 
+                    `✅ Done! All ${allPerms.length} permutations generated.`;
+                document.getElementById('stepBtn').disabled = true;
+                stopAuto();
+            }
+        }
+        
+        function toggleAuto() {
+            if (autoInterval) { stopAuto(); }
+            else {
+                document.getElementById('autoBtn').textContent = 'Pause';
+                autoInterval = setInterval(step, 600);
+            }
+        }
+        
+        function stopAuto() {
+            if (autoInterval) { clearInterval(autoInterval); autoInterval = null; }
+            document.getElementById('autoBtn').textContent = 'Auto Run';
+        }
+        
+        function reset() {
+            stopAuto();
+            document.getElementById('stepBtn').disabled = false;
+            document.getElementById('statusMessage').textContent = 'One-liner solution using itertools.permutations()';
+            init();
+        }
+        
+        init();
+    </script>
+</body>
+</html>

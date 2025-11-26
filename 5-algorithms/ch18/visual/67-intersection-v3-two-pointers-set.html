@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Q67: Intersection of Two Arrays II - Two Pointers</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; padding: 20px; }
+        .container { max-width: 1100px; margin: 0 auto; background: white; border-radius: 20px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); overflow: hidden; }
+        .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 30px; color: white; }
+        .header h1 { font-size: 1.8em; margin-bottom: 10px; }
+        .header p { opacity: 0.9; font-size: 0.95em; }
+        .problem-info { background: #f8f9fa; padding: 20px; border-bottom: 1px solid #eee; }
+        .problem-info h3 { color: #333; margin-bottom: 10px; }
+        .problem-info p { color: #666; line-height: 1.6; }
+        .code-section { background: #1e1e1e; padding: 20px; margin: 20px; border-radius: 10px; }
+        .code-section h3 { color: #9cdcfe; margin-bottom: 15px; font-size: 0.9em; }
+        .code-section pre { color: #d4d4d4; font-family: 'Consolas', monospace; font-size: 0.8em; line-height: 1.5; overflow-x: auto; }
+        .keyword { color: #569cd6; }
+        .function { color: #dcdcaa; }
+        .comment { color: #6a9955; }
+        .number { color: #b5cea8; }
+        .controls { padding: 20px; display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; background: #f8f9fa; }
+        .btn { padding: 12px 24px; font-size: 1em; cursor: pointer; border: none; border-radius: 8px; transition: all 0.3s; }
+        .btn-primary { background: linear-gradient(135deg, #667eea, #764ba2); color: white; }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4); }
+        .btn-success { background: linear-gradient(135deg, #11998e, #38ef7d); color: white; }
+        .btn-warning { background: linear-gradient(135deg, #f093fb, #f5576c); color: white; }
+        .visualization { padding: 30px; min-height: 450px; }
+        .status { padding: 15px 20px; background: #e8f5e9; text-align: center; font-weight: 500; color: #2e7d32; }
+        .step-info { background: #fff3e0; padding: 15px 20px; text-align: center; color: #ef6c00; font-weight: 500; }
+        .array-section { margin: 20px 0; }
+        .array-label { font-weight: bold; color: #333; margin-bottom: 10px; }
+        .array-container { display: flex; align-items: center; gap: 5px; flex-wrap: wrap; }
+        .array-item { width: 50px; height: 50px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 1.2em; border-radius: 10px; background: #e3f2fd; color: #1976d2; border: 2px solid #1976d2; transition: all 0.3s; position: relative; }
+        .array-item.pointer-i { background: #ff9800; color: white; border-color: #e65100; }
+        .array-item.pointer-j { background: #9c27b0; color: white; border-color: #6a1b9a; }
+        .array-item.match { background: #4caf50; color: white; border-color: #2e7d32; }
+        .array-item.done { opacity: 0.4; }
+        .pointer-label { position: absolute; top: -25px; font-size: 0.8em; font-weight: bold; }
+        .pointer-i-label { color: #e65100; }
+        .pointer-j-label { color: #6a1b9a; }
+        .result-section { margin-top: 20px; padding: 15px; background: #e8f5e9; border-radius: 10px; text-align: center; }
+        .result-section h4 { color: #2e7d32; margin-bottom: 10px; }
+        .result-item { display: inline-flex; align-items: center; justify-content: center; width: 40px; height: 40px; margin: 5px; font-weight: bold; border-radius: 8px; background: #4caf50; color: white; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔍 Q67: Intersection of Two Arrays II</h1>
+            <p>LeetCode #350 | File: 67-3.py | Approach: Two Pointers (Set Result)</p>
+        </div>
+        
+        <div class="problem-info">
+            <h3>📋 Problem Description</h3>
+            <p>Given two integer arrays nums1 and nums2, return an array of their intersection. 
+            Each element must appear as many times as it shows in both arrays.</p>
+            <p style="margin-top: 10px;"><strong>Key Insight:</strong> Sort both arrays, use two pointers. 
+            If nums1[i] < nums2[j], advance i; if nums1[i] > nums2[j], advance j; if equal, add to result and advance both.</p>
+        </div>
+
+        <div class="code-section">
+            <h3>📄 Python Solution (67-3.py)</h3>
+            <pre><span class="keyword">from</span> typing <span class="keyword">import</span> List, Set
+
+<span class="keyword">class</span> <span class="function">Solution</span>:
+    <span class="keyword">def</span> <span class="function">intersection</span>(self, nums1: List[<span class="keyword">int</span>], nums2: List[<span class="keyword">int</span>]) -> List[<span class="keyword">int</span>]:
+        result: Set = <span class="function">set</span>()
+        nums1.<span class="function">sort</span>()
+        nums2.<span class="function">sort</span>()
+        i = j = <span class="number">0</span>
+        <span class="keyword">while</span> i < <span class="function">len</span>(nums1) <span class="keyword">and</span> j < <span class="function">len</span>(nums2):
+            <span class="keyword">if</span> nums1[i] > nums2[j]:
+                j += <span class="number">1</span>
+            <span class="keyword">elif</span> nums1[i] < nums2[j]:
+                i += <span class="number">1</span>
+            <span class="keyword">else</span>:
+                result.<span class="function">add</span>(nums1[i])
+                i += <span class="number">1</span>
+                j += <span class="number">1</span>
+        <span class="keyword">return</span> result</pre>
+        </div>
+
+        <div class="controls">
+            <button class="btn btn-primary" onclick="step()">Step</button>
+            <button class="btn btn-success" onclick="toggleAutoRun()">Auto Run</button>
+            <button class="btn btn-warning" onclick="reset()">Reset</button>
+        </div>
+
+        <div class="step-info" id="stepInfo">Click "Step" or "Auto Run" to begin visualization</div>
+        
+        <div class="visualization" id="viz">
+            <div class="array-section">
+                <div class="array-label">nums1 (sorted): [1, 2, 2, 4, 9]</div>
+                <div class="array-container" id="array1Container"></div>
+            </div>
+            <div class="array-section">
+                <div class="array-label">nums2 (sorted): [2, 2, 4, 5, 9]</div>
+                <div class="array-container" id="array2Container"></div>
+            </div>
+            <div class="result-section">
+                <h4>Result Set</h4>
+                <div id="resultContainer"></div>
+            </div>
+        </div>
+
+        <div class="status" id="status">Ready to visualize two-pointer intersection</div>
+    </div>
+
+    <script>
+        const nums1 = [1, 2, 2, 4, 9];
+        const nums2 = [2, 2, 4, 5, 9];
+        let i = 0, j = 0;
+        let result = new Set();
+        let currentStep = 0;
+        let autoRunning = false;
+        let autoRunInterval;
+        let history = [];
+
+        function renderArrays() {
+            const container1 = document.getElementById('array1Container');
+            const container2 = document.getElementById('array2Container');
+            container1.innerHTML = '';
+            container2.innerHTML = '';
+
+            nums1.forEach((num, idx) => {
+                const item = document.createElement('div');
+                item.className = 'array-item';
+                if (idx === i && i < nums1.length) {
+                    item.classList.add('pointer-i');
+                    const label = document.createElement('span');
+                    label.className = 'pointer-label pointer-i-label';
+                    label.textContent = 'i';
+                    item.appendChild(label);
+                }
+                if (idx < i) item.classList.add('done');
+                item.innerHTML += num;
+                container1.appendChild(item);
+            });
+
+            nums2.forEach((num, idx) => {
+                const item = document.createElement('div');
+                item.className = 'array-item';
+                if (idx === j && j < nums2.length) {
+                    item.classList.add('pointer-j');
+                    const label = document.createElement('span');
+                    label.className = 'pointer-label pointer-j-label';
+                    label.textContent = 'j';
+                    item.appendChild(label);
+                }
+                if (idx < j) item.classList.add('done');
+                item.innerHTML += num;
+                container2.appendChild(item);
+            });
+        }
+
+        function renderResult() {
+            const container = document.getElementById('resultContainer');
+            container.innerHTML = '';
+            [...result].sort((a,b) => a-b).forEach(num => {
+                const item = document.createElement('span');
+                item.className = 'result-item';
+                item.textContent = num;
+                container.appendChild(item);
+            });
+            if (result.size === 0) {
+                container.textContent = '(empty)';
+            }
+        }
+
+        function step() {
+            if (i >= nums1.length || j >= nums2.length) {
+                document.getElementById('stepInfo').textContent = `Done! Intersection: {${[...result].join(', ')}}`;
+                document.getElementById('status').textContent = 'Two-pointer approach: O(n log n) time (sorting), O(1) extra space';
+                return;
+            }
+
+            const v1 = nums1[i];
+            const v2 = nums2[j];
+
+            if (v1 < v2) {
+                document.getElementById('stepInfo').textContent = 
+                    `nums1[${i}]=${v1} < nums2[${j}]=${v2} → Advance i`;
+                i++;
+            } else if (v1 > v2) {
+                document.getElementById('stepInfo').textContent = 
+                    `nums1[${i}]=${v1} > nums2[${j}]=${v2} → Advance j`;
+                j++;
+            } else {
+                result.add(v1);
+                document.getElementById('stepInfo').textContent = 
+                    `nums1[${i}]=${v1} == nums2[${j}]=${v2} → Match! Add ${v1} to result, advance both`;
+                i++;
+                j++;
+            }
+
+            renderArrays();
+            renderResult();
+            currentStep++;
+        }
+
+        function toggleAutoRun() {
+            autoRunning = !autoRunning;
+            const btn = document.querySelector('.btn-success');
+            if (autoRunning) {
+                btn.textContent = 'Pause';
+                autoRunInterval = setInterval(() => {
+                    if (i >= nums1.length || j >= nums2.length) {
+                        step();
+                        toggleAutoRun();
+                        return;
+                    }
+                    step();
+                }, 1000);
+            } else {
+                btn.textContent = 'Auto Run';
+                clearInterval(autoRunInterval);
+            }
+        }
+
+        function reset() {
+            i = 0;
+            j = 0;
+            result = new Set();
+            currentStep = 0;
+            if (autoRunning) toggleAutoRun();
+            document.getElementById('stepInfo').textContent = 'Click "Step" or "Auto Run" to begin visualization';
+            document.getElementById('status').textContent = 'Ready to visualize two-pointer intersection';
+            renderArrays();
+            renderResult();
+        }
+
+        // Initialize
+        renderArrays();
+        renderResult();
+    </script>
+</body>
+</html>

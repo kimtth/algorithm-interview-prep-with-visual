@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Q56: Implement Trie</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f5f7fa; min-height: 100vh; padding: 20px; }
+        .container { max-width: 1400px; margin: 0 auto; }
+        
+        .problem-info { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 16px; padding: 25px 30px; margin-bottom: 25px; color: white; }
+        .problem-info h1 { font-size: 1.8em; margin-bottom: 10px; }
+        .problem-info p { font-size: 1.1em; opacity: 0.95; line-height: 1.6; }
+        .problem-meta { display: flex; gap: 20px; margin-top: 15px; flex-wrap: wrap; }
+        .meta-tag { background: rgba(255,255,255,0.2); padding: 6px 14px; border-radius: 20px; font-size: 0.9em; }
+        
+        .code-section { background: white; border-radius: 16px; padding: 25px; margin-bottom: 25px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
+        .code-section h3 { color: #333; margin-bottom: 15px; }
+        .code-block { background: #1e1e1e; border-radius: 12px; padding: 20px; overflow-x: auto; }
+        .code-block pre { margin: 0; font-family: 'Consolas', monospace; font-size: 12px; line-height: 1.4; color: #d4d4d4; }
+        .code-block .keyword { color: #569cd6; }
+        .code-block .function { color: #dcdcaa; }
+        .code-block .comment { color: #6a9955; }
+        
+        .visualization-section { background: white; border-radius: 16px; padding: 25px; margin-bottom: 25px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
+        .visualization-section h3 { color: #333; margin-bottom: 20px; }
+        
+        .controls { display: flex; gap: 12px; margin-bottom: 25px; flex-wrap: wrap; align-items: center; }
+        .btn { padding: 12px 28px; font-size: 1em; border: none; border-radius: 10px; cursor: pointer; font-weight: 500; }
+        .btn-primary { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; }
+        .btn-success { background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); color: white; }
+        .btn-warning { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white; }
+        .btn-info { background: linear-gradient(135deg, #2196f3 0%, #03a9f4 100%); color: white; }
+        .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        
+        .input-group { display: flex; gap: 8px; align-items: center; }
+        .input-group input { padding: 10px 15px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 1em; width: 150px; }
+        .input-group input:focus { outline: none; border-color: #667eea; }
+        
+        .status-message { background: #e8f4fd; border-left: 4px solid #2196f3; padding: 15px 20px; border-radius: 0 10px 10px 0; margin-bottom: 20px; color: #1565c0; }
+        
+        .trie-container { display: flex; justify-content: center; overflow-x: auto; }
+        svg { background: #fafafa; border-radius: 12px; border: 1px solid #e0e0e0; min-width: 800px; }
+        
+        .legend { display: flex; gap: 20px; margin-bottom: 15px; flex-wrap: wrap; justify-content: center; }
+        .legend-item { display: flex; align-items: center; gap: 8px; font-size: 0.9em; }
+        .legend-circle { width: 18px; height: 18px; border-radius: 50%; }
+        
+        .words-section { padding: 20px; background: #f3e5f5; border-radius: 12px; margin-top: 20px; }
+        .words-title { font-size: 0.9em; font-weight: 600; color: #7b1fa2; margin-bottom: 12px; }
+        .words-list { display: flex; flex-wrap: wrap; gap: 10px; }
+        .word-tag { padding: 8px 16px; background: white; border-radius: 20px; font-weight: 500; border: 2px solid #ce93d8; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="problem-info">
+            <h1>Q56: Implement Trie (Prefix Tree)</h1>
+            <p>A trie stores strings with shared prefixes. Each node represents a character, and paths from root form words. Supports insert, search, and startsWith operations.</p>
+            <div class="problem-meta">
+                <span class="meta-tag">📁 Trie</span>
+                <span class="meta-tag">⏱️ O(m) per operation</span>
+                <span class="meta-tag">💡 Prefix Tree</span>
+            </div>
+        </div>
+        
+        <div class="code-section">
+            <h3>💻 Python Solution</h3>
+            <div class="code-block">
+                <pre><span class="keyword">class</span> <span class="function">TrieNode</span>:
+    <span class="keyword">def</span> <span class="function">__init__</span>(self):
+        self.word = False
+        self.children = collections.defaultdict(TrieNode)
+
+<span class="keyword">class</span> <span class="function">Trie</span>:
+    <span class="keyword">def</span> <span class="function">insert</span>(self, word: str) -> None:
+        node = self.root
+        <span class="keyword">for</span> char <span class="keyword">in</span> word:
+            node = node.children[char]
+        node.word = True
+
+    <span class="keyword">def</span> <span class="function">search</span>(self, word: str) -> bool:
+        node = self.root
+        <span class="keyword">for</span> char <span class="keyword">in</span> word:
+            <span class="keyword">if</span> char <span class="keyword">not in</span> node.children:
+                <span class="keyword">return</span> False
+            node = node.children[char]
+        <span class="keyword">return</span> node.word</pre>
+            </div>
+        </div>
+        
+        <div class="visualization-section">
+            <h3>🎬 Interactive Trie Visualization</h3>
+            
+            <div class="controls">
+                <div class="input-group">
+                    <input type="text" id="wordInput" placeholder="Enter word..." onkeypress="if(event.key==='Enter')insertWord()">
+                    <button class="btn btn-primary" onclick="insertWord()">Insert</button>
+                    <button class="btn btn-info" onclick="searchWord()">Search</button>
+                    <button class="btn btn-success" onclick="prefixSearch()">StartsWith</button>
+                </div>
+                <button class="btn btn-warning" onclick="reset()">Reset</button>
+            </div>
+            
+            <div class="legend">
+                <div class="legend-item"><div class="legend-circle" style="background: #667eea;"></div> Node</div>
+                <div class="legend-item"><div class="legend-circle" style="background: #4caf50;"></div> Word End</div>
+                <div class="legend-item"><div class="legend-circle" style="background: #ff9800;"></div> Current Path</div>
+            </div>
+            
+            <div class="status-message" id="statusMessage">
+                Type a word and click Insert, Search, or StartsWith.
+            </div>
+            
+            <div class="trie-container">
+                <svg id="trie" width="900" height="400"></svg>
+            </div>
+            
+            <div class="words-section">
+                <div class="words-title">📚 Stored Words</div>
+                <div class="words-list" id="wordsList"><span style="color:#999">No words yet</span></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        class TrieNode {
+            constructor() {
+                this.children = {};
+                this.isWord = false;
+            }
+        }
+        
+        let root = new TrieNode();
+        let words = [];
+        let highlightPath = [];
+        
+        function insert(word) {
+            let node = root;
+            for (const char of word) {
+                if (!node.children[char]) {
+                    node.children[char] = new TrieNode();
+                }
+                node = node.children[char];
+            }
+            node.isWord = true;
+            if (!words.includes(word)) words.push(word);
+        }
+        
+        function search(word) {
+            let node = root;
+            highlightPath = [];
+            for (const char of word) {
+                if (!node.children[char]) {
+                    return { found: false, path: highlightPath };
+                }
+                highlightPath.push(char);
+                node = node.children[char];
+            }
+            return { found: node.isWord, path: highlightPath };
+        }
+        
+        function startsWith(prefix) {
+            let node = root;
+            highlightPath = [];
+            for (const char of prefix) {
+                if (!node.children[char]) {
+                    return { found: false, path: highlightPath };
+                }
+                highlightPath.push(char);
+                node = node.children[char];
+            }
+            return { found: true, path: highlightPath };
+        }
+        
+        function renderTrie() {
+            const svg = d3.select("#trie");
+            svg.selectAll("*").remove();
+            
+            const width = 900, height = 400;
+            const nodeRadius = 22;
+            
+            // Build tree structure for visualization
+            const nodes = [];
+            const links = [];
+            
+            function traverse(node, x, y, parentId, edgeLabel, level, leftBound, rightBound) {
+                const id = nodes.length;
+                nodes.push({ id, x, y, isWord: node.isWord, label: edgeLabel || 'root' });
+                
+                if (parentId !== null) {
+                    links.push({ source: parentId, target: id, label: edgeLabel });
+                }
+                
+                const children = Object.keys(node.children).sort();
+                const childCount = children.length;
+                
+                if (childCount > 0) {
+                    const spacing = (rightBound - leftBound) / (childCount + 1);
+                    children.forEach((char, i) => {
+                        const childX = leftBound + spacing * (i + 1);
+                        const childY = y + 70;
+                        const childLeft = leftBound + spacing * i;
+                        const childRight = leftBound + spacing * (i + 1);
+                        traverse(node.children[char], childX, childY, id, char, level + 1, childLeft, childRight);
+                    });
+                }
+            }
+            
+            traverse(root, width / 2, 40, null, null, 0, 0, width);
+            
+            // Check which nodes are in highlight path
+            function getHighlightedNodes() {
+                if (highlightPath.length === 0) return new Set();
+                const highlighted = new Set([0]); // root
+                let pathStr = '';
+                let node = root;
+                for (const char of highlightPath) {
+                    pathStr += char;
+                    // Find the node id with this path
+                    for (let i = 1; i < nodes.length; i++) {
+                        if (nodes[i].label === char) {
+                            // Check if parent is highlighted
+                            const link = links.find(l => l.target === i);
+                            if (link && highlighted.has(link.source)) {
+                                highlighted.add(i);
+                                break;
+                            }
+                        }
+                    }
+                    node = node.children[char];
+                }
+                return highlighted;
+            }
+            
+            const highlightedNodes = getHighlightedNodes();
+            
+            // Draw edges
+            links.forEach(link => {
+                const source = nodes[link.source];
+                const target = nodes[link.target];
+                const isHighlighted = highlightedNodes.has(link.source) && highlightedNodes.has(link.target);
+                
+                svg.append("line")
+                    .attr("x1", source.x).attr("y1", source.y)
+                    .attr("x2", target.x).attr("y2", target.y)
+                    .attr("stroke", isHighlighted ? "#ff9800" : "#999")
+                    .attr("stroke-width", isHighlighted ? 3 : 2);
+                
+                // Edge label
+                const midX = (source.x + target.x) / 2;
+                const midY = (source.y + target.y) / 2;
+                svg.append("text")
+                    .attr("x", midX + 8)
+                    .attr("y", midY)
+                    .attr("font-size", "14px")
+                    .attr("fill", isHighlighted ? "#e65100" : "#333")
+                    .attr("font-weight", "bold")
+                    .text(link.label);
+            });
+            
+            // Draw nodes
+            nodes.forEach((node, i) => {
+                let fill = "#667eea";
+                if (node.isWord) fill = "#4caf50";
+                if (highlightedNodes.has(i)) fill = "#ff9800";
+                
+                svg.append("circle")
+                    .attr("cx", node.x)
+                    .attr("cy", node.y)
+                    .attr("r", nodeRadius)
+                    .attr("fill", fill)
+                    .attr("stroke", "#333")
+                    .attr("stroke-width", 2);
+                
+                if (i === 0) {
+                    svg.append("text")
+                        .attr("x", node.x)
+                        .attr("y", node.y + 5)
+                        .attr("text-anchor", "middle")
+                        .attr("fill", "white")
+                        .attr("font-weight", "bold")
+                        .attr("font-size", "11px")
+                        .text("root");
+                }
+            });
+            
+            renderWords();
+        }
+        
+        function renderWords() {
+            const container = document.getElementById('wordsList');
+            if (words.length === 0) {
+                container.innerHTML = '<span style="color:#999">No words yet</span>';
+            } else {
+                container.innerHTML = words.map(w => 
+                    `<div class="word-tag">${w}</div>`
+                ).join('');
+            }
+        }
+        
+        function insertWord() {
+            const input = document.getElementById('wordInput');
+            const word = input.value.trim().toLowerCase();
+            if (!word) return;
+            
+            insert(word);
+            highlightPath = [];
+            document.getElementById('statusMessage').textContent = 
+                `Inserted "${word}" into trie.`;
+            input.value = '';
+            renderTrie();
+        }
+        
+        function searchWord() {
+            const input = document.getElementById('wordInput');
+            const word = input.value.trim().toLowerCase();
+            if (!word) return;
+            
+            const result = search(word);
+            if (result.found) {
+                document.getElementById('statusMessage').textContent = 
+                    `✅ "${word}" found in trie!`;
+            } else {
+                document.getElementById('statusMessage').textContent = 
+                    `❌ "${word}" not found.`;
+            }
+            renderTrie();
+        }
+        
+        function prefixSearch() {
+            const input = document.getElementById('wordInput');
+            const prefix = input.value.trim().toLowerCase();
+            if (!prefix) return;
+            
+            const result = startsWith(prefix);
+            if (result.found) {
+                document.getElementById('statusMessage').textContent = 
+                    `✅ Words starting with "${prefix}" exist!`;
+            } else {
+                document.getElementById('statusMessage').textContent = 
+                    `❌ No words start with "${prefix}".`;
+            }
+            renderTrie();
+        }
+        
+        function reset() {
+            root = new TrieNode();
+            words = [];
+            highlightPath = [];
+            document.getElementById('wordInput').value = '';
+            document.getElementById('statusMessage').textContent = 
+                'Type a word and click Insert, Search, or StartsWith.';
+            renderTrie();
+        }
+        
+        // Initialize with some words
+        ['apple', 'app', 'apply'].forEach(w => insert(w));
+        renderTrie();
+    </script>
+</body>
+</html>

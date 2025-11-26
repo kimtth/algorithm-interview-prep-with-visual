@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Q72: Sum of Two Integers - Masked XOR</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; padding: 20px; }
+        .container { max-width: 1000px; margin: 0 auto; background: white; border-radius: 20px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); overflow: hidden; }
+        .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 30px; color: white; }
+        .header h1 { font-size: 1.8em; margin-bottom: 10px; }
+        .header p { opacity: 0.9; font-size: 0.95em; }
+        .problem-info { background: #f8f9fa; padding: 20px; border-bottom: 1px solid #eee; }
+        .problem-info h3 { color: #333; margin-bottom: 10px; }
+        .problem-info p { color: #666; line-height: 1.6; }
+        .code-section { background: #1e1e1e; padding: 20px; margin: 20px; border-radius: 10px; }
+        .code-section h3 { color: #9cdcfe; margin-bottom: 15px; font-size: 0.9em; }
+        .code-section pre { color: #d4d4d4; font-family: 'Consolas', monospace; font-size: 0.8em; line-height: 1.5; overflow-x: auto; }
+        .keyword { color: #569cd6; }
+        .function { color: #dcdcaa; }
+        .comment { color: #6a9955; }
+        .number { color: #b5cea8; }
+        .controls { padding: 20px; display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; background: #f8f9fa; }
+        .btn { padding: 12px 24px; font-size: 1em; cursor: pointer; border: none; border-radius: 8px; transition: all 0.3s; }
+        .btn-primary { background: linear-gradient(135deg, #667eea, #764ba2); color: white; }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4); }
+        .btn-success { background: linear-gradient(135deg, #11998e, #38ef7d); color: white; }
+        .btn-warning { background: linear-gradient(135deg, #f093fb, #f5576c); color: white; }
+        .visualization { padding: 30px; min-height: 400px; }
+        .status { padding: 15px 20px; background: #e8f5e9; text-align: center; font-weight: 500; color: #2e7d32; }
+        .step-info { background: #fff3e0; padding: 15px 20px; text-align: center; color: #ef6c00; font-weight: 500; }
+        .bit-section { margin: 20px 0; padding: 15px; background: #f5f5f5; border-radius: 10px; }
+        .bit-section h4 { color: #333; margin-bottom: 10px; font-size: 0.9em; }
+        .bit-row { display: flex; gap: 5px; justify-content: center; margin: 10px 0; font-family: monospace; }
+        .bit { width: 30px; height: 35px; display: flex; align-items: center; justify-content: center; border-radius: 5px; font-weight: bold; }
+        .bit-0 { background: #e3f2fd; color: #1976d2; }
+        .bit-1 { background: #ff9800; color: white; }
+        .bit-label { width: 80px; display: flex; align-items: center; font-weight: bold; color: #333; }
+        .constants { background: #e8f5e9; padding: 15px; border-radius: 10px; margin: 15px 0; }
+        .constants h4 { color: #2e7d32; margin-bottom: 10px; }
+        .result-display { text-align: center; margin-top: 20px; font-size: 1.5em; color: #333; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>➕ Q72: Sum of Two Integers</h1>
+            <p>LeetCode #371 | File: 72-2.py | Approach: Masked XOR with Negative Handling</p>
+        </div>
+        
+        <div class="problem-info">
+            <h3>📋 Problem Description</h3>
+            <p>Calculate the sum of two integers without using + or - operators.</p>
+            <p style="margin-top: 10px;"><strong>Key Insight:</strong> Use XOR for sum without carry, AND+shift for carry. 
+            Apply 32-bit mask (0xFFFFFFFF) for Python's infinite precision. Handle negative overflow with INT_MAX check.</p>
+        </div>
+
+        <div class="code-section">
+            <h3>📄 Python Solution (72-2.py)</h3>
+            <pre><span class="keyword">class</span> <span class="function">Solution</span>:
+    <span class="keyword">def</span> <span class="function">getSum</span>(self, a: <span class="keyword">int</span>, b: <span class="keyword">int</span>) -> <span class="keyword">int</span>:
+        MASK = <span class="number">0xFFFFFFFF</span>
+        INT_MAX = <span class="number">0x7FFFFFFF</span>
+        <span class="comment"># Sum and carry</span>
+        <span class="keyword">while</span> b != <span class="number">0</span>:
+            a, b = (a ^ b) & MASK, ((a & b) << <span class="number">1</span>) & MASK
+
+        <span class="comment"># Handle negative result</span>
+        <span class="keyword">if</span> a > INT_MAX:
+            a = ~(a ^ MASK)
+        <span class="keyword">return</span> a</pre>
+        </div>
+
+        <div class="controls">
+            <button class="btn btn-primary" onclick="step()">Step</button>
+            <button class="btn btn-success" onclick="toggleAutoRun()">Auto Run</button>
+            <button class="btn btn-warning" onclick="reset()">Reset</button>
+        </div>
+
+        <div class="step-info" id="stepInfo">Click "Step" or "Auto Run" to begin visualization</div>
+        
+        <div class="visualization" id="viz">
+            <div class="constants">
+                <h4>32-bit Constants</h4>
+                <p>MASK = 0xFFFFFFFF (all 1s) | INT_MAX = 0x7FFFFFFF (max positive 32-bit)</p>
+            </div>
+            <div class="bit-section">
+                <h4>Computing: a=5, b=3 → 8</h4>
+                <div id="bitDisplay"></div>
+            </div>
+            <div class="result-display" id="result"></div>
+        </div>
+
+        <div class="status" id="status">Ready to visualize masked bit manipulation</div>
+    </div>
+
+    <script>
+        let a = 5, b = 3;
+        const MASK = 0xFFFFFFFF;
+        const INT_MAX = 0x7FFFFFFF;
+        let currentStep = 0;
+        let autoRunning = false;
+        let autoRunInterval;
+
+        function toBinary(n, bits = 8) {
+            return (n >>> 0).toString(2).padStart(bits, '0').slice(-bits);
+        }
+
+        function renderBits(label, value, highlight = false) {
+            const binary = toBinary(value & 0xFF);
+            let html = `<div class="bit-row"><span class="bit-label">${label} (${value & 0xFF}):</span>`;
+            for (const bit of binary) {
+                html += `<span class="bit bit-${bit}">${bit}</span>`;
+            }
+            html += '</div>';
+            return html;
+        }
+
+        function step() {
+            const display = document.getElementById('bitDisplay');
+            
+            if (currentStep === 0) {
+                display.innerHTML = renderBits('a', a) + renderBits('b', b);
+                document.getElementById('stepInfo').textContent = `Initial: a=${a} (${toBinary(a)}), b=${b} (${toBinary(b)})`;
+            } else if (b !== 0) {
+                const xorResult = (a ^ b) & MASK;
+                const carryResult = ((a & b) << 1) & MASK;
+                
+                display.innerHTML = 
+                    renderBits('a', a) +
+                    renderBits('b', b) +
+                    `<hr style="margin: 10px 0;">` +
+                    renderBits('a^b', xorResult) +
+                    renderBits('(a&b)<<1', carryResult);
+                
+                document.getElementById('stepInfo').textContent = 
+                    `a^b=${xorResult}, (a&b)<<1=${carryResult}. New: a=${xorResult}, b=${carryResult}`;
+                
+                a = xorResult;
+                b = carryResult;
+            }
+            
+            if (b === 0 && currentStep > 0) {
+                // Check for negative
+                if (a > INT_MAX) {
+                    a = ~(a ^ MASK);
+                }
+                document.getElementById('stepInfo').textContent = `Done! b=0, no more carry. Result: ${a}`;
+                document.getElementById('result').innerHTML = 
+                    `<span style="color: #4caf50;">5 + 3 = <strong>${a}</strong></span>`;
+                document.getElementById('status').textContent = 'Bit manipulation complete! Mask handles 32-bit overflow.';
+            }
+
+            currentStep++;
+        }
+
+        function toggleAutoRun() {
+            autoRunning = !autoRunning;
+            const btn = document.querySelector('.btn-success');
+            if (autoRunning) {
+                btn.textContent = 'Pause';
+                autoRunInterval = setInterval(() => {
+                    if (b === 0 && currentStep > 0) {
+                        step();
+                        toggleAutoRun();
+                        return;
+                    }
+                    step();
+                }, 1200);
+            } else {
+                btn.textContent = 'Auto Run';
+                clearInterval(autoRunInterval);
+            }
+        }
+
+        function reset() {
+            a = 5;
+            b = 3;
+            currentStep = 0;
+            if (autoRunning) toggleAutoRun();
+            document.getElementById('stepInfo').textContent = 'Click "Step" or "Auto Run" to begin visualization';
+            document.getElementById('status').textContent = 'Ready to visualize masked bit manipulation';
+            document.getElementById('result').innerHTML = '';
+            document.getElementById('bitDisplay').innerHTML = '';
+        }
+    </script>
+</body>
+</html>

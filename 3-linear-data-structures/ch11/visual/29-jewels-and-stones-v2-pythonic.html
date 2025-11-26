@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Q29: Jewels and Stones - Pythonic One-liner</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f5f7fa; min-height: 100vh; padding: 20px; }
+        .container { max-width: 1200px; margin: 0 auto; }
+        
+        .problem-info { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 16px; padding: 25px 30px; margin-bottom: 25px; color: white; }
+        .problem-info h1 { font-size: 1.8em; margin-bottom: 10px; }
+        .problem-info p { font-size: 1.1em; opacity: 0.95; line-height: 1.6; }
+        .problem-meta { display: flex; gap: 20px; margin-top: 15px; flex-wrap: wrap; }
+        .meta-tag { background: rgba(255,255,255,0.2); padding: 6px 14px; border-radius: 20px; font-size: 0.9em; }
+        
+        .code-section { background: white; border-radius: 16px; padding: 25px; margin-bottom: 25px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
+        .code-section h3 { color: #333; margin-bottom: 15px; }
+        .code-block { background: #1e1e1e; border-radius: 12px; padding: 20px; overflow-x: auto; }
+        .code-block pre { margin: 0; font-family: 'Consolas', monospace; font-size: 14px; line-height: 1.5; color: #d4d4d4; }
+        .code-block .keyword { color: #569cd6; }
+        .code-block .function { color: #dcdcaa; }
+        .code-block .comment { color: #6a9955; }
+        
+        .visualization-section { background: white; border-radius: 16px; padding: 25px; margin-bottom: 25px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
+        .visualization-section h3 { color: #333; margin-bottom: 20px; }
+        
+        .controls { display: flex; gap: 12px; margin-bottom: 25px; flex-wrap: wrap; }
+        .btn { padding: 12px 28px; font-size: 1em; border: none; border-radius: 10px; cursor: pointer; font-weight: 500; }
+        .btn-primary { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; }
+        .btn-success { background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); color: white; }
+        .btn-warning { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white; }
+        .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        
+        .status-message { background: #e8f4fd; border-left: 4px solid #2196f3; padding: 15px 20px; border-radius: 0 10px 10px 0; margin-bottom: 20px; color: #1565c0; }
+        
+        .stones-display { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 20px; padding: 20px; background: #f9f9f9; border-radius: 12px; }
+        .stone-item { display: flex; flex-direction: column; align-items: center; gap: 5px; }
+        .stone-char { width: 50px; height: 50px; display: flex; justify-content: center; align-items: center; font-size: 1.4em; font-weight: 600; border: 2px solid #9e9e9e; border-radius: 8px; background: white; transition: all 0.3s ease; }
+        .stone-char.current { border-color: #ff9800; background: #fff3e0; }
+        .stone-char.jewel { border-color: #4caf50; background: #e8f5e9; }
+        .stone-check { font-size: 0.9em; color: #666; }
+        .stone-check.true { color: #4caf50; font-weight: 600; }
+        .stone-check.false { color: #f44336; }
+        
+        .expression-display { font-family: monospace; font-size: 1.2em; padding: 20px; background: #e3f2fd; border-radius: 12px; margin-bottom: 20px; text-align: center; }
+        
+        .result-box { font-size: 1.5em; font-weight: 600; text-align: center; padding: 20px; background: #e8f5e9; border-radius: 12px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="problem-info">
+            <h1>Q29: Jewels and Stones</h1>
+            <p>Count how many stones you have that are also jewels using Pythonic one-liner.</p>
+            <div class="problem-meta">
+                <span class="meta-tag">📁 Hash Table</span>
+                <span class="meta-tag">⏱️ O(J × S)</span>
+                <span class="meta-tag">💡 Version 2: Pythonic</span>
+            </div>
+        </div>
+        
+        <div class="code-section">
+            <h3>💻 Python Solution - One-liner</h3>
+            <div class="code-block">
+                <pre><span class="keyword">def</span> <span class="function">numJewelsInStones</span>(self, J: str, S: str) -> int:
+    <span class="keyword">return</span> sum(s <span class="keyword">in</span> J <span class="keyword">for</span> s <span class="keyword">in</span> S)
+
+<span class="comment"># Generator expression: (s in J for s in S)</span>
+<span class="comment"># For each stone, check if it's a jewel (True=1, False=0)</span>
+<span class="comment"># sum() adds up all the True values</span></pre>
+            </div>
+        </div>
+        
+        <div class="visualization-section">
+            <h3>🎬 Visualization</h3>
+            
+            <div class="controls">
+                <button class="btn btn-primary" id="stepBtn" onclick="step()">Step</button>
+                <button class="btn btn-success" id="autoBtn" onclick="toggleAuto()">Auto Run</button>
+                <button class="btn btn-warning" onclick="reset()">Reset</button>
+            </div>
+            
+            <div class="status-message" id="statusMessage">
+                J = "aA", S = "aAAbbbb". Check each stone: is it in J?
+            </div>
+            
+            <div class="expression-display" id="expressionDisplay">
+                sum(s in "aA" for s in "aAAbbbb")
+            </div>
+            
+            <div class="stones-display" id="stonesDisplay"></div>
+            
+            <div class="result-box" id="resultBox">sum(...) = 0</div>
+        </div>
+    </div>
+
+    <script>
+        const jewels = "aA";
+        const stones = "aAAbbbb";
+        let checks = [];
+        let index = 0;
+        let autoInterval = null;
+        
+        function init() {
+            checks = [];
+            index = 0;
+            renderStones();
+            document.getElementById('resultBox').textContent = 'sum(...) = 0';
+        }
+        
+        function renderStones() {
+            const container = document.getElementById('stonesDisplay');
+            container.innerHTML = '';
+            
+            stones.split('').forEach((s, i) => {
+                const item = document.createElement('div');
+                item.className = 'stone-item';
+                
+                const charDiv = document.createElement('div');
+                charDiv.className = 'stone-char';
+                if (i === index) charDiv.classList.add('current');
+                if (checks[i] === true) charDiv.classList.add('jewel');
+                charDiv.textContent = s;
+                
+                const checkDiv = document.createElement('div');
+                checkDiv.className = 'stone-check';
+                if (i < checks.length) {
+                    checkDiv.textContent = checks[i] ? 'True (1)' : 'False (0)';
+                    checkDiv.classList.add(checks[i] ? 'true' : 'false');
+                } else {
+                    checkDiv.textContent = '?';
+                }
+                
+                item.appendChild(charDiv);
+                item.appendChild(checkDiv);
+                container.appendChild(item);
+            });
+        }
+        
+        function step() {
+            if (index >= stones.length) {
+                const total = checks.filter(c => c).length;
+                document.getElementById('statusMessage').textContent = 
+                    `✅ Done! sum(${checks.map(c => c ? '1' : '0').join(' + ')}) = ${total}`;
+                document.getElementById('stepBtn').disabled = true;
+                stopAuto();
+                return;
+            }
+            
+            const s = stones[index];
+            const isJewel = jewels.includes(s);
+            checks.push(isJewel);
+            
+            document.getElementById('statusMessage').textContent = 
+                `'${s}' in "${jewels}" → ${isJewel}`;
+            
+            const total = checks.filter(c => c).length;
+            document.getElementById('resultBox').textContent = `sum(...) = ${total}`;
+            
+            index++;
+            renderStones();
+        }
+        
+        function toggleAuto() {
+            if (autoInterval) { stopAuto(); }
+            else {
+                document.getElementById('autoBtn').textContent = 'Pause';
+                autoInterval = setInterval(() => {
+                    if (index >= stones.length) {
+                        step();
+                        stopAuto();
+                    } else {
+                        step();
+                    }
+                }, 600);
+            }
+        }
+        
+        function stopAuto() {
+            if (autoInterval) { clearInterval(autoInterval); autoInterval = null; }
+            document.getElementById('autoBtn').textContent = 'Auto Run';
+        }
+        
+        function reset() {
+            stopAuto();
+            document.getElementById('stepBtn').disabled = false;
+            document.getElementById('statusMessage').textContent = 'J = "aA", S = "aAAbbbb". Check each stone: is it in J?';
+            document.getElementById('expressionDisplay').textContent = 'sum(s in "aA" for s in "aAAbbbb")';
+            init();
+        }
+        
+        init();
+    </script>
+</body>
+</html>

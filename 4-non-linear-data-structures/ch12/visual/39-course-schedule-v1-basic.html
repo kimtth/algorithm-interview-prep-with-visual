@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Q39: Course Schedule - Basic DFS</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f5f7fa; min-height: 100vh; padding: 20px; }
+        .container { max-width: 1200px; margin: 0 auto; }
+        
+        .problem-info { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 16px; padding: 25px 30px; margin-bottom: 25px; color: white; }
+        .problem-info h1 { font-size: 1.8em; margin-bottom: 10px; }
+        .problem-info p { font-size: 1.1em; opacity: 0.95; line-height: 1.6; }
+        .problem-meta { display: flex; gap: 20px; margin-top: 15px; flex-wrap: wrap; }
+        .meta-tag { background: rgba(255,255,255,0.2); padding: 6px 14px; border-radius: 20px; font-size: 0.9em; }
+        
+        .code-section { background: white; border-radius: 16px; padding: 25px; margin-bottom: 25px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
+        .code-section h3 { color: #333; margin-bottom: 15px; }
+        .code-block { background: #1e1e1e; border-radius: 12px; padding: 20px; overflow-x: auto; }
+        .code-block pre { margin: 0; font-family: 'Consolas', monospace; font-size: 13px; line-height: 1.5; color: #d4d4d4; }
+        .code-block .keyword { color: #569cd6; }
+        .code-block .function { color: #dcdcaa; }
+        .code-block .comment { color: #6a9955; }
+        
+        .visualization-section { background: white; border-radius: 16px; padding: 25px; margin-bottom: 25px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
+        .visualization-section h3 { color: #333; margin-bottom: 20px; }
+        
+        .controls { display: flex; gap: 12px; margin-bottom: 25px; flex-wrap: wrap; }
+        .btn { padding: 12px 28px; font-size: 1em; border: none; border-radius: 10px; cursor: pointer; font-weight: 500; }
+        .btn-primary { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; }
+        .btn-success { background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); color: white; }
+        .btn-warning { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white; }
+        .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        
+        .status-message { background: #e8f4fd; border-left: 4px solid #2196f3; padding: 15px 20px; border-radius: 0 10px 10px 0; margin-bottom: 20px; color: #1565c0; }
+        
+        .prereq-display { padding: 15px; background: #f9f9f9; border-radius: 12px; margin-bottom: 20px; }
+        .prereq-title { font-weight: 600; color: #555; margin-bottom: 10px; }
+        .prereq-item { display: inline-block; padding: 6px 12px; background: white; border-radius: 6px; margin: 4px; font-family: monospace; }
+        
+        .sets-section { display: flex; gap: 20px; margin-bottom: 20px; flex-wrap: wrap; }
+        .set-box { flex: 1; min-width: 200px; padding: 15px; border-radius: 12px; }
+        .set-box.traced { background: #fff3e0; }
+        .set-box.result { background: #e8f5e9; }
+        .set-title { font-weight: 600; margin-bottom: 10px; color: #555; }
+        .set-items { display: flex; gap: 8px; flex-wrap: wrap; }
+        .set-item { width: 35px; height: 35px; display: flex; justify-content: center; align-items: center; border-radius: 50%; font-weight: 600; }
+        .set-box.traced .set-item { background: #ff9800; color: white; }
+        .set-box.result .set-item { background: #4caf50; color: white; }
+        
+        #graphCanvas { width: 100%; height: 300px; margin-top: 20px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="problem-info">
+            <h1>Q39: Course Schedule - Basic DFS</h1>
+            <p>Determine if you can finish all courses given prerequisites. Detect if there's a cycle in the dependency graph.</p>
+            <div class="problem-meta">
+                <span class="meta-tag">📁 Graph / DFS</span>
+                <span class="meta-tag">⏱️ O(V + E)</span>
+                <span class="meta-tag">💡 Cycle Detection</span>
+            </div>
+        </div>
+        
+        <div class="code-section">
+            <h3>💻 Python Solution (Basic DFS)</h3>
+            <div class="code-block">
+                <pre><span class="keyword">def</span> <span class="function">canFinish</span>(numCourses: int, prerequisites: List[List[int]]) -> bool:
+    graph = collections.defaultdict(list)
+    <span class="keyword">for</span> x, y <span class="keyword">in</span> prerequisites:
+        graph[x].append(y)
+
+    traced = set()  <span class="comment"># Currently in DFS path</span>
+
+    <span class="keyword">def</span> <span class="function">dfs</span>(i):
+        <span class="keyword">if</span> i <span class="keyword">in</span> traced:
+            <span class="keyword">return</span> False  <span class="comment"># Cycle detected!</span>
+
+        traced.add(i)
+        <span class="keyword">for</span> y <span class="keyword">in</span> graph[i]:
+            <span class="keyword">if not</span> dfs(y):
+                <span class="keyword">return</span> False
+        traced.remove(i)  <span class="comment"># Backtrack</span>
+        <span class="keyword">return</span> True
+
+    <span class="keyword">for</span> x <span class="keyword">in</span> list(graph):
+        <span class="keyword">if not</span> dfs(x):
+            <span class="keyword">return</span> False
+    <span class="keyword">return</span> True</pre>
+            </div>
+        </div>
+        
+        <div class="visualization-section">
+            <h3>🎬 Visualization</h3>
+            
+            <div class="controls">
+                <button class="btn btn-primary" id="stepBtn" onclick="step()">Step</button>
+                <button class="btn btn-success" id="autoBtn" onclick="toggleAuto()">Auto Run</button>
+                <button class="btn btn-warning" onclick="reset()">Reset</button>
+            </div>
+            
+            <div class="status-message" id="statusMessage">
+                numCourses = 4, prerequisites = [[1,0],[2,0],[3,1],[3,2]]. Can we finish all?
+            </div>
+            
+            <div class="prereq-display">
+                <div class="prereq-title">Prerequisites (course → requires):</div>
+                <div id="prereqItems"></div>
+            </div>
+            
+            <div class="sets-section">
+                <div class="set-box traced">
+                    <div class="set-title">Traced (current DFS path)</div>
+                    <div class="set-items" id="tracedItems"></div>
+                </div>
+            </div>
+            
+            <svg id="graphCanvas"></svg>
+        </div>
+    </div>
+
+    <script>
+        const numCourses = 4;
+        const prerequisites = [[1,0],[2,0],[3,1],[3,2]];
+        let graph = {};
+        let traced = new Set();
+        let stack = [];
+        let currentNode = -1;
+        let courseIndex = 0;
+        let courses = [];
+        let autoInterval = null;
+        let finished = false;
+        
+        function init() {
+            graph = {};
+            prerequisites.forEach(([x, y]) => {
+                if (!graph[x]) graph[x] = [];
+                graph[x].push(y);
+            });
+            courses = Object.keys(graph).map(Number);
+            
+            traced = new Set();
+            stack = [];
+            currentNode = -1;
+            courseIndex = 0;
+            finished = false;
+            
+            // Render prerequisites
+            const prereqContainer = document.getElementById('prereqItems');
+            prereqContainer.innerHTML = '';
+            prerequisites.forEach(([x, y]) => {
+                const item = document.createElement('span');
+                item.className = 'prereq-item';
+                item.textContent = `${x} → ${y}`;
+                prereqContainer.appendChild(item);
+            });
+            
+            render();
+        }
+        
+        function render() {
+            // Traced set
+            const tracedContainer = document.getElementById('tracedItems');
+            tracedContainer.innerHTML = '';
+            traced.forEach(n => {
+                const item = document.createElement('div');
+                item.className = 'set-item';
+                item.textContent = n;
+                tracedContainer.appendChild(item);
+            });
+            
+            renderGraph();
+        }
+        
+        function renderGraph() {
+            const svg = d3.select('#graphCanvas');
+            svg.selectAll('*').remove();
+            
+            const width = svg.node().getBoundingClientRect().width || 800;
+            const height = 300;
+            svg.attr('height', height);
+            
+            const positions = {
+                0: {x: width * 0.5, y: 50},
+                1: {x: width * 0.3, y: 150},
+                2: {x: width * 0.7, y: 150},
+                3: {x: width * 0.5, y: 250}
+            };
+            
+            // Arrow marker
+            svg.append('defs').append('marker')
+                .attr('id', 'arrow')
+                .attr('viewBox', '0 0 10 10')
+                .attr('refX', 25)
+                .attr('refY', 5)
+                .attr('markerWidth', 6)
+                .attr('markerHeight', 6)
+                .attr('orient', 'auto')
+                .append('path')
+                .attr('d', 'M 0 0 L 10 5 L 0 10 z')
+                .attr('fill', '#667eea');
+            
+            // Draw edges
+            prerequisites.forEach(([from, to]) => {
+                const p1 = positions[from];
+                const p2 = positions[to];
+                svg.append('line')
+                    .attr('x1', p1.x)
+                    .attr('y1', p1.y)
+                    .attr('x2', p2.x)
+                    .attr('y2', p2.y)
+                    .attr('stroke', traced.has(from) && traced.has(to) ? '#ff9800' : '#667eea')
+                    .attr('stroke-width', 2)
+                    .attr('marker-end', 'url(#arrow)');
+            });
+            
+            // Draw nodes
+            for (let i = 0; i < numCourses; i++) {
+                const pos = positions[i];
+                svg.append('circle')
+                    .attr('cx', pos.x)
+                    .attr('cy', pos.y)
+                    .attr('r', 25)
+                    .attr('fill', traced.has(i) ? '#ff9800' : (i === currentNode ? '#4caf50' : '#667eea'));
+                
+                svg.append('text')
+                    .attr('x', pos.x)
+                    .attr('y', pos.y + 5)
+                    .attr('text-anchor', 'middle')
+                    .attr('fill', 'white')
+                    .attr('font-weight', 'bold')
+                    .attr('font-size', '16px')
+                    .text(i);
+            }
+        }
+        
+        function step() {
+            if (finished) return;
+            
+            if (stack.length === 0) {
+                if (courseIndex >= courses.length) {
+                    document.getElementById('statusMessage').textContent = 
+                        '✅ No cycle found! Can finish all courses.';
+                    document.getElementById('stepBtn').disabled = true;
+                    stopAuto();
+                    finished = true;
+                    return;
+                }
+                
+                const course = courses[courseIndex];
+                stack.push({node: course, childIdx: 0});
+                traced.add(course);
+                currentNode = course;
+                document.getElementById('statusMessage').textContent = 
+                    `Starting DFS from course ${course}`;
+                render();
+                return;
+            }
+            
+            const state = stack[stack.length - 1];
+            const neighbors = graph[state.node] || [];
+            
+            if (state.childIdx >= neighbors.length) {
+                // Done with this node
+                traced.delete(state.node);
+                stack.pop();
+                
+                if (stack.length === 0) {
+                    courseIndex++;
+                    document.getElementById('statusMessage').textContent = 
+                        `Finished exploring from course ${state.node}`;
+                } else {
+                    currentNode = stack[stack.length - 1].node;
+                    document.getElementById('statusMessage').textContent = 
+                        `Backtracking from ${state.node}`;
+                }
+                render();
+                return;
+            }
+            
+            const nextNode = neighbors[state.childIdx];
+            state.childIdx++;
+            
+            if (traced.has(nextNode)) {
+                document.getElementById('statusMessage').textContent = 
+                    `❌ Cycle detected! ${nextNode} already in path. Cannot finish courses.`;
+                document.getElementById('stepBtn').disabled = true;
+                stopAuto();
+                finished = true;
+                return;
+            }
+            
+            traced.add(nextNode);
+            stack.push({node: nextNode, childIdx: 0});
+            currentNode = nextNode;
+            document.getElementById('statusMessage').textContent = 
+                `Visiting ${nextNode} (prerequisite of ${state.node})`;
+            render();
+        }
+        
+        function toggleAuto() {
+            if (autoInterval) { stopAuto(); }
+            else {
+                document.getElementById('autoBtn').textContent = 'Pause';
+                autoInterval = setInterval(step, 600);
+            }
+        }
+        
+        function stopAuto() {
+            if (autoInterval) { clearInterval(autoInterval); autoInterval = null; }
+            document.getElementById('autoBtn').textContent = 'Auto Run';
+        }
+        
+        function reset() {
+            stopAuto();
+            document.getElementById('stepBtn').disabled = false;
+            document.getElementById('statusMessage').textContent = 'numCourses = 4, prerequisites = [[1,0],[2,0],[3,1],[3,2]]. Can we finish all?';
+            init();
+        }
+        
+        init();
+    </script>
+</body>
+</html>

@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Q41: Cheapest Flights Within K Stops</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f5f7fa; min-height: 100vh; padding: 20px; }
+        .container { max-width: 1200px; margin: 0 auto; }
+        
+        .problem-info { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 16px; padding: 25px 30px; margin-bottom: 25px; color: white; }
+        .problem-info h1 { font-size: 1.8em; margin-bottom: 10px; }
+        .problem-info p { font-size: 1.1em; opacity: 0.95; line-height: 1.6; }
+        .problem-meta { display: flex; gap: 20px; margin-top: 15px; flex-wrap: wrap; }
+        .meta-tag { background: rgba(255,255,255,0.2); padding: 6px 14px; border-radius: 20px; font-size: 0.9em; }
+        
+        .code-section { background: white; border-radius: 16px; padding: 25px; margin-bottom: 25px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
+        .code-section h3 { color: #333; margin-bottom: 15px; }
+        .code-block { background: #1e1e1e; border-radius: 12px; padding: 20px; overflow-x: auto; }
+        .code-block pre { margin: 0; font-family: 'Consolas', monospace; font-size: 13px; line-height: 1.5; color: #d4d4d4; }
+        .code-block .keyword { color: #569cd6; }
+        .code-block .function { color: #dcdcaa; }
+        .code-block .comment { color: #6a9955; }
+        .code-block .number { color: #b5cea8; }
+        
+        .visualization-section { background: white; border-radius: 16px; padding: 25px; margin-bottom: 25px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
+        .visualization-section h3 { color: #333; margin-bottom: 20px; }
+        
+        .controls { display: flex; gap: 12px; margin-bottom: 25px; flex-wrap: wrap; }
+        .btn { padding: 12px 28px; font-size: 1em; border: none; border-radius: 10px; cursor: pointer; font-weight: 500; transition: all 0.2s; }
+        .btn-primary { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; }
+        .btn-success { background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); color: white; }
+        .btn-warning { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white; }
+        .btn:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+        .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+        
+        .status-message { background: #e8f4fd; border-left: 4px solid #2196f3; padding: 15px 20px; border-radius: 0 10px 10px 0; margin-bottom: 20px; color: #1565c0; }
+        
+        .graph-container { display: flex; justify-content: center; margin-bottom: 20px; }
+        svg { background: #fafafa; border-radius: 12px; border: 1px solid #e0e0e0; }
+        
+        .info-section { display: flex; gap: 20px; flex-wrap: wrap; margin-bottom: 20px; }
+        .info-box { padding: 15px 25px; border-radius: 12px; background: #f9f9f9; }
+        .info-label { font-size: 0.85em; color: #666; margin-bottom: 5px; }
+        .info-value { font-size: 1.3em; font-weight: 600; color: #333; }
+        .info-box.src { background: #e8f5e9; }
+        .info-box.dst { background: #fff3e0; }
+        .info-box.stops { background: #e3f2fd; }
+        
+        .data-display { padding: 20px; background: #f3e5f5; border-radius: 12px; margin-bottom: 20px; }
+        .data-title { font-size: 0.9em; font-weight: 600; color: #7b1fa2; margin-bottom: 12px; }
+        .queue-items { display: flex; flex-wrap: wrap; gap: 8px; }
+        .queue-item { padding: 8px 14px; background: white; border: 2px solid #9c27b0; border-radius: 8px; font-weight: 500; font-size: 0.9em; }
+        .queue-item.processing { background: #f3e5f5; border-color: #7b1fa2; }
+        
+        .legend { display: flex; gap: 20px; margin-bottom: 15px; flex-wrap: wrap; }
+        .legend-item { display: flex; align-items: center; gap: 8px; font-size: 0.9em; }
+        .legend-circle { width: 18px; height: 18px; border-radius: 50%; }
+        
+        .result-box { padding: 20px; background: #e8f5e9; border-radius: 12px; text-align: center; display: none; }
+        .result-box.error { background: #ffebee; }
+        .result-value { font-size: 1.5em; font-weight: 600; color: #2e7d32; }
+        .result-box.error .result-value { color: #c62828; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="problem-info">
+            <h1>Q41: Cheapest Flights Within K Stops</h1>
+            <p>Find the cheapest price to fly from source to destination with at most K stops. Modified Dijkstra with stop count tracking.</p>
+            <div class="problem-meta">
+                <span class="meta-tag">📁 Graph</span>
+                <span class="meta-tag">⏱️ O(E·K)</span>
+                <span class="meta-tag">💡 Modified Dijkstra</span>
+            </div>
+        </div>
+        
+        <div class="code-section">
+            <h3>💻 Python Solution</h3>
+            <div class="code-block">
+                <pre><span class="keyword">def</span> <span class="function">findCheapestPrice</span>(n: int, flights: List, src: int, dst: int, K: int) -> int:
+    graph = collections.defaultdict(list)
+    <span class="keyword">for</span> u, v, w <span class="keyword">in</span> flights:
+        graph[u].append((v, w))
+    
+    <span class="comment"># Queue: (price, node, remaining_stops)</span>
+    Q = [(<span class="number">0</span>, src, K)]
+    
+    <span class="keyword">while</span> Q:
+        price, node, k = heapq.heappop(Q)
+        <span class="keyword">if</span> node == dst:
+            <span class="keyword">return</span> price
+        <span class="keyword">if</span> k >= <span class="number">0</span>:
+            <span class="keyword">for</span> v, w <span class="keyword">in</span> graph[node]:
+                alt = price + w
+                heapq.heappush(Q, (alt, v, k - <span class="number">1</span>))
+    <span class="keyword">return</span> -<span class="number">1</span></pre>
+            </div>
+        </div>
+        
+        <div class="visualization-section">
+            <h3>🎬 Visualization</h3>
+            
+            <div class="controls">
+                <button class="btn btn-primary" id="stepBtn" onclick="step()">Step</button>
+                <button class="btn btn-success" id="autoBtn" onclick="toggleAuto()">Auto Run</button>
+                <button class="btn btn-warning" onclick="reset()">Reset</button>
+            </div>
+            
+            <div class="info-section">
+                <div class="info-box src">
+                    <div class="info-label">Source</div>
+                    <div class="info-value">0</div>
+                </div>
+                <div class="info-box dst">
+                    <div class="info-label">Destination</div>
+                    <div class="info-value">2</div>
+                </div>
+                <div class="info-box stops">
+                    <div class="info-label">Max Stops (K)</div>
+                    <div class="info-value">1</div>
+                </div>
+            </div>
+            
+            <div class="legend">
+                <div class="legend-item"><div class="legend-circle" style="background: #3498db;"></div> Normal</div>
+                <div class="legend-item"><div class="legend-circle" style="background: #27ae60;"></div> Source</div>
+                <div class="legend-item"><div class="legend-circle" style="background: #e74c3c;"></div> Destination</div>
+                <div class="legend-item"><div class="legend-circle" style="background: #f39c12;"></div> Current</div>
+            </div>
+            
+            <div class="status-message" id="statusMessage">
+                Find cheapest flight from 0 to 2 with at most 1 stop.
+            </div>
+            
+            <div class="graph-container">
+                <svg id="graph" width="500" height="300"></svg>
+            </div>
+            
+            <div class="data-display">
+                <div class="data-title">📚 Priority Queue (price, node, remaining_stops)</div>
+                <div class="queue-items" id="queueDisplay"><span style="color:#999">Empty</span></div>
+            </div>
+            
+            <div class="result-box" id="resultBox">
+                <div class="result-value" id="resultValue"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Example: 3 nodes, flights [[0,1,100],[1,2,100],[0,2,500]], src=0, dst=2, K=1
+        const nodes = [
+            {id: 0, x: 100, y: 150},
+            {id: 1, x: 250, y: 80},
+            {id: 2, x: 400, y: 150}
+        ];
+        
+        const edges = [
+            {from: 0, to: 1, weight: 100},
+            {from: 1, to: 2, weight: 100},
+            {from: 0, to: 2, weight: 500}
+        ];
+        
+        const src = 0;
+        const dst = 2;
+        const K = 1;
+        
+        let heap = [];
+        let currentNode = -1;
+        let done = false;
+        let result = null;
+        let autoInterval = null;
+        
+        function init() {
+            heap = [[0, src, K]];
+            currentNode = -1;
+            done = false;
+            result = null;
+            renderGraph();
+            renderQueue();
+        }
+        
+        function renderGraph(highlightEdge = null) {
+            const svg = d3.select("#graph");
+            svg.selectAll("*").remove();
+            
+            // Arrow marker
+            svg.append("defs").append("marker")
+                .attr("id", "arrow")
+                .attr("viewBox", "0 -5 10 10")
+                .attr("refX", 8)
+                .attr("refY", 0)
+                .attr("markerWidth", 6)
+                .attr("markerHeight", 6)
+                .attr("orient", "auto")
+                .append("path")
+                .attr("d", "M0,-5L10,0L0,5")
+                .attr("fill", "#666");
+            
+            // Draw edges
+            edges.forEach(e => {
+                const from = nodes.find(n => n.id === e.from);
+                const to = nodes.find(n => n.id === e.to);
+                
+                let color = "#666";
+                let width = 2;
+                if (highlightEdge && highlightEdge.from === e.from && highlightEdge.to === e.to) {
+                    color = "#f39c12";
+                    width = 3;
+                }
+                
+                const dx = to.x - from.x;
+                const dy = to.y - from.y;
+                const len = Math.sqrt(dx*dx + dy*dy);
+                const ux = dx / len;
+                const uy = dy / len;
+                
+                // Curve for 0->2 edge
+                if (e.from === 0 && e.to === 2) {
+                    const midX = (from.x + to.x) / 2;
+                    const midY = (from.y + to.y) / 2 + 60;
+                    
+                    svg.append("path")
+                        .attr("d", `M${from.x + 20},${from.y + 20} Q${midX},${midY} ${to.x - 20},${to.y + 20}`)
+                        .attr("fill", "none")
+                        .attr("stroke", color)
+                        .attr("stroke-width", width)
+                        .attr("marker-end", "url(#arrow)");
+                    
+                    svg.append("text")
+                        .attr("x", midX)
+                        .attr("y", midY + 20)
+                        .attr("text-anchor", "middle")
+                        .attr("font-size", "14px")
+                        .attr("font-weight", "bold")
+                        .attr("fill", "#e74c3c")
+                        .text("$" + e.weight);
+                } else {
+                    svg.append("line")
+                        .attr("x1", from.x + ux * 30)
+                        .attr("y1", from.y + uy * 30)
+                        .attr("x2", to.x - ux * 35)
+                        .attr("y2", to.y - uy * 35)
+                        .attr("stroke", color)
+                        .attr("stroke-width", width)
+                        .attr("marker-end", "url(#arrow)");
+                    
+                    svg.append("text")
+                        .attr("x", (from.x + to.x) / 2 + 12)
+                        .attr("y", (from.y + to.y) / 2 - 10)
+                        .attr("font-size", "14px")
+                        .attr("font-weight", "bold")
+                        .attr("fill", "#e74c3c")
+                        .text("$" + e.weight);
+                }
+            });
+            
+            // Draw nodes
+            nodes.forEach(node => {
+                let fill = "#3498db";
+                if (node.id === src) fill = "#27ae60";
+                if (node.id === dst) fill = "#e74c3c";
+                if (node.id === currentNode) fill = "#f39c12";
+                
+                svg.append("circle")
+                    .attr("cx", node.x)
+                    .attr("cy", node.y)
+                    .attr("r", 28)
+                    .attr("fill", fill)
+                    .attr("stroke", "#333")
+                    .attr("stroke-width", 2);
+                
+                svg.append("text")
+                    .attr("x", node.x)
+                    .attr("y", node.y + 6)
+                    .attr("text-anchor", "middle")
+                    .attr("font-size", "18px")
+                    .attr("font-weight", "bold")
+                    .attr("fill", "white")
+                    .text(node.id);
+                
+                // Labels
+                if (node.id === src) {
+                    svg.append("text")
+                        .attr("x", node.x)
+                        .attr("y", node.y - 38)
+                        .attr("text-anchor", "middle")
+                        .attr("font-size", "12px")
+                        .attr("font-weight", "bold")
+                        .attr("fill", "#27ae60")
+                        .text("SRC");
+                }
+                if (node.id === dst) {
+                    svg.append("text")
+                        .attr("x", node.x)
+                        .attr("y", node.y - 38)
+                        .attr("text-anchor", "middle")
+                        .attr("font-size", "12px")
+                        .attr("font-weight", "bold")
+                        .attr("fill", "#e74c3c")
+                        .text("DST");
+                }
+            });
+        }
+        
+        function renderQueue() {
+            const container = document.getElementById('queueDisplay');
+            if (heap.length === 0) {
+                container.innerHTML = '<span style="color:#999">Empty</span>';
+            } else {
+                const sorted = [...heap].sort((a, b) => a[0] - b[0]);
+                container.innerHTML = sorted.map(([p, n, k], i) => 
+                    `<div class="queue-item${i === 0 ? ' processing' : ''}">(${p}, ${n}, ${k})</div>`
+                ).join('');
+            }
+        }
+        
+        function step() {
+            if (done) {
+                document.getElementById('stepBtn').disabled = true;
+                stopAuto();
+                return;
+            }
+            
+            if (heap.length === 0) {
+                done = true;
+                document.getElementById('statusMessage').textContent = 
+                    `❌ No path found within ${K} stops!`;
+                document.getElementById('resultBox').style.display = 'block';
+                document.getElementById('resultBox').classList.add('error');
+                document.getElementById('resultValue').textContent = 'Return -1';
+                document.getElementById('stepBtn').disabled = true;
+                stopAuto();
+                return;
+            }
+            
+            heap.sort((a, b) => a[0] - b[0]);
+            const [price, node, k] = heap.shift();
+            currentNode = node;
+            
+            if (node === dst) {
+                done = true;
+                result = price;
+                document.getElementById('statusMessage').textContent = 
+                    `✅ Reached destination! Cheapest price = $${price}`;
+                document.getElementById('resultBox').style.display = 'block';
+                document.getElementById('resultValue').textContent = `Cheapest Price: $${price}`;
+                document.getElementById('stepBtn').disabled = true;
+                stopAuto();
+                renderGraph();
+                renderQueue();
+                return;
+            }
+            
+            if (k >= 0) {
+                edges.filter(e => e.from === node).forEach(e => {
+                    heap.push([price + e.weight, e.to, k - 1]);
+                });
+                document.getElementById('statusMessage').textContent = 
+                    `At node ${node} (price=$${price}, ${k} stops remaining). Added neighbors.`;
+            } else {
+                document.getElementById('statusMessage').textContent = 
+                    `At node ${node} (price=$${price}), no stops remaining. Cannot explore further.`;
+            }
+            
+            renderGraph();
+            renderQueue();
+        }
+        
+        function toggleAuto() {
+            if (autoInterval) { stopAuto(); }
+            else {
+                document.getElementById('autoBtn').textContent = 'Pause';
+                autoInterval = setInterval(step, 800);
+            }
+        }
+        
+        function stopAuto() {
+            if (autoInterval) { clearInterval(autoInterval); autoInterval = null; }
+            document.getElementById('autoBtn').textContent = 'Auto Run';
+        }
+        
+        function reset() {
+            stopAuto();
+            document.getElementById('stepBtn').disabled = false;
+            document.getElementById('statusMessage').textContent = 
+                'Find cheapest flight from 0 to 2 with at most 1 stop.';
+            document.getElementById('resultBox').style.display = 'none';
+            document.getElementById('resultBox').classList.remove('error');
+            init();
+        }
+        
+        init();
+    </script>
+</body>
+</html>

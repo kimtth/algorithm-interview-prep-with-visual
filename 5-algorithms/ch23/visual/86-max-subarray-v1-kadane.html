@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Maximum Subarray - Kadane's Algorithm</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; padding: 20px; }
+        .container { max-width: 900px; margin: 0 auto; }
+        h1 { text-align: center; color: white; margin-bottom: 10px; }
+        .subtitle { text-align: center; color: rgba(255,255,255,0.9); margin-bottom: 20px; font-size: 14px; }
+        .controls { display: flex; justify-content: center; gap: 15px; margin-bottom: 20px; }
+        button { background: white; color: #667eea; border: none; padding: 10px 25px; border-radius: 25px; cursor: pointer; font-weight: 600; }
+        button:disabled { opacity: 0.5; cursor: not-allowed; }
+        .panel { background: white; border-radius: 15px; padding: 20px; margin-bottom: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
+        .panel-title { font-size: 16px; font-weight: bold; color: #333; margin-bottom: 15px; border-bottom: 2px solid #667eea; padding-bottom: 10px; }
+        .array-container { display: flex; justify-content: center; gap: 5px; margin: 20px 0; }
+        .array-item { width: 55px; height: 60px; display: flex; flex-direction: column; align-items: center; justify-content: center; border-radius: 10px; font-weight: bold; transition: all 0.3s; }
+        .array-item .value { font-size: 18px; }
+        .array-item .index { font-size: 10px; color: #999; }
+        .default { background: #f5f7fa; border: 2px solid #ddd; }
+        .current { background: #2196f3; color: white; border: 2px solid #1976d2; }
+        .in-max { background: #4caf50; color: white; border: 2px solid #2e7d32; }
+        .in-current-sum { background: #ff9800; color: white; border: 2px solid #f57c00; }
+        .info-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; text-align: center; }
+        .info-item { background: #f5f7fa; padding: 15px; border-radius: 10px; }
+        .info-label { font-size: 12px; color: #666; }
+        .info-value { font-size: 28px; font-weight: bold; color: #667eea; }
+        .info-value.positive { color: #4caf50; }
+        .info-value.negative { color: #f44336; }
+        .formula { text-align: center; padding: 15px; background: #f5f7fa; border-radius: 10px; font-family: monospace; margin: 15px 0; }
+        .result-box { text-align: center; padding: 20px; background: linear-gradient(135deg, #667eea, #764ba2); border-radius: 10px; color: white; }
+        .result-value { font-size: 48px; font-weight: bold; }
+        .status-box { background: #f5f7fa; border-radius: 10px; padding: 15px; font-family: monospace; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📈 Maximum Subarray</h1>
+        <p class="subtitle">Kadane's Algorithm O(n) - Track current sum and max sum</p>
+
+        <div class="controls">
+            <button id="stepBtn">Step</button>
+            <button id="autoBtn">Auto Run</button>
+            <button id="resetBtn">Reset</button>
+        </div>
+
+        <div class="panel">
+            <div class="panel-title">📊 Array</div>
+            <div class="array-container" id="array"></div>
+            <div class="formula" id="formula">currentSum = max(nums[i], currentSum + nums[i])</div>
+        </div>
+
+        <div class="panel">
+            <div class="panel-title">📊 Current State</div>
+            <div class="info-grid">
+                <div class="info-item">
+                    <div class="info-label">Current Index</div>
+                    <div class="info-value" id="idx-val">0</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Current Sum</div>
+                    <div class="info-value" id="cur-sum">0</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Max Sum</div>
+                    <div class="info-value positive" id="max-sum">-∞</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="panel">
+            <div class="panel-title">🏆 Maximum Subarray Sum</div>
+            <div class="result-box">
+                <div class="result-value" id="result">?</div>
+            </div>
+        </div>
+
+        <div class="panel">
+            <div class="panel-title">📋 Status</div>
+            <div class="status-box" id="status">At each position: extend current subarray or start new one. Track maximum.</div>
+        </div>
+    </div>
+
+    <script>
+        const nums = [-2, 1, -3, 4, -1, 2, 1, -5, 4];
+        let idx = 0;
+        let currentSum = 0;
+        let maxSum = -Infinity;
+        let maxStart = 0, maxEnd = 0;
+        let curStart = 0;
+        let done = false;
+        let autoInterval = null;
+
+        function render() {
+            document.getElementById('array').innerHTML = nums.map((v, i) => {
+                let cls = 'array-item default';
+                if (i >= maxStart && i <= maxEnd && done) cls = 'array-item in-max';
+                else if (i === idx && !done) cls = 'array-item current';
+                return `<div class="${cls}"><span class="value">${v}</span><span class="index">[${i}]</span></div>`;
+            }).join('');
+
+            document.getElementById('idx-val').textContent = idx;
+            document.getElementById('cur-sum').textContent = currentSum;
+            document.getElementById('cur-sum').className = `info-value ${currentSum >= 0 ? 'positive' : 'negative'}`;
+            document.getElementById('max-sum').textContent = maxSum === -Infinity ? '-∞' : maxSum;
+            document.getElementById('result').textContent = done ? maxSum : '?';
+        }
+
+        function step() {
+            if (done) return;
+
+            if (idx >= nums.length) {
+                done = true;
+                document.getElementById('status').innerHTML = 
+                    `✅ Maximum subarray sum: ${maxSum} (indices ${maxStart} to ${maxEnd})`;
+                document.getElementById('formula').textContent = `Max subarray: [${nums.slice(maxStart, maxEnd + 1).join(', ')}]`;
+                document.getElementById('stepBtn').disabled = true;
+                document.getElementById('autoBtn').disabled = true;
+                stopAuto();
+                render();
+                return;
+            }
+
+            const val = nums[idx];
+            const extend = currentSum + val;
+            const startNew = val;
+
+            if (startNew > extend) {
+                currentSum = startNew;
+                curStart = idx;
+                document.getElementById('status').innerHTML = 
+                    `Index ${idx}: ${val} > ${extend}. Start new subarray at ${idx}. currentSum = ${currentSum}`;
+            } else {
+                currentSum = extend;
+                document.getElementById('status').innerHTML = 
+                    `Index ${idx}: ${extend} ≥ ${val}. Extend subarray. currentSum = ${currentSum}`;
+            }
+
+            if (currentSum > maxSum) {
+                maxSum = currentSum;
+                maxStart = curStart;
+                maxEnd = idx;
+                document.getElementById('status').innerHTML += ` New max: ${maxSum}!`;
+            }
+
+            document.getElementById('formula').textContent = 
+                `max(${val}, ${extend > val ? extend - val : currentSum - val} + ${val}) = ${currentSum}`;
+
+            idx++;
+            render();
+        }
+
+        function reset() {
+            stopAuto();
+            idx = 0;
+            currentSum = 0;
+            maxSum = -Infinity;
+            maxStart = 0; maxEnd = 0;
+            curStart = 0;
+            done = false;
+            document.getElementById('formula').textContent = 'currentSum = max(nums[i], currentSum + nums[i])';
+            document.getElementById('stepBtn').disabled = false;
+            document.getElementById('autoBtn').disabled = false;
+            document.getElementById('status').innerHTML = 'At each position: extend current subarray or start new one. Track maximum.';
+            render();
+        }
+
+        function stopAuto() {
+            if (autoInterval) { clearInterval(autoInterval); autoInterval = null; }
+            document.getElementById('autoBtn').textContent = 'Auto Run';
+        }
+
+        document.getElementById('stepBtn').onclick = () => { stopAuto(); step(); };
+        document.getElementById('autoBtn').onclick = () => {
+            if (autoInterval) { stopAuto(); }
+            else { autoInterval = setInterval(step, 700); document.getElementById('autoBtn').textContent = '⏸ Pause'; }
+        };
+        document.getElementById('resetBtn').onclick = reset;
+
+        render();
+    </script>
+</body>
+</html>

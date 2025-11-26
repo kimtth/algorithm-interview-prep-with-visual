@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Merge Intervals</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; padding: 20px; }
+        .container { max-width: 1200px; margin: 0 auto; }
+        h1 { text-align: center; color: white; margin-bottom: 10px; text-shadow: 2px 2px 4px rgba(0,0,0,0.3); }
+        .subtitle { text-align: center; color: rgba(255,255,255,0.9); margin-bottom: 20px; font-size: 14px; }
+        .controls { display: flex; justify-content: center; gap: 15px; margin-bottom: 20px; flex-wrap: wrap; }
+        button { background: white; color: #667eea; border: none; padding: 10px 25px; border-radius: 25px; cursor: pointer; font-weight: 600; transition: all 0.3s; }
+        button:hover { transform: scale(1.05); box-shadow: 0 5px 20px rgba(0,0,0,0.2); }
+        button:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+        .panel { background: white; border-radius: 15px; padding: 20px; margin-bottom: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
+        .panel-title { font-size: 16px; font-weight: bold; color: #333; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 2px solid #667eea; }
+        #intervals-svg { width: 100%; height: 200px; }
+        #timeline-svg { width: 100%; height: 150px; }
+        .interval { cursor: pointer; }
+        .interval rect { rx: 5; ry: 5; }
+        .interval.active rect { stroke-width: 3; }
+        .interval text { font-size: 11px; fill: white; font-weight: bold; }
+        .status-box { background: #f5f7fa; border-radius: 10px; padding: 15px; font-family: monospace; }
+        .intervals-list { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; margin-bottom: 15px; }
+        .interval-item { padding: 8px 15px; background: #f5f7fa; border-radius: 20px; font-family: monospace; transition: all 0.3s; }
+        .interval-item.active { background: #667eea; color: white; }
+        .interval-item.merged { background: #4caf50; color: white; }
+        .interval-item.processing { background: #ff9800; color: white; }
+        .merged-list { display: flex; gap: 10px; flex-wrap: wrap; min-height: 40px; }
+        .merged-item { padding: 8px 15px; background: linear-gradient(135deg, #667eea, #764ba2); color: white; border-radius: 20px; font-family: monospace; animation: fadeIn 0.3s; }
+        @keyframes fadeIn { from { opacity: 0; transform: scale(0.8); } to { opacity: 1; transform: scale(1); } }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📊 Merge Intervals</h1>
+        <p class="subtitle">O(n log n) - Sort by start, then merge overlapping intervals</p>
+
+        <div class="controls">
+            <button id="stepBtn">Step</button>
+            <button id="autoBtn">Auto Run</button>
+            <button id="resetBtn">Reset</button>
+        </div>
+
+        <div class="panel">
+            <div class="panel-title">📝 Input Intervals (sorted by start)</div>
+            <div class="intervals-list" id="intervals"></div>
+        </div>
+
+        <div class="panel">
+            <div class="panel-title">📈 Timeline Visualization</div>
+            <svg id="timeline-svg"></svg>
+        </div>
+
+        <div class="panel">
+            <div class="panel-title">✅ Merged Result</div>
+            <div class="merged-list" id="merged"></div>
+        </div>
+
+        <div class="panel">
+            <div class="panel-title">📊 Status</div>
+            <div class="status-box" id="status">Click "Step" or "Auto Run" to start merging intervals</div>
+        </div>
+    </div>
+
+    <script>
+        const initialIntervals = [[1,3], [2,6], [8,10], [15,18]];
+        let intervals = [];
+        let merged = [];
+        let step = 0;
+        let currentIndex = 0;
+        let autoInterval = null;
+        let phase = 'sort'; // 'sort', 'process'
+
+        const colors = ['#667eea', '#764ba2', '#f093fb', '#f5576c', '#4facfe', '#43e97b'];
+
+        function initIntervals() {
+            // Sort intervals by start time
+            intervals = [...initialIntervals].sort((a, b) => a[0] - b[0]);
+            renderIntervalsList();
+        }
+
+        function renderIntervalsList() {
+            const container = document.getElementById('intervals');
+            container.innerHTML = intervals.map((iv, i) => 
+                `<div class="interval-item" id="interval-${i}">[${iv[0]}, ${iv[1]}]</div>`
+            ).join('');
+        }
+
+        function renderTimeline() {
+            const svg = d3.select('#timeline-svg');
+            svg.selectAll('*').remove();
+            
+            const width = svg.node().getBoundingClientRect().width;
+            const height = 150;
+            const margin = { left: 40, right: 40, top: 20, bottom: 40 };
+            
+            // Find max value
+            const maxVal = Math.max(...intervals.flat(), ...merged.flat());
+            const xScale = d3.scaleLinear()
+                .domain([0, maxVal + 1])
+                .range([margin.left, width - margin.right]);
+
+            const g = svg.append('g');
+
+            // Draw axis
+            g.append('line')
+                .attr('x1', margin.left)
+                .attr('x2', width - margin.right)
+                .attr('y1', height - margin.bottom)
+                .attr('y2', height - margin.bottom)
+                .attr('stroke', '#ccc')
+                .attr('stroke-width', 2);
+
+            // Tick marks
+            for (let i = 0; i <= maxVal + 1; i++) {
+                g.append('line')
+                    .attr('x1', xScale(i))
+                    .attr('x2', xScale(i))
+                    .attr('y1', height - margin.bottom)
+                    .attr('y2', height - margin.bottom + 5)
+                    .attr('stroke', '#666');
+                
+                g.append('text')
+                    .attr('x', xScale(i))
+                    .attr('y', height - margin.bottom + 20)
+                    .attr('text-anchor', 'middle')
+                    .attr('font-size', '12px')
+                    .attr('fill', '#666')
+                    .text(i);
+            }
+
+            // Draw intervals (original)
+            const intervalHeight = 25;
+            intervals.forEach((iv, i) => {
+                const isActive = i === currentIndex;
+                const isProcessed = i < currentIndex;
+                
+                g.append('rect')
+                    .attr('x', xScale(iv[0]))
+                    .attr('y', 20 + (i % 2) * 30)
+                    .attr('width', xScale(iv[1]) - xScale(iv[0]))
+                    .attr('height', intervalHeight)
+                    .attr('fill', isActive ? '#ff9800' : (isProcessed ? '#ccc' : colors[i % colors.length]))
+                    .attr('opacity', isProcessed ? 0.3 : 0.8)
+                    .attr('rx', 5);
+                
+                g.append('text')
+                    .attr('x', (xScale(iv[0]) + xScale(iv[1])) / 2)
+                    .attr('y', 20 + (i % 2) * 30 + intervalHeight / 2 + 4)
+                    .attr('text-anchor', 'middle')
+                    .attr('fill', 'white')
+                    .attr('font-size', '11px')
+                    .attr('font-weight', 'bold')
+                    .text(`[${iv[0]},${iv[1]}]`);
+            });
+
+            // Draw merged intervals
+            merged.forEach((iv, i) => {
+                g.append('rect')
+                    .attr('x', xScale(iv[0]))
+                    .attr('y', height - margin.bottom - 35)
+                    .attr('width', xScale(iv[1]) - xScale(iv[0]))
+                    .attr('height', intervalHeight)
+                    .attr('fill', '#4caf50')
+                    .attr('rx', 5);
+                
+                g.append('text')
+                    .attr('x', (xScale(iv[0]) + xScale(iv[1])) / 2)
+                    .attr('y', height - margin.bottom - 35 + intervalHeight / 2 + 4)
+                    .attr('text-anchor', 'middle')
+                    .attr('fill', 'white')
+                    .attr('font-size', '11px')
+                    .attr('font-weight', 'bold')
+                    .text(`[${iv[0]},${iv[1]}]`);
+            });
+        }
+
+        function renderMerged() {
+            const container = document.getElementById('merged');
+            container.innerHTML = merged.map(iv => 
+                `<div class="merged-item">[${iv[0]}, ${iv[1]}]</div>`
+            ).join('');
+        }
+
+        function updateIntervalStyles() {
+            intervals.forEach((_, i) => {
+                const el = document.getElementById(`interval-${i}`);
+                el.classList.remove('active', 'merged', 'processing');
+                if (i < currentIndex) el.classList.add('merged');
+                else if (i === currentIndex) el.classList.add('processing');
+            });
+        }
+
+        function executeStep() {
+            if (currentIndex >= intervals.length) {
+                document.getElementById('status').innerHTML = 
+                    `✅ Merge complete! ${intervals.length} intervals merged into ${merged.length}`;
+                document.getElementById('stepBtn').disabled = true;
+                document.getElementById('autoBtn').disabled = true;
+                stopAuto();
+                return;
+            }
+
+            const current = intervals[currentIndex];
+            updateIntervalStyles();
+
+            if (merged.length === 0) {
+                merged.push([...current]);
+                document.getElementById('status').innerHTML = 
+                    `Add first interval [${current[0]}, ${current[1]}] to merged list`;
+            } else {
+                const last = merged[merged.length - 1];
+                
+                if (current[0] <= last[1]) {
+                    // Overlapping - merge
+                    const oldEnd = last[1];
+                    last[1] = Math.max(last[1], current[1]);
+                    document.getElementById('status').innerHTML = 
+                        `Overlap! [${current[0]}, ${current[1]}] overlaps with [${last[0]}, ${oldEnd}]. ` +
+                        `Merge to [${last[0]}, ${last[1]}]`;
+                } else {
+                    // No overlap - add new
+                    merged.push([...current]);
+                    document.getElementById('status').innerHTML = 
+                        `No overlap. Add [${current[0]}, ${current[1]}] as new interval`;
+                }
+            }
+
+            currentIndex++;
+            renderTimeline();
+            renderMerged();
+        }
+
+        function reset() {
+            stopAuto();
+            merged = [];
+            currentIndex = 0;
+            phase = 'sort';
+            
+            initIntervals();
+            
+            document.getElementById('merged').innerHTML = '';
+            document.getElementById('stepBtn').disabled = false;
+            document.getElementById('autoBtn').disabled = false;
+            document.getElementById('status').innerHTML = 'Click "Step" or "Auto Run" to start merging intervals';
+            
+            renderTimeline();
+        }
+
+        function stopAuto() {
+            if (autoInterval) {
+                clearInterval(autoInterval);
+                autoInterval = null;
+                document.getElementById('autoBtn').textContent = 'Auto Run';
+            }
+        }
+
+        document.getElementById('stepBtn').addEventListener('click', () => {
+            stopAuto();
+            executeStep();
+        });
+
+        document.getElementById('autoBtn').addEventListener('click', () => {
+            if (autoInterval) {
+                stopAuto();
+            } else {
+                autoInterval = setInterval(executeStep, 800);
+                document.getElementById('autoBtn').textContent = '⏸ Pause';
+            }
+        });
+
+        document.getElementById('resetBtn').addEventListener('click', reset);
+
+        // Initialize
+        initIntervals();
+        renderTimeline();
+    </script>
+</body>
+</html>

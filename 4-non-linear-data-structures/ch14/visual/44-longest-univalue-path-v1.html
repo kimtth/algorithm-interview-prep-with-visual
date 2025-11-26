@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Q44: Longest Univalue Path</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f5f7fa; min-height: 100vh; padding: 20px; }
+        .container { max-width: 1200px; margin: 0 auto; }
+        
+        .problem-info { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 16px; padding: 25px 30px; margin-bottom: 25px; color: white; }
+        .problem-info h1 { font-size: 1.8em; margin-bottom: 10px; }
+        .problem-info p { font-size: 1.1em; opacity: 0.95; line-height: 1.6; }
+        .problem-meta { display: flex; gap: 20px; margin-top: 15px; flex-wrap: wrap; }
+        .meta-tag { background: rgba(255,255,255,0.2); padding: 6px 14px; border-radius: 20px; font-size: 0.9em; }
+        
+        .code-section { background: white; border-radius: 16px; padding: 25px; margin-bottom: 25px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
+        .code-section h3 { color: #333; margin-bottom: 15px; }
+        .code-block { background: #1e1e1e; border-radius: 12px; padding: 20px; overflow-x: auto; }
+        .code-block pre { margin: 0; font-family: 'Consolas', monospace; font-size: 12px; line-height: 1.5; color: #d4d4d4; }
+        .code-block .keyword { color: #569cd6; }
+        .code-block .function { color: #dcdcaa; }
+        .code-block .comment { color: #6a9955; }
+        
+        .visualization-section { background: white; border-radius: 16px; padding: 25px; margin-bottom: 25px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
+        .visualization-section h3 { color: #333; margin-bottom: 20px; }
+        
+        .controls { display: flex; gap: 12px; margin-bottom: 25px; flex-wrap: wrap; }
+        .btn { padding: 12px 28px; font-size: 1em; border: none; border-radius: 10px; cursor: pointer; font-weight: 500; }
+        .btn-primary { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; }
+        .btn-success { background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); color: white; }
+        .btn-warning { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white; }
+        .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        
+        .status-message { background: #e8f4fd; border-left: 4px solid #2196f3; padding: 15px 20px; border-radius: 0 10px 10px 0; margin-bottom: 20px; color: #1565c0; }
+        
+        .tree-container { display: flex; justify-content: center; margin-bottom: 20px; }
+        svg { background: #fafafa; border-radius: 12px; border: 1px solid #e0e0e0; }
+        
+        .info-section { display: flex; gap: 20px; flex-wrap: wrap; margin-bottom: 20px; justify-content: center; }
+        .info-box { padding: 15px 25px; border-radius: 12px; background: #f9f9f9; text-align: center; }
+        .info-label { font-size: 0.85em; color: #666; margin-bottom: 5px; }
+        .info-value { font-size: 1.5em; font-weight: 600; color: #333; }
+        .info-box.highlight { background: #e8f5e9; }
+        .info-box.highlight .info-value { color: #2e7d32; }
+        
+        .legend { display: flex; gap: 20px; margin-bottom: 15px; flex-wrap: wrap; justify-content: center; }
+        .legend-item { display: flex; align-items: center; gap: 8px; font-size: 0.9em; }
+        .legend-circle { width: 18px; height: 18px; border-radius: 50%; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="problem-info">
+            <h1>Q44: Longest Univalue Path</h1>
+            <p>Find the longest path where all nodes have the same value. Path is measured by number of edges.</p>
+            <div class="problem-meta">
+                <span class="meta-tag">📁 Tree</span>
+                <span class="meta-tag">⏱️ O(n)</span>
+                <span class="meta-tag">💡 DFS Post-Order</span>
+            </div>
+        </div>
+        
+        <div class="code-section">
+            <h3>💻 Python Solution</h3>
+            <div class="code-block">
+                <pre><span class="keyword">def</span> <span class="function">longestUnivaluePath</span>(root: TreeNode) -> int:
+    result = 0
+    
+    <span class="keyword">def</span> <span class="function">dfs</span>(node: TreeNode):
+        <span class="keyword">nonlocal</span> result
+        <span class="keyword">if</span> node <span class="keyword">is</span> None:
+            <span class="keyword">return</span> 0
+        
+        left = dfs(node.left)
+        right = dfs(node.right)
+        
+        <span class="comment"># Extend path if child has same value</span>
+        <span class="keyword">if</span> node.left <span class="keyword">and</span> node.left.val == node.val:
+            left += 1
+        <span class="keyword">else</span>:
+            left = 0
+        <span class="keyword">if</span> node.right <span class="keyword">and</span> node.right.val == node.val:
+            right += 1
+        <span class="keyword">else</span>:
+            right = 0
+        
+        result = max(result, left + right)
+        <span class="keyword">return</span> max(left, right)
+    
+    dfs(root)
+    <span class="keyword">return</span> result</pre>
+            </div>
+        </div>
+        
+        <div class="visualization-section">
+            <h3>🎬 Visualization</h3>
+            
+            <div class="controls">
+                <button class="btn btn-primary" id="stepBtn" onclick="step()">Step</button>
+                <button class="btn btn-success" id="autoBtn" onclick="toggleAuto()">Auto Run</button>
+                <button class="btn btn-warning" onclick="reset()">Reset</button>
+            </div>
+            
+            <div class="legend">
+                <div class="legend-item"><div class="legend-circle" style="background: #3498db;"></div> Unvisited</div>
+                <div class="legend-item"><div class="legend-circle" style="background: #f39c12;"></div> Processing</div>
+                <div class="legend-item"><div class="legend-circle" style="background: #27ae60;"></div> Completed</div>
+                <div class="legend-item"><div class="legend-circle" style="background: #e74c3c;"></div> Same Value Path</div>
+            </div>
+            
+            <div class="status-message" id="statusMessage">
+                Tree with values [5, 4, 5, 1, 1, 5]. Find longest path of same values.
+            </div>
+            
+            <div class="info-section">
+                <div class="info-box">
+                    <div class="info-label">Current Node Return</div>
+                    <div class="info-value" id="currentReturn">-</div>
+                </div>
+                <div class="info-box highlight">
+                    <div class="info-label">Longest Path</div>
+                    <div class="info-value" id="longestValue">0</div>
+                </div>
+            </div>
+            
+            <div class="tree-container">
+                <svg id="tree" width="600" height="320"></svg>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Tree:     5
+        //          / \
+        //         4   5
+        //        / \   \
+        //       1   1   5
+        const treeData = [
+            { id: 0, val: 5, x: 300, y: 50, left: 1, right: 2 },
+            { id: 1, val: 4, x: 180, y: 130, left: 3, right: 4 },
+            { id: 2, val: 5, x: 420, y: 130, left: null, right: 5 },
+            { id: 3, val: 1, x: 120, y: 210 },
+            { id: 4, val: 1, x: 240, y: 210 },
+            { id: 5, val: 5, x: 480, y: 210 }
+        ];
+        
+        let nodes = [...treeData];
+        let links = [
+            { source: 0, target: 1 }, { source: 0, target: 2 },
+            { source: 1, target: 3 }, { source: 1, target: 4 },
+            { source: 2, target: 5 }
+        ];
+        
+        let stack = [];
+        let returnValues = {};
+        let result = 0;
+        let currentNode = null;
+        let completed = new Set();
+        let pathEdges = [];
+        let done = false;
+        let autoInterval = null;
+        
+        function init() {
+            stack = [{ id: 0, phase: 'descend' }];
+            returnValues = {};
+            result = 0;
+            currentNode = null;
+            completed = new Set();
+            pathEdges = [];
+            done = false;
+            renderTree();
+        }
+        
+        function getChildren(id) {
+            const node = nodes[id];
+            const children = [];
+            if (node.left !== undefined && node.left !== null) children.push(node.left);
+            if (node.right !== undefined && node.right !== null) children.push(node.right);
+            return children;
+        }
+        
+        function renderTree() {
+            const svg = d3.select("#tree");
+            svg.selectAll("*").remove();
+            
+            // Draw links
+            links.forEach(link => {
+                const source = nodes[link.source];
+                const target = nodes[link.target];
+                const isPath = pathEdges.some(e => 
+                    (e.source === link.source && e.target === link.target) ||
+                    (e.source === link.target && e.target === link.source));
+                
+                svg.append("line")
+                    .attr("x1", source.x).attr("y1", source.y)
+                    .attr("x2", target.x).attr("y2", target.y)
+                    .attr("stroke", isPath ? "#e74c3c" : "#999")
+                    .attr("stroke-width", isPath ? 4 : 2);
+            });
+            
+            // Draw nodes
+            nodes.forEach(node => {
+                let fill = "#3498db";
+                if (completed.has(node.id)) fill = "#27ae60";
+                if (currentNode === node.id) fill = "#f39c12";
+                
+                svg.append("circle")
+                    .attr("cx", node.x).attr("cy", node.y)
+                    .attr("r", 28)
+                    .attr("fill", fill)
+                    .attr("stroke", "#333")
+                    .attr("stroke-width", 2);
+                
+                svg.append("text")
+                    .attr("x", node.x).attr("y", node.y + 6)
+                    .attr("text-anchor", "middle")
+                    .attr("fill", "white")
+                    .attr("font-weight", "bold")
+                    .attr("font-size", "18px")
+                    .text(node.val);
+                
+                // Show return value
+                if (returnValues[node.id] !== undefined) {
+                    svg.append("text")
+                        .attr("x", node.x + 35).attr("y", node.y)
+                        .attr("font-size", "12px")
+                        .attr("fill", "#666")
+                        .text(`r=${returnValues[node.id]}`);
+                }
+            });
+        }
+        
+        function step() {
+            if (done || stack.length === 0) {
+                done = true;
+                document.getElementById('statusMessage').textContent = 
+                    `✅ Complete! Longest univalue path = ${result} edges`;
+                document.getElementById('stepBtn').disabled = true;
+                stopAuto();
+                return;
+            }
+            
+            const current = stack[stack.length - 1];
+            currentNode = current.id;
+            const node = nodes[current.id];
+            const children = getChildren(current.id);
+            
+            if (current.phase === 'descend') {
+                const unvisited = children.filter(c => !completed.has(c));
+                if (unvisited.length > 0) {
+                    stack.push({ id: unvisited[0], phase: 'descend' });
+                    document.getElementById('statusMessage').textContent = 
+                        `Descending to node ${nodes[unvisited[0]].val}`;
+                } else {
+                    current.phase = 'compute';
+                    document.getElementById('statusMessage').textContent = 
+                        `Node ${node.val}: computing return value`;
+                }
+            } else if (current.phase === 'compute') {
+                let left = 0, right = 0;
+                
+                if (node.left !== undefined && node.left !== null) {
+                    const leftNode = nodes[node.left];
+                    if (leftNode.val === node.val) {
+                        left = (returnValues[node.left] || 0) + 1;
+                        pathEdges.push({ source: current.id, target: node.left });
+                    }
+                }
+                if (node.right !== undefined && node.right !== null) {
+                    const rightNode = nodes[node.right];
+                    if (rightNode.val === node.val) {
+                        right = (returnValues[node.right] || 0) + 1;
+                        pathEdges.push({ source: current.id, target: node.right });
+                    }
+                }
+                
+                const pathThrough = left + right;
+                if (pathThrough > result) {
+                    result = pathThrough;
+                    document.getElementById('longestValue').textContent = result;
+                }
+                
+                const ret = Math.max(left, right);
+                returnValues[current.id] = ret;
+                document.getElementById('currentReturn').textContent = ret;
+                
+                document.getElementById('statusMessage').textContent = 
+                    `Node ${node.val}: left=${left}, right=${right}, path=${pathThrough}, return=${ret}`;
+                
+                completed.add(current.id);
+                stack.pop();
+            }
+            
+            renderTree();
+        }
+        
+        function toggleAuto() {
+            if (autoInterval) { stopAuto(); }
+            else {
+                document.getElementById('autoBtn').textContent = 'Pause';
+                autoInterval = setInterval(step, 700);
+            }
+        }
+        
+        function stopAuto() {
+            if (autoInterval) { clearInterval(autoInterval); autoInterval = null; }
+            document.getElementById('autoBtn').textContent = 'Auto Run';
+        }
+        
+        function reset() {
+            stopAuto();
+            document.getElementById('stepBtn').disabled = false;
+            document.getElementById('statusMessage').textContent = 
+                'Tree with values [5, 4, 5, 1, 1, 5]. Find longest path of same values.';
+            document.getElementById('longestValue').textContent = '0';
+            document.getElementById('currentReturn').textContent = '-';
+            init();
+        }
+        
+        init();
+    </script>
+</body>
+</html>

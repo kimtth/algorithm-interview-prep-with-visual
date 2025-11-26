@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UTF-8 Validation</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; padding: 20px; }
+        .container { max-width: 900px; margin: 0 auto; }
+        h1 { text-align: center; color: white; margin-bottom: 10px; }
+        .subtitle { text-align: center; color: rgba(255,255,255,0.9); margin-bottom: 20px; font-size: 14px; }
+        .controls { display: flex; justify-content: center; gap: 15px; margin-bottom: 20px; }
+        button { background: white; color: #667eea; border: none; padding: 10px 25px; border-radius: 25px; cursor: pointer; font-weight: 600; }
+        button:disabled { opacity: 0.5; cursor: not-allowed; }
+        .panel { background: white; border-radius: 15px; padding: 20px; margin-bottom: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
+        .panel-title { font-size: 16px; font-weight: bold; color: #333; margin-bottom: 15px; border-bottom: 2px solid #667eea; padding-bottom: 10px; }
+        .bytes-container { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; }
+        .byte-item { text-align: center; padding: 10px; border-radius: 10px; min-width: 100px; transition: all 0.3s; }
+        .byte-item.default { background: #f5f7fa; border: 2px solid #ddd; }
+        .byte-item.current { background: #2196f3; color: white; border: 2px solid #1976d2; }
+        .byte-item.valid { background: #4caf50; color: white; border: 2px solid #2e7d32; }
+        .byte-item.invalid { background: #f44336; color: white; border: 2px solid #c62828; }
+        .byte-decimal { font-size: 18px; font-weight: bold; }
+        .byte-binary { font-family: monospace; font-size: 14px; margin-top: 5px; }
+        .byte-type { font-size: 11px; margin-top: 5px; opacity: 0.8; }
+        .rules-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; }
+        .rule-item { background: #f5f7fa; padding: 15px; border-radius: 10px; }
+        .rule-pattern { font-family: monospace; font-weight: bold; color: #667eea; }
+        .rule-desc { font-size: 12px; color: #666; margin-top: 5px; }
+        .result-box { text-align: center; padding: 20px; border-radius: 10px; }
+        .result-valid { background: #4caf50; color: white; }
+        .result-invalid { background: #f44336; color: white; }
+        .result-pending { background: #f5f7fa; color: #666; }
+        .result-value { font-size: 28px; font-weight: bold; }
+        .status-box { background: #f5f7fa; border-radius: 10px; padding: 15px; font-family: monospace; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔤 UTF-8 Validation</h1>
+        <p class="subtitle">Check if byte sequence is valid UTF-8 encoding</p>
+
+        <div class="controls">
+            <button id="stepBtn">Step</button>
+            <button id="autoBtn">Auto Run</button>
+            <button id="resetBtn">Reset</button>
+        </div>
+
+        <div class="panel">
+            <div class="panel-title">📊 Byte Sequence</div>
+            <div class="bytes-container" id="bytes"></div>
+        </div>
+
+        <div class="panel">
+            <div class="panel-title">📜 UTF-8 Encoding Rules</div>
+            <div class="rules-grid">
+                <div class="rule-item">
+                    <div class="rule-pattern">0xxxxxxx</div>
+                    <div class="rule-desc">1-byte char (ASCII, 0-127)</div>
+                </div>
+                <div class="rule-item">
+                    <div class="rule-pattern">110xxxxx 10xxxxxx</div>
+                    <div class="rule-desc">2-byte char</div>
+                </div>
+                <div class="rule-item">
+                    <div class="rule-pattern">1110xxxx 10xxxxxx 10xxxxxx</div>
+                    <div class="rule-desc">3-byte char</div>
+                </div>
+                <div class="rule-item">
+                    <div class="rule-pattern">11110xxx 10xxxxxx 10xxxxxx 10xxxxxx</div>
+                    <div class="rule-desc">4-byte char</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="panel">
+            <div class="panel-title">✅ Result</div>
+            <div class="result-box result-pending" id="result-box">
+                <div class="result-value" id="result">Pending...</div>
+            </div>
+        </div>
+
+        <div class="panel">
+            <div class="panel-title">📋 Status</div>
+            <div class="status-box" id="status">Check each byte: leading byte determines char length, continuation bytes start with 10.</div>
+        </div>
+    </div>
+
+    <script>
+        const data = [197, 130, 1];  // Valid: 2-byte char + 1-byte char
+        let idx = 0;
+        let remaining = 0;
+        let byteStates = new Array(data.length).fill('default');
+        let done = false;
+        let valid = true;
+        let autoInterval = null;
+
+        function toBinary(n) {
+            return (n >>> 0).toString(2).padStart(8, '0');
+        }
+
+        function getByteType(n) {
+            if ((n & 0x80) === 0) return '1-byte (ASCII)';
+            if ((n & 0xE0) === 0xC0) return 'Lead: 2-byte';
+            if ((n & 0xF0) === 0xE0) return 'Lead: 3-byte';
+            if ((n & 0xF8) === 0xF0) return 'Lead: 4-byte';
+            if ((n & 0xC0) === 0x80) return 'Continuation';
+            return 'Invalid';
+        }
+
+        function render() {
+            document.getElementById('bytes').innerHTML = data.map((v, i) => {
+                return `<div class="byte-item ${byteStates[i]}">
+                    <div class="byte-decimal">${v}</div>
+                    <div class="byte-binary">${toBinary(v)}</div>
+                    <div class="byte-type">${getByteType(v)}</div>
+                </div>`;
+            }).join('');
+        }
+
+        function step() {
+            if (done) return;
+
+            if (idx >= data.length) {
+                if (remaining > 0) {
+                    valid = false;
+                    document.getElementById('status').innerHTML = 
+                        `❌ Invalid! Expected ${remaining} more continuation bytes.`;
+                } else {
+                    document.getElementById('status').innerHTML = 
+                        `✅ Valid UTF-8 encoding!`;
+                }
+                done = true;
+                const resultBox = document.getElementById('result-box');
+                resultBox.className = `result-box ${valid ? 'result-valid' : 'result-invalid'}`;
+                document.getElementById('result').textContent = valid ? 'Valid UTF-8' : 'Invalid UTF-8';
+                document.getElementById('stepBtn').disabled = true;
+                document.getElementById('autoBtn').disabled = true;
+                stopAuto();
+                render();
+                return;
+            }
+
+            const byte = data[idx];
+            byteStates[idx] = 'current';
+            render();
+
+            if (remaining > 0) {
+                // Expecting continuation byte
+                if ((byte & 0xC0) === 0x80) {
+                    remaining--;
+                    byteStates[idx] = 'valid';
+                    document.getElementById('status').innerHTML = 
+                        `Byte ${idx}: ${toBinary(byte)} - Valid continuation byte. ${remaining} more expected.`;
+                } else {
+                    valid = false;
+                    byteStates[idx] = 'invalid';
+                    done = true;
+                    document.getElementById('status').innerHTML = 
+                        `❌ Byte ${idx}: Expected continuation (10xxxxxx), got ${toBinary(byte)}`;
+                    const resultBox = document.getElementById('result-box');
+                    resultBox.className = 'result-box result-invalid';
+                    document.getElementById('result').textContent = 'Invalid UTF-8';
+                    document.getElementById('stepBtn').disabled = true;
+                    document.getElementById('autoBtn').disabled = true;
+                    stopAuto();
+                }
+            } else {
+                // Expecting leading byte
+                if ((byte & 0x80) === 0) {
+                    byteStates[idx] = 'valid';
+                    document.getElementById('status').innerHTML = 
+                        `Byte ${idx}: ${toBinary(byte)} - 1-byte ASCII character.`;
+                } else if ((byte & 0xE0) === 0xC0) {
+                    remaining = 1;
+                    byteStates[idx] = 'valid';
+                    document.getElementById('status').innerHTML = 
+                        `Byte ${idx}: ${toBinary(byte)} - Start of 2-byte character. Need 1 continuation.`;
+                } else if ((byte & 0xF0) === 0xE0) {
+                    remaining = 2;
+                    byteStates[idx] = 'valid';
+                    document.getElementById('status').innerHTML = 
+                        `Byte ${idx}: ${toBinary(byte)} - Start of 3-byte character. Need 2 continuations.`;
+                } else if ((byte & 0xF8) === 0xF0) {
+                    remaining = 3;
+                    byteStates[idx] = 'valid';
+                    document.getElementById('status').innerHTML = 
+                        `Byte ${idx}: ${toBinary(byte)} - Start of 4-byte character. Need 3 continuations.`;
+                } else {
+                    valid = false;
+                    byteStates[idx] = 'invalid';
+                    done = true;
+                    document.getElementById('status').innerHTML = 
+                        `❌ Byte ${idx}: Invalid leading byte pattern ${toBinary(byte)}`;
+                    const resultBox = document.getElementById('result-box');
+                    resultBox.className = 'result-box result-invalid';
+                    document.getElementById('result').textContent = 'Invalid UTF-8';
+                    document.getElementById('stepBtn').disabled = true;
+                    document.getElementById('autoBtn').disabled = true;
+                    stopAuto();
+                }
+            }
+
+            idx++;
+            render();
+        }
+
+        function reset() {
+            stopAuto();
+            idx = 0;
+            remaining = 0;
+            byteStates = new Array(data.length).fill('default');
+            done = false;
+            valid = true;
+            document.getElementById('result-box').className = 'result-box result-pending';
+            document.getElementById('result').textContent = 'Pending...';
+            document.getElementById('stepBtn').disabled = false;
+            document.getElementById('autoBtn').disabled = false;
+            document.getElementById('status').innerHTML = 'Check each byte: leading byte determines char length, continuation bytes start with 10.';
+            render();
+        }
+
+        function stopAuto() {
+            if (autoInterval) { clearInterval(autoInterval); autoInterval = null; }
+            document.getElementById('autoBtn').textContent = 'Auto Run';
+        }
+
+        document.getElementById('stepBtn').onclick = () => { stopAuto(); step(); };
+        document.getElementById('autoBtn').onclick = () => {
+            if (autoInterval) { stopAuto(); }
+            else { autoInterval = setInterval(step, 800); document.getElementById('autoBtn').textContent = '⏸ Pause'; }
+        };
+        document.getElementById('resetBtn').onclick = reset;
+
+        render();
+    </script>
+</body>
+</html>

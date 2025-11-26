@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Q55: Kth Largest Element (v4 - Sort)</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f5f7fa; min-height: 100vh; padding: 20px; }
+        .container { max-width: 1200px; margin: 0 auto; }
+        
+        .problem-info { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 16px; padding: 25px 30px; margin-bottom: 25px; color: white; }
+        .problem-info h1 { font-size: 1.8em; margin-bottom: 10px; }
+        .problem-info p { font-size: 1.1em; opacity: 0.95; line-height: 1.6; }
+        .problem-meta { display: flex; gap: 20px; margin-top: 15px; flex-wrap: wrap; }
+        .meta-tag { background: rgba(255,255,255,0.2); padding: 6px 14px; border-radius: 20px; font-size: 0.9em; }
+        
+        .code-section { background: white; border-radius: 16px; padding: 25px; margin-bottom: 25px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
+        .code-section h3 { color: #333; margin-bottom: 15px; }
+        .code-block { background: #1e1e1e; border-radius: 12px; padding: 20px; overflow-x: auto; }
+        .code-block pre { margin: 0; font-family: 'Consolas', monospace; font-size: 12px; line-height: 1.5; color: #d4d4d4; }
+        .code-block .keyword { color: #569cd6; }
+        .code-block .function { color: #dcdcaa; }
+        .code-block .comment { color: #6a9955; }
+        
+        .visualization-section { background: white; border-radius: 16px; padding: 25px; margin-bottom: 25px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
+        .visualization-section h3 { color: #333; margin-bottom: 20px; }
+        
+        .controls { display: flex; gap: 12px; margin-bottom: 25px; flex-wrap: wrap; }
+        .btn { padding: 12px 28px; font-size: 1em; border: none; border-radius: 10px; cursor: pointer; font-weight: 500; }
+        .btn-primary { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; }
+        .btn-success { background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); color: white; }
+        .btn-warning { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white; }
+        .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        
+        .status-message { background: #e8f4fd; border-left: 4px solid #2196f3; padding: 15px 20px; border-radius: 0 10px 10px 0; margin-bottom: 20px; color: #1565c0; }
+        
+        .array-section { margin-bottom: 25px; }
+        .array-title { font-size: 0.95em; font-weight: 600; color: #555; margin-bottom: 12px; }
+        .array-container { display: flex; gap: 8px; flex-wrap: wrap; padding: 20px; background: #fafafa; border-radius: 12px; border: 1px solid #e0e0e0; align-items: flex-end; }
+        .array-item { width: 50px; display: flex; flex-direction: column; align-items: center; gap: 5px; }
+        .array-bar { width: 40px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 4px 4px 0 0; display: flex; align-items: flex-end; justify-content: center; padding-bottom: 5px; color: white; font-weight: bold; font-size: 0.9em; transition: all 0.3s; }
+        .array-bar.highlight { background: linear-gradient(135deg, #4caf50 0%, #8bc34a 100%); }
+        .array-index { font-size: 0.8em; color: #999; }
+        
+        .result-box { padding: 25px; background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%); border-radius: 12px; text-align: center; }
+        .result-label { font-size: 1em; color: #2e7d32; margin-bottom: 10px; }
+        .result-value { font-size: 2.5em; font-weight: bold; color: #1b5e20; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="problem-info">
+            <h1>Q55: Kth Largest Element (v4 - Sort)</h1>
+            <p>Simply sort in descending order and return element at index k-1. Simplest approach but O(n log n).</p>
+            <div class="problem-meta">
+                <span class="meta-tag">📁 Sorting</span>
+                <span class="meta-tag">⏱️ O(n log n)</span>
+                <span class="meta-tag">💡 Direct Approach</span>
+            </div>
+        </div>
+        
+        <div class="code-section">
+            <h3>💻 Python Solution</h3>
+            <div class="code-block">
+                <pre><span class="keyword">def</span> <span class="function">findKthLargest</span>(nums: List[int], k: int) -> int:
+    <span class="keyword">return</span> sorted(nums, reverse=True)[k - 1]</pre>
+            </div>
+        </div>
+        
+        <div class="visualization-section">
+            <h3>🎬 Visualization</h3>
+            
+            <div class="controls">
+                <button class="btn btn-primary" id="stepBtn" onclick="step()">Step</button>
+                <button class="btn btn-success" id="autoBtn" onclick="toggleAuto()">Auto Run</button>
+                <button class="btn btn-warning" onclick="reset()">Reset</button>
+            </div>
+            
+            <div class="status-message" id="statusMessage">
+                nums = [3, 2, 1, 5, 6, 4], k = 2. Sort descending, return index k-1.
+            </div>
+            
+            <div class="array-section">
+                <div class="array-title" id="arrayTitle">📊 Input Array</div>
+                <div class="array-container" id="arrayContainer"></div>
+            </div>
+            
+            <div class="result-box" id="resultBox" style="display: none;">
+                <div class="result-label">sorted(nums, reverse=True)[k-1]</div>
+                <div class="result-value" id="finalResult">-</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const nums = [3, 2, 1, 5, 6, 4];
+        const k = 2;
+        const sorted = [...nums].sort((a, b) => b - a); // [6, 5, 4, 3, 2, 1]
+        
+        let currentArray = [...nums];
+        let stepIndex = 0;
+        let autoInterval = null;
+        
+        function init() {
+            currentArray = [...nums];
+            stepIndex = 0;
+            document.getElementById('arrayTitle').textContent = '📊 Input Array';
+            document.getElementById('resultBox').style.display = 'none';
+            renderArray(-1);
+        }
+        
+        function renderArray(highlightIndex) {
+            const container = document.getElementById('arrayContainer');
+            const maxVal = Math.max(...currentArray);
+            
+            container.innerHTML = currentArray.map((val, i) => {
+                const height = (val / maxVal) * 120 + 30;
+                const isHighlight = (i === highlightIndex);
+                return `
+                    <div class="array-item">
+                        <div class="array-bar${isHighlight ? ' highlight' : ''}" style="height: ${height}px">${val}</div>
+                        <div class="array-index">[${i}]</div>
+                    </div>
+                `;
+            }).join('');
+        }
+        
+        function step() {
+            if (stepIndex === 0) {
+                // Sort
+                currentArray = [...sorted];
+                document.getElementById('arrayTitle').textContent = '📊 Sorted (Descending)';
+                document.getElementById('statusMessage').textContent = 
+                    `sorted(nums, reverse=True) = [${sorted.join(', ')}]`;
+                renderArray(-1);
+                stepIndex++;
+            } else if (stepIndex === 1) {
+                // Highlight kth element
+                renderArray(k - 1);
+                document.getElementById('statusMessage').textContent = 
+                    `Access index k-1 = ${k-1}. Value at index ${k-1} is ${sorted[k-1]}.`;
+                stepIndex++;
+            } else if (stepIndex === 2) {
+                // Show result
+                document.getElementById('resultBox').style.display = 'block';
+                document.getElementById('finalResult').textContent = sorted[k - 1];
+                document.getElementById('statusMessage').textContent = 
+                    `✅ The ${k}th largest element is ${sorted[k-1]}!`;
+                document.getElementById('stepBtn').disabled = true;
+                stopAuto();
+            }
+        }
+        
+        function toggleAuto() {
+            if (autoInterval) { stopAuto(); }
+            else {
+                document.getElementById('autoBtn').textContent = 'Pause';
+                autoInterval = setInterval(step, 1000);
+            }
+        }
+        
+        function stopAuto() {
+            if (autoInterval) { clearInterval(autoInterval); autoInterval = null; }
+            document.getElementById('autoBtn').textContent = 'Auto Run';
+        }
+        
+        function reset() {
+            stopAuto();
+            document.getElementById('stepBtn').disabled = false;
+            document.getElementById('statusMessage').textContent = 
+                'nums = [3, 2, 1, 5, 6, 4], k = 2. Sort descending, return index k-1.';
+            init();
+        }
+        
+        init();
+    </script>
+</body>
+</html>

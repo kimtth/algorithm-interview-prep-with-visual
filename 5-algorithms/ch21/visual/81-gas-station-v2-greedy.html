@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Q81: Gas Station - Greedy Single Pass</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; padding: 20px; }
+        .container { max-width: 1000px; margin: 0 auto; background: white; border-radius: 20px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); overflow: hidden; }
+        .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 30px; color: white; }
+        .header h1 { font-size: 1.8em; margin-bottom: 10px; }
+        .header p { opacity: 0.9; font-size: 0.95em; }
+        .problem-info { background: #f8f9fa; padding: 20px; border-bottom: 1px solid #eee; }
+        .problem-info h3 { color: #333; margin-bottom: 10px; }
+        .problem-info p { color: #666; line-height: 1.6; }
+        .code-section { background: #1e1e1e; padding: 20px; margin: 20px; border-radius: 10px; }
+        .code-section h3 { color: #9cdcfe; margin-bottom: 15px; font-size: 0.9em; }
+        .code-section pre { color: #d4d4d4; font-family: 'Consolas', monospace; font-size: 0.8em; line-height: 1.4; }
+        .keyword { color: #569cd6; }
+        .function { color: #dcdcaa; }
+        .comment { color: #6a9955; }
+        .number { color: #b5cea8; }
+        .controls { padding: 20px; display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; background: #f8f9fa; }
+        .btn { padding: 12px 24px; font-size: 1em; cursor: pointer; border: none; border-radius: 8px; transition: all 0.3s; }
+        .btn-primary { background: linear-gradient(135deg, #667eea, #764ba2); color: white; }
+        .btn-success { background: linear-gradient(135deg, #11998e, #38ef7d); color: white; }
+        .btn-warning { background: linear-gradient(135deg, #f093fb, #f5576c); color: white; }
+        .visualization { padding: 30px; min-height: 350px; }
+        .status { padding: 15px 20px; background: #e8f5e9; text-align: center; font-weight: 500; color: #2e7d32; }
+        .step-info { background: #fff3e0; padding: 15px 20px; text-align: center; color: #ef6c00; font-weight: 500; }
+        .stations-container { display: flex; justify-content: center; gap: 15px; flex-wrap: wrap; margin: 20px 0; }
+        .station { padding: 15px; background: #f5f5f5; border-radius: 10px; text-align: center; min-width: 80px; transition: all 0.3s; }
+        .station.current { background: #2196f3; color: white; }
+        .station.start { background: #4caf50; color: white; }
+        .station.failed { background: #ffcdd2; }
+        .station h5 { margin-bottom: 5px; }
+        .info-panel { display: flex; justify-content: center; gap: 20px; margin: 15px 0; flex-wrap: wrap; }
+        .info-item { padding: 10px 20px; background: #f5f5f5; border-radius: 8px; }
+        .result-display { text-align: center; margin-top: 20px; font-size: 1.5em; color: #333; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>⛽ Q81: Gas Station</h1>
+            <p>LeetCode #134 | File: 81-2.py | Approach: Greedy Single Pass</p>
+        </div>
+        
+        <div class="problem-info">
+            <h3>📋 Problem Description</h3>
+            <p>Complete a circuit of gas stations. Find the starting index, or -1 if impossible.</p>
+            <p style="margin-top: 10px;"><strong>Key Insight:</strong> If total gas ≥ total cost, solution exists. 
+            When fuel goes negative at station i, start must be after i.</p>
+        </div>
+
+        <div class="code-section">
+            <h3>📄 Python Solution (81-2.py)</h3>
+            <pre><span class="keyword">from</span> typing <span class="keyword">import</span> List
+
+<span class="keyword">class</span> <span class="function">Solution</span>:
+    <span class="keyword">def</span> <span class="function">canCompleteCircuit</span>(self, gas: List[<span class="keyword">int</span>], cost: List[<span class="keyword">int</span>]) -> <span class="keyword">int</span>:
+        <span class="keyword">if</span> <span class="function">sum</span>(gas) < <span class="function">sum</span>(cost):
+            <span class="keyword">return</span> -<span class="number">1</span>
+
+        start, fuel = <span class="number">0</span>, <span class="number">0</span>
+        <span class="keyword">for</span> i <span class="keyword">in</span> <span class="function">range</span>(<span class="function">len</span>(gas)):
+            <span class="keyword">if</span> gas[i] + fuel < cost[i]:
+                start = i + <span class="number">1</span>
+                fuel = <span class="number">0</span>
+            <span class="keyword">else</span>:
+                fuel += gas[i] - cost[i]
+        <span class="keyword">return</span> start</pre>
+        </div>
+
+        <div class="controls">
+            <button class="btn btn-primary" onclick="step()">Step</button>
+            <button class="btn btn-success" onclick="toggleAutoRun()">Auto Run</button>
+            <button class="btn btn-warning" onclick="reset()">Reset</button>
+        </div>
+
+        <div class="step-info" id="stepInfo">Click "Step" to begin</div>
+        
+        <div class="visualization" id="viz">
+            <div class="stations-container" id="stationsContainer"></div>
+            <div class="info-panel">
+                <div class="info-item" id="startInfo">Start: <strong>0</strong></div>
+                <div class="info-item" id="fuelInfo">Fuel: <strong>0</strong></div>
+                <div class="info-item" id="totalInfo">Total gas: 15, Total cost: 15 ✓</div>
+            </div>
+            <div class="result-display" id="result"></div>
+        </div>
+
+        <div class="status" id="status">Ready to find the starting station</div>
+    </div>
+
+    <script>
+        const gas = [1, 2, 3, 4, 5];
+        const cost = [3, 4, 5, 1, 2];
+        let start = 0, fuel = 0;
+        let currentIdx = -1;
+        let autoRunning = false;
+        let autoRunInterval;
+
+        function renderStations() {
+            const container = document.getElementById('stationsContainer');
+            container.innerHTML = '';
+            for (let i = 0; i < gas.length; i++) {
+                const station = document.createElement('div');
+                station.className = 'station';
+                if (i === currentIdx) station.classList.add('current');
+                if (i === start && currentIdx >= 0) station.classList.add('start');
+                station.innerHTML = `
+                    <h5>Station ${i}</h5>
+                    <div>Gas: ${gas[i]}</div>
+                    <div>Cost: ${cost[i]}</div>
+                    <div><small>Net: ${gas[i] - cost[i]}</small></div>
+                `;
+                container.appendChild(station);
+            }
+        }
+
+        function step() {
+            currentIdx++;
+            
+            if (currentIdx >= gas.length) {
+                document.getElementById('stepInfo').textContent = `Done! Start from station ${start}`;
+                document.getElementById('result').innerHTML = 
+                    `<span style="color: #4caf50;">Answer: Station <strong>${start}</strong></span>`;
+                document.getElementById('status').textContent = 
+                    'Single pass O(n): find where fuel stays non-negative!';
+                return;
+            }
+
+            const i = currentIdx;
+            let desc;
+            
+            if (gas[i] + fuel < cost[i]) {
+                desc = `Station ${i}: gas=${gas[i]}, fuel=${fuel}, cost=${cost[i]}. Can't reach next! Reset start to ${i + 1}`;
+                start = i + 1;
+                fuel = 0;
+            } else {
+                fuel += gas[i] - cost[i];
+                desc = `Station ${i}: gain ${gas[i]}, spend ${cost[i]}, fuel becomes ${fuel}`;
+            }
+
+            document.getElementById('stepInfo').textContent = desc;
+            document.getElementById('startInfo').innerHTML = `Start: <strong>${start}</strong>`;
+            document.getElementById('fuelInfo').innerHTML = `Fuel: <strong>${fuel}</strong>`;
+            renderStations();
+        }
+
+        function toggleAutoRun() {
+            autoRunning = !autoRunning;
+            const btn = document.querySelector('.btn-success');
+            if (autoRunning) {
+                btn.textContent = 'Pause';
+                autoRunInterval = setInterval(() => {
+                    if (currentIdx >= gas.length - 1) {
+                        step(); toggleAutoRun(); return;
+                    }
+                    step();
+                }, 1000);
+            } else {
+                btn.textContent = 'Auto Run';
+                clearInterval(autoRunInterval);
+            }
+        }
+
+        function reset() {
+            start = 0; fuel = 0; currentIdx = -1;
+            if (autoRunning) toggleAutoRun();
+            document.getElementById('stepInfo').textContent = 'Click "Step" to begin';
+            document.getElementById('status').textContent = 'Ready to find the starting station';
+            document.getElementById('result').innerHTML = '';
+            document.getElementById('startInfo').innerHTML = 'Start: <strong>0</strong>';
+            document.getElementById('fuelInfo').innerHTML = 'Fuel: <strong>0</strong>';
+            renderStations();
+        }
+
+        renderStations();
+    </script>
+</body>
+</html>

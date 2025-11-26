@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Q7: Two Sum - Two-Pass Hash Map</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f5f7fa; min-height: 100vh; padding: 20px; }
+        .container { max-width: 1200px; margin: 0 auto; }
+        
+        .problem-info { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 16px; padding: 25px 30px; margin-bottom: 25px; color: white; }
+        .problem-info h1 { font-size: 1.8em; margin-bottom: 10px; }
+        .problem-info p { font-size: 1.1em; opacity: 0.95; line-height: 1.6; }
+        .problem-meta { display: flex; gap: 20px; margin-top: 15px; flex-wrap: wrap; }
+        .meta-tag { background: rgba(255,255,255,0.2); padding: 6px 14px; border-radius: 20px; font-size: 0.9em; }
+        
+        .code-section { background: white; border-radius: 16px; padding: 25px; margin-bottom: 25px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
+        .code-section h3 { color: #333; margin-bottom: 15px; }
+        .code-block { background: #1e1e1e; border-radius: 12px; padding: 20px; overflow-x: auto; }
+        .code-block pre { margin: 0; font-family: 'Consolas', monospace; font-size: 13px; line-height: 1.5; color: #d4d4d4; }
+        .code-block .keyword { color: #569cd6; }
+        .code-block .function { color: #dcdcaa; }
+        .code-block .comment { color: #6a9955; }
+        .code-block .string { color: #ce9178; }
+        
+        .visualization-section { background: white; border-radius: 16px; padding: 25px; margin-bottom: 25px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
+        .visualization-section h3 { color: #333; margin-bottom: 20px; }
+        
+        .controls { display: flex; gap: 12px; margin-bottom: 25px; flex-wrap: wrap; }
+        .btn { padding: 12px 28px; font-size: 1em; border: none; border-radius: 10px; cursor: pointer; font-weight: 500; }
+        .btn-primary { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; }
+        .btn-success { background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); color: white; }
+        .btn-warning { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white; }
+        .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        
+        .status-message { background: #e8f4fd; border-left: 4px solid #2196f3; padding: 15px 20px; border-radius: 0 10px 10px 0; margin-bottom: 20px; color: #1565c0; }
+        
+        .phase-indicator { display: flex; gap: 20px; margin-bottom: 20px; }
+        .phase { padding: 12px 20px; border-radius: 10px; background: #f0f0f0; color: #666; font-weight: 500; }
+        .phase.active { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; }
+        
+        .array-display { display: flex; gap: 10px; margin-bottom: 20px; padding: 20px; background: #f9f9f9; border-radius: 12px; flex-wrap: wrap; justify-content: center; }
+        .array-item { width: 55px; height: 55px; display: flex; flex-direction: column; justify-content: center; align-items: center; border-radius: 10px; border: 3px solid #e0e0e0; background: white; transition: all 0.3s; }
+        .array-item .value { font-size: 1.3em; font-weight: 600; }
+        .array-item .index { font-size: 0.75em; color: #999; }
+        .array-item.current { border-color: #ff9800; background: #fff3e0; }
+        .array-item.added { border-color: #4caf50; background: #e8f5e9; }
+        .array-item.found { border-color: #9c27b0; background: #f3e5f5; }
+        
+        .hashmap-display { padding: 20px; background: #e8f5e9; border-radius: 12px; margin-bottom: 20px; }
+        .hashmap-title { font-size: 0.9em; color: #2e7d32; margin-bottom: 12px; font-weight: 600; }
+        .hashmap-entries { display: flex; flex-wrap: wrap; gap: 10px; }
+        .hashmap-entry { padding: 10px 18px; background: white; border: 2px solid #4caf50; border-radius: 8px; }
+        .hashmap-entry.highlight { background: #c8e6c9; border-color: #2e7d32; }
+        
+        .info-section { display: flex; gap: 20px; flex-wrap: wrap; margin-bottom: 20px; }
+        .info-box { padding: 15px 25px; border-radius: 12px; background: #f9f9f9; }
+        .info-label { font-size: 0.85em; color: #666; margin-bottom: 5px; }
+        .info-value { font-size: 1.3em; font-weight: 600; color: #333; }
+        .info-box.highlight { background: #e8f5e9; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="problem-info">
+            <h1>Q7: Two Sum - Two-Pass Hash Map</h1>
+            <p>Find two numbers that add up to the target. First pass builds a hash map, second pass searches for complements.</p>
+            <div class="problem-meta">
+                <span class="meta-tag">📁 Hash Table</span>
+                <span class="meta-tag">⏱️ O(n)</span>
+                <span class="meta-tag">💡 Two-Pass Algorithm</span>
+            </div>
+        </div>
+        
+        <div class="code-section">
+            <h3>💻 Python Solution</h3>
+            <div class="code-block">
+                <pre><span class="keyword">def</span> <span class="function">twoSum</span>(nums: List[int], target: int) -> List[int]:
+    nums_map = {}
+    <span class="comment"># First pass: build hash map</span>
+    <span class="keyword">for</span> i, num <span class="keyword">in</span> enumerate(nums):
+        nums_map[num] = i
+    
+    <span class="comment"># Second pass: search for complement</span>
+    <span class="keyword">for</span> i, num <span class="keyword">in</span> enumerate(nums):
+        <span class="keyword">if</span> target - num <span class="keyword">in</span> nums_map <span class="keyword">and</span> nums_map[target - num] != i:
+            <span class="keyword">return</span> [i, nums_map[target - num]]</pre>
+            </div>
+        </div>
+        
+        <div class="visualization-section">
+            <h3>🎬 Visualization</h3>
+            
+            <div class="controls">
+                <button class="btn btn-primary" id="stepBtn" onclick="step()">Step</button>
+                <button class="btn btn-success" id="autoBtn" onclick="toggleAuto()">Auto Run</button>
+                <button class="btn btn-warning" onclick="reset()">Reset</button>
+            </div>
+            
+            <div class="phase-indicator">
+                <div class="phase" id="phase1">Phase 1: Build Hash Map</div>
+                <div class="phase" id="phase2">Phase 2: Search Complement</div>
+            </div>
+            
+            <div class="status-message" id="statusMessage">
+                nums = [2, 7, 11, 15], target = 9. Click Step to start building the hash map.
+            </div>
+            
+            <div class="array-display" id="arrayDisplay"></div>
+            
+            <div class="hashmap-display">
+                <div class="hashmap-title">📚 nums_map (value → index)</div>
+                <div class="hashmap-entries" id="hashmapDisplay"></div>
+            </div>
+            
+            <div class="info-section">
+                <div class="info-box">
+                    <div class="info-label">Target</div>
+                    <div class="info-value">9</div>
+                </div>
+                <div class="info-box">
+                    <div class="info-label">Current Value</div>
+                    <div class="info-value" id="currentValue">-</div>
+                </div>
+                <div class="info-box">
+                    <div class="info-label">Complement</div>
+                    <div class="info-value" id="complementValue">-</div>
+                </div>
+            </div>
+            
+            <div class="info-section">
+                <div class="info-box highlight" id="resultBox" style="display: none;">
+                    <div class="info-label">Result</div>
+                    <div class="info-value" id="resultValue"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const nums = [2, 7, 11, 15];
+        const target = 9;
+        let phase = 1;
+        let currentI = 0;
+        let numsMap = {};
+        let addedIndices = new Set();
+        let foundIndices = [];
+        let done = false;
+        let autoInterval = null;
+        
+        function init() {
+            phase = 1;
+            currentI = 0;
+            numsMap = {};
+            addedIndices = new Set();
+            foundIndices = [];
+            done = false;
+            render();
+        }
+        
+        function render() {
+            // Phase indicators
+            document.getElementById('phase1').className = `phase ${phase === 1 ? 'active' : ''}`;
+            document.getElementById('phase2').className = `phase ${phase === 2 ? 'active' : ''}`;
+            
+            // Array display
+            const arrContainer = document.getElementById('arrayDisplay');
+            arrContainer.innerHTML = '';
+            nums.forEach((n, i) => {
+                const item = document.createElement('div');
+                item.className = 'array-item';
+                if (foundIndices.includes(i)) {
+                    item.classList.add('found');
+                } else if (i === currentI) {
+                    item.classList.add('current');
+                } else if (phase === 1 && addedIndices.has(i)) {
+                    item.classList.add('added');
+                }
+                item.innerHTML = `<div class="value">${n}</div><div class="index">[${i}]</div>`;
+                arrContainer.appendChild(item);
+            });
+            
+            // Hashmap display
+            const mapContainer = document.getElementById('hashmapDisplay');
+            mapContainer.innerHTML = '';
+            if (Object.keys(numsMap).length === 0) {
+                mapContainer.innerHTML = '<span style="color:#999">Empty</span>';
+            } else {
+                for (let [k, v] of Object.entries(numsMap)) {
+                    const entry = document.createElement('div');
+                    entry.className = 'hashmap-entry';
+                    if (phase === 2 && foundIndices.includes(v)) {
+                        entry.classList.add('highlight');
+                    }
+                    entry.textContent = `${k} → ${v}`;
+                    mapContainer.appendChild(entry);
+                }
+            }
+            
+            // Current values
+            if (currentI < nums.length && !done) {
+                document.getElementById('currentValue').textContent = nums[currentI];
+                document.getElementById('complementValue').textContent = phase === 2 ? (target - nums[currentI]) : '-';
+            }
+        }
+        
+        function step() {
+            if (done) {
+                document.getElementById('stepBtn').disabled = true;
+                stopAuto();
+                return;
+            }
+            
+            if (phase === 1) {
+                // Phase 1: Build hash map
+                numsMap[nums[currentI]] = currentI;
+                addedIndices.add(currentI);
+                document.getElementById('statusMessage').textContent = 
+                    `Added nums_map[${nums[currentI]}] = ${currentI}`;
+                
+                currentI++;
+                if (currentI >= nums.length) {
+                    phase = 2;
+                    currentI = 0;
+                    document.getElementById('statusMessage').textContent = 
+                        `Hash map complete! Starting Phase 2: Search for complements.`;
+                }
+            } else {
+                // Phase 2: Search for complement
+                const num = nums[currentI];
+                const complement = target - num;
+                
+                if (complement in numsMap && numsMap[complement] !== currentI) {
+                    foundIndices = [currentI, numsMap[complement]];
+                    done = true;
+                    document.getElementById('statusMessage').textContent = 
+                        `✅ Found! ${num} + ${complement} = ${target}. Return [${currentI}, ${numsMap[complement]}]`;
+                    document.getElementById('resultBox').style.display = 'block';
+                    document.getElementById('resultValue').textContent = `[${currentI}, ${numsMap[complement]}]`;
+                    document.getElementById('stepBtn').disabled = true;
+                    stopAuto();
+                } else {
+                    document.getElementById('statusMessage').textContent = 
+                        `${complement} not in map or same index. Moving to next.`;
+                    currentI++;
+                }
+            }
+            
+            render();
+        }
+        
+        function toggleAuto() {
+            if (autoInterval) { stopAuto(); }
+            else {
+                document.getElementById('autoBtn').textContent = 'Pause';
+                autoInterval = setInterval(step, 600);
+            }
+        }
+        
+        function stopAuto() {
+            if (autoInterval) { clearInterval(autoInterval); autoInterval = null; }
+            document.getElementById('autoBtn').textContent = 'Auto Run';
+        }
+        
+        function reset() {
+            stopAuto();
+            document.getElementById('stepBtn').disabled = false;
+            document.getElementById('statusMessage').textContent = 'nums = [2, 7, 11, 15], target = 9. Click Step to start building the hash map.';
+            document.getElementById('resultBox').style.display = 'none';
+            document.getElementById('currentValue').textContent = '-';
+            document.getElementById('complementValue').textContent = '-';
+            init();
+        }
+        
+        init();
+    </script>
+</body>
+</html>

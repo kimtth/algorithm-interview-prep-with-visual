@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Q51: BST to Greater Sum Tree</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f5f7fa; min-height: 100vh; padding: 20px; }
+        .container { max-width: 1200px; margin: 0 auto; }
+        
+        .problem-info { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 16px; padding: 25px 30px; margin-bottom: 25px; color: white; }
+        .problem-info h1 { font-size: 1.8em; margin-bottom: 10px; }
+        .problem-info p { font-size: 1.1em; opacity: 0.95; line-height: 1.6; }
+        .problem-meta { display: flex; gap: 20px; margin-top: 15px; flex-wrap: wrap; }
+        .meta-tag { background: rgba(255,255,255,0.2); padding: 6px 14px; border-radius: 20px; font-size: 0.9em; }
+        
+        .code-section { background: white; border-radius: 16px; padding: 25px; margin-bottom: 25px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
+        .code-section h3 { color: #333; margin-bottom: 15px; }
+        .code-block { background: #1e1e1e; border-radius: 12px; padding: 20px; overflow-x: auto; }
+        .code-block pre { margin: 0; font-family: 'Consolas', monospace; font-size: 12px; line-height: 1.5; color: #d4d4d4; }
+        .code-block .keyword { color: #569cd6; }
+        .code-block .function { color: #dcdcaa; }
+        .code-block .comment { color: #6a9955; }
+        
+        .visualization-section { background: white; border-radius: 16px; padding: 25px; margin-bottom: 25px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
+        .visualization-section h3 { color: #333; margin-bottom: 20px; }
+        
+        .controls { display: flex; gap: 12px; margin-bottom: 25px; flex-wrap: wrap; }
+        .btn { padding: 12px 28px; font-size: 1em; border: none; border-radius: 10px; cursor: pointer; font-weight: 500; }
+        .btn-primary { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; }
+        .btn-success { background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); color: white; }
+        .btn-warning { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white; }
+        .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        
+        .status-message { background: #e8f4fd; border-left: 4px solid #2196f3; padding: 15px 20px; border-radius: 0 10px 10px 0; margin-bottom: 20px; color: #1565c0; }
+        
+        .info-section { display: flex; gap: 20px; flex-wrap: wrap; margin-bottom: 20px; justify-content: center; }
+        .info-box { padding: 15px 25px; border-radius: 12px; background: #f9f9f9; text-align: center; }
+        .info-label { font-size: 0.85em; color: #666; margin-bottom: 5px; }
+        .info-value { font-size: 1.4em; font-weight: 600; color: #333; }
+        .info-box.highlight { background: #e8f5e9; }
+        
+        .tree-container { display: flex; justify-content: center; margin-bottom: 20px; }
+        svg { background: #fafafa; border-radius: 12px; border: 1px solid #e0e0e0; }
+        
+        .legend { display: flex; gap: 20px; margin-bottom: 15px; flex-wrap: wrap; justify-content: center; }
+        .legend-item { display: flex; align-items: center; gap: 8px; font-size: 0.9em; }
+        .legend-circle { width: 18px; height: 18px; border-radius: 50%; }
+        
+        .traversal-section { padding: 20px; background: #f3e5f5; border-radius: 12px; margin-top: 20px; }
+        .traversal-title { font-size: 0.9em; font-weight: 600; color: #7b1fa2; margin-bottom: 12px; }
+        .traversal-items { display: flex; flex-wrap: wrap; gap: 8px; }
+        .traversal-item { padding: 8px 14px; background: white; border-radius: 8px; font-weight: 500; border: 2px solid #ce93d8; }
+        .traversal-item.visited { background: #4caf50; color: white; border-color: #388e3c; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="problem-info">
+            <h1>Q51: BST to Greater Sum Tree</h1>
+            <p>Convert BST to Greater Sum Tree where each node's value is replaced by the sum of all values greater than or equal to it. Uses reverse in-order traversal (right → node → left).</p>
+            <div class="problem-meta">
+                <span class="meta-tag">📁 BST</span>
+                <span class="meta-tag">⏱️ O(n)</span>
+                <span class="meta-tag">💡 Reverse Inorder</span>
+            </div>
+        </div>
+        
+        <div class="code-section">
+            <h3>💻 Python Solution</h3>
+            <div class="code-block">
+                <pre><span class="keyword">class</span> <span class="function">Solution</span>:
+    val: int = 0
+
+    <span class="keyword">def</span> <span class="function">bstToGst</span>(self, root: TreeNode) -> TreeNode:
+        <span class="comment"># 중위 순회 노드 값 누적 (Reverse in-order)</span>
+        <span class="keyword">if</span> root:
+            self.bstToGst(root.right)  <span class="comment"># Visit right first</span>
+            self.val += root.val       <span class="comment"># Accumulate</span>
+            root.val = self.val        <span class="comment"># Update node</span>
+            self.bstToGst(root.left)   <span class="comment"># Then left</span>
+
+        <span class="keyword">return</span> root</pre>
+            </div>
+        </div>
+        
+        <div class="visualization-section">
+            <h3>🎬 Visualization</h3>
+            
+            <div class="controls">
+                <button class="btn btn-primary" id="stepBtn" onclick="step()">Step</button>
+                <button class="btn btn-success" id="autoBtn" onclick="toggleAuto()">Auto Run</button>
+                <button class="btn btn-warning" onclick="reset()">Reset</button>
+            </div>
+            
+            <div class="legend">
+                <div class="legend-item"><div class="legend-circle" style="background: #3498db;"></div> Unvisited</div>
+                <div class="legend-item"><div class="legend-circle" style="background: #ff9800;"></div> Current</div>
+                <div class="legend-item"><div class="legend-circle" style="background: #4caf50;"></div> Updated</div>
+            </div>
+            
+            <div class="status-message" id="statusMessage">
+                BST: [4, 1, 6, 0, 2, 5, 7, null, null, null, 3, null, null, null, 8]. Convert to GST.
+            </div>
+            
+            <div class="info-section">
+                <div class="info-box highlight">
+                    <div class="info-label">Running Sum</div>
+                    <div class="info-value" id="runningSum">0</div>
+                </div>
+                <div class="info-box">
+                    <div class="info-label">Current Node</div>
+                    <div class="info-value" id="currentNode">-</div>
+                </div>
+            </div>
+            
+            <div class="tree-container">
+                <svg id="tree" width="600" height="300"></svg>
+            </div>
+            
+            <div class="traversal-section">
+                <div class="traversal-title">🔄 Reverse In-Order Traversal: Right → Node → Left</div>
+                <div class="traversal-items" id="traversalItems">
+                    <span style="color:#999">Order: 8 → 7 → 6 → 5 → 4 → 3 → 2 → 1 → 0</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // BST structure
+        //        4
+        //      /   \
+        //     1     6
+        //    / \   / \
+        //   0   2 5   7
+        //        \     \
+        //         3     8
+        
+        const originalValues = {
+            4: 4, 1: 1, 6: 6, 0: 0, 2: 2, 5: 5, 7: 7, 3: 3, 8: 8
+        };
+        
+        const treeStructure = {
+            4: { left: 1, right: 6 },
+            1: { left: 0, right: 2 },
+            6: { left: 5, right: 7 },
+            0: { left: null, right: null },
+            2: { left: null, right: 3 },
+            5: { left: null, right: null },
+            7: { left: null, right: 8 },
+            3: { left: null, right: null },
+            8: { left: null, right: null }
+        };
+        
+        const positions = {
+            4: { x: 300, y: 40 },
+            1: { x: 150, y: 110 },
+            6: { x: 450, y: 110 },
+            0: { x: 80, y: 180 },
+            2: { x: 220, y: 180 },
+            5: { x: 380, y: 180 },
+            7: { x: 520, y: 180 },
+            3: { x: 260, y: 250 },
+            8: { x: 560, y: 250 }
+        };
+        
+        // Reverse in-order: right -> node -> left
+        const traversalOrder = [8, 7, 6, 5, 4, 3, 2, 1, 0];
+        
+        let nodeValues = {};
+        let visited = new Set();
+        let runningSum = 0;
+        let stepIndex = 0;
+        let currentNode = null;
+        let autoInterval = null;
+        
+        function init() {
+            nodeValues = {...originalValues};
+            visited = new Set();
+            runningSum = 0;
+            stepIndex = 0;
+            currentNode = null;
+            
+            document.getElementById('runningSum').textContent = '0';
+            document.getElementById('currentNode').textContent = '-';
+            
+            renderTree();
+            renderTraversal();
+        }
+        
+        function renderTree() {
+            const svg = d3.select("#tree");
+            svg.selectAll("*").remove();
+            
+            // Draw edges
+            Object.entries(treeStructure).forEach(([node, children]) => {
+                const nodeId = parseInt(node);
+                const pos = positions[nodeId];
+                
+                if (children.left !== null) {
+                    const childPos = positions[children.left];
+                    svg.append("line")
+                        .attr("x1", pos.x).attr("y1", pos.y)
+                        .attr("x2", childPos.x).attr("y2", childPos.y)
+                        .attr("stroke", "#999")
+                        .attr("stroke-width", 2);
+                }
+                if (children.right !== null) {
+                    const childPos = positions[children.right];
+                    svg.append("line")
+                        .attr("x1", pos.x).attr("y1", pos.y)
+                        .attr("x2", childPos.x).attr("y2", childPos.y)
+                        .attr("stroke", "#999")
+                        .attr("stroke-width", 2);
+                }
+            });
+            
+            // Draw nodes
+            Object.entries(positions).forEach(([nodeId, pos]) => {
+                const id = parseInt(nodeId);
+                let fill = "#3498db";
+                if (visited.has(id)) fill = "#4caf50";
+                if (id === currentNode) fill = "#ff9800";
+                
+                svg.append("circle")
+                    .attr("cx", pos.x)
+                    .attr("cy", pos.y)
+                    .attr("r", 25)
+                    .attr("fill", fill)
+                    .attr("stroke", "#333")
+                    .attr("stroke-width", 2);
+                
+                // Show current value
+                svg.append("text")
+                    .attr("x", pos.x)
+                    .attr("y", pos.y + 5)
+                    .attr("text-anchor", "middle")
+                    .attr("fill", "white")
+                    .attr("font-weight", "bold")
+                    .attr("font-size", "14px")
+                    .text(nodeValues[id]);
+                
+                // Show original value below if changed
+                if (visited.has(id)) {
+                    svg.append("text")
+                        .attr("x", pos.x)
+                        .attr("y", pos.y + 45)
+                        .attr("text-anchor", "middle")
+                        .attr("fill", "#666")
+                        .attr("font-size", "11px")
+                        .text(`was: ${originalValues[id]}`);
+                }
+            });
+        }
+        
+        function renderTraversal() {
+            const container = document.getElementById('traversalItems');
+            container.innerHTML = traversalOrder.map(node => {
+                let cls = 'traversal-item';
+                if (visited.has(node)) cls += ' visited';
+                return `<div class="${cls}">${node} → ${visited.has(node) ? nodeValues[node] : '?'}</div>`;
+            }).join('');
+        }
+        
+        function step() {
+            if (stepIndex >= traversalOrder.length) {
+                document.getElementById('statusMessage').textContent = '✅ Complete! BST converted to Greater Sum Tree.';
+                document.getElementById('stepBtn').disabled = true;
+                stopAuto();
+                currentNode = null;
+                renderTree();
+                return;
+            }
+            
+            currentNode = traversalOrder[stepIndex];
+            const oldVal = originalValues[currentNode];
+            runningSum += oldVal;
+            nodeValues[currentNode] = runningSum;
+            visited.add(currentNode);
+            
+            document.getElementById('runningSum').textContent = runningSum;
+            document.getElementById('currentNode').textContent = `${oldVal} → ${runningSum}`;
+            document.getElementById('statusMessage').textContent = 
+                `Visit node ${oldVal}. Sum = ${runningSum - oldVal} + ${oldVal} = ${runningSum}. Update to ${runningSum}.`;
+            
+            renderTree();
+            renderTraversal();
+            
+            stepIndex++;
+            
+            if (stepIndex >= traversalOrder.length) {
+                setTimeout(() => {
+                    document.getElementById('statusMessage').textContent = '✅ Complete! BST converted to Greater Sum Tree.';
+                    document.getElementById('stepBtn').disabled = true;
+                    stopAuto();
+                    currentNode = null;
+                    renderTree();
+                }, 300);
+            }
+        }
+        
+        function toggleAuto() {
+            if (autoInterval) { stopAuto(); }
+            else {
+                document.getElementById('autoBtn').textContent = 'Pause';
+                autoInterval = setInterval(step, 900);
+            }
+        }
+        
+        function stopAuto() {
+            if (autoInterval) { clearInterval(autoInterval); autoInterval = null; }
+            document.getElementById('autoBtn').textContent = 'Auto Run';
+        }
+        
+        function reset() {
+            stopAuto();
+            document.getElementById('stepBtn').disabled = false;
+            document.getElementById('statusMessage').textContent = 
+                'BST: [4, 1, 6, 0, 2, 5, 7, null, null, null, 3, null, null, null, 8]. Convert to GST.';
+            init();
+        }
+        
+        init();
+    </script>
+</body>
+</html>

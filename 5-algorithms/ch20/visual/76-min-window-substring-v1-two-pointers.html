@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minimum Window Substring - Two Pointers</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; padding: 20px; }
+        .container { max-width: 1000px; margin: 0 auto; }
+        h1 { text-align: center; color: white; margin-bottom: 10px; }
+        .subtitle { text-align: center; color: rgba(255,255,255,0.9); margin-bottom: 20px; font-size: 14px; }
+        .controls { display: flex; justify-content: center; gap: 15px; margin-bottom: 20px; flex-wrap: wrap; }
+        button { background: white; color: #667eea; border: none; padding: 10px 25px; border-radius: 25px; cursor: pointer; font-weight: 600; }
+        button:disabled { opacity: 0.5; cursor: not-allowed; }
+        .info-box { background: white; padding: 8px 15px; border-radius: 20px; font-weight: bold; font-size: 14px; }
+        .panel { background: white; border-radius: 15px; padding: 20px; margin-bottom: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
+        .panel-title { font-size: 16px; font-weight: bold; color: #333; margin-bottom: 15px; border-bottom: 2px solid #667eea; padding-bottom: 10px; }
+        .string-container { display: flex; justify-content: center; gap: 3px; margin: 15px 0; flex-wrap: wrap; }
+        .char { width: 35px; height: 45px; display: flex; flex-direction: column; align-items: center; justify-content: center; border-radius: 6px; font-weight: bold; position: relative; transition: all 0.3s; }
+        .char .letter { font-size: 18px; }
+        .char .idx { font-size: 9px; position: absolute; bottom: 2px; color: #999; }
+        .default { background: #f5f7fa; border: 2px solid #ddd; }
+        .in-window { background: #e3f2fd; border: 2px solid #2196f3; }
+        .matched { background: #4caf50; color: white; border: 2px solid #2e7d32; }
+        .left-ptr { background: #ff9800; color: white; border: 2px solid #f57c00; }
+        .right-ptr { background: #2196f3; color: white; border: 2px solid #1976d2; }
+        .target-char { width: 40px; height: 45px; display: flex; align-items: center; justify-content: center; border-radius: 8px; font-weight: bold; font-size: 20px; }
+        .target-met { background: #4caf50; color: white; }
+        .target-unmet { background: #f5f7fa; border: 2px solid #ddd; }
+        .freq-grid { display: flex; justify-content: center; gap: 15px; flex-wrap: wrap; }
+        .freq-item { text-align: center; }
+        .freq-label { font-size: 12px; color: #666; }
+        .result-box { text-align: center; padding: 15px; background: #f5f7fa; border-radius: 10px; }
+        .result-value { font-size: 28px; font-weight: bold; color: #667eea; font-family: monospace; }
+        .status-box { background: #f5f7fa; border-radius: 10px; padding: 15px; font-family: monospace; font-size: 13px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 Minimum Window Substring</h1>
+        <p class="subtitle">Two Pointers + Counter O(n) - Shrink window when valid</p>
+
+        <div class="controls">
+            <button id="stepBtn">Step</button>
+            <button id="autoBtn">Auto Run</button>
+            <button id="resetBtn">Reset</button>
+            <div class="info-box">Target: "ABC"</div>
+        </div>
+
+        <div class="panel">
+            <div class="panel-title">📝 Source String S</div>
+            <div class="string-container" id="source"></div>
+        </div>
+
+        <div class="panel">
+            <div class="panel-title">🎯 Character Frequency (need vs have)</div>
+            <div class="freq-grid" id="freq"></div>
+        </div>
+
+        <div class="panel">
+            <div class="panel-title">✅ Minimum Window</div>
+            <div class="result-box">
+                <div class="result-value" id="result">-</div>
+            </div>
+        </div>
+
+        <div class="panel">
+            <div class="panel-title">📋 Status</div>
+            <div class="status-box" id="status">Expand right to include chars, shrink left when all targets met.</div>
+        </div>
+    </div>
+
+    <script>
+        const s = "ADOBECODEBANC";
+        const t = "ABC";
+        let left = 0, right = 0;
+        let need = {}, have = {};
+        let required = 0, formed = 0;
+        let minLen = Infinity, minStart = 0;
+        let phase = 'expand';
+        let done = false;
+        let autoInterval = null;
+
+        // Initialize need counter
+        for (const c of t) {
+            need[c] = (need[c] || 0) + 1;
+            required++;
+        }
+
+        function render() {
+            document.getElementById('source').innerHTML = s.split('').map((c, i) => {
+                let cls = 'char default';
+                if (i >= left && i < right) {
+                    cls = 'char in-window';
+                    if (need[c]) cls = 'char matched';
+                }
+                if (i === left) cls = 'char left-ptr';
+                if (i === right - 1 && right > left) cls = 'char right-ptr';
+                return `<div class="${cls}"><span class="letter">${c}</span><span class="idx">${i}</span></div>`;
+            }).join('');
+
+            // Show frequency
+            const chars = Object.keys(need);
+            document.getElementById('freq').innerHTML = chars.map(c => {
+                const h = have[c] || 0;
+                const n = need[c];
+                const met = h >= n;
+                return `<div class="freq-item">
+                    <div class="target-char ${met ? 'target-met' : 'target-unmet'}">${c}</div>
+                    <div class="freq-label">${h}/${n}</div>
+                </div>`;
+            }).join('');
+
+            document.getElementById('result').textContent = 
+                minLen === Infinity ? '-' : s.substring(minStart, minStart + minLen);
+        }
+
+        function isValid() {
+            for (const c in need) {
+                if ((have[c] || 0) < need[c]) return false;
+            }
+            return true;
+        }
+
+        function step() {
+            if (done) return;
+
+            if (phase === 'expand') {
+                if (right >= s.length) {
+                    done = true;
+                    document.getElementById('status').innerHTML = 
+                        `✅ Done! Minimum window: "${s.substring(minStart, minStart + minLen)}"`;
+                    document.getElementById('stepBtn').disabled = true;
+                    document.getElementById('autoBtn').disabled = true;
+                    stopAuto();
+                    render();
+                    return;
+                }
+
+                const c = s[right];
+                have[c] = (have[c] || 0) + 1;
+                right++;
+
+                document.getElementById('status').innerHTML = 
+                    `Expand: Add '${c}' at index ${right-1}. Window: "${s.substring(left, right)}"`;
+
+                if (isValid()) {
+                    phase = 'shrink';
+                }
+            } else {
+                // Shrink phase
+                const windowLen = right - left;
+                if (windowLen < minLen) {
+                    minLen = windowLen;
+                    minStart = left;
+                }
+
+                const c = s[left];
+                have[c]--;
+                left++;
+
+                document.getElementById('status').innerHTML = 
+                    `Shrink: Remove '${c}'. Window: "${s.substring(left, right)}". Best: "${s.substring(minStart, minStart + minLen)}"`;
+
+                if (!isValid()) {
+                    phase = 'expand';
+                }
+            }
+
+            render();
+        }
+
+        function reset() {
+            stopAuto();
+            left = 0; right = 0;
+            have = {};
+            minLen = Infinity; minStart = 0;
+            phase = 'expand';
+            done = false;
+            document.getElementById('stepBtn').disabled = false;
+            document.getElementById('autoBtn').disabled = false;
+            document.getElementById('status').innerHTML = 'Expand right to include chars, shrink left when all targets met.';
+            render();
+        }
+
+        function stopAuto() {
+            if (autoInterval) { clearInterval(autoInterval); autoInterval = null; }
+            document.getElementById('autoBtn').textContent = 'Auto Run';
+        }
+
+        document.getElementById('stepBtn').onclick = () => { stopAuto(); step(); };
+        document.getElementById('autoBtn').onclick = () => {
+            if (autoInterval) { stopAuto(); }
+            else { autoInterval = setInterval(step, 500); document.getElementById('autoBtn').textContent = '⏸ Pause'; }
+        };
+        document.getElementById('resetBtn').onclick = reset;
+
+        render();
+    </script>
+</body>
+</html>

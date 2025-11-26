@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Largest Number</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; padding: 20px; }
+        .container { max-width: 1200px; margin: 0 auto; }
+        h1 { text-align: center; color: white; margin-bottom: 10px; text-shadow: 2px 2px 4px rgba(0,0,0,0.3); }
+        .subtitle { text-align: center; color: rgba(255,255,255,0.9); margin-bottom: 20px; font-size: 14px; }
+        .controls { display: flex; justify-content: center; gap: 15px; margin-bottom: 20px; flex-wrap: wrap; }
+        button { background: white; color: #667eea; border: none; padding: 10px 25px; border-radius: 25px; cursor: pointer; font-weight: 600; transition: all 0.3s; }
+        button:hover { transform: scale(1.05); box-shadow: 0 5px 20px rgba(0,0,0,0.2); }
+        button:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+        .panel { background: white; border-radius: 15px; padding: 20px; margin-bottom: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
+        .panel-title { font-size: 16px; font-weight: bold; color: #333; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 2px solid #667eea; }
+        .numbers-container { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin-bottom: 15px; }
+        .number-box { width: 60px; height: 50px; background: #f5f7fa; border: 2px solid #667eea; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 18px; transition: all 0.3s; }
+        .number-box.comparing { background: #ff9800; color: white; border-color: #f57c00; }
+        .number-box.swapping { background: #e91e63; color: white; border-color: #c2185b; }
+        .number-box.sorted { background: #4caf50; color: white; border-color: #2e7d32; }
+        .number-box.current { background: #667eea; color: white; border-color: #764ba2; }
+        .comparison-box { background: #f5f7fa; border-radius: 10px; padding: 20px; text-align: center; margin: 20px 0; }
+        .comparison-row { display: flex; align-items: center; justify-content: center; gap: 20px; font-size: 20px; font-family: monospace; }
+        .vs { color: #667eea; font-weight: bold; }
+        .compare-result { margin-top: 10px; font-size: 14px; color: #666; }
+        .result-box { background: linear-gradient(135deg, #667eea, #764ba2); color: white; padding: 20px; border-radius: 10px; text-align: center; font-size: 28px; font-family: monospace; letter-spacing: 2px; }
+        .status-box { background: #f5f7fa; border-radius: 10px; padding: 15px; font-family: monospace; }
+        .code-box { background: #1e1e1e; color: #d4d4d4; padding: 15px; border-radius: 10px; font-family: 'Consolas', monospace; font-size: 13px; }
+        .code-box .highlight { background: #264f78; display: block; margin: 0 -15px; padding: 0 15px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔢 Largest Number</h1>
+        <p class="subtitle">Custom comparator: compare str(a)+str(b) vs str(b)+str(a)</p>
+
+        <div class="controls">
+            <button id="stepBtn">Step</button>
+            <button id="autoBtn">Auto Run</button>
+            <button id="resetBtn">Reset</button>
+        </div>
+
+        <div class="panel">
+            <div class="panel-title">📝 Numbers (Insertion Sort with Custom Compare)</div>
+            <div class="numbers-container" id="numbers"></div>
+        </div>
+
+        <div class="panel">
+            <div class="panel-title">⚖️ Comparison</div>
+            <div class="comparison-box" id="comparison">
+                <div class="comparison-row">
+                    <span id="comp-left">-</span>
+                    <span class="vs">vs</span>
+                    <span id="comp-right">-</span>
+                </div>
+                <div class="compare-result" id="compare-result">-</div>
+            </div>
+        </div>
+
+        <div class="panel">
+            <div class="panel-title">🏆 Result</div>
+            <div class="result-box" id="result">-</div>
+        </div>
+
+        <div class="panel">
+            <div class="panel-title">📊 Status</div>
+            <div class="status-box" id="status">Click "Step" or "Auto Run" to find the largest number</div>
+        </div>
+
+        <div class="panel">
+            <div class="panel-title">💻 Algorithm</div>
+            <div class="code-box" id="code">
+<span id="line1">def to_swap(n1, n2):</span>
+<span id="line2">    return str(n1) + str(n2) < str(n2) + str(n1)</span>
+<span id="line3"></span>
+<span id="line4">def largestNumber(nums):</span>
+<span id="line5">    i = 1</span>
+<span id="line6">    while i < len(nums):</span>
+<span id="line7">        j = i</span>
+<span id="line8">        while j > 0 and to_swap(nums[j-1], nums[j]):</span>
+<span id="line9">            nums[j], nums[j-1] = nums[j-1], nums[j]</span>
+<span id="line10">            j -= 1</span>
+<span id="line11">        i += 1</span>
+<span id="line12">    return ''.join(map(str, nums))</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const initialNums = [3, 30, 34, 5, 9];
+        let nums = [...initialNums];
+        let i = 1;
+        let j = 1;
+        let phase = 'compare'; // 'compare', 'swap', 'next'
+        let autoInterval = null;
+        let done = false;
+
+        function renderNumbers() {
+            const container = document.getElementById('numbers');
+            container.innerHTML = nums.map((n, idx) => {
+                let cls = 'number-box';
+                if (done) {
+                    cls += ' sorted';
+                } else if (idx === j - 1 && phase === 'compare') {
+                    cls += ' comparing';
+                } else if (idx === j && phase === 'compare') {
+                    cls += ' current';
+                } else if ((idx === j || idx === j - 1) && phase === 'swap') {
+                    cls += ' swapping';
+                } else if (idx < i && !done) {
+                    cls += ' sorted';
+                }
+                return `<div class="${cls}">${n}</div>`;
+            }).join('');
+        }
+
+        function updateComparison(n1, n2, result) {
+            if (n1 === null) {
+                document.getElementById('comp-left').textContent = '-';
+                document.getElementById('comp-right').textContent = '-';
+                document.getElementById('compare-result').textContent = '-';
+                return;
+            }
+
+            const left = `${n1}${n2}`;
+            const right = `${n2}${n1}`;
+            document.getElementById('comp-left').textContent = `"${left}"`;
+            document.getElementById('comp-right').textContent = `"${right}"`;
+            
+            if (result !== null) {
+                const shouldSwap = left < right;
+                document.getElementById('compare-result').innerHTML = 
+                    `${left} ${shouldSwap ? '<' : '≥'} ${right} → ${shouldSwap ? '✅ Swap needed' : '❌ No swap'}`;
+            }
+        }
+
+        function updateResult() {
+            if (done) {
+                const result = nums.join('');
+                // Handle edge case where all zeros
+                document.getElementById('result').textContent = 
+                    parseInt(result) === 0 ? '0' : result;
+            } else {
+                document.getElementById('result').textContent = '-';
+            }
+        }
+
+        function highlightCode(lineNum) {
+            document.querySelectorAll('.code-box span').forEach(span => {
+                span.classList.remove('highlight');
+            });
+            if (lineNum) {
+                const line = document.getElementById(`line${lineNum}`);
+                if (line) line.classList.add('highlight');
+            }
+        }
+
+        function toSwap(n1, n2) {
+            return `${n1}${n2}` < `${n2}${n1}`;
+        }
+
+        function executeStep() {
+            if (done) return;
+
+            if (i >= nums.length) {
+                done = true;
+                highlightCode(12);
+                document.getElementById('status').innerHTML = 
+                    `✅ Sort complete! Largest number: ${nums.join('')}`;
+                document.getElementById('stepBtn').disabled = true;
+                document.getElementById('autoBtn').disabled = true;
+                updateComparison(null);
+                updateResult();
+                stopAuto();
+                renderNumbers();
+                return;
+            }
+
+            if (phase === 'compare') {
+                if (j > 0) {
+                    highlightCode(8);
+                    updateComparison(nums[j - 1], nums[j], true);
+                    
+                    if (toSwap(nums[j - 1], nums[j])) {
+                        phase = 'swap';
+                        document.getElementById('status').innerHTML = 
+                            `Compare: "${nums[j-1]}${nums[j]}" < "${nums[j]}${nums[j-1]}" → Swap needed`;
+                    } else {
+                        phase = 'next';
+                        document.getElementById('status').innerHTML = 
+                            `Compare: "${nums[j-1]}${nums[j]}" ≥ "${nums[j]}${nums[j-1]}" → No swap, move to next i`;
+                    }
+                } else {
+                    phase = 'next';
+                }
+            } else if (phase === 'swap') {
+                highlightCode(9);
+                [nums[j], nums[j - 1]] = [nums[j - 1], nums[j]];
+                j--;
+                document.getElementById('status').innerHTML = 
+                    `Swapped! Array: [${nums.join(', ')}]. j = ${j}`;
+                phase = 'compare';
+            } else if (phase === 'next') {
+                i++;
+                j = i;
+                highlightCode(11);
+                document.getElementById('status').innerHTML = 
+                    `Move to next element: i = ${i}`;
+                phase = 'compare';
+                updateComparison(null);
+            }
+
+            renderNumbers();
+        }
+
+        function reset() {
+            stopAuto();
+            nums = [...initialNums];
+            i = 1;
+            j = 1;
+            phase = 'compare';
+            done = false;
+            
+            document.getElementById('stepBtn').disabled = false;
+            document.getElementById('autoBtn').disabled = false;
+            document.getElementById('status').innerHTML = 'Click "Step" or "Auto Run" to find the largest number';
+            updateComparison(null);
+            updateResult();
+            highlightCode(null);
+            renderNumbers();
+        }
+
+        function stopAuto() {
+            if (autoInterval) {
+                clearInterval(autoInterval);
+                autoInterval = null;
+                document.getElementById('autoBtn').textContent = 'Auto Run';
+            }
+        }
+
+        document.getElementById('stepBtn').addEventListener('click', () => {
+            stopAuto();
+            executeStep();
+        });
+
+        document.getElementById('autoBtn').addEventListener('click', () => {
+            if (autoInterval) {
+                stopAuto();
+            } else {
+                autoInterval = setInterval(executeStep, 600);
+                document.getElementById('autoBtn').textContent = '⏸ Pause';
+            }
+        });
+
+        document.getElementById('resetBtn').addEventListener('click', reset);
+
+        // Initialize
+        renderNumbers();
+        updateResult();
+    </script>
+</body>
+</html>

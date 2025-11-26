@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Q12: Best Time to Buy and Sell Stock - One Pass</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f7fa;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        /* Problem Info Section */
+        .problem-info {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 16px;
+            padding: 25px 30px;
+            margin-bottom: 25px;
+            color: white;
+            box-shadow: 0 10px 40px rgba(102, 126, 234, 0.3);
+        }
+        .problem-info h1 {
+            font-size: 1.8em;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+        .problem-info p {
+            font-size: 1.1em;
+            opacity: 0.95;
+            line-height: 1.6;
+        }
+        .problem-meta {
+            display: flex;
+            gap: 20px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+        .meta-tag {
+            background: rgba(255,255,255,0.2);
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.9em;
+        }
+        
+        /* Code Section */
+        .code-section {
+            background: white;
+            border-radius: 16px;
+            padding: 25px;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        }
+        .code-section h3 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 1.2em;
+        }
+        .code-block {
+            background: #1e1e1e;
+            border-radius: 12px;
+            padding: 20px;
+            overflow-x: auto;
+        }
+        .code-block pre {
+            margin: 0;
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            font-size: 14px;
+            line-height: 1.6;
+            color: #d4d4d4;
+        }
+        .code-block .keyword { color: #569cd6; }
+        .code-block .function { color: #dcdcaa; }
+        .code-block .string { color: #ce9178; }
+        .code-block .number { color: #b5cea8; }
+        .code-block .comment { color: #6a9955; }
+        .code-block .class-name { color: #4ec9b0; }
+        
+        /* Visualization Section */
+        .visualization-section {
+            background: white;
+            border-radius: 16px;
+            padding: 25px;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        }
+        .visualization-section h3 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 1.2em;
+        }
+        
+        /* Controls */
+        .controls {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        .btn {
+            padding: 12px 28px;
+            font-size: 1em;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .btn-primary:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+        .btn-success {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            color: white;
+        }
+        .btn-success:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(17, 153, 142, 0.4);
+        }
+        .btn-warning {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+        }
+        .btn-warning:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(245, 87, 108, 0.4);
+        }
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        /* Status Message */
+        .status-message {
+            background: #e8f4fd;
+            border-left: 4px solid #2196f3;
+            padding: 15px 20px;
+            border-radius: 0 10px 10px 0;
+            margin-bottom: 20px;
+            font-size: 1.05em;
+            color: #1565c0;
+        }
+        
+        /* Stats Display */
+        .stats-display {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+        }
+        .stat-box {
+            flex: 1;
+            min-width: 140px;
+            padding: 15px;
+            border-radius: 12px;
+            text-align: center;
+        }
+        .stat-box.min {
+            background: #e8f5e9;
+            border: 2px solid #4caf50;
+        }
+        .stat-box.current {
+            background: #fff3e0;
+            border: 2px solid #ff9800;
+        }
+        .stat-box.profit {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .stat-label {
+            font-size: 0.85em;
+            opacity: 0.8;
+            margin-bottom: 5px;
+        }
+        .stat-value {
+            font-size: 1.4em;
+            font-weight: 700;
+        }
+        
+        /* Chart Container */
+        .chart-container {
+            width: 100%;
+            height: 300px;
+            background: #fafafa;
+            border-radius: 12px;
+            border: 1px solid #e0e0e0;
+            margin-bottom: 20px;
+        }
+        
+        /* Array Display */
+        .array-section {
+            margin-top: 20px;
+        }
+        .array-label {
+            font-size: 1em;
+            color: #666;
+            margin-bottom: 10px;
+            font-weight: 500;
+        }
+        .array-container {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        .price-box {
+            width: 60px;
+            height: 70px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.2em;
+            font-weight: 600;
+            background: white;
+            transition: all 0.4s ease;
+        }
+        .day-label {
+            font-size: 0.5em;
+            color: #999;
+            margin-top: 2px;
+        }
+        .price-box.min-day {
+            background: #4caf50;
+            border-color: #2e7d32;
+            color: white;
+        }
+        .price-box.current-day {
+            background: #ff9800;
+            border-color: #ef6c00;
+            color: white;
+        }
+        .price-box.checked {
+            background: #e3f2fd;
+            border-color: #90caf9;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="problem-info">
+            <h1>Q12: Best Time to Buy and Sell Stock</h1>
+            <p>Given an array prices where prices[i] is the price of a stock on day i, find the maximum profit by choosing a single day to buy and a single day to sell in the future.</p>
+            <div class="problem-meta">
+                <span class="meta-tag">📁 Array</span>
+                <span class="meta-tag">⏱️ O(n)</span>
+                <span class="meta-tag">💾 O(1)</span>
+                <span class="meta-tag">💡 Version 2: One Pass</span>
+            </div>
+        </div>
+        
+        <div class="code-section">
+            <h3>💻 Python Solution - One Pass (Track Min & Max Profit)</h3>
+            <div class="code-block">
+                <pre><span class="keyword">def</span> <span class="function">maxProfit</span>(self, prices: List[<span class="class-name">int</span>]) -> <span class="class-name">int</span>:
+    profit = <span class="number">0</span>
+    min_price = sys.maxsize
+    
+    <span class="comment"># Keep updating min price and max profit</span>
+    <span class="keyword">for</span> price <span class="keyword">in</span> prices:
+        min_price = <span class="function">min</span>(min_price, price)
+        profit = <span class="function">max</span>(profit, price - min_price)
+    
+    <span class="keyword">return</span> profit</pre>
+            </div>
+        </div>
+        
+        <div class="visualization-section">
+            <h3>🎬 Visualization</h3>
+            
+            <div class="controls">
+                <button class="btn btn-primary" id="stepBtn" onclick="step()">Step</button>
+                <button class="btn btn-success" id="autoBtn" onclick="toggleAuto()">Auto Run</button>
+                <button class="btn btn-warning" onclick="reset()">Reset</button>
+            </div>
+            
+            <div class="stats-display">
+                <div class="stat-box min">
+                    <div class="stat-label">Min Price</div>
+                    <div class="stat-value" id="minPrice">∞</div>
+                </div>
+                <div class="stat-box current">
+                    <div class="stat-label">Current Price</div>
+                    <div class="stat-value" id="currentPrice">-</div>
+                </div>
+                <div class="stat-box profit">
+                    <div class="stat-label">Max Profit</div>
+                    <div class="stat-value" id="maxProfit">0</div>
+                </div>
+            </div>
+            
+            <div class="status-message" id="statusMessage">
+                Click "Step" or "Auto Run" to start visualization
+            </div>
+            
+            <div class="chart-container" id="chartContainer"></div>
+            
+            <div class="array-section">
+                <div class="array-label">Stock Prices:</div>
+                <div class="array-container" id="pricesContainer"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const prices = [7, 1, 5, 3, 6, 4];
+        let currentIndex = -1;
+        let minPrice = Infinity;
+        let maxProfit = 0;
+        let minPriceDay = -1;
+        let autoInterval = null;
+        
+        // D3 Setup
+        const margin = { top: 20, right: 30, bottom: 40, left: 50 };
+        let svg, xScale, yScale, width, height;
+        
+        function initChart() {
+            const container = document.getElementById('chartContainer');
+            container.innerHTML = '';
+            
+            width = container.offsetWidth - margin.left - margin.right;
+            height = container.offsetHeight - margin.top - margin.bottom;
+            
+            svg = d3.select('#chartContainer')
+                .append('svg')
+                .attr('width', container.offsetWidth)
+                .attr('height', container.offsetHeight)
+                .append('g')
+                .attr('transform', `translate(${margin.left},${margin.top})`);
+            
+            xScale = d3.scaleLinear()
+                .domain([0, prices.length - 1])
+                .range([0, width]);
+            
+            yScale = d3.scaleLinear()
+                .domain([0, d3.max(prices) + 1])
+                .range([height, 0]);
+            
+            // X Axis
+            svg.append('g')
+                .attr('transform', `translate(0,${height})`)
+                .call(d3.axisBottom(xScale).ticks(prices.length).tickFormat(d => `Day ${d}`));
+            
+            // Y Axis
+            svg.append('g')
+                .call(d3.axisLeft(yScale).tickFormat(d => `$${d}`));
+            
+            // Line
+            const line = d3.line()
+                .x((d, i) => xScale(i))
+                .y(d => yScale(d));
+            
+            svg.append('path')
+                .datum(prices)
+                .attr('fill', 'none')
+                .attr('stroke', '#667eea')
+                .attr('stroke-width', 3)
+                .attr('d', line);
+            
+            // Dots
+            svg.selectAll('.dot')
+                .data(prices)
+                .enter()
+                .append('circle')
+                .attr('class', 'dot')
+                .attr('cx', (d, i) => xScale(i))
+                .attr('cy', d => yScale(d))
+                .attr('r', 6)
+                .attr('fill', '#667eea');
+            
+            // Min price line (hidden initially)
+            svg.append('line')
+                .attr('class', 'min-line')
+                .attr('x1', 0)
+                .attr('x2', width)
+                .attr('y1', yScale(0))
+                .attr('y2', yScale(0))
+                .attr('stroke', '#4caf50')
+                .attr('stroke-width', 2)
+                .attr('stroke-dasharray', '5,5')
+                .style('opacity', 0);
+        }
+        
+        function init() {
+            renderPrices();
+            initChart();
+        }
+        
+        function renderPrices() {
+            const container = document.getElementById('pricesContainer');
+            container.innerHTML = '';
+            prices.forEach((price, idx) => {
+                const box = document.createElement('div');
+                box.className = 'price-box';
+                box.id = `price-${idx}`;
+                box.innerHTML = `$${price}<span class="day-label">Day ${idx}</span>`;
+                container.appendChild(box);
+            });
+        }
+        
+        function step() {
+            currentIndex++;
+            
+            if (currentIndex >= prices.length) {
+                document.getElementById('statusMessage').textContent = 
+                    `✅ Done! Max profit = $${maxProfit}`;
+                document.getElementById('stepBtn').disabled = true;
+                stopAuto();
+                return;
+            }
+            
+            const price = prices[currentIndex];
+            document.getElementById('currentPrice').textContent = `$${price}`;
+            
+            // Clear previous highlights
+            document.querySelectorAll('.price-box').forEach(box => {
+                box.classList.remove('current-day');
+            });
+            
+            // Update min price
+            const prevMin = minPrice;
+            if (price < minPrice) {
+                minPrice = price;
+                minPriceDay = currentIndex;
+                document.getElementById('minPrice').textContent = `$${minPrice}`;
+            }
+            
+            // Highlight min and current
+            if (minPriceDay >= 0) {
+                document.getElementById(`price-${minPriceDay}`).classList.add('min-day');
+            }
+            document.getElementById(`price-${currentIndex}`).classList.add('current-day', 'checked');
+            
+            // Calculate potential profit
+            const potentialProfit = price - minPrice;
+            if (potentialProfit > maxProfit) {
+                maxProfit = potentialProfit;
+                document.getElementById('maxProfit').textContent = `$${maxProfit}`;
+            }
+            
+            // Update min line on chart
+            svg.select('.min-line')
+                .style('opacity', 1)
+                .transition()
+                .duration(300)
+                .attr('y1', yScale(minPrice))
+                .attr('y2', yScale(minPrice));
+            
+            // Draw profit indicator
+            svg.selectAll('.profit-line').remove();
+            if (potentialProfit > 0) {
+                svg.append('line')
+                    .attr('class', 'profit-line')
+                    .attr('x1', xScale(currentIndex))
+                    .attr('x2', xScale(currentIndex))
+                    .attr('y1', yScale(minPrice))
+                    .attr('y2', yScale(price))
+                    .attr('stroke', '#ff9800')
+                    .attr('stroke-width', 3);
+            }
+            
+            // Highlight current dot
+            svg.selectAll('.dot')
+                .attr('fill', (d, i) => {
+                    if (i === minPriceDay) return '#4caf50';
+                    if (i === currentIndex) return '#ff9800';
+                    if (i < currentIndex) return '#90caf9';
+                    return '#667eea';
+                })
+                .attr('r', (d, i) => (i === currentIndex || i === minPriceDay) ? 8 : 6);
+            
+            document.getElementById('statusMessage').textContent = 
+                `Day ${currentIndex}: Price=$${price}, Min=$${minPrice}, Potential profit=$${potentialProfit}, Max profit=$${maxProfit}`;
+        }
+        
+        function toggleAuto() {
+            if (autoInterval) {
+                stopAuto();
+            } else {
+                document.getElementById('autoBtn').textContent = 'Pause';
+                autoInterval = setInterval(() => {
+                    if (currentIndex >= prices.length - 1) {
+                        step();
+                        stopAuto();
+                    } else {
+                        step();
+                    }
+                }, 1200);
+            }
+        }
+        
+        function stopAuto() {
+            if (autoInterval) {
+                clearInterval(autoInterval);
+                autoInterval = null;
+            }
+            document.getElementById('autoBtn').textContent = 'Auto Run';
+        }
+        
+        function reset() {
+            stopAuto();
+            currentIndex = -1;
+            minPrice = Infinity;
+            maxProfit = 0;
+            minPriceDay = -1;
+            document.getElementById('stepBtn').disabled = false;
+            document.getElementById('minPrice').textContent = '∞';
+            document.getElementById('currentPrice').textContent = '-';
+            document.getElementById('maxProfit').textContent = '0';
+            document.getElementById('statusMessage').textContent = 
+                'Click "Step" or "Auto Run" to start visualization';
+            init();
+        }
+        
+        // Initialize on load
+        init();
+    </script>
+</body>
+</html>

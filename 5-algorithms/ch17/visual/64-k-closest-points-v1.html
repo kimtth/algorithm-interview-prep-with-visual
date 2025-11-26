@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>K Closest Points to Origin</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; padding: 20px; }
+        .container { max-width: 1200px; margin: 0 auto; }
+        h1 { text-align: center; color: white; margin-bottom: 10px; text-shadow: 2px 2px 4px rgba(0,0,0,0.3); }
+        .subtitle { text-align: center; color: rgba(255,255,255,0.9); margin-bottom: 20px; font-size: 14px; }
+        .controls { display: flex; justify-content: center; gap: 15px; margin-bottom: 20px; flex-wrap: wrap; }
+        button { background: white; color: #667eea; border: none; padding: 10px 25px; border-radius: 25px; cursor: pointer; font-weight: 600; transition: all 0.3s; }
+        button:hover { transform: scale(1.05); box-shadow: 0 5px 20px rgba(0,0,0,0.2); }
+        button:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+        .main-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .panel { background: white; border-radius: 15px; padding: 20px; margin-bottom: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
+        .panel-title { font-size: 16px; font-weight: bold; color: #333; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 2px solid #667eea; }
+        .full-width { grid-column: 1 / -1; }
+        #graph-svg { width: 100%; height: 350px; }
+        .point { cursor: pointer; transition: all 0.3s; }
+        .point.active { filter: drop-shadow(0 0 5px #ff9800); }
+        .point.selected { filter: drop-shadow(0 0 8px #4caf50); }
+        .heap-container { min-height: 200px; }
+        .heap-item { display: inline-flex; align-items: center; gap: 5px; margin: 5px; padding: 8px 12px; background: #f5f7fa; border-radius: 20px; font-family: monospace; font-size: 13px; transition: all 0.3s; }
+        .heap-item.adding { background: #ff9800; color: white; }
+        .heap-item.popping { background: #f44336; color: white; }
+        .heap-item.result { background: #4caf50; color: white; }
+        .result-container { display: flex; gap: 10px; flex-wrap: wrap; min-height: 50px; }
+        .result-item { padding: 10px 15px; background: linear-gradient(135deg, #667eea, #764ba2); color: white; border-radius: 20px; font-family: monospace; animation: fadeIn 0.3s; }
+        @keyframes fadeIn { from { opacity: 0; transform: scale(0.8); } to { opacity: 1; transform: scale(1); } }
+        .status-box { background: #f5f7fa; border-radius: 10px; padding: 15px; font-family: monospace; }
+        .dist-label { font-size: 10px; fill: #666; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📍 K Closest Points to Origin</h1>
+        <p class="subtitle">O(n log n) using Min Heap - Find K=2 closest points</p>
+
+        <div class="controls">
+            <button id="stepBtn">Step</button>
+            <button id="autoBtn">Auto Run</button>
+            <button id="resetBtn">Reset</button>
+        </div>
+
+        <div class="main-grid">
+            <div class="panel">
+                <div class="panel-title">📈 Coordinate Plane</div>
+                <svg id="graph-svg"></svg>
+            </div>
+
+            <div class="panel">
+                <div class="panel-title">🔢 Min Heap (by distance²)</div>
+                <div class="heap-container" id="heap"></div>
+            </div>
+
+            <div class="panel full-width">
+                <div class="panel-title">✅ K Closest Points (K=2)</div>
+                <div class="result-container" id="results"></div>
+            </div>
+
+            <div class="panel full-width">
+                <div class="panel-title">📊 Status</div>
+                <div class="status-box" id="status">Click "Step" or "Auto Run" to find K closest points</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const points = [[1, 3], [-2, 2], [5, 8], [0, 1]];
+        const K = 2;
+        let heap = []; // Min heap: [[dist, x, y], ...]
+        let results = [];
+        let step = 0;
+        let phase = 'push'; // 'push', 'pop'
+        let pushIndex = 0;
+        let popCount = 0;
+        let activePoint = -1;
+        let autoInterval = null;
+
+        function calculateDist(point) {
+            return point[0] ** 2 + point[1] ** 2;
+        }
+
+        function renderGraph() {
+            const svg = d3.select('#graph-svg');
+            svg.selectAll('*').remove();
+            
+            const width = svg.node().getBoundingClientRect().width;
+            const height = 350;
+            const margin = 40;
+            
+            // Scale
+            const allCoords = points.flat();
+            const maxCoord = Math.max(...allCoords.map(Math.abs)) + 2;
+            const scale = d3.scaleLinear()
+                .domain([-maxCoord, maxCoord])
+                .range([margin, width - margin]);
+            const scaleY = d3.scaleLinear()
+                .domain([-maxCoord, maxCoord])
+                .range([height - margin, margin]);
+
+            const g = svg.append('g');
+
+            // Grid
+            for (let i = -Math.floor(maxCoord); i <= maxCoord; i++) {
+                g.append('line')
+                    .attr('x1', scale(i)).attr('x2', scale(i))
+                    .attr('y1', margin).attr('y2', height - margin)
+                    .attr('stroke', '#eee').attr('stroke-width', 1);
+                g.append('line')
+                    .attr('x1', margin).attr('x2', width - margin)
+                    .attr('y1', scaleY(i)).attr('y2', scaleY(i))
+                    .attr('stroke', '#eee').attr('stroke-width', 1);
+            }
+
+            // Axes
+            g.append('line')
+                .attr('x1', margin).attr('x2', width - margin)
+                .attr('y1', scaleY(0)).attr('y2', scaleY(0))
+                .attr('stroke', '#333').attr('stroke-width', 2);
+            g.append('line')
+                .attr('x1', scale(0)).attr('x2', scale(0))
+                .attr('y1', margin).attr('y2', height - margin)
+                .attr('stroke', '#333').attr('stroke-width', 2);
+
+            // Origin
+            g.append('circle')
+                .attr('cx', scale(0)).attr('cy', scaleY(0))
+                .attr('r', 6).attr('fill', '#667eea');
+            g.append('text')
+                .attr('x', scale(0) + 10).attr('y', scaleY(0) + 15)
+                .attr('font-size', '12px').attr('fill', '#667eea')
+                .text('Origin');
+
+            // Points
+            points.forEach((p, i) => {
+                const isActive = i === activePoint;
+                const isSelected = results.some(r => r[0] === p[0] && r[1] === p[1]);
+                const isInHeap = heap.some(h => h[1] === p[0] && h[2] === p[1]);
+                
+                // Distance line
+                if (isActive || isSelected) {
+                    g.append('line')
+                        .attr('x1', scale(0)).attr('y1', scaleY(0))
+                        .attr('x2', scale(p[0])).attr('y2', scaleY(p[1]))
+                        .attr('stroke', isSelected ? '#4caf50' : '#ff9800')
+                        .attr('stroke-width', 2)
+                        .attr('stroke-dasharray', '5,5');
+                }
+
+                // Point
+                g.append('circle')
+                    .attr('class', `point ${isActive ? 'active' : ''} ${isSelected ? 'selected' : ''}`)
+                    .attr('cx', scale(p[0])).attr('cy', scaleY(p[1]))
+                    .attr('r', isActive ? 12 : 10)
+                    .attr('fill', isSelected ? '#4caf50' : (isActive ? '#ff9800' : (isInHeap ? '#667eea' : '#999')));
+
+                // Label
+                g.append('text')
+                    .attr('x', scale(p[0]) + 12).attr('y', scaleY(p[1]) - 8)
+                    .attr('font-size', '12px').attr('font-weight', 'bold')
+                    .text(`(${p[0]},${p[1]})`);
+
+                // Distance
+                const dist = calculateDist(p);
+                g.append('text')
+                    .attr('class', 'dist-label')
+                    .attr('x', scale(p[0]) + 12).attr('y', scaleY(p[1]) + 8)
+                    .text(`d²=${dist}`);
+            });
+        }
+
+        function renderHeap() {
+            const container = document.getElementById('heap');
+            if (heap.length === 0) {
+                container.innerHTML = '<div style="color:#999;text-align:center;">Empty</div>';
+                return;
+            }
+            container.innerHTML = heap.map((item, i) => {
+                let cls = 'heap-item';
+                if (phase === 'push' && i === heap.length - 1 && activePoint >= 0) cls += ' adding';
+                if (phase === 'pop' && i === 0) cls += ' popping';
+                return `<div class="${cls}">dist²=${item[0]} → (${item[1]},${item[2]})</div>`;
+            }).join('');
+        }
+
+        function renderResults() {
+            const container = document.getElementById('results');
+            container.innerHTML = results.map(p => 
+                `<div class="result-item">(${p[0]}, ${p[1]})</div>`
+            ).join('');
+        }
+
+        function heapPush(item) {
+            heap.push(item);
+            // Bubble up
+            let i = heap.length - 1;
+            while (i > 0) {
+                const parent = Math.floor((i - 1) / 2);
+                if (heap[parent][0] > heap[i][0]) {
+                    [heap[parent], heap[i]] = [heap[i], heap[parent]];
+                    i = parent;
+                } else break;
+            }
+        }
+
+        function heapPop() {
+            if (heap.length === 0) return null;
+            const result = heap[0];
+            const last = heap.pop();
+            if (heap.length > 0) {
+                heap[0] = last;
+                // Bubble down
+                let i = 0;
+                while (true) {
+                    const left = 2 * i + 1;
+                    const right = 2 * i + 2;
+                    let smallest = i;
+                    if (left < heap.length && heap[left][0] < heap[smallest][0]) smallest = left;
+                    if (right < heap.length && heap[right][0] < heap[smallest][0]) smallest = right;
+                    if (smallest !== i) {
+                        [heap[i], heap[smallest]] = [heap[smallest], heap[i]];
+                        i = smallest;
+                    } else break;
+                }
+            }
+            return result;
+        }
+
+        function executeStep() {
+            if (phase === 'push') {
+                if (pushIndex < points.length) {
+                    const p = points[pushIndex];
+                    const dist = calculateDist(p);
+                    activePoint = pushIndex;
+                    
+                    heapPush([dist, p[0], p[1]]);
+                    
+                    document.getElementById('status').innerHTML = 
+                        `Push point (${p[0]}, ${p[1]}) with distance² = ${dist} to min heap`;
+                    
+                    pushIndex++;
+                } else {
+                    phase = 'pop';
+                    activePoint = -1;
+                    document.getElementById('status').innerHTML = 
+                        `All points added to heap. Now extract K=${K} closest points.`;
+                }
+            } else if (phase === 'pop') {
+                if (popCount < K && heap.length > 0) {
+                    const item = heapPop();
+                    results.push([item[1], item[2]]);
+                    popCount++;
+                    
+                    document.getElementById('status').innerHTML = 
+                        `Pop closest point: (${item[1]}, ${item[2]}) with distance² = ${item[0]}`;
+                } else {
+                    document.getElementById('status').innerHTML = 
+                        `✅ Found K=${K} closest points: ${results.map(p => `(${p[0]},${p[1]})`).join(', ')}`;
+                    document.getElementById('stepBtn').disabled = true;
+                    document.getElementById('autoBtn').disabled = true;
+                    stopAuto();
+                }
+            }
+
+            renderGraph();
+            renderHeap();
+            renderResults();
+        }
+
+        function reset() {
+            stopAuto();
+            heap = [];
+            results = [];
+            step = 0;
+            phase = 'push';
+            pushIndex = 0;
+            popCount = 0;
+            activePoint = -1;
+            
+            document.getElementById('stepBtn').disabled = false;
+            document.getElementById('autoBtn').disabled = false;
+            document.getElementById('status').innerHTML = 'Click "Step" or "Auto Run" to find K closest points';
+            
+            renderGraph();
+            renderHeap();
+            renderResults();
+        }
+
+        function stopAuto() {
+            if (autoInterval) {
+                clearInterval(autoInterval);
+                autoInterval = null;
+                document.getElementById('autoBtn').textContent = 'Auto Run';
+            }
+        }
+
+        document.getElementById('stepBtn').addEventListener('click', () => {
+            stopAuto();
+            executeStep();
+        });
+
+        document.getElementById('autoBtn').addEventListener('click', () => {
+            if (autoInterval) {
+                stopAuto();
+            } else {
+                autoInterval = setInterval(executeStep, 800);
+                document.getElementById('autoBtn').textContent = '⏸ Pause';
+            }
+        });
+
+        document.getElementById('resetBtn').addEventListener('click', reset);
+
+        // Initialize
+        renderGraph();
+        renderHeap();
+    </script>
+</body>
+</html>

@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Q46: Merge Two Binary Trees</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f5f7fa; min-height: 100vh; padding: 20px; }
+        .container { max-width: 1200px; margin: 0 auto; }
+        
+        .problem-info { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 16px; padding: 25px 30px; margin-bottom: 25px; color: white; }
+        .problem-info h1 { font-size: 1.8em; margin-bottom: 10px; }
+        .problem-info p { font-size: 1.1em; opacity: 0.95; line-height: 1.6; }
+        .problem-meta { display: flex; gap: 20px; margin-top: 15px; flex-wrap: wrap; }
+        .meta-tag { background: rgba(255,255,255,0.2); padding: 6px 14px; border-radius: 20px; font-size: 0.9em; }
+        
+        .code-section { background: white; border-radius: 16px; padding: 25px; margin-bottom: 25px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
+        .code-section h3 { color: #333; margin-bottom: 15px; }
+        .code-block { background: #1e1e1e; border-radius: 12px; padding: 20px; overflow-x: auto; }
+        .code-block pre { margin: 0; font-family: 'Consolas', monospace; font-size: 13px; line-height: 1.5; color: #d4d4d4; }
+        .code-block .keyword { color: #569cd6; }
+        .code-block .function { color: #dcdcaa; }
+        .code-block .comment { color: #6a9955; }
+        
+        .visualization-section { background: white; border-radius: 16px; padding: 25px; margin-bottom: 25px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
+        .visualization-section h3 { color: #333; margin-bottom: 20px; }
+        
+        .controls { display: flex; gap: 12px; margin-bottom: 25px; flex-wrap: wrap; }
+        .btn { padding: 12px 28px; font-size: 1em; border: none; border-radius: 10px; cursor: pointer; font-weight: 500; }
+        .btn-primary { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; }
+        .btn-success { background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); color: white; }
+        .btn-warning { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white; }
+        .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        
+        .status-message { background: #e8f4fd; border-left: 4px solid #2196f3; padding: 15px 20px; border-radius: 0 10px 10px 0; margin-bottom: 20px; color: #1565c0; }
+        
+        .trees-container { display: flex; gap: 20px; justify-content: center; flex-wrap: wrap; margin-bottom: 20px; }
+        .tree-box { text-align: center; }
+        .tree-label { font-weight: 600; color: #333; margin-bottom: 10px; font-size: 0.95em; }
+        svg { background: #fafafa; border-radius: 12px; border: 1px solid #e0e0e0; }
+        
+        .legend { display: flex; gap: 20px; margin-bottom: 15px; flex-wrap: wrap; justify-content: center; }
+        .legend-item { display: flex; align-items: center; gap: 8px; font-size: 0.9em; }
+        .legend-circle { width: 18px; height: 18px; border-radius: 50%; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="problem-info">
+            <h1>Q46: Merge Two Binary Trees</h1>
+            <p>Merge two binary trees by summing overlapping node values. If only one tree has a node, use that value.</p>
+            <div class="problem-meta">
+                <span class="meta-tag">📁 Tree</span>
+                <span class="meta-tag">⏱️ O(n)</span>
+                <span class="meta-tag">💡 Recursive DFS</span>
+            </div>
+        </div>
+        
+        <div class="code-section">
+            <h3>💻 Python Solution</h3>
+            <div class="code-block">
+                <pre><span class="keyword">def</span> <span class="function">mergeTrees</span>(t1: TreeNode, t2: TreeNode) -> TreeNode:
+    <span class="keyword">if</span> t1 <span class="keyword">and</span> t2:
+        node = TreeNode(t1.val + t2.val)
+        node.left = <span class="function">mergeTrees</span>(t1.left, t2.left)
+        node.right = <span class="function">mergeTrees</span>(t1.right, t2.right)
+        <span class="keyword">return</span> node
+    <span class="keyword">else</span>:
+        <span class="keyword">return</span> t1 <span class="keyword">or</span> t2</pre>
+            </div>
+        </div>
+        
+        <div class="visualization-section">
+            <h3>🎬 Visualization</h3>
+            
+            <div class="controls">
+                <button class="btn btn-primary" id="stepBtn" onclick="step()">Step</button>
+                <button class="btn btn-success" id="autoBtn" onclick="toggleAuto()">Auto Run</button>
+                <button class="btn btn-warning" onclick="reset()">Reset</button>
+            </div>
+            
+            <div class="legend">
+                <div class="legend-item"><div class="legend-circle" style="background: #3498db;"></div> Unmerged</div>
+                <div class="legend-item"><div class="legend-circle" style="background: #f39c12;"></div> Processing</div>
+                <div class="legend-item"><div class="legend-circle" style="background: #27ae60;"></div> Merged</div>
+            </div>
+            
+            <div class="status-message" id="statusMessage">
+                Merge t1 and t2 recursively. Overlapping nodes are summed.
+            </div>
+            
+            <div class="trees-container">
+                <div class="tree-box">
+                    <div class="tree-label">Tree 1</div>
+                    <svg id="tree1" width="200" height="200"></svg>
+                </div>
+                <div class="tree-box">
+                    <div class="tree-label">Tree 2</div>
+                    <svg id="tree2" width="200" height="200"></svg>
+                </div>
+                <div class="tree-box">
+                    <div class="tree-label">Merged Result</div>
+                    <svg id="result" width="200" height="200"></svg>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        //     1          2
+        //    / \        / \
+        //   3   2      1   3
+        //  /            \   \
+        // 5              4   7
+        const tree1 = [
+            { id: 0, val: 1, x: 100, y: 30, left: 1, right: 2 },
+            { id: 1, val: 3, x: 50, y: 90, left: 3 },
+            { id: 2, val: 2, x: 150, y: 90 },
+            { id: 3, val: 5, x: 25, y: 150 }
+        ];
+        
+        const tree2 = [
+            { id: 0, val: 2, x: 100, y: 30, left: 1, right: 2 },
+            { id: 1, val: 1, x: 50, y: 90, right: 3 },
+            { id: 2, val: 3, x: 150, y: 90, right: 4 },
+            { id: 3, val: 4, x: 75, y: 150 },
+            { id: 4, val: 7, x: 175, y: 150 }
+        ];
+        
+        let result = [];
+        let stack = [];
+        let currentPos = null;
+        let merged = new Set();
+        let done = false;
+        let autoInterval = null;
+        
+        function init() {
+            result = [];
+            stack = [{ pos: 'root', t1: tree1[0], t2: tree2[0] }];
+            currentPos = null;
+            merged = new Set();
+            done = false;
+            renderTrees();
+        }
+        
+        function renderTree(svgId, nodes, highlight = null) {
+            const svg = d3.select(svgId);
+            svg.selectAll("*").remove();
+            
+            if (!nodes || nodes.length === 0) return;
+            
+            // Draw links
+            nodes.forEach(node => {
+                if (node.left !== undefined) {
+                    const child = nodes.find(n => n.id === node.left);
+                    if (child) {
+                        svg.append("line")
+                            .attr("x1", node.x).attr("y1", node.y)
+                            .attr("x2", child.x).attr("y2", child.y)
+                            .attr("stroke", "#999").attr("stroke-width", 2);
+                    }
+                }
+                if (node.right !== undefined) {
+                    const child = nodes.find(n => n.id === node.right);
+                    if (child) {
+                        svg.append("line")
+                            .attr("x1", node.x).attr("y1", node.y)
+                            .attr("x2", child.x).attr("y2", child.y)
+                            .attr("stroke", "#999").attr("stroke-width", 2);
+                    }
+                }
+            });
+            
+            // Draw nodes
+            nodes.forEach(node => {
+                let fill = "#3498db";
+                if (node.merged) fill = "#27ae60";
+                if (highlight === node.id) fill = "#f39c12";
+                
+                svg.append("circle")
+                    .attr("cx", node.x).attr("cy", node.y)
+                    .attr("r", 20)
+                    .attr("fill", fill)
+                    .attr("stroke", "#333")
+                    .attr("stroke-width", 2);
+                
+                svg.append("text")
+                    .attr("x", node.x).attr("y", node.y + 5)
+                    .attr("text-anchor", "middle")
+                    .attr("fill", "white")
+                    .attr("font-weight", "bold")
+                    .attr("font-size", "14px")
+                    .text(node.val);
+            });
+        }
+        
+        function renderTrees() {
+            renderTree("#tree1", tree1);
+            renderTree("#tree2", tree2);
+            renderTree("#result", result);
+        }
+        
+        function step() {
+            if (done || stack.length === 0) {
+                done = true;
+                document.getElementById('statusMessage').textContent = 
+                    '✅ Complete! Trees have been merged.';
+                document.getElementById('stepBtn').disabled = true;
+                stopAuto();
+                return;
+            }
+            
+            const current = stack.pop();
+            const { pos, t1, t2 } = current;
+            
+            if (t1 && t2) {
+                const newVal = t1.val + t2.val;
+                const newNode = { 
+                    id: result.length, 
+                    val: newVal, 
+                    x: t1.x, 
+                    y: t1.y,
+                    merged: true
+                };
+                result.push(newNode);
+                
+                document.getElementById('statusMessage').textContent = 
+                    `Position ${pos}: ${t1.val} + ${t2.val} = ${newVal}`;
+                
+                // Queue children
+                const t1Left = t1.left !== undefined ? tree1.find(n => n.id === t1.left) : null;
+                const t2Left = t2.left !== undefined ? tree2.find(n => n.id === t2.left) : null;
+                const t1Right = t1.right !== undefined ? tree1.find(n => n.id === t1.right) : null;
+                const t2Right = t2.right !== undefined ? tree2.find(n => n.id === t2.right) : null;
+                
+                if (t1Left || t2Left) stack.push({ pos: 'left', t1: t1Left, t2: t2Left });
+                if (t1Right || t2Right) stack.push({ pos: 'right', t1: t1Right, t2: t2Right });
+            } else if (t1) {
+                const newNode = { id: result.length, val: t1.val, x: t1.x, y: t1.y, merged: true };
+                result.push(newNode);
+                document.getElementById('statusMessage').textContent = 
+                    `Position ${pos}: only t1 has value ${t1.val}`;
+            } else if (t2) {
+                const newNode = { id: result.length, val: t2.val, x: t2.x, y: t2.y, merged: true };
+                result.push(newNode);
+                document.getElementById('statusMessage').textContent = 
+                    `Position ${pos}: only t2 has value ${t2.val}`;
+            }
+            
+            renderTrees();
+        }
+        
+        function toggleAuto() {
+            if (autoInterval) { stopAuto(); }
+            else {
+                document.getElementById('autoBtn').textContent = 'Pause';
+                autoInterval = setInterval(step, 800);
+            }
+        }
+        
+        function stopAuto() {
+            if (autoInterval) { clearInterval(autoInterval); autoInterval = null; }
+            document.getElementById('autoBtn').textContent = 'Auto Run';
+        }
+        
+        function reset() {
+            stopAuto();
+            document.getElementById('stepBtn').disabled = false;
+            document.getElementById('statusMessage').textContent = 
+                'Merge t1 and t2 recursively. Overlapping nodes are summed.';
+            init();
+        }
+        
+        init();
+    </script>
+</body>
+</html>

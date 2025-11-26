@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Q16: Add Two Numbers - Reverse and Convert</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f5f7fa; min-height: 100vh; padding: 20px; }
+        .container { max-width: 1200px; margin: 0 auto; }
+        
+        .problem-info { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 16px; padding: 25px 30px; margin-bottom: 25px; color: white; }
+        .problem-info h1 { font-size: 1.8em; margin-bottom: 10px; }
+        .problem-info p { font-size: 1.1em; opacity: 0.95; line-height: 1.6; }
+        .problem-meta { display: flex; gap: 20px; margin-top: 15px; flex-wrap: wrap; }
+        .meta-tag { background: rgba(255,255,255,0.2); padding: 6px 14px; border-radius: 20px; font-size: 0.9em; }
+        
+        .code-section { background: white; border-radius: 16px; padding: 25px; margin-bottom: 25px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
+        .code-section h3 { color: #333; margin-bottom: 15px; }
+        .code-block { background: #1e1e1e; border-radius: 12px; padding: 20px; overflow-x: auto; }
+        .code-block pre { margin: 0; font-family: 'Consolas', monospace; font-size: 13px; line-height: 1.5; color: #d4d4d4; }
+        .code-block .keyword { color: #569cd6; }
+        .code-block .function { color: #dcdcaa; }
+        .code-block .comment { color: #6a9955; }
+        
+        .visualization-section { background: white; border-radius: 16px; padding: 25px; margin-bottom: 25px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
+        .visualization-section h3 { color: #333; margin-bottom: 20px; }
+        
+        .controls { display: flex; gap: 12px; margin-bottom: 25px; flex-wrap: wrap; }
+        .btn { padding: 12px 28px; font-size: 1em; border: none; border-radius: 10px; cursor: pointer; font-weight: 500; }
+        .btn-primary { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; }
+        .btn-success { background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); color: white; }
+        .btn-warning { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white; }
+        .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        
+        .status-message { background: #e8f4fd; border-left: 4px solid #2196f3; padding: 15px 20px; border-radius: 0 10px 10px 0; margin-bottom: 20px; color: #1565c0; }
+        
+        .step-section { display: flex; gap: 20px; flex-wrap: wrap; margin-bottom: 20px; }
+        .step-box { flex: 1; min-width: 200px; padding: 20px; border-radius: 12px; background: #f9f9f9; }
+        .step-title { font-size: 0.9em; color: #666; margin-bottom: 10px; font-weight: 500; }
+        .step-content { font-size: 1.2em; font-weight: 600; color: #333; word-break: break-all; }
+        .step-box.active { background: #e8f5e9; border: 2px solid #4caf50; }
+        .step-box.complete { background: #e3f2fd; border: 2px solid #2196f3; }
+        
+        .list-section { margin-bottom: 20px; }
+        .list-label { font-size: 1em; color: #666; margin-bottom: 10px; font-weight: 500; }
+        .list-container { display: flex; align-items: center; gap: 5px; flex-wrap: wrap; min-height: 70px; padding: 15px; background: #f9f9f9; border-radius: 12px; }
+        .list-node { width: 50px; height: 50px; border: 2px solid #667eea; border-radius: 10px; display: flex; justify-content: center; align-items: center; font-size: 1.3em; font-weight: 600; background: white; transition: all 0.4s ease; }
+        .list-node.highlight { background: #fff3e0; border-color: #ff9800; }
+        .list-node.processed { background: #e8f5e9; border-color: #4caf50; }
+        .list-arrow { width: 25px; height: 2px; background: #667eea; position: relative; }
+        .list-arrow::after { content: ''; position: absolute; right: 0; top: -4px; border: 5px solid transparent; border-left-color: #667eea; }
+        
+        .calculation-display { font-size: 1.4em; font-weight: 600; text-align: center; padding: 20px; background: #f3e5f5; border-radius: 12px; margin-bottom: 20px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="problem-info">
+            <h1>Q16: Add Two Numbers</h1>
+            <p>Add two numbers represented as linked lists where digits are stored in reverse order.</p>
+            <div class="problem-meta">
+                <span class="meta-tag">📁 Linked List</span>
+                <span class="meta-tag">⏱️ O(n)</span>
+                <span class="meta-tag">💡 Version 2: Reverse & Convert</span>
+            </div>
+        </div>
+        
+        <div class="code-section">
+            <h3>💻 Python Solution - Reverse and Convert</h3>
+            <div class="code-block">
+                <pre><span class="keyword">def</span> <span class="function">addTwoNumbers</span>(self, l1: ListNode, l2: ListNode) -> ListNode:
+    <span class="comment"># 1. Reverse both lists</span>
+    a = self.toList(self.reverseList(l1))
+    b = self.toList(self.reverseList(l2))
+    
+    <span class="comment"># 2. Convert to integers and add</span>
+    resultStr = int(''.join(str(e) <span class="keyword">for</span> e <span class="keyword">in</span> a)) + \
+                int(''.join(str(e) <span class="keyword">for</span> e <span class="keyword">in</span> b))
+    
+    <span class="comment"># 3. Convert result back to linked list</span>
+    <span class="keyword">return</span> self.toReversedLinkedList(str(resultStr))</pre>
+            </div>
+        </div>
+        
+        <div class="visualization-section">
+            <h3>🎬 Visualization</h3>
+            
+            <div class="controls">
+                <button class="btn btn-primary" id="stepBtn" onclick="step()">Step</button>
+                <button class="btn btn-success" id="autoBtn" onclick="toggleAuto()">Auto Run</button>
+                <button class="btn btn-warning" onclick="reset()">Reset</button>
+            </div>
+            
+            <div class="status-message" id="statusMessage">
+                Click "Step" or "Auto Run" to start. Adding 342 + 465 = 807
+            </div>
+            
+            <div class="list-section">
+                <div class="list-label">L1 (342 stored as 2→4→3):</div>
+                <div class="list-container" id="l1Container"></div>
+            </div>
+            
+            <div class="list-section">
+                <div class="list-label">L2 (465 stored as 5→6→4):</div>
+                <div class="list-container" id="l2Container"></div>
+            </div>
+            
+            <div class="step-section">
+                <div class="step-box" id="step1">
+                    <div class="step-title">Step 1: Reverse Lists</div>
+                    <div class="step-content" id="step1Content">-</div>
+                </div>
+                <div class="step-box" id="step2">
+                    <div class="step-title">Step 2: Convert to Numbers</div>
+                    <div class="step-content" id="step2Content">-</div>
+                </div>
+                <div class="step-box" id="step3">
+                    <div class="step-title">Step 3: Add</div>
+                    <div class="step-content" id="step3Content">-</div>
+                </div>
+            </div>
+            
+            <div class="calculation-display" id="calcDisplay" style="display: none;"></div>
+            
+            <div class="list-section">
+                <div class="list-label">Result:</div>
+                <div class="list-container" id="resultContainer"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let l1 = [2, 4, 3];  // 342 reversed
+        let l2 = [5, 6, 4];  // 465 reversed
+        let stepIndex = 0;
+        let autoInterval = null;
+        
+        const steps = [
+            { phase: 'init', msg: 'Input: L1 = [2,4,3] (342), L2 = [5,6,4] (465)' },
+            { phase: 'reverse1', msg: 'Step 1: Reverse L1: [2,4,3] → [3,4,2]' },
+            { phase: 'reverse2', msg: 'Step 1: Reverse L2: [5,6,4] → [4,6,5]' },
+            { phase: 'convert', msg: 'Step 2: Convert to integers: "342" and "465"' },
+            { phase: 'add', msg: 'Step 3: Add: 342 + 465 = 807' },
+            { phase: 'toList', msg: 'Convert 807 back to reversed linked list: [7,0,8]' },
+            { phase: 'done', msg: '✅ Done! Result: [7 → 0 → 8] representing 807' }
+        ];
+        
+        function init() {
+            stepIndex = 0;
+            renderList('l1Container', l1, []);
+            renderList('l2Container', l2, []);
+            renderList('resultContainer', [], []);
+            document.getElementById('step1').className = 'step-box';
+            document.getElementById('step2').className = 'step-box';
+            document.getElementById('step3').className = 'step-box';
+            document.getElementById('step1Content').textContent = '-';
+            document.getElementById('step2Content').textContent = '-';
+            document.getElementById('step3Content').textContent = '-';
+            document.getElementById('calcDisplay').style.display = 'none';
+        }
+        
+        function renderList(containerId, nodes, highlights) {
+            const container = document.getElementById(containerId);
+            container.innerHTML = '';
+            nodes.forEach((val, i) => {
+                const node = document.createElement('div');
+                node.className = 'list-node';
+                if (highlights.includes(i)) node.classList.add('highlight');
+                node.textContent = val;
+                container.appendChild(node);
+                if (i < nodes.length - 1) {
+                    const arrow = document.createElement('div');
+                    arrow.className = 'list-arrow';
+                    container.appendChild(arrow);
+                }
+            });
+        }
+        
+        function step() {
+            if (stepIndex >= steps.length) return;
+            
+            const s = steps[stepIndex];
+            document.getElementById('statusMessage').textContent = s.msg;
+            
+            if (s.phase === 'reverse1') {
+                document.getElementById('step1').className = 'step-box active';
+                renderList('l1Container', [3, 4, 2], [0, 1, 2]);
+                document.getElementById('step1Content').textContent = 'L1: [3,4,2]';
+            } else if (s.phase === 'reverse2') {
+                renderList('l2Container', [4, 6, 5], [0, 1, 2]);
+                document.getElementById('step1Content').textContent = 'L1: [3,4,2], L2: [4,6,5]';
+                document.getElementById('step1').className = 'step-box complete';
+            } else if (s.phase === 'convert') {
+                document.getElementById('step2').className = 'step-box active';
+                document.getElementById('step2Content').textContent = '342, 465';
+            } else if (s.phase === 'add') {
+                document.getElementById('step2').className = 'step-box complete';
+                document.getElementById('step3').className = 'step-box active';
+                document.getElementById('step3Content').textContent = '807';
+                document.getElementById('calcDisplay').style.display = 'block';
+                document.getElementById('calcDisplay').innerHTML = '342 + 465 = <strong>807</strong>';
+            } else if (s.phase === 'toList') {
+                document.getElementById('step3').className = 'step-box complete';
+                renderList('resultContainer', [7, 0, 8], [0, 1, 2]);
+            } else if (s.phase === 'done') {
+                document.getElementById('stepBtn').disabled = true;
+                stopAuto();
+            }
+            
+            stepIndex++;
+        }
+        
+        function toggleAuto() {
+            if (autoInterval) { stopAuto(); }
+            else {
+                document.getElementById('autoBtn').textContent = 'Pause';
+                autoInterval = setInterval(() => {
+                    if (stepIndex >= steps.length) stopAuto();
+                    else step();
+                }, 1200);
+            }
+        }
+        
+        function stopAuto() {
+            if (autoInterval) { clearInterval(autoInterval); autoInterval = null; }
+            document.getElementById('autoBtn').textContent = 'Auto Run';
+        }
+        
+        function reset() {
+            stopAuto();
+            document.getElementById('stepBtn').disabled = false;
+            document.getElementById('statusMessage').textContent = 'Click "Step" or "Auto Run" to start. Adding 342 + 465 = 807';
+            init();
+        }
+        
+        init();
+    </script>
+</body>
+</html>

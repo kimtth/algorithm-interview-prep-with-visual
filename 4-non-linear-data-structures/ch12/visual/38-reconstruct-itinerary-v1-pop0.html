@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Q38: Reconstruct Itinerary - DFS pop(0)</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f5f7fa; min-height: 100vh; padding: 20px; }
+        .container { max-width: 1200px; margin: 0 auto; }
+        
+        .problem-info { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 16px; padding: 25px 30px; margin-bottom: 25px; color: white; }
+        .problem-info h1 { font-size: 1.8em; margin-bottom: 10px; }
+        .problem-info p { font-size: 1.1em; opacity: 0.95; line-height: 1.6; }
+        .problem-meta { display: flex; gap: 20px; margin-top: 15px; flex-wrap: wrap; }
+        .meta-tag { background: rgba(255,255,255,0.2); padding: 6px 14px; border-radius: 20px; font-size: 0.9em; }
+        
+        .code-section { background: white; border-radius: 16px; padding: 25px; margin-bottom: 25px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
+        .code-section h3 { color: #333; margin-bottom: 15px; }
+        .code-block { background: #1e1e1e; border-radius: 12px; padding: 20px; overflow-x: auto; }
+        .code-block pre { margin: 0; font-family: 'Consolas', monospace; font-size: 13px; line-height: 1.5; color: #d4d4d4; }
+        .code-block .keyword { color: #569cd6; }
+        .code-block .function { color: #dcdcaa; }
+        .code-block .comment { color: #6a9955; }
+        .code-block .string { color: #ce9178; }
+        
+        .visualization-section { background: white; border-radius: 16px; padding: 25px; margin-bottom: 25px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
+        .visualization-section h3 { color: #333; margin-bottom: 20px; }
+        
+        .controls { display: flex; gap: 12px; margin-bottom: 25px; flex-wrap: wrap; }
+        .btn { padding: 12px 28px; font-size: 1em; border: none; border-radius: 10px; cursor: pointer; font-weight: 500; }
+        .btn-primary { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; }
+        .btn-success { background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); color: white; }
+        .btn-warning { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white; }
+        .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        
+        .status-message { background: #e8f4fd; border-left: 4px solid #2196f3; padding: 15px 20px; border-radius: 0 10px 10px 0; margin-bottom: 20px; color: #1565c0; }
+        
+        .graph-section { display: flex; gap: 30px; margin-bottom: 20px; flex-wrap: wrap; }
+        .graph-box { flex: 1; min-width: 300px; padding: 15px; background: #f9f9f9; border-radius: 12px; }
+        .graph-title { font-weight: 600; margin-bottom: 10px; color: #555; }
+        .graph-item { padding: 8px 12px; background: white; border-radius: 8px; margin-bottom: 8px; font-family: monospace; }
+        .graph-item.current { background: #fff3e0; border: 2px solid #ff9800; }
+        
+        .route-section { padding: 20px; background: #e8f5e9; border-radius: 12px; }
+        .route-label { font-size: 0.9em; color: #2e7d32; margin-bottom: 10px; }
+        .route-items { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+        .route-item { padding: 10px 18px; background: #4caf50; color: white; border-radius: 8px; font-weight: 600; }
+        .route-arrow { color: #4caf50; font-size: 1.2em; }
+        
+        #graphCanvas { width: 100%; height: 250px; margin-top: 20px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="problem-info">
+            <h1>Q38: Reconstruct Itinerary - DFS pop(0)</h1>
+            <p>Reconstruct the itinerary from flight tickets. Use all tickets exactly once, starting from "JFK".</p>
+            <div class="problem-meta">
+                <span class="meta-tag">📁 Graph / DFS</span>
+                <span class="meta-tag">⏱️ O(E log E)</span>
+                <span class="meta-tag">💡 Eulerian Path</span>
+            </div>
+        </div>
+        
+        <div class="code-section">
+            <h3>💻 Python Solution (DFS with pop(0))</h3>
+            <div class="code-block">
+                <pre><span class="keyword">def</span> <span class="function">findItinerary</span>(tickets: List[List[str]]) -> List[str]:
+    graph = collections.defaultdict(list)
+    <span class="comment"># Build graph in sorted order</span>
+    <span class="keyword">for</span> a, b <span class="keyword">in</span> sorted(tickets):
+        graph[a].append(b)
+
+    route = []
+
+    <span class="keyword">def</span> <span class="function">dfs</span>(a):
+        <span class="keyword">while</span> graph[a]:
+            dfs(graph[a].pop(0))  <span class="comment"># Visit first (lexical order)</span>
+        route.append(a)
+
+    dfs(<span class="string">'JFK'</span>)
+    <span class="keyword">return</span> route[::-1]  <span class="comment"># Reverse for correct order</span></pre>
+            </div>
+        </div>
+        
+        <div class="visualization-section">
+            <h3>🎬 Visualization</h3>
+            
+            <div class="controls">
+                <button class="btn btn-primary" id="stepBtn" onclick="step()">Step</button>
+                <button class="btn btn-success" id="autoBtn" onclick="toggleAuto()">Auto Run</button>
+                <button class="btn btn-warning" onclick="reset()">Reset</button>
+            </div>
+            
+            <div class="status-message" id="statusMessage">
+                Tickets: [["JFK","SFO"],["JFK","ATL"],["SFO","ATL"],["ATL","JFK"],["ATL","SFO"]]
+            </div>
+            
+            <div class="graph-section">
+                <div class="graph-box">
+                    <div class="graph-title">Graph (Adjacency List)</div>
+                    <div id="graphDisplay"></div>
+                </div>
+                <div class="graph-box">
+                    <div class="graph-title">DFS Stack</div>
+                    <div id="stackDisplay"></div>
+                </div>
+            </div>
+            
+            <div class="route-section">
+                <div class="route-label">Route (will be reversed at end):</div>
+                <div class="route-items" id="routeDisplay"></div>
+            </div>
+            
+            <svg id="graphCanvas"></svg>
+        </div>
+    </div>
+
+    <script>
+        const tickets = [["JFK","SFO"],["JFK","ATL"],["SFO","ATL"],["ATL","JFK"],["ATL","SFO"]];
+        let graph = {};
+        let route = [];
+        let dfsStack = [];
+        let currentNode = '';
+        let autoInterval = null;
+        
+        function init() {
+            // Build sorted graph
+            graph = {};
+            tickets.slice().sort().forEach(([a, b]) => {
+                if (!graph[a]) graph[a] = [];
+                graph[a].push(b);
+            });
+            
+            route = [];
+            dfsStack = ['JFK'];
+            currentNode = 'JFK';
+            render();
+        }
+        
+        function render() {
+            // Graph display
+            const graphContainer = document.getElementById('graphDisplay');
+            graphContainer.innerHTML = '';
+            Object.entries(graph).forEach(([node, neighbors]) => {
+                const item = document.createElement('div');
+                item.className = 'graph-item' + (node === currentNode ? ' current' : '');
+                item.textContent = `${node} → [${neighbors.join(', ')}]`;
+                graphContainer.appendChild(item);
+            });
+            
+            // Stack display
+            const stackContainer = document.getElementById('stackDisplay');
+            stackContainer.innerHTML = '';
+            dfsStack.forEach((node, i) => {
+                const item = document.createElement('div');
+                item.className = 'graph-item' + (i === dfsStack.length - 1 ? ' current' : '');
+                item.textContent = node;
+                stackContainer.appendChild(item);
+            });
+            
+            // Route display
+            const routeContainer = document.getElementById('routeDisplay');
+            routeContainer.innerHTML = '';
+            route.forEach((node, i) => {
+                if (i > 0) {
+                    const arrow = document.createElement('span');
+                    arrow.className = 'route-arrow';
+                    arrow.textContent = '←';
+                    routeContainer.appendChild(arrow);
+                }
+                const item = document.createElement('span');
+                item.className = 'route-item';
+                item.textContent = node;
+                routeContainer.appendChild(item);
+            });
+            
+            renderGraph();
+        }
+        
+        function renderGraph() {
+            const svg = d3.select('#graphCanvas');
+            svg.selectAll('*').remove();
+            
+            const width = svg.node().getBoundingClientRect().width || 800;
+            const height = 250;
+            svg.attr('height', height);
+            
+            const nodes = ['JFK', 'ATL', 'SFO'];
+            const positions = {
+                'JFK': {x: width * 0.2, y: height / 2},
+                'ATL': {x: width * 0.5, y: height / 2},
+                'SFO': {x: width * 0.8, y: height / 2}
+            };
+            
+            // Draw edges
+            Object.entries(graph).forEach(([from, tos]) => {
+                tos.forEach((to, i) => {
+                    const p1 = positions[from];
+                    const p2 = positions[to];
+                    if (p1 && p2) {
+                        const offset = i * 10 - 5;
+                        svg.append('line')
+                            .attr('x1', p1.x)
+                            .attr('y1', p1.y + offset)
+                            .attr('x2', p2.x)
+                            .attr('y2', p2.y + offset)
+                            .attr('stroke', '#667eea')
+                            .attr('stroke-width', 2)
+                            .attr('marker-end', 'url(#arrow)');
+                    }
+                });
+            });
+            
+            // Arrow marker
+            svg.append('defs').append('marker')
+                .attr('id', 'arrow')
+                .attr('viewBox', '0 0 10 10')
+                .attr('refX', 25)
+                .attr('refY', 5)
+                .attr('markerWidth', 6)
+                .attr('markerHeight', 6)
+                .attr('orient', 'auto')
+                .append('path')
+                .attr('d', 'M 0 0 L 10 5 L 0 10 z')
+                .attr('fill', '#667eea');
+            
+            // Draw nodes
+            nodes.forEach(node => {
+                const pos = positions[node];
+                svg.append('circle')
+                    .attr('cx', pos.x)
+                    .attr('cy', pos.y)
+                    .attr('r', 25)
+                    .attr('fill', node === currentNode ? '#ff9800' : (route.includes(node) ? '#4caf50' : '#667eea'));
+                
+                svg.append('text')
+                    .attr('x', pos.x)
+                    .attr('y', pos.y + 5)
+                    .attr('text-anchor', 'middle')
+                    .attr('fill', 'white')
+                    .attr('font-weight', 'bold')
+                    .text(node);
+            });
+        }
+        
+        function step() {
+            if (dfsStack.length === 0) {
+                document.getElementById('statusMessage').textContent = 
+                    `✅ Done! Itinerary: ${route.slice().reverse().join(' → ')}`;
+                document.getElementById('stepBtn').disabled = true;
+                stopAuto();
+                return;
+            }
+            
+            currentNode = dfsStack[dfsStack.length - 1];
+            
+            if (graph[currentNode] && graph[currentNode].length > 0) {
+                const next = graph[currentNode].shift();
+                dfsStack.push(next);
+                document.getElementById('statusMessage').textContent = 
+                    `From ${currentNode}, fly to ${next} (lexically first)`;
+            } else {
+                const node = dfsStack.pop();
+                route.push(node);
+                document.getElementById('statusMessage').textContent = 
+                    `No more flights from ${node}, add to route`;
+            }
+            
+            render();
+        }
+        
+        function toggleAuto() {
+            if (autoInterval) { stopAuto(); }
+            else {
+                document.getElementById('autoBtn').textContent = 'Pause';
+                autoInterval = setInterval(step, 700);
+            }
+        }
+        
+        function stopAuto() {
+            if (autoInterval) { clearInterval(autoInterval); autoInterval = null; }
+            document.getElementById('autoBtn').textContent = 'Auto Run';
+        }
+        
+        function reset() {
+            stopAuto();
+            document.getElementById('stepBtn').disabled = false;
+            document.getElementById('statusMessage').textContent = 'Tickets: [["JFK","SFO"],["JFK","ATL"],["SFO","ATL"],["ATL","JFK"],["ATL","SFO"]]';
+            init();
+        }
+        
+        init();
+    </script>
+</body>
+</html>
