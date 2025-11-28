@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Binary Search - Recursive</title>
+    <link rel="stylesheet" href="visual.css">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 Binary Search - Recursive</h1>
+        <p class="subtitle">O(log n) - Divide and conquer approach</p>
+
+        <div class="controls">
+            <button id="stepBtn">Step</button>
+            <button id="autoBtn">Auto Run</button>
+            <button id="resetBtn">Reset</button>
+            <div class="target-display">Target: <span id="target">9</span></div>
+        </div>
+
+        <div class="panel">
+            <div class="panel-title">📊 Sorted Array</div>
+            <div class="array-container" id="array"></div>
+        </div>
+
+        <div class="panel">
+            <div class="panel-title">📚 Recursion Stack</div>
+            <div class="recursion-stack" id="stack"></div>
+        </div>
+
+        <div class="panel">
+            <div class="panel-title">📊 Status</div>
+            <div class="status-box" id="status">Click "Step" or "Auto Run" to search for target</div>
+        </div>
+
+        <div class="panel">
+            <div class="panel-title">💻 Algorithm</div>
+            <div class="code-box" id="code">
+<span id="line1">def binary_search(left, right):</span>
+<span id="line2">    if left <= right:</span>
+<span id="line3">        mid = (left + right) // 2</span>
+<span id="line4">        if nums[mid] < target:</span>
+<span id="line5">            return binary_search(mid + 1, right)</span>
+<span id="line6">        elif nums[mid] > target:</span>
+<span id="line7">            return binary_search(left, mid - 1)</span>
+<span id="line8">        else:</span>
+<span id="line9">            return mid  # Found!</span>
+<span id="line10">    return -1  # Not found</span>
+            </div>
+        </div>
+    
+        <div class="code-section">
+            <h3>📄 Python Solution (65-1.py)</h3>
+            <pre><span class="keyword">from</span> typing <span class="keyword">import</span> List
+
+
+<span class="keyword">class</span> Solution:
+    <span class="keyword">def</span> <span class="function">search</span>(<span class="keyword">self</span>, nums: List[int], target: int) -&gt; int:
+        <span class="keyword">def</span> <span class="function">binary_search</span>(left, right):
+            <span class="keyword">if</span> left &lt;= right:
+                mid = (left + right) // <span class="number">2</span>
+
+                <span class="keyword">if</span> nums[mid] &lt; target:
+                    <span class="keyword">return</span> <span class="function">binary_search</span>(mid + <span class="number">1</span>, right)
+                <span class="keyword">elif</span> nums[mid] &gt; target:
+                    <span class="keyword">return</span> <span class="function">binary_search</span>(left, mid - <span class="number">1</span>)
+                <span class="keyword">else</span>:
+                    <span class="keyword">return</span> mid
+            <span class="keyword">else</span>:
+                <span class="keyword">return</span> -<span class="number">1</span>
+
+        <span class="keyword">return</span> <span class="function">binary_search</span>(<span class="number">0</span>, <span class="function">len</span>(nums) - <span class="number">1</span>)</pre>
+        </div>
+
+    </div>
+
+
+    <script>
+        const nums = [-1, 0, 3, 5, 9, 12];
+        const target = 9;
+        let stack = [];
+        let found = -1;
+        let autoInterval = null;
+        let phase = 'call'; // 'call', 'compare', 'recurse', 'return'
+
+        document.getElementById('target').textContent = target;
+
+        function renderArray() {
+            const container = document.getElementById('array');
+            const current = stack.length > 0 ? stack[stack.length - 1] : null;
+            
+            container.innerHTML = nums.map((val, i) => {
+                let cls = 'array-item';
+                let pointers = '';
+                
+                if (found === i) {
+                    cls += ' found';
+                } else if (current) {
+                    if (i >= current.left && i <= current.right) {
+                        cls += ' in-range';
+                        if (i === current.mid) cls = 'array-item mid';
+                    } else {
+                        cls += ' out-range';
+                    }
+                    
+                    if (i === current.left) pointers += '<span class="pointer left">L↓</span>';
+                    if (i === current.right) pointers += '<span class="pointer right">R↓</span>';
+                    if (i === current.mid) pointers += '<span class="pointer mid">↑mid</span>';
+                } else {
+                    cls += ' in-range';
+                }
+                
+                return `<div class="${cls}">${pointers}<span class="value">${val}</span><span class="index">[${i}]</span></div>`;
+            }).join('');
+        }
+
+        function renderStack() {
+            const container = document.getElementById('stack');
+            if (stack.length === 0) {
+                container.innerHTML = '<div class="empty-text">No active calls</div>';
+                return;
+            }
+            
+            container.innerHTML = stack.map((frame, i) => {
+                let cls = 'stack-frame';
+                if (i === stack.length - 1) {
+                    cls += frame.returning ? ' returning' : ' active';
+                }
+                return `<div class="${cls}">
+                    binary_search(left=${frame.left}, right=${frame.right}) 
+                    ${frame.mid !== undefined ? `→ mid=${frame.mid}, nums[mid]=${nums[frame.mid]}` : ''}
+                </div>`;
+            }).join('');
+        }
+
+        function highlightCode(lineNum) {
+            document.querySelectorAll('.code-box span').forEach(span => {
+                span.classList.remove('highlight');
+            });
+            if (lineNum) {
+                const line = document.getElementById(`line${lineNum}`);
+                if (line) line.classList.add('highlight');
+            }
+        }
+
+        function executeStep() {
+            if (found >= 0) return;
+
+            if (stack.length === 0) {
+                // Initial call
+                stack.push({ left: 0, right: nums.length - 1 });
+                highlightCode(1);
+                document.getElementById('status').innerHTML = 
+                    `Initial call: binary_search(0, ${nums.length - 1})`;
+                phase = 'compare';
+            } else {
+                const current = stack[stack.length - 1];
+                
+                if (current.returning) {
+                    // Return from call
+                    stack.pop();
+                    if (stack.length === 0) {
+                        highlightCode(10);
+                        document.getElementById('status').innerHTML = 
+                            `❌ Target ${target} not found. Return -1`;
+                        document.getElementById('stepBtn').disabled = true;
+                        document.getElementById('autoBtn').disabled = true;
+                        stopAuto();
+                    } else {
+                        const parent = stack[stack.length - 1];
+                        parent.returning = true;
+                        document.getElementById('status').innerHTML = 
+                            `Return -1 to parent call`;
+                    }
+                } else if (phase === 'compare') {
+                    if (current.left > current.right) {
+                        current.returning = true;
+                        highlightCode(10);
+                        document.getElementById('status').innerHTML = 
+                            `left (${current.left}) > right (${current.right}). Return -1`;
+                    } else {
+                        current.mid = Math.floor((current.left + current.right) / 2);
+                        highlightCode(3);
+                        document.getElementById('status').innerHTML = 
+                            `Calculate mid = (${current.left} + ${current.right}) / 2 = ${current.mid}`;
+                        phase = 'check';
+                    }
+                } else if (phase === 'check') {
+                    const midVal = nums[current.mid];
+                    
+                    if (midVal < target) {
+                        highlightCode(5);
+                        document.getElementById('status').innerHTML = 
+                            `nums[${current.mid}] = ${midVal} < ${target}. Search right half.`;
+                        phase = 'recurse-right';
+                    } else if (midVal > target) {
+                        highlightCode(7);
+                        document.getElementById('status').innerHTML = 
+                            `nums[${current.mid}] = ${midVal} > ${target}. Search left half.`;
+                        phase = 'recurse-left';
+                    } else {
+                        highlightCode(9);
+                        found = current.mid;
+                        document.getElementById('status').innerHTML = 
+                            `✅ Found! nums[${current.mid}] = ${target}. Return ${current.mid}`;
+                        document.getElementById('stepBtn').disabled = true;
+                        document.getElementById('autoBtn').disabled = true;
+                        stopAuto();
+                    }
+                } else if (phase === 'recurse-right') {
+                    stack.push({ left: current.mid + 1, right: current.right });
+                    document.getElementById('status').innerHTML = 
+                        `Recurse: binary_search(${current.mid + 1}, ${current.right})`;
+                    phase = 'compare';
+                } else if (phase === 'recurse-left') {
+                    stack.push({ left: current.left, right: current.mid - 1 });
+                    document.getElementById('status').innerHTML = 
+                        `Recurse: binary_search(${current.left}, ${current.mid - 1})`;
+                    phase = 'compare';
+                }
+            }
+
+            renderArray();
+            renderStack();
+        }
+
+        function reset() {
+            stopAuto();
+            stack = [];
+            found = -1;
+            phase = 'call';
+            
+            document.getElementById('stepBtn').disabled = false;
+            document.getElementById('autoBtn').disabled = false;
+            document.getElementById('status').innerHTML = 'Click "Step" or "Auto Run" to search for target';
+            highlightCode(null);
+            renderArray();
+            renderStack();
+        }
+
+        function stopAuto() {
+            if (autoInterval) {
+                clearInterval(autoInterval);
+                autoInterval = null;
+                document.getElementById('autoBtn').textContent = 'Auto Run';
+            }
+        }
+
+        document.getElementById('stepBtn').addEventListener('click', () => {
+            stopAuto();
+            executeStep();
+        });
+
+        document.getElementById('autoBtn').addEventListener('click', () => {
+            if (autoInterval) {
+                stopAuto();
+            } else {
+                autoInterval = setInterval(executeStep, 800);
+                document.getElementById('autoBtn').textContent = '⏸ Pause';
+            }
+        });
+
+        document.getElementById('resetBtn').addEventListener('click', reset);
+
+        // Initialize
+        renderArray();
+        renderStack();
+    </script>
+</body>
+</html>

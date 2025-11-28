@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Task Scheduler - Greedy</title>
+    <link rel="stylesheet" href="visual.css">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    
+</head>
+<body>
+    <div class="container">
+        <h1>📋 Task Scheduler</h1>
+        <p class="subtitle">Greedy - Schedule most frequent tasks first with n-cooldown</p>
+
+        <div class="controls">
+            <button id="stepBtn">Step</button>
+            <button id="autoBtn">Auto Run</button>
+            <button id="resetBtn">Reset</button>
+            <div class="info-box">Cooldown n = 2</div>
+        </div>
+
+        <div class="panel">
+            <div class="panel-title">📥 Tasks</div>
+            <div class="tasks-input" id="tasks-input"></div>
+            <div class="freq-container" id="freq"></div>
+        </div>
+
+        <div class="panel">
+            <div class="panel-title">⏱️ Execution Timeline</div>
+            <div class="timeline" id="timeline"></div>
+        </div>
+
+        <div class="panel">
+            <div class="panel-title">📊 Result</div>
+            <div class="result-box">
+                <div class="result-value">Time: <span id="result">0</span></div>
+            </div>
+        </div>
+
+        <div class="panel">
+            <div class="panel-title">📋 Status</div>
+            <div class="status-box" id="status">Formula: (maxFreq - 1) * (n + 1) + countMaxFreq. Or total tasks if larger.</div>
+        </div>
+    
+        <div class="code-section">
+            <h3>📄 Python Solution (80-1.py)</h3>
+            <pre><span class="keyword">import</span> collections
+<span class="keyword">from</span> typing <span class="keyword">import</span> List
+
+
+<span class="keyword">class</span> Solution:
+    <span class="keyword">def</span> <span class="function">leastInterval</span>(<span class="keyword">self</span>, tasks: List[str], n: int) -&gt; int:
+        counter = collections.<span class="function">Counter</span>(tasks)
+        result = <span class="number">0</span>
+
+        <span class="keyword">while</span> <span class="keyword">True</span>:
+            sub_count = <span class="number">0</span>
+            <span class="comment"># 개수 순 추출</span>
+            <span class="keyword">for</span> task, _ <span class="keyword">in</span> counter.<span class="function">most_common</span>(n + <span class="number">1</span>):
+                sub_count += <span class="number">1</span>
+                result += <span class="number">1</span>
+
+                counter.<span class="function">subtract</span>(task)
+                <span class="comment"># 0 이하인 아이템을 목록에서 완전히 제거</span>
+                counter += collections.<span class="function">Counter</span>()
+
+            <span class="keyword">if</span> <span class="keyword">not</span> counter:
+                <span class="keyword">break</span>
+
+            result += n - sub_count + <span class="number">1</span>
+
+        <span class="keyword">return</span> result</pre>
+        </div>
+
+    </div>
+
+
+    <script>
+        const tasks = ['A', 'A', 'A', 'B', 'B', 'B'];
+        const n = 2;
+        let counts = {};
+        let timeline = [];
+        let lastUsed = {};
+        let time = 0;
+        let done = false;
+        let autoInterval = null;
+
+        // Initialize counts
+        for (const t of tasks) {
+            counts[t] = (counts[t] || 0) + 1;
+        }
+        const maxFreq = Math.max(...Object.values(counts));
+
+        function render() {
+            // Show input tasks
+            document.getElementById('tasks-input').innerHTML = tasks.map(t => 
+                `<span class="task-badge task-${t}">${t}</span>`
+            ).join('');
+
+            // Show frequency bars
+            document.getElementById('freq').innerHTML = Object.keys(counts).map(t => {
+                const h = (counts[t] / maxFreq) * 80;
+                return `<div class="freq-item">
+                    <div class="freq-bar h-80">
+                        <div class="freq-fill" style="height:${h}px; margin-top:${80-h}px;"></div>
+                    </div>
+                    <div class="freq-label">${t}: ${counts[t]}</div>
+                </div>`;
+            }).join('');
+
+            // Show timeline
+            document.getElementById('timeline').innerHTML = timeline.length > 0 
+                ? timeline.map(t => `<div class="slot slot-${t}">${t}</div>`).join('')
+                : '<span class="text-gray">Empty</span>';
+
+            document.getElementById('result').textContent = time;
+        }
+
+        function getNextTask() {
+            let best = null, bestCount = 0;
+            for (const t in counts) {
+                if (counts[t] > 0) {
+                    const lastTime = lastUsed[t] || -Infinity;
+                    if (time - lastTime > n && counts[t] > bestCount) {
+                        best = t;
+                        bestCount = counts[t];
+                    }
+                }
+            }
+            return best;
+        }
+
+        function hasRemainingTasks() {
+            return Object.values(counts).some(c => c > 0);
+        }
+
+        function step() {
+            if (done) return;
+
+            if (!hasRemainingTasks()) {
+                done = true;
+                document.getElementById('status').innerHTML = 
+                    `✅ All tasks complete! Total time: ${time}`;
+                document.getElementById('stepBtn').disabled = true;
+                document.getElementById('autoBtn').disabled = true;
+                stopAuto();
+                return;
+            }
+
+            const task = getNextTask();
+            
+            if (task) {
+                timeline.push(task);
+                counts[task]--;
+                lastUsed[task] = time;
+                document.getElementById('status').innerHTML = 
+                    `Time ${time}: Execute task ${task}. Remaining: ${counts[task]}`;
+            } else {
+                timeline.push('idle');
+                document.getElementById('status').innerHTML = 
+                    `Time ${time}: Idle (cooling down)`;
+            }
+
+            time++;
+            render();
+        }
+
+        function reset() {
+            stopAuto();
+            counts = {};
+            for (const t of tasks) counts[t] = (counts[t] || 0) + 1;
+            timeline = [];
+            lastUsed = {};
+            time = 0;
+            done = false;
+            document.getElementById('stepBtn').disabled = false;
+            document.getElementById('autoBtn').disabled = false;
+            document.getElementById('status').innerHTML = 'Formula: (maxFreq - 1) * (n + 1) + countMaxFreq. Or total tasks if larger.';
+            render();
+        }
+
+        function stopAuto() {
+            if (autoInterval) { clearInterval(autoInterval); autoInterval = null; }
+            document.getElementById('autoBtn').textContent = 'Auto Run';
+        }
+
+        document.getElementById('stepBtn').onclick = () => { stopAuto(); step(); };
+        document.getElementById('autoBtn').onclick = () => {
+            if (autoInterval) { stopAuto(); }
+            else { autoInterval = setInterval(step, 600); document.getElementById('autoBtn').textContent = '⏸ Pause'; }
+        };
+        document.getElementById('resetBtn').onclick = reset;
+
+        render();
+    </script>
+</body>
+</html>

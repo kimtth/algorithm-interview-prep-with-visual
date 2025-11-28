@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Q42: Maximum Depth of Binary Tree - BFS</title>
+    <link rel="stylesheet" href="visual.css">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    
+</head>
+<body>
+    <div class="container">
+        <div class="problem-info">
+            <h1>Q42: Maximum Depth of Binary Tree</h1>
+            <p>Find the maximum depth (height) of a binary tree using BFS level-by-level traversal.</p>
+            <div class="problem-meta">
+                <span class="meta-tag">📁 Tree</span>
+                <span class="meta-tag">⏱️ O(n)</span>
+                <span class="meta-tag">💡 BFS Level Order</span>
+            </div>
+        </div>
+        
+        
+        
+        <div class="visualization-section">
+            <h3>🎬 Visualization</h3>
+            
+            <div class="controls">
+                <button class="btn btn-primary" id="stepBtn" onclick="step()">Step</button>
+                <button class="btn btn-success" id="autoBtn" onclick="toggleAuto()">Auto Run</button>
+                <button class="btn btn-warning" onclick="reset()">Reset</button>
+            </div>
+            
+            <div class="legend">
+                <div class="legend-item"><div class="legend-circle bg-cyan"></div> Unvisited</div>
+                <div class="legend-item"><div class="legend-circle bg-orange-deep"></div> Current Level</div>
+                <div class="legend-item"><div class="legend-circle bg-lime"></div> Visited</div>
+            </div>
+            
+            <div class="status-message" id="statusMessage">
+                Tree: [3, 9, 20, 4, 6, 15, 7]. Click Step to start BFS traversal.
+            </div>
+            
+            <div class="info-section">
+                <div class="info-box highlight">
+                    <div class="info-label">Current Depth</div>
+                    <div class="info-value" id="depthValue">0</div>
+                </div>
+            </div>
+            
+            <div class="tree-container">
+                <svg id="tree" width="600" height="300"></svg>
+            </div>
+            
+            <div class="queue-section">
+                <div class="queue-title">📚 Queue (nodes at current level)</div>
+                <div class="queue-items" id="queueDisplay"><span class="text-gray">Empty</span></div>
+            </div>
+        </div>
+    </div>
+        
+        <div class="code-section">
+            <h3>📄 Python Solution (42-1.py)</h3>
+            <pre><span class="keyword">import</span> collections
+
+
+<span class="comment"># Definition for a binary tree node.</span>
+<span class="keyword">class</span> TreeNode:
+    <span class="keyword">def</span> <span class="function">__init__</span>(<span class="keyword">self</span>, x):
+        <span class="keyword">self</span>.val = x
+        <span class="keyword">self</span>.left = <span class="keyword">None</span>
+        <span class="keyword">self</span>.right = <span class="keyword">None</span>
+
+
+<span class="keyword">class</span> Solution:
+    <span class="keyword">def</span> <span class="function">maxDepth</span>(<span class="keyword">self</span>, root: TreeNode) -&gt; int:
+        <span class="keyword">if</span> root is <span class="keyword">None</span>:
+            <span class="keyword">return</span> <span class="number">0</span>
+        queue = collections.<span class="function">deque</span>([root])
+        depth = <span class="number">0</span>
+
+        <span class="keyword">while</span> queue:
+            depth += <span class="number">1</span>
+            <span class="comment"># 큐 연산 추출 노드의 자식 노드 삽입</span>
+            <span class="keyword">for</span> _ <span class="keyword">in</span> <span class="function">range</span>(<span class="function">len</span>(queue)):
+                cur_root = queue.<span class="function">popleft</span>()
+                <span class="keyword">if</span> cur_root.left:
+                    queue.<span class="function">append</span>(cur_root.left)
+                <span class="keyword">if</span> cur_root.right:
+                    queue.<span class="function">append</span>(cur_root.right)
+        <span class="comment"># BFS 반복 횟수 == 깊이</span>
+        <span class="keyword">return</span> depth</pre>
+        </div>
+
+    </div>
+
+    <script>
+        const treeData = {
+            val: 3,
+            left: { val: 9, left: { val: 4 }, right: { val: 6 } },
+            right: { val: 20, left: { val: 15 }, right: { val: 7 } }
+        };
+        
+        let nodes = [];
+        let links = [];
+        let queue = [];
+        let depth = 0;
+        let currentLevel = [];
+        let visited = new Set();
+        let done = false;
+        let autoInterval = null;
+        
+        function buildTree(node, x, y, dx, depth = 0, parent = null) {
+            if (!node) return;
+            const nodeData = { val: node.val, x, y, depth, id: nodes.length };
+            nodes.push(nodeData);
+            if (parent !== null) {
+                links.push({ source: parent, target: nodeData });
+            }
+            if (node.left) buildTree(node.left, x - dx, y + 70, dx / 2, depth + 1, nodeData);
+            if (node.right) buildTree(node.right, x + dx, y + 70, dx / 2, depth + 1, nodeData);
+        }
+        
+        function init() {
+            nodes = [];
+            links = [];
+            queue = [];
+            currentLevel = [];
+            visited = new Set();
+            depth = 0;
+            done = false;
+            
+            buildTree(treeData, 300, 50, 120);
+            queue = [nodes[0]];
+            renderTree();
+            renderQueue();
+        }
+        
+        function renderTree() {
+            const svg = d3.select("#tree");
+            svg.selectAll("*").remove();
+            
+            // Draw links
+            links.forEach(link => {
+                svg.append("line")
+                    .attr("x1", link.source.x)
+                    .attr("y1", link.source.y)
+                    .attr("x2", link.target.x)
+                    .attr("y2", link.target.y)
+                    .attr("stroke", "#999")
+                    .attr("stroke-width", 2);
+            });
+            
+            // Draw nodes
+            nodes.forEach(node => {
+                let fill = "#3498db";
+                if (visited.has(node.id)) fill = "#27ae60";
+                if (currentLevel.includes(node.id)) fill = "#f39c12";
+                
+                svg.append("circle")
+                    .attr("cx", node.x)
+                    .attr("cy", node.y)
+                    .attr("r", 25)
+                    .attr("fill", fill)
+                    .attr("stroke", "#333")
+                    .attr("stroke-width", 2);
+                
+                svg.append("text")
+                    .attr("x", node.x)
+                    .attr("y", node.y + 5)
+                    .attr("text-anchor", "middle")
+                    .attr("fill", "white")
+                    .attr("font-weight", "bold")
+                    .attr("font-size", "14px")
+                    .text(node.val);
+            });
+        }
+        
+        function renderQueue() {
+            const container = document.getElementById('queueDisplay');
+            if (queue.length === 0) {
+                container.innerHTML = '<span class="text-gray">Empty</span>';
+            } else {
+                container.innerHTML = queue.map(n => 
+                    `<div class="queue-item">${n.val}</div>`
+                ).join('');
+            }
+        }
+        
+        function step() {
+            if (done) {
+                document.getElementById('stepBtn').disabled = true;
+                stopAuto();
+                return;
+            }
+            
+            if (queue.length === 0) {
+                done = true;
+                currentLevel = [];
+                document.getElementById('statusMessage').textContent = 
+                    `✅ BFS Complete! Maximum Depth = ${depth}`;
+                document.getElementById('stepBtn').disabled = true;
+                stopAuto();
+                renderTree();
+                return;
+            }
+            
+            // Process entire level
+            depth++;
+            document.getElementById('depthValue').textContent = depth;
+            
+            const levelSize = queue.length;
+            currentLevel = queue.map(n => n.id);
+            const levelVals = queue.map(n => n.val);
+            
+            // Mark all as visited and collect children
+            const nextQueue = [];
+            queue.forEach(node => {
+                visited.add(node.id);
+                // Find children
+                links.forEach(link => {
+                    if (link.source.id === node.id) {
+                        nextQueue.push(link.target);
+                    }
+                });
+            });
+            
+            queue = nextQueue;
+            
+            document.getElementById('statusMessage').textContent = 
+                `Level ${depth}: Processed nodes [${levelVals.join(', ')}]. Added ${nextQueue.length} children.`;
+            
+            renderTree();
+            renderQueue();
+        }
+        
+        function toggleAuto() {
+            if (autoInterval) { stopAuto(); }
+            else {
+                document.getElementById('autoBtn').textContent = 'Pause';
+                autoInterval = setInterval(step, 1000);
+            }
+        }
+        
+        function stopAuto() {
+            if (autoInterval) { clearInterval(autoInterval); autoInterval = null; }
+            document.getElementById('autoBtn').textContent = 'Auto Run';
+        }
+        
+        function reset() {
+            stopAuto();
+            document.getElementById('stepBtn').disabled = false;
+            document.getElementById('statusMessage').textContent = 
+                'Tree: [3, 9, 20, 4, 6, 15, 7]. Click Step to start BFS traversal.';
+            document.getElementById('depthValue').textContent = '0';
+            init();
+        }
+        
+        init();
+    </script>
+</body>
+</html>

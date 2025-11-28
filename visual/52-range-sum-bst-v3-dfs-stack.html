@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Q52: Range Sum of BST (v3 - DFS Stack)</title>
+    <link rel="stylesheet" href="visual.css">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    
+</head>
+<body>
+    <div class="container">
+        <div class="problem-info">
+            <h1>Q52: Range Sum of BST (v3 - DFS Stack)</h1>
+            <p>Iterative DFS using stack with BST-based pruning. Push nodes to stack and process with LIFO order.</p>
+            <div class="problem-meta">
+                <span class="meta-tag">📁 BST</span>
+                <span class="meta-tag">⏱️ O(n)</span>
+                <span class="meta-tag">💡 Iterative DFS</span>
+            </div>
+        </div>
+        
+        
+        
+        <div class="visualization-section">
+            <h3>🎬 Visualization</h3>
+            
+            <div class="controls">
+                <button class="btn btn-primary" id="stepBtn" onclick="step()">Step</button>
+                <button class="btn btn-success" id="autoBtn" onclick="toggleAuto()">Auto Run</button>
+                <button class="btn btn-warning" onclick="reset()">Reset</button>
+            </div>
+            
+            <div class="legend">
+                <div class="legend-item"><div class="legend-circle bg-cyan"></div> Unvisited</div>
+                <div class="legend-item"><div class="legend-circle legend-color bg-orange"></div> Current</div>
+                <div class="legend-item"><div class="legend-circle legend-color bg-green"></div> Added to Sum</div>
+                <div class="legend-item"><div class="legend-circle legend-color bg-gray"></div> Not in Range</div>
+            </div>
+            
+            <div class="status-message" id="statusMessage">
+                BST root=10, L=7, R=15. Using stack for iterative DFS.
+            </div>
+            
+            <div class="info-section">
+                <div class="info-box">
+                    <div class="info-label">Range [L, R]</div>
+                    <div class="info-value">[7, 15]</div>
+                </div>
+                <div class="info-box highlight">
+                    <div class="info-label">Current Sum</div>
+                    <div class="info-value" id="currentSum">0</div>
+                </div>
+            </div>
+            
+            <div class="split-view">
+                <div class="tree-section">
+                    <div class="tree-container">
+                        <svg id="tree" width="400" height="280"></svg>
+                    </div>
+                </div>
+                
+                <div class="stack-section">
+                    <div class="stack-container">
+                        <div class="stack-title">📚 Stack (LIFO)</div>
+                        <div class="stack-items" id="stackItems">
+                            <div class="stack-empty">Empty</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+        
+        <div class="code-section">
+            <h3>📄 Python Solution (52-3.py)</h3>
+            <pre><span class="comment"># Definition for a binary tree node.</span>
+<span class="keyword">class</span> TreeNode:
+    <span class="keyword">def</span> <span class="function">__init__</span>(<span class="keyword">self</span>, x):
+        <span class="keyword">self</span>.val = x
+        <span class="keyword">self</span>.left = <span class="keyword">None</span>
+        <span class="keyword">self</span>.right = <span class="keyword">None</span>
+
+
+<span class="keyword">class</span> Solution:
+    <span class="keyword">def</span> <span class="function">rangeSumBST</span>(<span class="keyword">self</span>, root: TreeNode, L: int, R: int) -&gt; int:
+        stack, sum = [root], <span class="number">0</span>
+        <span class="comment"># 스택 이용 필요한 노드 DFS 반복</span>
+        <span class="keyword">while</span> stack:
+            node = stack.<span class="function">pop</span>()
+            <span class="keyword">if</span> node:
+                <span class="keyword">if</span> node.val &gt; L:
+                    stack.<span class="function">append</span>(node.left)
+                <span class="keyword">if</span> node.val &lt; R:
+                    stack.<span class="function">append</span>(node.right)
+                <span class="keyword">if</span> L &lt;= node.val &lt;= R:
+                    sum += node.val
+        <span class="keyword">return</span> sum</pre>
+        </div>
+
+    </div>
+
+    <script>
+        const nodes = [
+            { id: 10, val: 10, left: 5, right: 15, x: 200, y: 50 },
+            { id: 5, val: 5, left: 3, right: 7, x: 100, y: 130 },
+            { id: 15, val: 15, left: null, right: 18, x: 300, y: 130 },
+            { id: 3, val: 3, left: null, right: null, x: 50, y: 210 },
+            { id: 7, val: 7, left: null, right: null, x: 150, y: 210 },
+            { id: 18, val: 18, left: null, right: null, x: 350, y: 210 }
+        ];
+        
+        const L = 7, R = 15;
+        
+        let stack = [];
+        let visited = {};
+        let currentNode = null;
+        let sum = 0;
+        let autoInterval = null;
+        
+        function getNode(id) {
+            return nodes.find(n => n.id === id);
+        }
+        
+        function init() {
+            stack = [10];
+            visited = {};
+            currentNode = null;
+            sum = 0;
+            
+            document.getElementById('currentSum').textContent = '0';
+            renderTree();
+            renderStack();
+        }
+        
+        function renderTree() {
+            const svg = d3.select("#tree");
+            svg.selectAll("*").remove();
+            
+            nodes.forEach(node => {
+                if (node.left !== null) {
+                    const child = getNode(node.left);
+                    svg.append("line")
+                        .attr("x1", node.x).attr("y1", node.y)
+                        .attr("x2", child.x).attr("y2", child.y)
+                        .attr("stroke", "#999")
+                        .attr("stroke-width", 2);
+                }
+                if (node.right !== null) {
+                    const child = getNode(node.right);
+                    svg.append("line")
+                        .attr("x1", node.x).attr("y1", node.y)
+                        .attr("x2", child.x).attr("y2", child.y)
+                        .attr("stroke", "#999")
+                        .attr("stroke-width", 2);
+                }
+            });
+            
+            nodes.forEach(node => {
+                let fill = "#3498db";
+                if (visited[node.id] === 'in') fill = "#4caf50";
+                else if (visited[node.id] === 'out') fill = "#9e9e9e";
+                if (node.id === currentNode) fill = "#ff9800";
+                
+                svg.append("circle")
+                    .attr("cx", node.x)
+                    .attr("cy", node.y)
+                    .attr("r", 25)
+                    .attr("fill", fill)
+                    .attr("stroke", "#333")
+                    .attr("stroke-width", 2);
+                
+                svg.append("text")
+                    .attr("x", node.x)
+                    .attr("y", node.y + 5)
+                    .attr("text-anchor", "middle")
+                    .attr("fill", "white")
+                    .attr("font-weight", "bold")
+                    .attr("font-size", "14px")
+                    .text(node.val);
+            });
+        }
+        
+        function renderStack() {
+            const container = document.getElementById('stackItems');
+            if (stack.length === 0) {
+                container.innerHTML = '<div class="stack-empty">Empty</div>';
+            } else {
+                container.innerHTML = stack.map((id, i) => {
+                    const isCurrent = (i === stack.length - 1 && currentNode === null);
+                    return `<div class="stack-item${isCurrent ? ' current' : ''}">${id}</div>`;
+                }).join('');
+            }
+        }
+        
+        function step() {
+            if (stack.length === 0) {
+                document.getElementById('statusMessage').textContent = `✅ Complete! Sum = ${sum}`;
+                document.getElementById('stepBtn').disabled = true;
+                stopAuto();
+                currentNode = null;
+                renderTree();
+                return;
+            }
+            
+            const nodeId = stack.pop();
+            currentNode = nodeId;
+            const node = getNode(nodeId);
+            
+            let msg = `Pop ${node.val}. `;
+            
+            // Check and add to sum
+            if (node.val >= L && node.val <= R) {
+                sum += node.val;
+                visited[node.id] = 'in';
+                msg += `${node.val} ∈ [${L},${R}], add to sum. `;
+            } else {
+                visited[node.id] = 'out';
+                msg += `${node.val} ∉ [${L},${R}]. `;
+            }
+            
+            // Push children based on BST pruning
+            const toAdd = [];
+            if (node.val > L && node.left !== null) {
+                stack.push(node.left);
+                toAdd.push(node.left);
+            }
+            if (node.val < R && node.right !== null) {
+                stack.push(node.right);
+                toAdd.push(node.right);
+            }
+            
+            if (toAdd.length > 0) {
+                msg += `Push [${toAdd.join(', ')}].`;
+            }
+            
+            document.getElementById('currentSum').textContent = sum;
+            document.getElementById('statusMessage').textContent = msg + ` Sum = ${sum}`;
+            
+            renderTree();
+            renderStack();
+            
+            if (stack.length === 0) {
+                setTimeout(() => {
+                    document.getElementById('statusMessage').textContent = `✅ Complete! Sum = ${sum}`;
+                    document.getElementById('stepBtn').disabled = true;
+                    stopAuto();
+                    currentNode = null;
+                    renderTree();
+                }, 300);
+            }
+        }
+        
+        function toggleAuto() {
+            if (autoInterval) { stopAuto(); }
+            else {
+                document.getElementById('autoBtn').textContent = 'Pause';
+                autoInterval = setInterval(step, 900);
+            }
+        }
+        
+        function stopAuto() {
+            if (autoInterval) { clearInterval(autoInterval); autoInterval = null; }
+            document.getElementById('autoBtn').textContent = 'Auto Run';
+        }
+        
+        function reset() {
+            stopAuto();
+            document.getElementById('stepBtn').disabled = false;
+            document.getElementById('statusMessage').textContent = 
+                'BST root=10, L=7, R=15. Using stack for iterative DFS.';
+            init();
+        }
+        
+        init();
+    </script>
+</body>
+</html>

@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Palindrome Pairs - Trie Solution</title>
+    <link rel="stylesheet" href="visual.css">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 Palindrome Pairs - Trie Solution</h1>
+        <p class="subtitle">O(n × k²) using Trie with reverse word insertion and palindrome detection</p>
+
+        <div class="controls">
+            <button id="stepBtn">Step</button>
+            <button id="autoBtn">Auto Run</button>
+            <button id="resetBtn">Reset</button>
+        </div>
+
+        <div class="panel full-width">
+            <div class="panel-title">📝 Words</div>
+            <div class="phase-indicator">
+                <div class="phase" id="phase-insert">Phase 1: Insert (Reversed)</div>
+                <div class="phase" id="phase-search">Phase 2: Search</div>
+            </div>
+            <div class="words-container" id="words"></div>
+        </div>
+
+        <div class="main-content">
+            <div class="panel">
+                <div class="panel-title">🌳 Trie Structure (Words inserted in reverse)</div>
+                <svg id="trie-svg"></svg>
+                <div class="legend">
+                    <div class="legend-item"><div class="legend-color bg-white-blue-border-purple"></div>Node</div>
+                    <div class="legend-item"><div class="legend-color bg-purple-trie-border-purple-dark"></div>Active</div>
+                    <div class="legend-item"><div class="legend-color bg-orange-border-orange-deep"></div>Word End</div>
+                    <div class="legend-item"><div class="legend-color legend-box bg-green-border-green-darker"></div>Palindrome IDs</div>
+                </div>
+            </div>
+
+            <div class="panel">
+                <div class="panel-title">📊 Status</div>
+                <div class="status-box" id="status">Click "Step" or "Auto Run" to start</div>
+                <div class="logic-box" id="logic-box" class="d-none"></div>
+            </div>
+
+            <div class="panel full-width">
+                <div class="panel-title">✅ Palindrome Pairs Found</div>
+                <div class="results-container" id="results"></div>
+            </div>
+        </div>
+    
+        <div class="code-section">
+            <h3>📄 Python Solution (57-2.py)</h3>
+            <pre><span class="keyword">import</span> collections
+<span class="keyword">from</span> typing <span class="keyword">import</span> List
+
+
+<span class="comment"># 트라이 저장할 노드</span>
+<span class="keyword">class</span> TrieNode:
+    <span class="keyword">def</span> <span class="function">__init__</span>(<span class="keyword">self</span>):
+        <span class="keyword">self</span>.children = collections.<span class="function">defaultdict</span>(TrieNode)
+        <span class="keyword">self</span>.word_id = -<span class="number">1</span>
+        <span class="keyword">self</span>.palindrome_word_ids = []
+
+
+<span class="keyword">class</span> Trie:
+    <span class="keyword">def</span> <span class="function">__init__</span>(<span class="keyword">self</span>):
+        <span class="keyword">self</span>.root = <span class="function">TrieNode</span>()
+
+    @staticmethod
+    <span class="keyword">def</span> <span class="function">is_palindrome</span>(word: str) -&gt; bool:
+        <span class="keyword">return</span> word[::] == word[::-<span class="number">1</span>]
+
+    <span class="comment"># 단어 삽입</span>
+    <span class="keyword">def</span> <span class="function">insert</span>(<span class="keyword">self</span>, index, word) -&gt; <span class="keyword">None</span>:
+        node = <span class="keyword">self</span>.root
+        <span class="keyword">for</span> i, char <span class="keyword">in</span> <span class="function">enumerate</span>(<span class="function">reversed</span>(word)):
+            <span class="keyword">if</span> <span class="keyword">self</span>.<span class="function">is_palindrome</span>(word[<span class="number">0</span>:<span class="function">len</span>(word) - i]):
+                node.palindrome_word_ids.<span class="function">append</span>(index)
+            node = node.children[char]
+        node.word_id = index
+
+    <span class="keyword">def</span> <span class="function">search</span>(<span class="keyword">self</span>, index, word) -&gt; List[List[int]]:
+        result = []
+        node = <span class="keyword">self</span>.root
+
+        <span class="keyword">while</span> word:
+            <span class="comment"># 판별 로직 3) (본문 설명 참고)</span>
+            <span class="keyword">if</span> node.word_id &gt;= <span class="number">0</span>:
+                <span class="keyword">if</span> <span class="keyword">self</span>.<span class="function">is_palindrome</span>(word):
+                    result.<span class="function">append</span>([index, node.word_id])
+            <span class="keyword">if</span> <span class="keyword">not</span> word[<span class="number">0</span>] <span class="keyword">in</span> node.children:
+                <span class="keyword">return</span> result
+            node = node.children[word[<span class="number">0</span>]]
+            word = word[<span class="number">1</span>:]
+
+        <span class="comment"># 판별 로직 1) (본문 설명 참고)</span>
+        <span class="keyword">if</span> node.word_id &gt;= <span class="number">0</span> <span class="keyword">and</span> node.word_id != index:
+            result.<span class="function">append</span>([index, node.word_id])
+
+        <span class="comment"># 판별 로직 2) (본문 설명 참고)</span>
+        <span class="keyword">for</span> palindrome_word_id <span class="keyword">in</span> node.palindrome_word_ids:
+            result.<span class="function">append</span>([index, palindrome_word_id])
+
+        <span class="keyword">return</span> result
+
+
+<span class="keyword">class</span> Solution:
+    <span class="keyword">def</span> <span class="function">palindromePairs</span>(<span class="keyword">self</span>, words: List[str]) -&gt; List[List[int]]:
+        trie = <span class="function">Trie</span>()
+
+        <span class="keyword">for</span> i, word <span class="keyword">in</span> <span class="function">enumerate</span>(words):
+            trie.<span class="function">insert</span>(i, word)
+
+        results = []
+        <span class="keyword">for</span> i, word <span class="keyword">in</span> <span class="function">enumerate</span>(words):
+            results.<span class="function">extend</span>(trie.<span class="function">search</span>(i, word))
+
+        <span class="keyword">return</span> results</pre>
+        </div>
+
+    </div>
+
+
+    <script>
+        const words = ["abcd", "dcba", "lls", "s", "sssll"];
+        let trie = { char: 'root', children: {}, wordId: -1, palindromeIds: [] };
+        let step = 0;
+        let phase = 'insert'; // 'insert' or 'search'
+        let insertIndex = 0;
+        let insertCharIndex = 0;
+        let searchIndex = 0;
+        let searchCharIndex = 0;
+        let results = [];
+        let autoInterval = null;
+        let insertSubStep = 0; // 0: check palindrome, 1: insert char
+        let searchSubStep = 0;
+        let currentSearchWord = '';
+        let searchNode = null;
+
+        function isPalindrome(s) {
+            return s === s.split('').reverse().join('');
+        }
+
+        function initWords() {
+            const container = document.getElementById('words');
+            container.innerHTML = words.map((w, i) => 
+                `<div class="word-item" id="word-${i}">[${i}] "${w}"</div>`
+            ).join('');
+        }
+
+        function renderTrie() {
+            const svg = d3.select('#trie-svg');
+            svg.selectAll('*').remove();
+
+            const width = svg.node().getBoundingClientRect().width;
+            const height = 400;
+            const g = svg.append('g').attr('transform', 'translate(40, 40)');
+
+            // Convert trie to hierarchy
+            function buildHierarchy(node, char = 'root') {
+                const result = { 
+                    name: char, 
+                    wordId: node.wordId, 
+                    palindromeIds: node.palindromeIds || [],
+                    active: node.active,
+                    children: [] 
+                };
+                for (const [c, child] of Object.entries(node.children)) {
+                    result.children.push(buildHierarchy(child, c));
+                }
+                return result;
+            }
+
+            const hierarchy = d3.hierarchy(buildHierarchy(trie));
+            const treeLayout = d3.tree().size([width - 80, height - 80]);
+            treeLayout(hierarchy);
+
+            // Links
+            g.selectAll('.link')
+                .data(hierarchy.links())
+                .enter()
+                .append('path')
+                .attr('class', d => 'link' + (d.target.data.active ? ' active' : ''))
+                .attr('d', d3.linkVertical().x(d => d.x).y(d => d.y));
+
+            // Nodes
+            const nodes = g.selectAll('.node')
+                .data(hierarchy.descendants())
+                .enter()
+                .append('g')
+                .attr('class', d => {
+                    let cls = 'node';
+                    if (d.data.active) cls += ' active';
+                    else if (d.data.wordId >= 0) cls += ' word-end';
+                    else if (d.data.palindromeIds.length > 0) cls += ' palindrome';
+                    return cls;
+                })
+                .attr('transform', d => `translate(${d.x}, ${d.y})`);
+
+            nodes.append('circle').attr('r', 18);
+            nodes.append('text')
+                .attr('dy', 5)
+                .attr('text-anchor', 'middle')
+                .text(d => d.data.name);
+
+            // Word ID labels
+            nodes.filter(d => d.data.wordId >= 0)
+                .append('text')
+                .attr('dy', -25)
+                .attr('text-anchor', 'middle')
+                .attr('fill', '#ff9800')
+                .attr('font-size', '10px')
+                .text(d => `id:${d.data.wordId}`);
+
+            // Palindrome IDs labels
+            nodes.filter(d => d.data.palindromeIds.length > 0)
+                .append('text')
+                .attr('dy', 35)
+                .attr('text-anchor', 'middle')
+                .attr('fill', '#4caf50')
+                .attr('font-size', '10px')
+                .text(d => `P:[${d.data.palindromeIds.join(',')}]`);
+        }
+
+        function clearTrieActive() {
+            function clear(node) {
+                node.active = false;
+                for (const child of Object.values(node.children)) {
+                    clear(child);
+                }
+            }
+            clear(trie);
+        }
+
+        function updateStatus(text) {
+            document.getElementById('status').innerHTML = text;
+        }
+
+        function showLogic(text) {
+            const box = document.getElementById('logic-box');
+            box.style.display = 'block';
+            box.innerHTML = text;
+        }
+
+        function hideLogic() {
+            document.getElementById('logic-box').style.display = 'none';
+        }
+
+        function updatePhase() {
+            document.getElementById('phase-insert').classList.toggle('active', phase === 'insert');
+            document.getElementById('phase-search').classList.toggle('active', phase === 'search');
+        }
+
+        function executeStep() {
+            if (phase === 'insert') {
+                executeInsertStep();
+            } else if (phase === 'search') {
+                executeSearchStep();
+            }
+        }
+
+        function executeInsertStep() {
+            if (insertIndex >= words.length) {
+                phase = 'search';
+                updatePhase();
+                searchNode = trie;
+                updateStatus('Phase 1 complete. Starting Phase 2: Search for palindrome pairs.');
+                hideLogic();
+                return;
+            }
+
+            const word = words[insertIndex];
+            const reversed = word.split('').reverse().join('');
+            
+            // Mark word as active
+            document.querySelectorAll('.word-item').forEach(el => el.classList.remove('active'));
+            document.getElementById(`word-${insertIndex}`).classList.add('active');
+            document.getElementById(`word-${insertIndex}`).classList.add('inserted');
+
+            if (insertCharIndex === 0 && insertSubStep === 0) {
+                clearTrieActive();
+                updateStatus(`Inserting word[${insertIndex}] = "${word}" as reversed: "${reversed}"`);
+                showLogic(`Insert reversed word into Trie.<br>Check at each step if remaining prefix is a palindrome.`);
+            }
+
+            let node = trie;
+            for (let i = 0; i < insertCharIndex; i++) {
+                node = node.children[reversed[i]];
+            }
+
+            if (insertSubStep === 0) {
+                // Check if remaining prefix is palindrome
+                const remaining = word.substring(0, word.length - insertCharIndex);
+                if (isPalindrome(remaining)) {
+                    node.palindromeIds = node.palindromeIds || [];
+                    if (!node.palindromeIds.includes(insertIndex)) {
+                        node.palindromeIds.push(insertIndex);
+                    }
+                    updateStatus(`At position ${insertCharIndex}: remaining "${remaining}" is palindrome → store word_id=${insertIndex}`);
+                } else {
+                    updateStatus(`At position ${insertCharIndex}: remaining "${remaining}" is NOT palindrome`);
+                }
+                node.active = true;
+                insertSubStep = 1;
+            } else {
+                // Insert character
+                if (insertCharIndex < reversed.length) {
+                    const char = reversed[insertCharIndex];
+                    if (!node.children[char]) {
+                        node.children[char] = { char, children: {}, wordId: -1, palindromeIds: [] };
+                    }
+                    node.children[char].active = true;
+                    updateStatus(`Insert character '${char}' at depth ${insertCharIndex + 1}`);
+                    insertCharIndex++;
+                    insertSubStep = 0;
+                } else {
+                    // Mark end of word
+                    node.wordId = insertIndex;
+                    updateStatus(`Mark end of word: word_id = ${insertIndex}`);
+                    insertIndex++;
+                    insertCharIndex = 0;
+                    insertSubStep = 0;
+                }
+            }
+
+            renderTrie();
+        }
+
+        function executeSearchStep() {
+            if (searchIndex >= words.length) {
+                updateStatus(`✅ Search complete! Found ${results.length} palindrome pairs.`);
+                document.getElementById('stepBtn').disabled = true;
+                document.getElementById('autoBtn').disabled = true;
+                stopAuto();
+                return;
+            }
+
+            const word = words[searchIndex];
+            
+            document.querySelectorAll('.word-item').forEach(el => {
+                el.classList.remove('active', 'searching');
+            });
+            document.getElementById(`word-${searchIndex}`).classList.add('searching');
+
+            if (searchCharIndex === 0 && searchSubStep === 0) {
+                clearTrieActive();
+                searchNode = trie;
+                trie.active = true;
+                updateStatus(`Searching for pairs with word[${searchIndex}] = "${word}"`);
+                showLogic(`<b>3 cases to check:</b><br>
+                1) Exact match at end node<br>
+                2) Remaining suffix is palindrome during traversal<br>
+                3) Palindrome IDs stored at current node`);
+            }
+
+            if (searchCharIndex < word.length) {
+                const char = word[searchCharIndex];
+                
+                // Case 2: Check if node has word_id and remaining is palindrome
+                if (searchNode.wordId >= 0 && searchNode.wordId !== searchIndex) {
+                    const remaining = word.substring(searchCharIndex);
+                    if (isPalindrome(remaining)) {
+                        const pair = [searchIndex, searchNode.wordId];
+                        if (!results.some(r => r[0] === pair[0] && r[1] === pair[1])) {
+                            results.push(pair);
+                            addResult(pair);
+                        }
+                        updateStatus(`Case 2: word_id=${searchNode.wordId} found, remaining "${remaining}" is palindrome → pair [${pair}]`);
+                    }
+                }
+
+                if (!searchNode.children[char]) {
+                    updateStatus(`Character '${char}' not found. Moving to next word.`);
+                    searchIndex++;
+                    searchCharIndex = 0;
+                    searchNode = trie;
+                    renderTrie();
+                    return;
+                }
+
+                searchNode = searchNode.children[char];
+                searchNode.active = true;
+                updateStatus(`Traverse to '${char}' at depth ${searchCharIndex + 1}`);
+                searchCharIndex++;
+            } else {
+                // Reached end of search word
+                // Case 1: Exact match
+                if (searchNode.wordId >= 0 && searchNode.wordId !== searchIndex) {
+                    const pair = [searchIndex, searchNode.wordId];
+                    if (!results.some(r => r[0] === pair[0] && r[1] === pair[1])) {
+                        results.push(pair);
+                        addResult(pair);
+                    }
+                    updateStatus(`Case 1: Exact match with word_id=${searchNode.wordId} → pair [${pair}]`);
+                }
+                
+                // Case 3: Palindrome IDs at current node
+                if (searchNode.palindromeIds && searchNode.palindromeIds.length > 0) {
+                    for (const pid of searchNode.palindromeIds) {
+                        const pair = [searchIndex, pid];
+                        if (!results.some(r => r[0] === pair[0] && r[1] === pair[1])) {
+                            results.push(pair);
+                            addResult(pair);
+                            updateStatus(`Case 3: Palindrome ID ${pid} at node → pair [${pair}]`);
+                        }
+                    }
+                }
+
+                searchIndex++;
+                searchCharIndex = 0;
+                searchNode = trie;
+            }
+
+            renderTrie();
+        }
+
+        function addResult(pair) {
+            const container = document.getElementById('results');
+            const combined = words[pair[0]] + words[pair[1]];
+            container.innerHTML += `<div class="result-pair">[${pair[0]},${pair[1]}] "${combined}"</div>`;
+        }
+
+        function reset() {
+            stopAuto();
+            trie = { char: 'root', children: {}, wordId: -1, palindromeIds: [] };
+            step = 0;
+            phase = 'insert';
+            insertIndex = 0;
+            insertCharIndex = 0;
+            insertSubStep = 0;
+            searchIndex = 0;
+            searchCharIndex = 0;
+            searchSubStep = 0;
+            searchNode = null;
+            results = [];
+            
+            document.getElementById('results').innerHTML = '';
+            document.querySelectorAll('.word-item').forEach(el => {
+                el.classList.remove('active', 'inserted', 'searching', 'found');
+            });
+            document.getElementById('stepBtn').disabled = false;
+            document.getElementById('autoBtn').disabled = false;
+            hideLogic();
+            updateStatus('Click "Step" or "Auto Run" to start');
+            updatePhase();
+            renderTrie();
+        }
+
+        function stopAuto() {
+            if (autoInterval) {
+                clearInterval(autoInterval);
+                autoInterval = null;
+                document.getElementById('autoBtn').textContent = 'Auto Run';
+            }
+        }
+
+        document.getElementById('stepBtn').addEventListener('click', () => {
+            stopAuto();
+            executeStep();
+        });
+
+        document.getElementById('autoBtn').addEventListener('click', () => {
+            if (autoInterval) {
+                stopAuto();
+            } else {
+                autoInterval = setInterval(executeStep, 600);
+                document.getElementById('autoBtn').textContent = '⏸ Pause';
+            }
+        });
+
+        document.getElementById('resetBtn').addEventListener('click', reset);
+
+        // Initialize
+        initWords();
+        updatePhase();
+        renderTrie();
+    </script>
+</body>
+</html>

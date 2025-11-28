@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Q53: Minimum Distance BST (v1 - Recursive)</title>
+    <link rel="stylesheet" href="visual.css">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    
+</head>
+<body>
+    <div class="container">
+        <div class="problem-info">
+            <h1>Q53: Minimum Distance in BST (v1 - Recursive)</h1>
+            <p>Find minimum difference between any two node values. Uses in-order traversal (sorted order in BST) and compares adjacent values.</p>
+            <div class="problem-meta">
+                <span class="meta-tag">📁 BST</span>
+                <span class="meta-tag">⏱️ O(n)</span>
+                <span class="meta-tag">💡 Recursive In-order</span>
+            </div>
+        </div>
+        
+        
+        
+        <div class="visualization-section">
+            <h3>🎬 Visualization</h3>
+            
+            <div class="controls">
+                <button class="btn btn-primary" id="stepBtn" onclick="step()">Step</button>
+                <button class="btn btn-success" id="autoBtn" onclick="toggleAuto()">Auto Run</button>
+                <button class="btn btn-warning" onclick="reset()">Reset</button>
+            </div>
+            
+            <div class="legend">
+                <div class="legend-item"><div class="legend-circle bg-cyan"></div> Unvisited</div>
+                <div class="legend-item"><div class="legend-circle legend-color bg-orange"></div> Current</div>
+                <div class="legend-item"><div class="legend-circle legend-color bg-green"></div> Visited</div>
+            </div>
+            
+            <div class="status-message" id="statusMessage">
+                BST: [4, 2, 6, 1, 3]. In-order gives sorted sequence. Compare adjacent values.
+            </div>
+            
+            <div class="info-section">
+                <div class="info-box">
+                    <div class="info-label">Previous Value</div>
+                    <div class="info-value" id="prevValue">-∞</div>
+                </div>
+                <div class="info-box highlight">
+                    <div class="info-label">Min Difference</div>
+                    <div class="info-value" id="minDiff">∞</div>
+                </div>
+            </div>
+            
+            <div class="tree-container">
+                <svg id="tree" width="400" height="220"></svg>
+            </div>
+            
+            <div class="traversal-section">
+                <div class="traversal-title">🔄 In-Order Traversal (Left → Node → Right)</div>
+                <div class="traversal-items" id="traversalItems"></div>
+            </div>
+        </div>
+    </div>
+        
+        <div class="code-section">
+            <h3>📄 Python Solution (53-1.py)</h3>
+            <pre><span class="keyword">import</span> sys
+
+
+<span class="comment"># Definition for a binary tree node.</span>
+<span class="keyword">class</span> TreeNode:
+    <span class="keyword">def</span> <span class="function">__init__</span>(<span class="keyword">self</span>, x):
+        <span class="keyword">self</span>.val = x
+        <span class="keyword">self</span>.left = <span class="keyword">None</span>
+        <span class="keyword">self</span>.right = <span class="keyword">None</span>
+
+
+<span class="keyword">class</span> Solution:
+    prev = -sys.maxsize
+    result = sys.maxsize
+
+    <span class="comment"># 재귀 구조 중위 순회 비교 결과</span>
+    <span class="keyword">def</span> <span class="function">minDiffInBST</span>(<span class="keyword">self</span>, root: TreeNode) -&gt; int:
+        <span class="keyword">if</span> root.left:
+            <span class="keyword">self</span>.<span class="function">minDiffInBST</span>(root.left)
+
+        <span class="keyword">self</span>.result = <span class="function">min</span>(<span class="keyword">self</span>.result, root.val - <span class="keyword">self</span>.prev)
+        <span class="keyword">self</span>.prev = root.val
+
+        <span class="keyword">if</span> root.right:
+            <span class="keyword">self</span>.<span class="function">minDiffInBST</span>(root.right)
+
+        <span class="keyword">return</span> <span class="keyword">self</span>.result</pre>
+        </div>
+
+    </div>
+
+    <script>
+        // BST:      4
+        //         /   \
+        //        2     6
+        //       / \
+        //      1   3
+        // In-order: 1, 2, 3, 4, 6
+        // Min diff = min(2-1, 3-2, 4-3, 6-4) = 1
+        
+        const nodes = [
+            { id: 4, val: 4, left: 2, right: 6, x: 200, y: 40 },
+            { id: 2, val: 2, left: 1, right: 3, x: 100, y: 110 },
+            { id: 6, val: 6, left: null, right: null, x: 300, y: 110 },
+            { id: 1, val: 1, left: null, right: null, x: 50, y: 180 },
+            { id: 3, val: 3, left: null, right: null, x: 150, y: 180 }
+        ];
+        
+        const inorderSequence = [1, 2, 3, 4, 6];
+        
+        let visited = new Set();
+        let currentNode = null;
+        let prev = null;
+        let minDiff = Infinity;
+        let stepIndex = 0;
+        let autoInterval = null;
+        
+        function getNode(id) {
+            return nodes.find(n => n.id === id);
+        }
+        
+        function init() {
+            visited = new Set();
+            currentNode = null;
+            prev = null;
+            minDiff = Infinity;
+            stepIndex = 0;
+            
+            document.getElementById('prevValue').textContent = '-∞';
+            document.getElementById('minDiff').textContent = '∞';
+            renderTree();
+            renderTraversal();
+        }
+        
+        function renderTree() {
+            const svg = d3.select("#tree");
+            svg.selectAll("*").remove();
+            
+            nodes.forEach(node => {
+                if (node.left !== null) {
+                    const child = getNode(node.left);
+                    svg.append("line")
+                        .attr("x1", node.x).attr("y1", node.y)
+                        .attr("x2", child.x).attr("y2", child.y)
+                        .attr("stroke", "#999")
+                        .attr("stroke-width", 2);
+                }
+                if (node.right !== null) {
+                    const child = getNode(node.right);
+                    svg.append("line")
+                        .attr("x1", node.x).attr("y1", node.y)
+                        .attr("x2", child.x).attr("y2", child.y)
+                        .attr("stroke", "#999")
+                        .attr("stroke-width", 2);
+                }
+            });
+            
+            nodes.forEach(node => {
+                let fill = "#3498db";
+                if (visited.has(node.val)) fill = "#4caf50";
+                if (node.val === currentNode) fill = "#ff9800";
+                
+                svg.append("circle")
+                    .attr("cx", node.x)
+                    .attr("cy", node.y)
+                    .attr("r", 25)
+                    .attr("fill", fill)
+                    .attr("stroke", "#333")
+                    .attr("stroke-width", 2);
+                
+                svg.append("text")
+                    .attr("x", node.x)
+                    .attr("y", node.y + 5)
+                    .attr("text-anchor", "middle")
+                    .attr("fill", "white")
+                    .attr("font-weight", "bold")
+                    .attr("font-size", "14px")
+                    .text(node.val);
+            });
+        }
+        
+        function renderTraversal() {
+            const container = document.getElementById('traversalItems');
+            container.innerHTML = inorderSequence.map(val => {
+                let cls = 'traversal-item';
+                if (visited.has(val)) cls += ' visited';
+                if (val === currentNode) cls += ' current';
+                return `<div class="${cls}">${val}</div>`;
+            }).join('');
+        }
+        
+        function step() {
+            if (stepIndex >= inorderSequence.length) {
+                document.getElementById('statusMessage').textContent = `✅ Complete! Minimum difference = ${minDiff}`;
+                document.getElementById('stepBtn').disabled = true;
+                stopAuto();
+                currentNode = null;
+                renderTree();
+                renderTraversal();
+                return;
+            }
+            
+            currentNode = inorderSequence[stepIndex];
+            
+            let diff = Infinity;
+            if (prev !== null) {
+                diff = currentNode - prev;
+                minDiff = Math.min(minDiff, diff);
+            }
+            
+            document.getElementById('prevValue').textContent = prev === null ? '-∞' : prev;
+            document.getElementById('minDiff').textContent = minDiff === Infinity ? '∞' : minDiff;
+            
+            if (prev !== null) {
+                document.getElementById('statusMessage').textContent = 
+                    `Visit ${currentNode}. Diff = ${currentNode} - ${prev} = ${diff}. Min = ${minDiff}`;
+            } else {
+                document.getElementById('statusMessage').textContent = 
+                    `Visit ${currentNode}. First node, no comparison yet.`;
+            }
+            
+            visited.add(currentNode);
+            prev = currentNode;
+            
+            renderTree();
+            renderTraversal();
+            
+            stepIndex++;
+            
+            if (stepIndex >= inorderSequence.length) {
+                setTimeout(() => {
+                    document.getElementById('statusMessage').textContent = `✅ Complete! Minimum difference = ${minDiff}`;
+                    document.getElementById('stepBtn').disabled = true;
+                    stopAuto();
+                    currentNode = null;
+                    renderTree();
+                    renderTraversal();
+                }, 300);
+            }
+        }
+        
+        function toggleAuto() {
+            if (autoInterval) { stopAuto(); }
+            else {
+                document.getElementById('autoBtn').textContent = 'Pause';
+                autoInterval = setInterval(step, 900);
+            }
+        }
+        
+        function stopAuto() {
+            if (autoInterval) { clearInterval(autoInterval); autoInterval = null; }
+            document.getElementById('autoBtn').textContent = 'Auto Run';
+        }
+        
+        function reset() {
+            stopAuto();
+            document.getElementById('stepBtn').disabled = false;
+            document.getElementById('statusMessage').textContent = 
+                'BST: [4, 2, 6, 1, 3]. In-order gives sorted sequence. Compare adjacent values.';
+            init();
+        }
+        
+        init();
+    </script>
+</body>
+</html>

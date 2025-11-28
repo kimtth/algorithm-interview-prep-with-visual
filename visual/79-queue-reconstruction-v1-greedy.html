@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Queue Reconstruction by Height</title>
+    <link rel="stylesheet" href="visual.css">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    
+</head>
+<body>
+    <div class="container">
+        <h1>👥 Queue Reconstruction by Height</h1>
+        <p class="subtitle">Greedy - Sort by height desc, then insert at position k</p>
+
+        <div class="controls">
+            <button id="stepBtn">Step</button>
+            <button id="autoBtn">Auto Run</button>
+            <button id="resetBtn">Reset</button>
+        </div>
+
+        <div class="panel">
+            <div class="panel-title">📋 People to Place (sorted by height desc, k asc)</div>
+            <div class="people-container" id="people"></div>
+        </div>
+
+        <div class="panel">
+            <div class="panel-title">🎯 Reconstructed Queue</div>
+            <div class="queue-container" id="queue"></div>
+        </div>
+
+        <div class="panel">
+            <div class="panel-title">📋 Status</div>
+            <div class="status-box" id="status">Sort by height descending. Insert each person at index k.</div>
+        </div>
+    
+        <div class="code-section">
+            <h3>📄 Python Solution (79-1.py)</h3>
+            <pre><span class="keyword">import</span> heapq
+<span class="keyword">from</span> typing <span class="keyword">import</span> List
+
+
+<span class="keyword">class</span> Solution:
+    <span class="keyword">def</span> <span class="function">reconstructQueue</span>(<span class="keyword">self</span>, people: List[List[int]]) -&gt; List[List[int]]:
+        heap = []
+        <span class="comment"># 키 역순, 인덱스 삽입</span>
+        <span class="keyword">for</span> person <span class="keyword">in</span> people:
+            heapq.<span class="function">heappush</span>(heap, (-person[<span class="number">0</span>], person[<span class="number">1</span>]))
+
+        result = []
+        <span class="comment"># 키 역순, 인덱스 추출</span>
+        <span class="keyword">while</span> heap:
+            person = heapq.<span class="function">heappop</span>(heap)
+            result.<span class="function">insert</span>(person[<span class="number">1</span>], [-person[<span class="number">0</span>], person[<span class="number">1</span>]])
+        <span class="keyword">return</span> result</pre>
+        </div>
+
+    </div>
+
+
+    <script>
+        const people = [[7,0], [4,4], [7,1], [5,0], [6,1], [5,2]];
+        let sorted = [];
+        let queue = [];
+        let idx = 0;
+        let phase = 'sort';
+        let done = false;
+        let autoInterval = null;
+
+        function render() {
+            const data = phase === 'sort' ? people : sorted;
+            document.getElementById('people').innerHTML = data.map((p, i) => {
+                let cls = 'person waiting';
+                if (phase === 'insert' && i < idx) cls = 'person placed';
+                if (phase === 'insert' && i === idx) cls = 'person current';
+                return `<div class="${cls}">
+                    <div class="person-icon">👤</div>
+                    <div class="person-info">h=${p[0]}, k=${p[1]}</div>
+                </div>`;
+            }).join('');
+
+            document.getElementById('queue').innerHTML = queue.length > 0
+                ? queue.map(p => `<div class="queue-slot filled">
+                    <div class="text-24">👤</div>
+                    <div class="font-bold">[${p[0]},${p[1]}]</div>
+                </div>`).join('')
+                : '<div class="text-gray">Empty - waiting for insertions</div>';
+        }
+
+        function step() {
+            if (done) return;
+
+            if (phase === 'sort') {
+                sorted = [...people].sort((a, b) => b[0] - a[0] || a[1] - b[1]);
+                phase = 'insert';
+                document.getElementById('status').innerHTML = 
+                    `Sorted by height desc, k asc: ${sorted.map(p => `[${p}]`).join(', ')}`;
+                render();
+                return;
+            }
+
+            if (idx >= sorted.length) {
+                done = true;
+                document.getElementById('status').innerHTML = 
+                    `✅ Queue reconstructed! Result: ${queue.map(p => `[${p}]`).join(', ')}`;
+                document.getElementById('stepBtn').disabled = true;
+                document.getElementById('autoBtn').disabled = true;
+                stopAuto();
+                render();
+                return;
+            }
+
+            const person = sorted[idx];
+            queue.splice(person[1], 0, person);
+            
+            document.getElementById('status').innerHTML = 
+                `Insert [${person[0]},${person[1]}] at position ${person[1]}. There are ${person[1]} taller people before.`;
+
+            idx++;
+            render();
+        }
+
+        function reset() {
+            stopAuto();
+            sorted = [];
+            queue = [];
+            idx = 0;
+            phase = 'sort';
+            done = false;
+            document.getElementById('stepBtn').disabled = false;
+            document.getElementById('autoBtn').disabled = false;
+            document.getElementById('status').innerHTML = 'Sort by height descending. Insert each person at index k.';
+            render();
+        }
+
+        function stopAuto() {
+            if (autoInterval) { clearInterval(autoInterval); autoInterval = null; }
+            document.getElementById('autoBtn').textContent = 'Auto Run';
+        }
+
+        document.getElementById('stepBtn').onclick = () => { stopAuto(); step(); };
+        document.getElementById('autoBtn').onclick = () => {
+            if (autoInterval) { stopAuto(); }
+            else { autoInterval = setInterval(step, 800); document.getElementById('autoBtn').textContent = '⏸ Pause'; }
+        };
+        document.getElementById('resetBtn').onclick = reset;
+
+        render();
+    </script>
+</body>
+</html>

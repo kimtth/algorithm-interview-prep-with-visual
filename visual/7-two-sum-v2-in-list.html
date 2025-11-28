@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Q7: Two Sum - In-List Search</title>
+    <link rel="stylesheet" href="visual.css">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    
+</head>
+<body>
+    <div class="container">
+        <div class="problem-info">
+            <h1>Q7: Two Sum - In-List Search</h1>
+            <p>Find two numbers that add up to the target using Python's `in` operator for list searching.</p>
+            <div class="problem-meta">
+                <span class="meta-tag">📁 Array</span>
+                <span class="meta-tag">⏱️ O(n²)</span>
+                <span class="meta-tag">💡 Pythonic `in` operator</span>
+            </div>
+        </div>
+        
+        
+        
+        <div class="visualization-section">
+            <h3>🎬 Visualization</h3>
+            
+            <div class="controls">
+                <button class="btn btn-primary" id="stepBtn" onclick="step()">Step</button>
+                <button class="btn btn-success" id="autoBtn" onclick="toggleAuto()">Auto Run</button>
+                <button class="btn btn-warning" onclick="reset()">Reset</button>
+            </div>
+            
+            <div class="status-message" id="statusMessage">
+                nums = [2, 7, 11, 15], target = 9. Find two numbers that sum to 9.
+            </div>
+            
+            <div class="info-section">
+                <div class="info-box">
+                    <div class="info-label">Target</div>
+                    <div class="info-value">9</div>
+                </div>
+                <div class="info-box">
+                    <div class="info-label">Current (n)</div>
+                    <div class="info-value" id="currentValue">-</div>
+                </div>
+                <div class="info-box">
+                    <div class="info-label">Complement (target - n)</div>
+                    <div class="info-value" id="complementValue">-</div>
+                </div>
+            </div>
+            
+            <div class="array-display" id="arrayDisplay"></div>
+            
+            <div class="slice-display">
+                <div class="slice-label">Searching in nums[i+1:] slice:</div>
+                <div class="slice-items" id="sliceDisplay"></div>
+            </div>
+            
+            <div class="info-section">
+                <div class="info-box highlight" id="resultBox" class="d-none">
+                    <div class="info-label">Result</div>
+                    <div class="info-value" id="resultValue"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+        
+        <div class="code-section">
+            <h3>📄 Python Solution (7-2.py)</h3>
+            <pre><span class="keyword">from</span> typing <span class="keyword">import</span> List
+
+
+<span class="keyword">class</span> Solution:
+    <span class="keyword">def</span> <span class="function">twoSum</span>(<span class="keyword">self</span>, nums: List[int], target: int) -&gt; List[int]:
+        <span class="keyword">for</span> i, n <span class="keyword">in</span> <span class="function">enumerate</span>(nums):
+            complement = target - n
+
+            <span class="keyword">if</span> complement <span class="keyword">in</span> nums[i + <span class="number">1</span>:]:
+                <span class="keyword">return</span> [nums.<span class="function">index</span>(n), nums[i + <span class="number">1</span>:].<span class="function">index</span>(complement) + (i + <span class="number">1</span>)]</pre>
+        </div>
+
+    </div>
+
+    <script>
+        const nums = [2, 7, 11, 15];
+        const target = 9;
+        let currentI = 0;
+        let found = false;
+        let autoInterval = null;
+        
+        function init() {
+            currentI = 0;
+            found = false;
+            render();
+        }
+        
+        function render() {
+            // Array display
+            const arrContainer = document.getElementById('arrayDisplay');
+            arrContainer.innerHTML = '';
+            nums.forEach((n, i) => {
+                const item = document.createElement('div');
+                item.className = 'array-item';
+                if (found && (i === 0 || i === 1)) {
+                    item.classList.add('found');
+                } else if (i === currentI) {
+                    item.classList.add('current');
+                } else if (i > currentI) {
+                    item.classList.add('searching');
+                }
+                item.innerHTML = `<div class="value">${n}</div><div class="index">[${i}]</div>`;
+                arrContainer.appendChild(item);
+            });
+            
+            // Slice display
+            const sliceContainer = document.getElementById('sliceDisplay');
+            sliceContainer.innerHTML = '';
+            const slice = nums.slice(currentI + 1);
+            if (slice.length === 0) {
+                sliceContainer.innerHTML = '<span class="text-gray">empty</span>';
+            } else {
+                slice.forEach(n => {
+                    const item = document.createElement('span');
+                    item.className = 'slice-item';
+                    item.textContent = n;
+                    sliceContainer.appendChild(item);
+                });
+            }
+            
+            // Current values
+            if (currentI < nums.length) {
+                document.getElementById('currentValue').textContent = nums[currentI];
+                document.getElementById('complementValue').textContent = target - nums[currentI];
+            }
+        }
+        
+        function step() {
+            if (found || currentI >= nums.length) {
+                document.getElementById('stepBtn').disabled = true;
+                stopAuto();
+                return;
+            }
+            
+            const n = nums[currentI];
+            const complement = target - n;
+            const slice = nums.slice(currentI + 1);
+            
+            if (slice.includes(complement)) {
+                const j = slice.indexOf(complement) + currentI + 1;
+                found = true;
+                document.getElementById('statusMessage').textContent = 
+                    `✅ Found! ${n} + ${complement} = ${target}. Return [${currentI}, ${j}]`;
+                document.getElementById('resultBox').style.display = 'block';
+                document.getElementById('resultValue').textContent = `[${currentI}, ${j}]`;
+                document.getElementById('stepBtn').disabled = true;
+                stopAuto();
+            } else {
+                document.getElementById('statusMessage').textContent = 
+                    `${complement} not in slice [${slice.join(', ')}]. Moving to next element.`;
+                currentI++;
+            }
+            
+            render();
+        }
+        
+        function toggleAuto() {
+            if (autoInterval) { stopAuto(); }
+            else {
+                document.getElementById('autoBtn').textContent = 'Pause';
+                autoInterval = setInterval(step, 800);
+            }
+        }
+        
+        function stopAuto() {
+            if (autoInterval) { clearInterval(autoInterval); autoInterval = null; }
+            document.getElementById('autoBtn').textContent = 'Auto Run';
+        }
+        
+        function reset() {
+            stopAuto();
+            document.getElementById('stepBtn').disabled = false;
+            document.getElementById('statusMessage').textContent = 'nums = [2, 7, 11, 15], target = 9. Find two numbers that sum to 9.';
+            document.getElementById('resultBox').style.display = 'none';
+            init();
+        }
+        
+        init();
+    </script>
+</body>
+</html>

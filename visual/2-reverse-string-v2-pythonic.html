@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Q2: Reverse String - Pythonic Reverse</title>
+    <link rel="stylesheet" href="visual.css">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    
+</head>
+<body>
+    <div class="container">
+        <h1>Q2: Reverse String</h1>
+        <p class="subtitle">Solution 2: Pythonic reverse() Method</p>
+
+        <div class="problem-info">
+            <h3>📋 Problem Description</h3>
+            <p>Write a function that reverses a string. The input string is given as an array of characters. You must do this by modifying the input array in-place with O(1) extra memory.</p>
+            <p><strong>Example:</strong> ["h","e","l","l","o"] → ["o","l","l","e","h"]</p>
+            <div class="complexity">
+                <span><strong>Time:</strong> O(n)</span>
+                <span><strong>Space:</strong> O(1)</span>
+            </div>
+            <div class="advantage">
+                ✨ <strong>Advantage:</strong> Most Pythonic solution! list.reverse() modifies in-place and is implemented in C for optimal performance.
+            </div>
+        </div>
+
+        <div class="main-content">
+            
+
+            <div class="visualization-section">
+                <h3>🎬 Visualization</h3>
+                <div class="input-group">
+                    <label for="inputString">Input String:</label>
+                    <input type="text" id="inputString" value="hello">
+                </div>
+                <div class="controls">
+                    <button class="btn btn-primary" id="stepBtn" onclick="step()">Step</button>
+                    <button class="btn btn-success" id="autoBtn" onclick="toggleAuto()">Auto Run</button>
+                    <button class="btn btn-warning" onclick="reset()">Reset</button>
+                </div>
+                <div class="status-message" id="message">Enter a string and click Step or Auto Run to begin</div>
+                <div id="visualization"></div>
+                
+                <div class="legend">
+                    <div class="legend-item">
+                        <div class="legend-color bg-yellow"></div>
+                        <span>Original</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color bg-green-pale"></div>
+                        <span>Reversed</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="code-section">
+            <h3>📄 Python Solution (2-2.py)</h3>
+            <pre><span class="keyword">from</span> typing <span class="keyword">import</span> List
+
+
+<span class="keyword">class</span> Solution:
+    <span class="keyword">def</span> <span class="function">reverseString</span>(<span class="keyword">self</span>, s: List[str]) -&gt; <span class="keyword">None</span>:
+        s.<span class="function">reverse</span>()</pre>
+        </div>
+
+    </div>
+
+    <script>
+        let chars = [];
+        let phase = 0; // 0: not started, 1: show original, 2: call reverse, 3: show result
+        let isFinished = false;
+        let autoInterval = null;
+        let isAutoRunning = false;
+
+        function init() {
+            const input = document.getElementById('inputString').value;
+            chars = input.split('');
+            phase = 1;
+            isFinished = false;
+        }
+
+        function step() {
+            if (phase === 0) {
+                init();
+            }
+
+            if (isFinished) {
+                reset();
+                return;
+            }
+
+            const vis = d3.select("#visualization");
+
+            if (phase === 1) {
+                // Show original array
+                vis.selectAll("*").remove();
+                
+                const container = vis.append("div").attr("class", "step-container");
+                container.append("span").attr("class", "step-label").text("Step 1: Original Array s");
+                
+                const row = container.append("div").attr("class", "array-row");
+                chars.forEach((char, i) => {
+                    row.append("div")
+                        .attr("class", "char-box highlight")
+                        .text(char);
+                });
+                
+                container.append("div").style("text-align", "center").style("margin-top", "10px")
+                    .html(`s = [${chars.map(c => `"${c}"`).join(', ')}]`);
+                
+                document.getElementById('message').innerText = `Original: s = [${chars.map(c => `"${c}"`).join(', ')}]`;
+                phase = 2;
+            } else if (phase === 2) {
+                // Show method call
+                vis.append("div").attr("class", "method-call").text("s.reverse()");
+                vis.append("div").attr("class", "arrow").text("↓");
+                
+                document.getElementById('message').innerText = "Calling s.reverse() - this modifies s in-place!";
+                phase = 3;
+            } else if (phase === 3) {
+                // Show result
+                chars.reverse();
+                
+                const container = vis.append("div").attr("class", "step-container");
+                container.append("span").attr("class", "step-label").text("Step 2: After reverse()");
+                
+                const row = container.append("div").attr("class", "array-row");
+                chars.forEach((char, i) => {
+                    row.append("div")
+                        .attr("class", "char-box reversed")
+                        .text(char);
+                });
+                
+                container.append("div").style("text-align", "center").style("margin-top", "10px")
+                    .html(`s = [${chars.map(c => `"${c}"`).join(', ')}]`);
+                
+                container.append("div").style("text-align", "center").style("margin-top", "15px")
+                    .style("font-size", "2em").style("color", "#4caf50").text("✓");
+                
+                document.getElementById('message').innerText = `✓ Done! s = [${chars.map(c => `"${c}"`).join(', ')}]`;
+                isFinished = true;
+                stopAuto();
+                document.getElementById('stepBtn').innerText = "Restart";
+            }
+        }
+
+        function toggleAuto() {
+            if (isAutoRunning) {
+                stopAuto();
+            } else {
+                startAuto();
+            }
+        }
+
+        function startAuto() {
+            if (phase === 0) init();
+            isAutoRunning = true;
+            document.getElementById('autoBtn').innerText = "Pause";
+            document.getElementById('autoBtn').classList.add("running");
+            autoInterval = setInterval(() => {
+                if (isFinished) {
+                    stopAuto();
+                } else {
+                    step();
+                }
+            }, 1000);
+        }
+
+        function stopAuto() {
+            isAutoRunning = false;
+            document.getElementById('autoBtn').innerText = "Auto Run";
+            document.getElementById('autoBtn').classList.remove("running");
+            if (autoInterval) {
+                clearInterval(autoInterval);
+                autoInterval = null;
+            }
+        }
+
+        function reset() {
+            stopAuto();
+            phase = 0;
+            isFinished = false;
+            d3.select("#visualization").selectAll("*").remove();
+            document.getElementById('message').innerText = "Enter a string and click Step or Auto Run to begin";
+            document.getElementById('stepBtn').innerText = "Step";
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('inputString').addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    reset();
+                    init();
+                }
+            });
+        });
+    </script>
+</body>
+</html>

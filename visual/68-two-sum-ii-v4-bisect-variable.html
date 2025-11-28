@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Q68: Two Sum II - Bisect Left (Variable)</title>
+    <link rel="stylesheet" href="visual.css">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔍 Q68: Two Sum II - Input Array Is Sorted</h1>
+            <p>LeetCode #167 | File: 68-4.py | Approach: Bisect Left with Variable Slice</p>
+        </div>
+        
+        <div class="problem-info">
+            <h3>📋 Problem Description</h3>
+            <p>Given a 1-indexed sorted array, find two numbers that add up to target. Return their indices.</p>
+            <p class="mt-10"><strong>Key Insight:</strong> Similar to v3, but stores the slice in a variable first. Same logic, slightly different code structure.</p>
+        </div>
+
+        
+
+        <div class="status" id="status">Ready to visualize bisect_left with variable approach</div>
+    </div>
+
+        <div class="controls">
+            <button class="btn btn-primary" onclick="step()">Step</button>
+            <button class="btn btn-success" onclick="toggleAutoRun()">Auto Run</button>
+            <button class="btn btn-warning" onclick="reset()">Reset</button>
+        </div>
+
+        <div class="step-info" id="stepInfo">Click "Step" or "Auto Run" to begin visualization</div>
+        
+        <div class="visualization" id="viz">
+            <div class="array-container" id="arrayContainer"></div>
+            <div class="info-panel">
+                <div class="code-highlight" id="codeHighlight">nums = numbers[k+1:]</div>
+                <p id="infoText">The slice is stored in a variable before bisect_left</p>
+            </div>
+            <div class="result-display" id="result"></div>
+    
+        <div class="code-section">
+            <h3>📄 Python Solution (68-4.py)</h3>
+            <pre><span class="keyword">import</span> bisect
+<span class="keyword">from</span> typing <span class="keyword">import</span> List
+
+
+<span class="keyword">class</span> Solution:
+    <span class="keyword">def</span> <span class="function">twoSum</span>(<span class="keyword">self</span>, numbers: List[int], target: int) -&gt; List[int]:
+        <span class="keyword">for</span> k, v <span class="keyword">in</span> <span class="function">enumerate</span>(numbers):
+            expected = target - v
+            nums = numbers[k + <span class="number">1</span>:]
+            i = bisect.<span class="function">bisect_left</span>(nums, expected)
+            <span class="keyword">if</span> i &lt; <span class="function">len</span>(nums) <span class="keyword">and</span> numbers[i + k + <span class="number">1</span>] == expected:
+                <span class="keyword">return</span> k + <span class="number">1</span>, i + k + <span class="number">2</span></pre>
+        </div>
+
+    </div>
+
+    <script>
+        const numbers = [2, 3, 4, 6, 9];
+        const target = 9;
+        let k = 0;
+        let currentStep = 0;
+        let autoRunning = false;
+        let autoRunInterval;
+        let found = false;
+
+        function renderArray(currentK = -1, bisectIdx = -1, foundPair = []) {
+            const container = document.getElementById('arrayContainer');
+            container.innerHTML = '';
+            numbers.forEach((num, idx) => {
+                const item = document.createElement('div');
+                item.className = 'array-item';
+                if (foundPair.includes(idx)) {
+                    item.classList.add('found');
+                } else if (idx === currentK) {
+                    item.classList.add('current');
+                } else if (idx > currentK && currentK >= 0) {
+                    item.classList.add('search-range');
+                    if (idx === bisectIdx) {
+                        item.classList.add('bisect-result');
+                    }
+                }
+                item.innerHTML = `<span class="idx">[${idx}]</span><span class="val">${num}</span>`;
+                container.appendChild(item);
+            });
+        }
+
+        function step() {
+            if (found || k >= numbers.length) {
+                document.getElementById('status').textContent = 'Complete!';
+                return;
+            }
+
+            const v = numbers[k];
+            const expected = target - v;
+            const nums = numbers.slice(k + 1);
+            
+            // bisect_left
+            let i = 0;
+            while (i < nums.length && nums[i] < expected) i++;
+            
+            const actualIdx = i + k + 1;
+            
+            document.getElementById('codeHighlight').textContent = 
+                `nums = numbers[${k + 1}:] = [${nums.join(', ')}]; bisect_left(nums, ${expected}) = ${i}`;
+
+            if (i < nums.length && numbers[actualIdx] === expected) {
+                found = true;
+                document.getElementById('stepInfo').textContent = 
+                    `Found! k=${k}, expected=${expected}, bisect result i=${i}, actual index=${actualIdx}`;
+                document.getElementById('infoText').innerHTML = 
+                    `✅ numbers[${actualIdx}] = ${expected} matches!<br>Return: (${k + 1}, ${actualIdx + 1})`;
+                document.getElementById('result').innerHTML = 
+                    `<span class="text-green">Answer: <strong>[${k + 1}, ${actualIdx + 1}]</strong></span>`;
+                renderArray(k, actualIdx, [k, actualIdx]);
+            } else {
+                document.getElementById('stepInfo').textContent = 
+                    `k=${k}, v=${v}, looking for ${expected}. bisect_left gives ${i}. Not found, try next.`;
+                document.getElementById('infoText').textContent = 
+                    `Slice stored in 'nums' variable, then searched with bisect_left`;
+                renderArray(k, actualIdx < numbers.length ? actualIdx : -1);
+                k++;
+            }
+
+            currentStep++;
+        }
+
+        function toggleAutoRun() {
+            autoRunning = !autoRunning;
+            const btn = document.querySelector('.btn-success');
+            if (autoRunning) {
+                btn.textContent = 'Pause';
+                autoRunInterval = setInterval(() => {
+                    if (found || k >= numbers.length) {
+                        toggleAutoRun();
+                        return;
+                    }
+                    step();
+                }, 1500);
+            } else {
+                btn.textContent = 'Auto Run';
+                clearInterval(autoRunInterval);
+            }
+        }
+
+        function reset() {
+            k = 0;
+            currentStep = 0;
+            found = false;
+            if (autoRunning) toggleAutoRun();
+            document.getElementById('stepInfo').textContent = 'Click "Step" or "Auto Run" to begin visualization';
+            document.getElementById('status').textContent = 'Ready to visualize bisect_left with variable approach';
+            document.getElementById('result').innerHTML = '';
+            document.getElementById('codeHighlight').textContent = 'nums = numbers[k+1:]';
+            document.getElementById('infoText').textContent = 'The slice is stored in a variable before bisect_left';
+            renderArray();
+        }
+
+        // Initialize
+        renderArray();
+    </script>
+</body>
+</html>

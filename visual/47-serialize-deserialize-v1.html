@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Q47: Serialize and Deserialize Binary Tree</title>
+    <link rel="stylesheet" href="visual.css">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    
+</head>
+<body>
+    <div class="container">
+        <div class="problem-info">
+            <h1>Q47: Serialize and Deserialize Binary Tree</h1>
+            <p>Convert a binary tree to a string and back using BFS level-order traversal.</p>
+            <div class="problem-meta">
+                <span class="meta-tag">📁 Tree</span>
+                <span class="meta-tag">⏱️ O(n)</span>
+                <span class="meta-tag">💡 BFS Serialization</span>
+            </div>
+        </div>
+        
+        
+        
+        <div class="visualization-section">
+            <h3>🎬 Visualization</h3>
+            
+            <div class="controls">
+                <button class="btn btn-primary" id="stepBtn" onclick="step()">Step</button>
+                <button class="btn btn-success" id="autoBtn" onclick="toggleAuto()">Auto Run</button>
+                <button class="btn btn-warning" onclick="reset()">Reset</button>
+            </div>
+            
+            <div class="status-message" id="statusMessage">
+                Tree: [1, 2, 3, null, null, 4, 5]. Serialize using BFS.
+            </div>
+            
+            <div class="tree-container">
+                <svg id="tree" width="400" height="250"></svg>
+            </div>
+            
+            <div class="serial-section">
+                <div class="serial-title">📝 Serialized Output</div>
+                <div class="serial-output" id="serialOutput"># </div>
+            </div>
+            
+            <div class="queue-section">
+                <div class="queue-title">📚 BFS Queue</div>
+                <div class="queue-items" id="queueDisplay"><span class="text-gray">Empty</span></div>
+            </div>
+        </div>
+    </div>
+        
+        <div class="code-section">
+            <h3>📄 Python Solution (47-1.py)</h3>
+            <pre><span class="keyword">import</span> collections
+
+
+<span class="comment"># Definition for a binary tree node.</span>
+<span class="keyword">class</span> TreeNode:
+    <span class="keyword">def</span> <span class="function">__init__</span>(<span class="keyword">self</span>, x):
+        <span class="keyword">self</span>.val = x
+        <span class="keyword">self</span>.left = <span class="keyword">None</span>
+        <span class="keyword">self</span>.right = <span class="keyword">None</span>
+
+
+<span class="keyword">class</span> Codec:
+    <span class="comment"># 직렬화</span>
+    <span class="keyword">def</span> <span class="function">serialize</span>(<span class="keyword">self</span>, root: TreeNode) -&gt; str:
+        queue = collections.<span class="function">deque</span>([root])
+        result = ['<span class="comment">#']</span>
+        <span class="comment"># 트리 BFS 직렬화</span>
+        <span class="keyword">while</span> queue:
+            node = queue.<span class="function">popleft</span>()
+            <span class="keyword">if</span> node:
+                queue.<span class="function">append</span>(node.left)
+                queue.<span class="function">append</span>(node.right)
+
+                result.<span class="function">append</span>(<span class="function">str</span>(node.val))
+            <span class="keyword">else</span>:
+                result.<span class="function">append</span>('<span class="comment">#')</span>
+        <span class="keyword">return</span> ' '.<span class="function">join</span>(result)
+
+    <span class="comment"># 역직렬화</span>
+    <span class="keyword">def</span> <span class="function">deserialize</span>(<span class="keyword">self</span>, data: str) -&gt; TreeNode:
+        <span class="comment"># 예외 처리</span>
+        <span class="keyword">if</span> data == '<span class="comment"># #':</span>
+            <span class="keyword">return</span> <span class="keyword">None</span>
+
+        nodes = data.<span class="function">split</span>()
+
+        root = <span class="function">TreeNode</span>(<span class="function">int</span>(nodes[<span class="number">1</span>]))
+        queue = collections.<span class="function">deque</span>([root])
+        index = <span class="number">2</span>
+        <span class="comment"># 빠른 런너처럼 자식 노드 결과 먼저 확인 후 큐 삽입</span>
+        <span class="keyword">while</span> queue:
+            node = queue.<span class="function">popleft</span>()
+            <span class="keyword">if</span> nodes[index] is <span class="keyword">not</span> '<span class="comment">#':</span>
+                node.left = <span class="function">TreeNode</span>(<span class="function">int</span>(nodes[index]))
+                queue.<span class="function">append</span>(node.left)
+            index += <span class="number">1</span>
+
+            <span class="keyword">if</span> nodes[index] is <span class="keyword">not</span> '<span class="comment">#':</span>
+                node.right = <span class="function">TreeNode</span>(<span class="function">int</span>(nodes[index]))
+                queue.<span class="function">append</span>(node.right)
+            index += <span class="number">1</span>
+        <span class="keyword">return</span> root</pre>
+        </div>
+
+    </div>
+
+    <script>
+        //     1
+        //    / \
+        //   2   3
+        //      / \
+        //     4   5
+        const tree = [
+            { id: 0, val: 1, x: 200, y: 40, left: 1, right: 2 },
+            { id: 1, val: 2, x: 100, y: 110 },
+            { id: 2, val: 3, x: 300, y: 110, left: 3, right: 4 },
+            { id: 3, val: 4, x: 250, y: 180 },
+            { id: 4, val: 5, x: 350, y: 180 }
+        ];
+        
+        let queue = [];
+        let serialized = ['#'];
+        let currentNode = null;
+        let processed = new Set();
+        let done = false;
+        let autoInterval = null;
+        
+        function init() {
+            queue = [0];
+            serialized = ['#'];
+            currentNode = null;
+            processed = new Set();
+            done = false;
+            renderTree();
+            renderQueue();
+            document.getElementById('serialOutput').textContent = '# ';
+        }
+        
+        function renderTree() {
+            const svg = d3.select("#tree");
+            svg.selectAll("*").remove();
+            
+            // Draw links
+            tree.forEach(node => {
+                if (node.left !== undefined) {
+                    const child = tree[node.left];
+                    svg.append("line")
+                        .attr("x1", node.x).attr("y1", node.y)
+                        .attr("x2", child.x).attr("y2", child.y)
+                        .attr("stroke", "#999").attr("stroke-width", 2);
+                }
+                if (node.right !== undefined) {
+                    const child = tree[node.right];
+                    svg.append("line")
+                        .attr("x1", node.x).attr("y1", node.y)
+                        .attr("x2", child.x).attr("y2", child.y)
+                        .attr("stroke", "#999").attr("stroke-width", 2);
+                }
+            });
+            
+            // Draw nodes
+            tree.forEach(node => {
+                let fill = "#3498db";
+                if (processed.has(node.id)) fill = "#27ae60";
+                if (currentNode === node.id) fill = "#f39c12";
+                
+                svg.append("circle")
+                    .attr("cx", node.x).attr("cy", node.y)
+                    .attr("r", 24)
+                    .attr("fill", fill)
+                    .attr("stroke", "#333")
+                    .attr("stroke-width", 2);
+                
+                svg.append("text")
+                    .attr("x", node.x).attr("y", node.y + 5)
+                    .attr("text-anchor", "middle")
+                    .attr("fill", "white")
+                    .attr("font-weight", "bold")
+                    .text(node.val);
+            });
+        }
+        
+        function renderQueue() {
+            const container = document.getElementById('queueDisplay');
+            if (queue.length === 0) {
+                container.innerHTML = '<span class="text-gray">Empty</span>';
+            } else {
+                container.innerHTML = queue.map(id => {
+                    if (id === null) return `<div class="queue-item">#</div>`;
+                    return `<div class="queue-item">${tree[id].val}</div>`;
+                }).join('');
+            }
+        }
+        
+        function step() {
+            if (done || queue.length === 0) {
+                done = true;
+                currentNode = null;
+                document.getElementById('statusMessage').textContent = 
+                    '✅ Serialization complete!';
+                document.getElementById('stepBtn').disabled = true;
+                stopAuto();
+                renderTree();
+                return;
+            }
+            
+            const nodeId = queue.shift();
+            
+            if (nodeId === null) {
+                serialized.push('#');
+                document.getElementById('statusMessage').textContent = 
+                    'Null node → added "#" to output';
+            } else {
+                currentNode = nodeId;
+                const node = tree[nodeId];
+                serialized.push(String(node.val));
+                processed.add(nodeId);
+                
+                // Add children (or null)
+                queue.push(node.left !== undefined ? node.left : null);
+                queue.push(node.right !== undefined ? node.right : null);
+                
+                document.getElementById('statusMessage').textContent = 
+                    `Node ${node.val} → added "${node.val}" to output, queued children`;
+            }
+            
+            document.getElementById('serialOutput').textContent = serialized.join(' ');
+            renderTree();
+            renderQueue();
+        }
+        
+        function toggleAuto() {
+            if (autoInterval) { stopAuto(); }
+            else {
+                document.getElementById('autoBtn').textContent = 'Pause';
+                autoInterval = setInterval(step, 600);
+            }
+        }
+        
+        function stopAuto() {
+            if (autoInterval) { clearInterval(autoInterval); autoInterval = null; }
+            document.getElementById('autoBtn').textContent = 'Auto Run';
+        }
+        
+        function reset() {
+            stopAuto();
+            document.getElementById('stepBtn').disabled = false;
+            document.getElementById('statusMessage').textContent = 
+                'Tree: [1, 2, 3, null, null, 4, 5]. Serialize using BFS.';
+            init();
+        }
+        
+        init();
+    </script>
+</body>
+</html>

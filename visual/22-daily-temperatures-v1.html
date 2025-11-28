@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Q22: Daily Temperatures</title>
+    <link rel="stylesheet" href="visual.css">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    
+</head>
+<body>
+    <div class="container">
+        <div class="problem-info">
+            <h1>Q22: Daily Temperatures</h1>
+            <p>Given temperatures, return days until a warmer temperature. Return 0 if no warmer day.</p>
+            <div class="problem-meta">
+                <span class="meta-tag">📁 Stack</span>
+                <span class="meta-tag">⏱️ O(n)</span>
+                <span class="meta-tag">💾 O(n)</span>
+            </div>
+        </div>
+        
+        
+        
+        <div class="visualization-section">
+            <h3>🎬 Visualization</h3>
+            
+            <div class="controls">
+                <button class="btn btn-primary" id="stepBtn" onclick="step()">Step</button>
+                <button class="btn btn-success" id="autoBtn" onclick="toggleAuto()">Auto Run</button>
+                <button class="btn btn-warning" onclick="reset()">Reset</button>
+            </div>
+            
+            <div class="status-message" id="statusMessage">
+                Click "Step" or "Auto Run" to start
+            </div>
+            
+            <div class="temp-display" id="tempDisplay"></div>
+            
+            <div class="stack-container">
+                <div class="stack-label">Stack (stores indices):</div>
+                <div class="stack-items" id="stackItems"></div>
+            </div>
+            
+            <div class="mb-10 text-gray-dark">Answer Array:</div>
+            <div class="answer-display" id="answerDisplay"></div>
+        </div>
+    </div>
+        
+        <div class="code-section">
+            <h3>📄 Python Solution (22-1.py)</h3>
+            <pre><span class="keyword">from</span> typing <span class="keyword">import</span> List
+
+
+<span class="keyword">class</span> Solution:
+    <span class="keyword">def</span> <span class="function">dailyTemperatures</span>(<span class="keyword">self</span>, T: List[int]) -&gt; List[int]:
+        answer = [<span class="number">0</span>] * <span class="function">len</span>(T)
+        stack = []
+        <span class="keyword">for</span> i, cur <span class="keyword">in</span> <span class="function">enumerate</span>(T):
+            <span class="comment"># 현재 온도가 스택 값보다 높다면 정답 처리</span>
+            <span class="keyword">while</span> stack <span class="keyword">and</span> cur &gt; T[stack[-<span class="number">1</span>]]:
+                last = stack.<span class="function">pop</span>()
+                answer[last] = i - last
+            stack.<span class="function">append</span>(i)
+
+        <span class="keyword">return</span> answer</pre>
+        </div>
+
+    </div>
+
+    <script>
+        const temps = [73, 74, 75, 71, 69, 72, 76, 73];
+        let answer = new Array(temps.length).fill(0);
+        let stack = [];
+        let index = 0;
+        let autoInterval = null;
+        let resolved = new Set();
+        
+        function init() {
+            answer = new Array(temps.length).fill(0);
+            stack = [];
+            index = 0;
+            resolved = new Set();
+            renderTemps();
+            renderStack();
+            renderAnswer();
+        }
+        
+        function renderTemps() {
+            const container = document.getElementById('tempDisplay');
+            container.innerHTML = '';
+            temps.forEach((temp, i) => {
+                const item = document.createElement('div');
+                item.className = 'temp-item';
+                const box = document.createElement('div');
+                box.className = 'temp-box';
+                if (i === index) box.classList.add('current');
+                if (stack.includes(i)) box.classList.add('in-stack');
+                if (resolved.has(i)) box.classList.add('resolved');
+                box.textContent = temp;
+                const idx = document.createElement('div');
+                idx.className = 'temp-index';
+                idx.textContent = `i=${i}`;
+                item.appendChild(box);
+                item.appendChild(idx);
+                container.appendChild(item);
+            });
+        }
+        
+        function renderStack() {
+            const container = document.getElementById('stackItems');
+            container.innerHTML = '';
+            stack.forEach(i => {
+                const div = document.createElement('div');
+                div.className = 'stack-item';
+                div.textContent = `${i} (${temps[i]}°)`;
+                container.appendChild(div);
+            });
+        }
+        
+        function renderAnswer() {
+            const container = document.getElementById('answerDisplay');
+            container.innerHTML = '';
+            answer.forEach((val, i) => {
+                const item = document.createElement('div');
+                item.className = 'answer-item';
+                const box = document.createElement('div');
+                box.className = 'answer-box';
+                if (val > 0 || resolved.has(i)) box.classList.add('filled');
+                box.textContent = val;
+                const idx = document.createElement('div');
+                idx.className = 'temp-index';
+                idx.textContent = `[${i}]`;
+                item.appendChild(box);
+                item.appendChild(idx);
+                container.appendChild(item);
+            });
+        }
+        
+        function step() {
+            if (index >= temps.length) {
+                document.getElementById('statusMessage').textContent = 
+                    `✅ Done! Answer: [${answer.join(', ')}]`;
+                document.getElementById('stepBtn').disabled = true;
+                stopAuto();
+                return;
+            }
+            
+            const cur = temps[index];
+            let popped = [];
+            
+            while (stack.length > 0 && cur > temps[stack[stack.length - 1]]) {
+                const last = stack.pop();
+                answer[last] = index - last;
+                resolved.add(last);
+                popped.push(last);
+            }
+            
+            stack.push(index);
+            
+            if (popped.length > 0) {
+                document.getElementById('statusMessage').textContent = 
+                    `${cur}° > temps at indices [${popped.join(',')}] → Pop and set answer, push ${index}`;
+            } else {
+                document.getElementById('statusMessage').textContent = 
+                    `Push index ${index} (${cur}°) to stack`;
+            }
+            
+            index++;
+            renderTemps();
+            renderStack();
+            renderAnswer();
+        }
+        
+        function toggleAuto() {
+            if (autoInterval) { stopAuto(); }
+            else {
+                document.getElementById('autoBtn').textContent = 'Pause';
+                autoInterval = setInterval(() => {
+                    if (index >= temps.length || document.getElementById('stepBtn').disabled) stopAuto();
+                    else step();
+                }, 800);
+            }
+        }
+        
+        function stopAuto() {
+            if (autoInterval) { clearInterval(autoInterval); autoInterval = null; }
+            document.getElementById('autoBtn').textContent = 'Auto Run';
+        }
+        
+        function reset() {
+            stopAuto();
+            document.getElementById('stepBtn').disabled = false;
+            document.getElementById('statusMessage').textContent = 'Click "Step" or "Auto Run" to start';
+            init();
+        }
+        
+        init();
+    </script>
+</body>
+</html>

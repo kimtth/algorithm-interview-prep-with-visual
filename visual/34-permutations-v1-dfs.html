@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Q34: Permutations - DFS</title>
+    <link rel="stylesheet" href="visual.css">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    
+</head>
+<body>
+    <div class="container">
+        <div class="problem-info">
+            <h1>Q34: Permutations - DFS</h1>
+            <p>Given an array of distinct integers, return all possible permutations using DFS backtracking.</p>
+            <div class="problem-meta">
+                <span class="meta-tag">📁 Backtracking</span>
+                <span class="meta-tag">⏱️ O(n!)</span>
+                <span class="meta-tag">💡 DFS with removal</span>
+            </div>
+        </div>
+        
+        
+        
+        <div class="visualization-section">
+            <h3>🎬 Visualization</h3>
+            
+            <div class="controls">
+                <button class="btn btn-primary" id="stepBtn" onclick="step()">Step</button>
+                <button class="btn btn-success" id="autoBtn" onclick="toggleAuto()">Auto Run</button>
+                <button class="btn btn-warning" onclick="reset()">Reset</button>
+            </div>
+            
+            <div class="status-message" id="statusMessage">
+                Input: [1, 2, 3]. Generate all permutations using DFS.
+            </div>
+            
+            <div class="state-display">
+                <div class="state-box elements">
+                    <div class="state-label">Remaining Elements</div>
+                    <div class="state-items" id="elementsDisplay"></div>
+                </div>
+                <div class="state-box path">
+                    <div class="state-label">Current Path (prev_elements)</div>
+                    <div class="state-items" id="pathDisplay"></div>
+                </div>
+            </div>
+            
+            <div class="results-section">
+                <div class="results-label">Results (n! = 6 permutations):</div>
+                <div class="results-grid" id="resultsGrid"></div>
+            </div>
+            
+            <svg id="treeCanvas"></svg>
+        </div>
+    </div>
+        
+        <div class="code-section">
+            <h3>📄 Python Solution (34-1.py)</h3>
+            <pre><span class="keyword">from</span> typing <span class="keyword">import</span> List
+
+
+<span class="keyword">class</span> Solution:
+    <span class="keyword">def</span> <span class="function">permute</span>(<span class="keyword">self</span>, nums: List[int]) -&gt; List[List[int]]:
+        results = []
+        prev_elements = []
+
+        <span class="keyword">def</span> <span class="function">dfs</span>(elements):
+            <span class="comment"># 리프 노드일때 결과 추가</span>
+            <span class="keyword">if</span> <span class="function">len</span>(elements) == <span class="number">0</span>:
+                results.<span class="function">append</span>(prev_elements[:])
+
+            <span class="comment"># 순열 생성 재귀 호출</span>
+            <span class="keyword">for</span> e <span class="keyword">in</span> elements:
+                next_elements = elements[:]
+                next_elements.<span class="function">remove</span>(e)
+
+                prev_elements.<span class="function">append</span>(e)
+                <span class="function">dfs</span>(next_elements)
+                prev_elements.<span class="function">pop</span>()
+
+        <span class="function">dfs</span>(nums)
+        <span class="keyword">return</span> results</pre>
+        </div>
+
+    </div>
+
+    <script>
+        const nums = [1, 2, 3];
+        let results = [];
+        let stack = [];
+        let currentPath = [];
+        let currentElements = [];
+        let autoInterval = null;
+        let treeNodes = [{id: 'root', path: '[]', parent: null}];
+        
+        function init() {
+            results = [];
+            stack = [{elements: [...nums], path: [], action: 'explore'}];
+            currentPath = [];
+            currentElements = [...nums];
+            treeNodes = [{id: 'root', path: '[]', parent: null}];
+            render();
+        }
+        
+        function render() {
+            // Elements display
+            const elemContainer = document.getElementById('elementsDisplay');
+            elemContainer.innerHTML = '';
+            currentElements.forEach(e => {
+                const item = document.createElement('div');
+                item.className = 'state-item';
+                item.textContent = e;
+                elemContainer.appendChild(item);
+            });
+            if (currentElements.length === 0) {
+                elemContainer.innerHTML = '<span class="text-gray">empty</span>';
+            }
+            
+            // Path display
+            const pathContainer = document.getElementById('pathDisplay');
+            pathContainer.innerHTML = '';
+            currentPath.forEach(e => {
+                const item = document.createElement('div');
+                item.className = 'state-item';
+                item.textContent = e;
+                pathContainer.appendChild(item);
+            });
+            if (currentPath.length === 0) {
+                pathContainer.innerHTML = '<span class="text-gray">empty</span>';
+            }
+            
+            // Results
+            const resultsContainer = document.getElementById('resultsGrid');
+            resultsContainer.innerHTML = '';
+            results.forEach(r => {
+                const item = document.createElement('span');
+                item.className = 'result-item';
+                item.textContent = `[${r.join(', ')}]`;
+                resultsContainer.appendChild(item);
+            });
+            
+            renderTree();
+        }
+        
+        function renderTree() {
+            const svg = d3.select('#treeCanvas');
+            svg.selectAll('*').remove();
+            
+            const width = svg.node().getBoundingClientRect().width || 800;
+            const height = 350;
+            svg.attr('height', height);
+            
+            if (treeNodes.length <= 1) return;
+            
+            const root = d3.stratify()
+                .id(d => d.id)
+                .parentId(d => d.parent)(treeNodes);
+            
+            const treeLayout = d3.tree().size([width - 60, height - 80]);
+            treeLayout(root);
+            
+            svg.selectAll('.link')
+                .data(root.links())
+                .enter()
+                .append('line')
+                .attr('x1', d => d.source.x + 30)
+                .attr('y1', d => d.source.y + 30)
+                .attr('x2', d => d.target.x + 30)
+                .attr('y2', d => d.target.y + 30)
+                .attr('stroke', '#ccc')
+                .attr('stroke-width', 2);
+            
+            const nodes = svg.selectAll('.node')
+                .data(root.descendants())
+                .enter()
+                .append('g')
+                .attr('transform', d => `translate(${d.x + 30}, ${d.y + 30})`);
+            
+            nodes.append('circle')
+                .attr('r', 20)
+                .attr('fill', d => {
+                    const path = JSON.parse(d.data.path);
+                    if (results.some(r => JSON.stringify(r) === d.data.path)) return '#4caf50';
+                    if (JSON.stringify(currentPath) === d.data.path) return '#ff9800';
+                    return '#667eea';
+                });
+            
+            nodes.append('text')
+                .attr('dy', 5)
+                .attr('text-anchor', 'middle')
+                .attr('fill', 'white')
+                .attr('font-size', '10px')
+                .attr('font-weight', 'bold')
+                .text(d => d.data.path);
+        }
+        
+        function step() {
+            if (stack.length === 0) {
+                document.getElementById('statusMessage').textContent = 
+                    `✅ Done! Found ${results.length} permutations.`;
+                document.getElementById('stepBtn').disabled = true;
+                stopAuto();
+                return;
+            }
+            
+            const state = stack.pop();
+            currentElements = state.elements;
+            currentPath = state.path;
+            
+            if (state.elements.length === 0) {
+                results.push([...state.path]);
+                document.getElementById('statusMessage').textContent = 
+                    `Found permutation: [${state.path.join(', ')}]`;
+                render();
+                return;
+            }
+            
+            // Push children in reverse order
+            for (let i = state.elements.length - 1; i >= 0; i--) {
+                const e = state.elements[i];
+                const nextElements = state.elements.filter(x => x !== e);
+                const nextPath = [...state.path, e];
+                
+                stack.push({elements: nextElements, path: nextPath});
+                
+                const nodeId = JSON.stringify(nextPath);
+                if (!treeNodes.find(n => n.id === nodeId)) {
+                    treeNodes.push({
+                        id: nodeId,
+                        path: nodeId,
+                        parent: JSON.stringify(state.path) || 'root'
+                    });
+                }
+            }
+            
+            document.getElementById('statusMessage').textContent = 
+                `At path [${state.path.join(', ')}], choosing from [${state.elements.join(', ')}]`;
+            render();
+        }
+        
+        function toggleAuto() {
+            if (autoInterval) { stopAuto(); }
+            else {
+                document.getElementById('autoBtn').textContent = 'Pause';
+                autoInterval = setInterval(step, 500);
+            }
+        }
+        
+        function stopAuto() {
+            if (autoInterval) { clearInterval(autoInterval); autoInterval = null; }
+            document.getElementById('autoBtn').textContent = 'Auto Run';
+        }
+        
+        function reset() {
+            stopAuto();
+            document.getElementById('stepBtn').disabled = false;
+            document.getElementById('statusMessage').textContent = 'Input: [1, 2, 3]. Generate all permutations using DFS.';
+            init();
+        }
+        
+        init();
+    </script>
+</body>
+</html>

@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Q15: Reverse Linked List - Recursive</title>
+    <link rel="stylesheet" href="visual.css">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    
+</head>
+<body>
+    <div class="container">
+        <div class="problem-info">
+            <h1>Q15: Reverse Linked List</h1>
+            <p>Reverse a singly linked list.</p>
+            <div class="problem-meta">
+                <span class="meta-tag">📁 Linked List</span>
+                <span class="meta-tag">🔄 Recursion</span>
+                <span class="meta-tag">⏱️ O(n)</span>
+                <span class="meta-tag">💡 Version 1: Recursive</span>
+            </div>
+        </div>
+        
+        
+        
+        <div class="visualization-section">
+            <h3>🎬 Visualization</h3>
+            
+            <div class="controls">
+                <button class="btn btn-primary" id="stepBtn" onclick="step()">Step</button>
+                <button class="btn btn-success" id="autoBtn" onclick="toggleAuto()">Auto Run</button>
+                <button class="btn btn-warning" onclick="reset()">Reset</button>
+            </div>
+            
+            <div class="recursion-stack" id="recursionStack">
+                <div class="stack-label">📚 Recursion Call Stack:</div>
+                <div class="stack-frames" id="stackFrames"></div>
+            </div>
+            
+            <div class="status-message" id="statusMessage">
+                Click "Step" or "Auto Run" to start visualization
+            </div>
+            
+            <div class="list-section">
+                <div class="list-label">Current State:</div>
+                <div class="list-container" id="listContainer"></div>
+            </div>
+            
+            <div class="list-section">
+                <div class="list-label">Reversed Part:</div>
+                <div class="list-container" id="reversedContainer"></div>
+            </div>
+        </div>
+    </div>
+        
+        <div class="code-section">
+            <h3>📄 Python Solution (15-1.py)</h3>
+            <pre><span class="comment"># Definition for singly-linked list.</span>
+<span class="keyword">class</span> ListNode:
+    <span class="keyword">def</span> <span class="function">__init__</span>(<span class="keyword">self</span>, x):
+        <span class="keyword">self</span>.val = x
+        <span class="keyword">self</span>.next = <span class="keyword">None</span>
+
+
+<span class="keyword">class</span> Solution:
+    <span class="keyword">def</span> <span class="function">reverseList</span>(<span class="keyword">self</span>, head: ListNode) -&gt; ListNode:
+        <span class="keyword">def</span> <span class="function">reverse</span>(node: ListNode, prev: ListNode = <span class="keyword">None</span>):
+            <span class="keyword">if</span> <span class="keyword">not</span> node:
+                <span class="keyword">return</span> prev
+            next, node.next = node.next, prev
+            <span class="keyword">return</span> <span class="function">reverse</span>(next, node)
+
+        <span class="keyword">return</span> <span class="function">reverse</span>(head)</pre>
+        </div>
+
+    </div>
+
+    <script>
+        const values = [1, 2, 3, 4, 5];
+        let nodeIdx = 0;
+        let reversedList = [];
+        let callStack = [];
+        let autoInterval = null;
+        let phase = 'init';
+        
+        function init() {
+            renderList();
+            document.getElementById('reversedContainer').innerHTML = '';
+            document.getElementById('stackFrames').innerHTML = '';
+        }
+        
+        function renderList() {
+            const container = document.getElementById('listContainer');
+            container.innerHTML = '';
+            for (let i = nodeIdx; i < values.length; i++) {
+                const node = document.createElement('div');
+                node.className = 'list-node';
+                if (i === nodeIdx) {
+                    node.classList.add('current');
+                    const label = document.createElement('span');
+                    label.className = 'pointer-label node';
+                    label.textContent = 'node';
+                    node.appendChild(label);
+                }
+                node.innerHTML += values[i];
+                container.appendChild(node);
+                
+                if (i < values.length - 1) {
+                    const arrow = document.createElement('div');
+                    arrow.className = 'list-arrow';
+                    container.appendChild(arrow);
+                }
+            }
+        }
+        
+        function renderReversed() {
+            const container = document.getElementById('reversedContainer');
+            container.innerHTML = '';
+            reversedList.forEach((val, i) => {
+                const node = document.createElement('div');
+                node.className = 'list-node reversed';
+                if (i === 0) {
+                    const label = document.createElement('span');
+                    label.className = 'pointer-label prev';
+                    label.textContent = 'prev';
+                    node.appendChild(label);
+                }
+                node.innerHTML += val;
+                container.appendChild(node);
+                
+                if (i < reversedList.length - 1) {
+                    const arrow = document.createElement('div');
+                    arrow.className = 'list-arrow reversed';
+                    container.appendChild(arrow);
+                }
+            });
+        }
+        
+        function renderStack() {
+            const container = document.getElementById('stackFrames');
+            container.innerHTML = '';
+            callStack.forEach((frame, i) => {
+                const frameEl = document.createElement('div');
+                frameEl.className = 'stack-frame';
+                frameEl.textContent = frame;
+                container.appendChild(frameEl);
+            });
+        }
+        
+        function step() {
+            if (nodeIdx >= values.length) {
+                phase = 'done';
+                document.getElementById('statusMessage').textContent = 
+                    `✅ Reversed! Base case reached: node is None, return prev. Result: [${reversedList.join(' → ')}]`;
+                document.getElementById('stepBtn').disabled = true;
+                stopAuto();
+                return;
+            }
+            
+            const currentVal = values[nodeIdx];
+            callStack.push(`reverse(${currentVal}, ${reversedList.length > 0 ? reversedList[0] : 'None'})`);
+            renderStack();
+            
+            // Move current node to reversed list (prepend)
+            reversedList.unshift(currentVal);
+            nodeIdx++;
+            
+            renderList();
+            renderReversed();
+            
+            document.getElementById('statusMessage').textContent = 
+                `reverse(${currentVal}, prev): Set node.next = prev, then recurse with (next=${nodeIdx < values.length ? values[nodeIdx] : 'None'}, node=${currentVal})`;
+        }
+        
+        function toggleAuto() {
+            if (autoInterval) {
+                stopAuto();
+            } else {
+                document.getElementById('autoBtn').textContent = 'Pause';
+                autoInterval = setInterval(() => {
+                    if (phase === 'done') {
+                        stopAuto();
+                    } else {
+                        step();
+                    }
+                }, 1000);
+            }
+        }
+        
+        function stopAuto() {
+            if (autoInterval) {
+                clearInterval(autoInterval);
+                autoInterval = null;
+            }
+            document.getElementById('autoBtn').textContent = 'Auto Run';
+        }
+        
+        function reset() {
+            stopAuto();
+            phase = 'init';
+            nodeIdx = 0;
+            reversedList = [];
+            callStack = [];
+            document.getElementById('stepBtn').disabled = false;
+            document.getElementById('statusMessage').textContent = 
+                'Click "Step" or "Auto Run" to start visualization';
+            init();
+        }
+        
+        init();
+    </script>
+</body>
+</html>

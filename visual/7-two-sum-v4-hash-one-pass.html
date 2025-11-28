@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Two Sum - Hash Map (One-pass) | Algorithm Visualization</title>
+    <link rel="stylesheet" href="visual.css">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    
+</head>
+<body>
+    <div class="container">
+        <h1>📊 Q7. Two Sum</h1>
+        <p class="subtitle">Solution 4: Hash Map (One-pass) - Optimal Solution</p>
+
+        <div class="problem-info">
+            <h3>📋 Problem Description</h3>
+            <p><strong>Given:</strong> An array of integers <code>nums</code> and an integer <code>target</code></p>
+            <p><strong>Return:</strong> Indices of the two numbers that add up to <code>target</code></p>
+            <p><strong>Approach:</strong> Build hash map while searching - check if complement exists, if not store current number</p>
+            <p class="mt-10">
+                <span class="tag">Array</span>
+                <span class="tag">Hash Table</span>
+                <a href="https://leetcode.com/problems/two-sum/" target="_blank" class="ml-10">LeetCode #1 →</a>
+            </p>
+        </div>
+
+        <div class="controls">
+            <label>Example:</label>
+            <select id="exampleSelect">
+                <option value="2,7,11,15|9">nums=[2,7,11,15], target=9</option>
+                <option value="3,2,4|6">nums=[3,2,4], target=6</option>
+                <option value="3,3|6">nums=[3,3], target=6</option>
+                <option value="1,2,3,4,5,6|11">nums=[1,2,3,4,5,6], target=11</option>
+            </select>
+            <button class="btn-primary" id="startBtn">▶ Start</button>
+            <button class="btn-success" id="stepBtn" disabled>Step →</button>
+            <button class="btn-warning" id="autoBtn" disabled>⏩ Auto Run</button>
+            <button class="btn-danger" id="resetBtn">↺ Reset</button>
+        </div>
+
+        <div class="visualization">
+            <div class="legend">
+                <div class="legend-item">
+                    <div class="legend-color legend-circle bg-orange-deep"></div>
+                    <span>Current element</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color bg-purple"></div>
+                    <span>Looking for complement</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color legend-circle bg-lime"></div>
+                    <span>Found pair</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color legend-circle bg-cyan"></div>
+                    <span>Added to hash map</span>
+                </div>
+            </div>
+            <svg id="svg" width="100%" height="420"></svg>
+        </div>
+
+        <div class="status-box" id="statusBox">
+            <h4 id="statusTitle">Ready to Start</h4>
+            <p id="statusDesc">One-pass hash map: Check if complement exists, then add current to map.</p>
+        </div>
+
+        <div class="code-section">
+            <h3>📄 Python Solution (7-4.py)</h3>
+            <pre><span class="keyword">from</span> typing <span class="keyword">import</span> List
+
+
+<span class="keyword">class</span> Solution:
+    <span class="keyword">def</span> <span class="function">twoSum</span>(<span class="keyword">self</span>, nums: List[int], target: int) -&gt; List[int]:
+        nums_map = {}
+        <span class="comment"># 하나의 `for`문으로 통합</span>
+        <span class="keyword">for</span> i, num <span class="keyword">in</span> <span class="function">enumerate</span>(nums):
+            <span class="keyword">if</span> target - num <span class="keyword">in</span> nums_map:
+                <span class="keyword">return</span> [nums_map[target - num], i]
+            nums_map[num] = i</pre>
+        </div>
+
+    </div>
+
+    <script>
+        const width = 1100;
+        const height = 420;
+        
+        let nums = [];
+        let target = 0;
+        let currentIdx = 0;
+        let hashMap = {};
+        let found = false;
+        let foundPair = [];
+        let animating = false;
+        let autoRunning = false;
+        let phase = 0; // 0: check complement, 1: add to map
+
+        const svg = d3.select("#svg").attr("viewBox", `0 0 ${width} ${height}`);
+
+        function parseInput() {
+            const val = document.getElementById('exampleSelect').value;
+            const [arrStr, tgtStr] = val.split('|');
+            nums = arrStr.split(',').map(n => parseInt(n.trim()));
+            target = parseInt(tgtStr);
+        }
+
+        function draw() {
+            svg.selectAll("*").remove();
+            
+            const boxWidth = Math.min(80, (width - 100) / nums.length);
+            const startX = (width - nums.length * boxWidth) / 2;
+            const arrayY = 60;
+            
+            // Title
+            svg.append("text")
+                .attr("x", width / 2)
+                .attr("y", 25)
+                .attr("text-anchor", "middle")
+                .attr("font-size", "18px")
+                .attr("font-weight", "bold")
+                .attr("fill", "#2c3e50")
+                .text(`Target: ${target}`);
+
+            // Array
+            nums.forEach((num, idx) => {
+                const x = startX + idx * boxWidth;
+                
+                let fillColor = "#fff";
+                let strokeColor = "#bdc3c7";
+
+                if (found && foundPair.includes(idx)) {
+                    fillColor = "#27ae60";
+                    strokeColor = "#27ae60";
+                } else if (idx === currentIdx && animating) {
+                    fillColor = "#f39c12";
+                    strokeColor = "#f39c12";
+                } else if (idx < currentIdx) {
+                    fillColor = "#3498db";
+                    strokeColor = "#3498db";
+                }
+
+                svg.append("rect")
+                    .attr("x", x + 2)
+                    .attr("y", arrayY)
+                    .attr("width", boxWidth - 4)
+                    .attr("height", 50)
+                    .attr("rx", 8)
+                    .attr("fill", fillColor)
+                    .attr("stroke", strokeColor)
+                    .attr("stroke-width", 2);
+
+                svg.append("text")
+                    .attr("x", x + boxWidth / 2)
+                    .attr("y", arrayY + 32)
+                    .attr("text-anchor", "middle")
+                    .attr("font-size", "18px")
+                    .attr("font-weight", "bold")
+                    .attr("fill", idx <= currentIdx || (found && foundPair.includes(idx)) ? "#fff" : "#2c3e50")
+                    .text(num);
+
+                svg.append("text")
+                    .attr("x", x + boxWidth / 2)
+                    .attr("y", arrayY + 70)
+                    .attr("text-anchor", "middle")
+                    .attr("font-size", "12px")
+                    .attr("fill", "#7f8c8d")
+                    .text(`[${idx}]`);
+            });
+
+            // Hash Map visualization
+            const mapX = 100;
+            const mapY = 180;
+            
+            svg.append("text")
+                .attr("x", mapX)
+                .attr("y", mapY)
+                .attr("font-size", "14px")
+                .attr("font-weight", "bold")
+                .attr("fill", "#2c3e50")
+                .text("Hash Map: {value: index}");
+
+            svg.append("rect")
+                .attr("x", mapX)
+                .attr("y", mapY + 10)
+                .attr("width", 400)
+                .attr("height", 100)
+                .attr("rx", 8)
+                .attr("fill", "#f8f9fa")
+                .attr("stroke", "#e0e0e0")
+                .attr("stroke-width", 1);
+
+            const entries = Object.entries(hashMap);
+            const entryWidth = 70;
+            entries.forEach(([val, idx], i) => {
+                const ex = mapX + 20 + (i % 5) * entryWidth;
+                const ey = mapY + 30 + Math.floor(i / 5) * 40;
+
+                svg.append("rect")
+                    .attr("x", ex)
+                    .attr("y", ey)
+                    .attr("width", 60)
+                    .attr("height", 30)
+                    .attr("rx", 4)
+                    .attr("fill", "#3498db")
+                    .attr("opacity", 0.8);
+
+                svg.append("text")
+                    .attr("x", ex + 30)
+                    .attr("y", ey + 20)
+                    .attr("text-anchor", "middle")
+                    .attr("font-size", "12px")
+                    .attr("fill", "#fff")
+                    .text(`${val}: ${idx}`);
+            });
+
+            // Current operation
+            if (animating && !found && currentIdx < nums.length) {
+                const num = nums[currentIdx];
+                const complement = target - num;
+                const opY = 320;
+
+                svg.append("text")
+                    .attr("x", width / 2)
+                    .attr("y", opY)
+                    .attr("text-anchor", "middle")
+                    .attr("font-size", "15px")
+                    .attr("fill", "#2c3e50")
+                    .text(`Current: nums[${currentIdx}] = ${num}, Need: ${target} - ${num} = ${complement}`);
+
+                if (phase === 0) {
+                    const inMap = complement in hashMap;
+                    svg.append("text")
+                        .attr("x", width / 2)
+                        .attr("y", opY + 30)
+                        .attr("text-anchor", "middle")
+                        .attr("font-size", "15px")
+                        .attr("font-weight", "bold")
+                        .attr("fill", inMap ? "#27ae60" : "#e74c3c")
+                        .text(inMap ? `✓ ${complement} found in hash map at index ${hashMap[complement]}!` : `✗ ${complement} not in hash map`);
+                } else {
+                    svg.append("text")
+                        .attr("x", width / 2)
+                        .attr("y", opY + 30)
+                        .attr("text-anchor", "middle")
+                        .attr("font-size", "15px")
+                        .attr("fill", "#3498db")
+                        .text(`Adding ${num}: ${currentIdx} to hash map`);
+                }
+            }
+        }
+
+        function doStep() {
+            if (found || currentIdx >= nums.length) return;
+
+            const num = nums[currentIdx];
+            const complement = target - num;
+
+            if (phase === 0) {
+                // Check if complement exists
+                if (complement in hashMap) {
+                    found = true;
+                    foundPair = [hashMap[complement], currentIdx];
+                    updateStatus("🎉 Solution Found!", 
+                        `Found ${complement} in hash map!\nReturn: [${foundPair[0]}, ${foundPair[1]}]`, "success");
+                    document.getElementById('stepBtn').disabled = true;
+                    document.getElementById('autoBtn').disabled = true;
+                    autoRunning = false;
+                    document.getElementById('autoBtn').textContent = "⏩ Auto Run";
+                } else {
+                    phase = 1;
+                    updateStatus("Checking...", `${complement} not found. Will add ${num} to map.`, "info");
+                }
+            } else {
+                // Add current to map
+                hashMap[num] = currentIdx;
+                currentIdx++;
+                phase = 0;
+                
+                if (currentIdx < nums.length) {
+                    updateStatus("Checking...", `Processing nums[${currentIdx}]...`, "info");
+                }
+            }
+
+            draw();
+        }
+
+        function updateStatus(title, desc, type) {
+            const box = document.getElementById('statusBox');
+            box.className = 'status-box ' + type;
+            document.getElementById('statusTitle').textContent = title;
+            document.getElementById('statusDesc').innerHTML = desc.replace(/\n/g, '<br>');
+        }
+
+        function reset() {
+            parseInput();
+            currentIdx = 0;
+            hashMap = {};
+            found = false;
+            foundPair = [];
+            animating = false;
+            autoRunning = false;
+            phase = 0;
+
+            document.getElementById('startBtn').disabled = false;
+            document.getElementById('stepBtn').disabled = true;
+            document.getElementById('autoBtn').disabled = true;
+            document.getElementById('autoBtn').textContent = "⏩ Auto Run";
+
+            updateStatus("Ready to Start", "One-pass hash map: Check if complement exists, then add current to map.", "");
+            draw();
+        }
+
+        function start() {
+            reset();
+            animating = true;
+            document.getElementById('startBtn').disabled = true;
+            document.getElementById('stepBtn').disabled = false;
+            document.getElementById('autoBtn').disabled = false;
+            updateStatus("Started", "Use 'Step' for manual control or 'Auto Run' to watch automatically.", "info");
+            draw();
+        }
+
+        function autoRun() {
+            if (autoRunning) {
+                autoRunning = false;
+                document.getElementById('autoBtn').textContent = "⏩ Auto Run";
+                return;
+            }
+            autoRunning = true;
+            document.getElementById('autoBtn').textContent = "⏸ Pause";
+
+            function runStep() {
+                if (!autoRunning || found || currentIdx >= nums.length) {
+                    autoRunning = false;
+                    document.getElementById('autoBtn').textContent = "⏩ Auto Run";
+                    return;
+                }
+                doStep();
+                setTimeout(runStep, 700);
+            }
+            runStep();
+        }
+
+        document.getElementById('startBtn').addEventListener('click', start);
+        document.getElementById('stepBtn').addEventListener('click', doStep);
+        document.getElementById('autoBtn').addEventListener('click', autoRun);
+        document.getElementById('resetBtn').addEventListener('click', reset);
+        document.getElementById('exampleSelect').addEventListener('change', reset);
+
+        reset();
+    </script>
+</body>
+</html>

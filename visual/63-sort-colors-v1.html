@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sort Colors - Dutch National Flag</title>
+    <link rel="stylesheet" href="visual.css">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    
+</head>
+<body>
+    <div class="container">
+        <h1>🎨 Sort Colors</h1>
+        <p class="subtitle">O(n) Dutch National Flag Algorithm - One pass with 3 pointers</p>
+
+        <div class="controls">
+            <button id="stepBtn">Step</button>
+            <button id="autoBtn">Auto Run</button>
+            <button id="resetBtn">Reset</button>
+        </div>
+
+        <div class="panel">
+            <div class="panel-title">🏳️ Dutch National Flag</div>
+            <div class="legend">
+                <div class="legend-item"><div class="legend-color bg-red"></div>Red (0)</div>
+                <div class="legend-item"><div class="legend-color bg-gray-lighter"></div>White (1)</div>
+                <div class="legend-item"><div class="legend-color bg-blue"></div>Blue (2)</div>
+            </div>
+            <div class="colors-container" id="colors"></div>
+            <div class="pointers-info">
+                <div class="pointer-item red" id="red-info">red = 0</div>
+                <div class="pointer-item white" id="white-info">white = 0</div>
+                <div class="pointer-item blue" id="blue-info">blue = 6</div>
+            </div>
+        </div>
+
+        <div class="panel">
+            <div class="panel-title">📊 Status</div>
+            <div class="status-box" id="status">Click "Step" or "Auto Run" to sort colors in one pass</div>
+        </div>
+
+        <div class="panel">
+            <div class="panel-title">💻 Algorithm</div>
+            <div class="code-box" id="code">
+<span id="line1">def sortColors(nums):</span>
+<span id="line2">    red, white, blue = 0, 0, len(nums)</span>
+<span id="line3">    while white < blue:</span>
+<span id="line4">        if nums[white] < 1:      # Red (0)</span>
+<span id="line5">            swap(nums[red], nums[white])</span>
+<span id="line6">            white += 1; red += 1</span>
+<span id="line7">        elif nums[white] > 1:    # Blue (2)</span>
+<span id="line8">            blue -= 1</span>
+<span id="line9">            swap(nums[white], nums[blue])</span>
+<span id="line10">        else:                    # White (1)</span>
+<span id="line11">            white += 1</span>
+            </div>
+        </div>
+    
+        <div class="code-section">
+            <h3>📄 Python Solution (63-1.py)</h3>
+            <pre><span class="keyword">from</span> typing <span class="keyword">import</span> List
+
+
+<span class="keyword">class</span> Solution:
+    <span class="keyword">def</span> <span class="function">sortColors</span>(<span class="keyword">self</span>, nums: List[int]) -&gt; <span class="keyword">None</span>:
+        red, white, blue = <span class="number">0</span>, <span class="number">0</span>, <span class="function">len</span>(nums)
+
+        <span class="keyword">while</span> white &lt; blue:
+            <span class="keyword">if</span> nums[white] &lt; <span class="number">1</span>:
+                nums[red], nums[white] = nums[white], nums[red]
+                white += <span class="number">1</span>
+                red += <span class="number">1</span>
+            <span class="keyword">elif</span> nums[white] &gt; <span class="number">1</span>:
+                blue -= <span class="number">1</span>
+                nums[white], nums[blue] = nums[blue], nums[white]
+            <span class="keyword">else</span>:
+                white += <span class="number">1</span></pre>
+        </div>
+
+    </div>
+
+
+    <script>
+        const initialColors = [2, 0, 2, 1, 1, 0];
+        let colors = [...initialColors];
+        let red = 0, white = 0, blue = colors.length;
+        let phase = 'check'; // 'check', 'swap', 'move'
+        let swapIndices = [];
+        let autoInterval = null;
+
+        const colorNames = ['red', 'white', 'blue'];
+        const colorLabels = ['Red (0)', 'White (1)', 'Blue (2)'];
+
+        function renderColors() {
+            const container = document.getElementById('colors');
+            container.innerHTML = colors.map((c, i) => {
+                let cls = `color-box ${colorNames[c]}`;
+                if (i === white && white < blue) cls += ' current';
+                if (swapIndices.includes(i)) cls += ' swapping';
+                
+                let pointers = '';
+                if (i === red) pointers += '<span class="pointer red-ptr">↑red</span>';
+                if (i === white) pointers += '<span class="pointer white-ptr">↓white</span>';
+                if (i === blue) pointers += '<span class="pointer blue-ptr">↑blue</span>';
+                
+                return `<div class="${cls}">${c}${pointers}</div>`;
+            }).join('');
+
+            // Show blue pointer at end if needed
+            if (blue === colors.length) {
+                container.innerHTML += `<div class="w-20 pos-relative"><span class="pointer blue-ptr left-neg-10">↑blue</span></div>`;
+            }
+
+            document.getElementById('red-info').textContent = `red = ${red}`;
+            document.getElementById('white-info').textContent = `white = ${white}`;
+            document.getElementById('blue-info').textContent = `blue = ${blue}`;
+        }
+
+        function highlightCode(lineNum) {
+            document.querySelectorAll('.code-box span').forEach(span => {
+                span.classList.remove('highlight');
+            });
+            if (lineNum) {
+                const line = document.getElementById(`line${lineNum}`);
+                if (line) line.classList.add('highlight');
+            }
+        }
+
+        function executeStep() {
+            swapIndices = [];
+
+            if (white >= blue) {
+                document.getElementById('status').innerHTML = 
+                    `✅ Sort complete! Colors: [${colors.join(', ')}]`;
+                document.getElementById('stepBtn').disabled = true;
+                document.getElementById('autoBtn').disabled = true;
+                stopAuto();
+                renderColors();
+                return;
+            }
+
+            const currentColor = colors[white];
+
+            if (phase === 'check') {
+                highlightCode(3);
+                if (currentColor === 0) {
+                    document.getElementById('status').innerHTML = 
+                        `nums[white=${white}] = 0 (Red) → Swap with nums[red=${red}]`;
+                    highlightCode(4);
+                    phase = 'swap-red';
+                } else if (currentColor === 2) {
+                    document.getElementById('status').innerHTML = 
+                        `nums[white=${white}] = 2 (Blue) → Decrement blue, then swap`;
+                    highlightCode(7);
+                    phase = 'dec-blue';
+                } else {
+                    document.getElementById('status').innerHTML = 
+                        `nums[white=${white}] = 1 (White) → Already in place, move white forward`;
+                    highlightCode(10);
+                    phase = 'move-white';
+                }
+            } else if (phase === 'swap-red') {
+                swapIndices = [red, white];
+                [colors[red], colors[white]] = [colors[white], colors[red]];
+                highlightCode(5);
+                document.getElementById('status').innerHTML = 
+                    `Swap nums[${red}] ↔ nums[${white}]`;
+                phase = 'move-red';
+            } else if (phase === 'move-red') {
+                red++;
+                white++;
+                highlightCode(6);
+                document.getElementById('status').innerHTML = 
+                    `Move pointers: red = ${red}, white = ${white}`;
+                phase = 'check';
+            } else if (phase === 'dec-blue') {
+                blue--;
+                highlightCode(8);
+                document.getElementById('status').innerHTML = 
+                    `Decrement blue to ${blue}`;
+                phase = 'swap-blue';
+            } else if (phase === 'swap-blue') {
+                swapIndices = [white, blue];
+                [colors[white], colors[blue]] = [colors[blue], colors[white]];
+                highlightCode(9);
+                document.getElementById('status').innerHTML = 
+                    `Swap nums[${white}] ↔ nums[${blue}] (don't move white - need to check new value)`;
+                phase = 'check';
+            } else if (phase === 'move-white') {
+                white++;
+                highlightCode(11);
+                document.getElementById('status').innerHTML = 
+                    `Move white to ${white}`;
+                phase = 'check';
+            }
+
+            renderColors();
+        }
+
+        function reset() {
+            stopAuto();
+            colors = [...initialColors];
+            red = 0;
+            white = 0;
+            blue = colors.length;
+            phase = 'check';
+            swapIndices = [];
+            
+            document.getElementById('stepBtn').disabled = false;
+            document.getElementById('autoBtn').disabled = false;
+            document.getElementById('status').innerHTML = 'Click "Step" or "Auto Run" to sort colors in one pass';
+            highlightCode(null);
+            renderColors();
+        }
+
+        function stopAuto() {
+            if (autoInterval) {
+                clearInterval(autoInterval);
+                autoInterval = null;
+                document.getElementById('autoBtn').textContent = 'Auto Run';
+            }
+        }
+
+        document.getElementById('stepBtn').addEventListener('click', () => {
+            stopAuto();
+            executeStep();
+        });
+
+        document.getElementById('autoBtn').addEventListener('click', () => {
+            if (autoInterval) {
+                stopAuto();
+            } else {
+                autoInterval = setInterval(executeStep, 600);
+                document.getElementById('autoBtn').textContent = '⏸ Pause';
+            }
+        });
+
+        document.getElementById('resetBtn').addEventListener('click', reset);
+
+        // Initialize
+        renderColors();
+    </script>
+</body>
+</html>

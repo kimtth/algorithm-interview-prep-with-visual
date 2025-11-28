@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Q78: Best Time to Buy and Sell Stock II - Pythonic</title>
+    <link rel="stylesheet" href="visual.css">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📈 Q78: Best Time to Buy and Sell Stock II</h1>
+            <p>LeetCode #122 | File: 78-2.py | Approach: Pythonic One-liner</p>
+        </div>
+        
+        <div class="problem-info">
+            <h3>📋 Problem Description</h3>
+            <p>You can buy/sell as many times as you want. Find the maximum profit.</p>
+            <p class="mt-10"><strong>Key Insight:</strong> Sum all positive differences! 
+            <code>sum(max(prices[i+1] - prices[i], 0) for i in range(len(prices)-1))</code></p>
+        </div>
+
+        
+            <div class="info-panel">
+                <div class="info-item" id="totalProfit">Total Profit: <strong>0</strong></div>
+            </div>
+            <div class="result-display" id="result"></div>
+        </div>
+
+        <div class="status" id="status">Ready to visualize the one-liner</div>
+    </div>
+
+        <div class="controls">
+            <button class="btn btn-primary" onclick="step()">Step</button>
+            <button class="btn btn-success" onclick="toggleAutoRun()">Auto Run</button>
+            <button class="btn btn-warning" onclick="reset()">Reset</button>
+        </div>
+
+        <div class="step-info" id="stepInfo">Click "Step" to see the one-liner in action</div>
+        
+        <div class="visualization" id="viz">
+            <div class="chart-container">
+                <svg id="chart" width="100%" height="200"></svg>
+            </div>
+            <div class="text-center mx-15">
+                <p><strong>Daily Differences (prices[i+1] - prices[i]):</strong></p>
+                <div id="profitItems"></div>
+    
+        <div class="code-section">
+            <h3>📄 Python Solution (78-2.py)</h3>
+            <pre><span class="keyword">from</span> typing <span class="keyword">import</span> List
+
+
+<span class="keyword">class</span> Solution:
+    <span class="keyword">def</span> <span class="function">maxProfit</span>(<span class="keyword">self</span>, prices: List[int]) -&gt; int:
+        <span class="comment"># 0보다 크면 무조건 합산</span>
+        <span class="keyword">return</span> <span class="function">sum</span>(<span class="function">max</span>(prices[i + <span class="number">1</span>] - prices[i], <span class="number">0</span>) <span class="keyword">for</span> i <span class="keyword">in</span> <span class="function">range</span>(<span class="function">len</span>(prices) - <span class="number">1</span>))</pre>
+        </div>
+
+    </div>
+
+    <script>
+        const prices = [7, 1, 5, 3, 6, 4];
+        let currentIdx = 0;
+        let totalProfit = 0;
+        let differences = [];
+        let autoRunning = false;
+        let autoRunInterval;
+
+        function drawChart() {
+            const svg = d3.select('#chart');
+            svg.selectAll('*').remove();
+            
+            const width = svg.node().getBoundingClientRect().width;
+            const height = 180;
+            const margin = {top: 20, right: 30, bottom: 30, left: 40};
+            
+            const x = d3.scaleLinear()
+                .domain([0, prices.length - 1])
+                .range([margin.left, width - margin.right]);
+            
+            const y = d3.scaleLinear()
+                .domain([0, d3.max(prices) + 1])
+                .range([height - margin.bottom, margin.top]);
+
+            // Line
+            const line = d3.line()
+                .x((d, i) => x(i))
+                .y(d => y(d));
+
+            svg.append('path')
+                .datum(prices)
+                .attr('fill', 'none')
+                .attr('stroke', '#667eea')
+                .attr('stroke-width', 3)
+                .attr('d', line);
+
+            // Points
+            svg.selectAll('circle')
+                .data(prices)
+                .enter()
+                .append('circle')
+                .attr('cx', (d, i) => x(i))
+                .attr('cy', d => y(d))
+                .attr('r', 6)
+                .attr('fill', (d, i) => i <= currentIdx ? '#4caf50' : '#667eea');
+
+            // Labels
+            svg.selectAll('text.price')
+                .data(prices)
+                .enter()
+                .append('text')
+                .attr('class', 'price')
+                .attr('x', (d, i) => x(i))
+                .attr('y', d => y(d) - 12)
+                .attr('text-anchor', 'middle')
+                .attr('font-size', '12px')
+                .attr('fill', '#333')
+                .text(d => '$' + d);
+
+            // Highlight current comparison
+            if (currentIdx > 0 && currentIdx <= prices.length - 1) {
+                const diff = prices[currentIdx] - prices[currentIdx - 1];
+                svg.append('line')
+                    .attr('x1', x(currentIdx - 1))
+                    .attr('y1', y(prices[currentIdx - 1]))
+                    .attr('x2', x(currentIdx))
+                    .attr('y2', y(prices[currentIdx]))
+                    .attr('stroke', diff > 0 ? '#4caf50' : '#f44336')
+                    .attr('stroke-width', 4);
+            }
+        }
+
+        function renderProfitItems() {
+            const container = document.getElementById('profitItems');
+            container.innerHTML = '';
+            differences.forEach((diff, i) => {
+                const item = document.createElement('span');
+                item.className = `profit-item ${diff > 0 ? 'profit-positive' : 'profit-zero'}`;
+                item.textContent = `Day ${i}→${i+1}: ${diff > 0 ? '+' : ''}${diff}`;
+                container.appendChild(item);
+            });
+        }
+
+        function step() {
+            if (currentIdx >= prices.length - 1) {
+                document.getElementById('stepInfo').textContent = 
+                    `Done! sum(positive differences) = ${totalProfit}`;
+                document.getElementById('result').innerHTML = 
+                    `<span class="text-green">Max Profit: <strong>$${totalProfit}</strong></span>`;
+                document.getElementById('status').textContent = 
+                    'One-liner: sum only positive price changes!';
+                return;
+            }
+
+            currentIdx++;
+            const diff = prices[currentIdx] - prices[currentIdx - 1];
+            const profit = Math.max(diff, 0);
+            differences.push(diff);
+            totalProfit += profit;
+
+            document.getElementById('stepInfo').textContent = 
+                `Day ${currentIdx-1}→${currentIdx}: ${prices[currentIdx-1]}→${prices[currentIdx]}, diff=${diff}, profit=${profit > 0 ? '+' + profit : 0}`;
+            document.getElementById('totalProfit').innerHTML = 
+                `Total Profit: <strong>$${totalProfit}</strong>`;
+
+            drawChart();
+            renderProfitItems();
+        }
+
+        function toggleAutoRun() {
+            autoRunning = !autoRunning;
+            const btn = document.querySelector('.btn-success');
+            if (autoRunning) {
+                btn.textContent = 'Pause';
+                autoRunInterval = setInterval(() => {
+                    if (currentIdx >= prices.length - 1) {
+                        step(); toggleAutoRun(); return;
+                    }
+                    step();
+                }, 1000);
+            } else {
+                btn.textContent = 'Auto Run';
+                clearInterval(autoRunInterval);
+            }
+        }
+
+        function reset() {
+            currentIdx = 0;
+            totalProfit = 0;
+            differences = [];
+            if (autoRunning) toggleAutoRun();
+            document.getElementById('stepInfo').textContent = 'Click "Step" to see the one-liner in action';
+            document.getElementById('status').textContent = 'Ready to visualize the one-liner';
+            document.getElementById('result').innerHTML = '';
+            document.getElementById('totalProfit').innerHTML = 'Total Profit: <strong>0</strong>';
+            document.getElementById('profitItems').innerHTML = '';
+            drawChart();
+        }
+
+        drawChart();
+    </script>
+</body>
+</html>

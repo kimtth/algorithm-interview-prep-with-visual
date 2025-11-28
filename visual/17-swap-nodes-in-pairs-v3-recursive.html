@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Q17: Swap Nodes in Pairs - Recursive</title>
+    <link rel="stylesheet" href="visual.css">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    
+</head>
+<body>
+    <div class="container">
+        <div class="problem-info">
+            <h1>Q17: Swap Nodes in Pairs</h1>
+            <p>Given a linked list, swap every two adjacent nodes and return its head using recursion.</p>
+            <div class="problem-meta">
+                <span class="meta-tag">📁 Linked List</span>
+                <span class="meta-tag">⏱️ O(n)</span>
+                <span class="meta-tag">💡 Version 3: Recursive</span>
+            </div>
+        </div>
+        
+        
+        
+        <div class="visualization-section">
+            <h3>🎬 Visualization</h3>
+            
+            <div class="controls">
+                <button class="btn btn-primary" id="stepBtn" onclick="step()">Step</button>
+                <button class="btn btn-success" id="autoBtn" onclick="toggleAuto()">Auto Run</button>
+                <button class="btn btn-warning" onclick="reset()">Reset</button>
+            </div>
+            
+            <div class="status-message" id="statusMessage">
+                Click "Step" or "Auto Run" to start visualization
+            </div>
+            
+            <div class="call-stack" id="callStack">
+                <div class="call-stack-title">📚 Recursion Call Stack:</div>
+            </div>
+            
+            <div class="list-section">
+                <div class="list-label">Current State:</div>
+                <div class="list-container" id="listContainer"></div>
+            </div>
+        </div>
+    </div>
+        
+        <div class="code-section">
+            <h3>📄 Python Solution (17-3.py)</h3>
+            <pre><span class="comment"># Definition for singly-linked list.</span>
+<span class="keyword">class</span> ListNode:
+    <span class="keyword">def</span> <span class="function">__init__</span>(<span class="keyword">self</span>, x):
+        <span class="keyword">self</span>.val = x
+        <span class="keyword">self</span>.next = <span class="keyword">None</span>
+
+
+<span class="keyword">class</span> Solution:
+    <span class="keyword">def</span> <span class="function">swapPairs</span>(<span class="keyword">self</span>, head: ListNode) -&gt; ListNode:
+        <span class="keyword">if</span> head <span class="keyword">and</span> head.next:
+            p = head.next
+            <span class="comment"># 스왑된 값 리턴 받음</span>
+            head.next = <span class="keyword">self</span>.<span class="function">swapPairs</span>(p.next)
+            p.next = head
+            <span class="keyword">return</span> p
+        <span class="keyword">return</span> head</pre>
+        </div>
+
+    </div>
+
+    <script>
+        let nodes = [1, 2, 3, 4];
+        let autoInterval = null;
+        let callStack = [];
+        let stepIndex = 0;
+        
+        // Pre-computed steps for visualization
+        const steps = [
+            { action: 'call', depth: 0, head: 0, msg: 'swapPairs(1): head=1, p=2' },
+            { action: 'call', depth: 1, head: 2, msg: 'Recursing: swapPairs(3)' },
+            { action: 'call', depth: 2, head: 2, msg: 'swapPairs(3): head=3, p=4' },
+            { action: 'call', depth: 3, head: 4, msg: 'Recursing: swapPairs(None) - Base case' },
+            { action: 'return', depth: 3, msg: 'Return None (no more pairs)' },
+            { action: 'swap', depth: 2, pair: [2, 3], msg: 'Swap: 3.next = result, 4.next = 3, return 4' },
+            { action: 'return', depth: 2, result: [4, 3], msg: 'Return node 4 (swapped [3,4] → [4,3])' },
+            { action: 'swap', depth: 1, pair: [0, 1], msg: 'Swap: 1.next = result, 2.next = 1, return 2' },
+            { action: 'return', depth: 1, result: [2, 1, 4, 3], msg: 'Return node 2 (final: [2,1,4,3])' },
+            { action: 'done', msg: '✅ Done! Final result: [2 → 1 → 4 → 3]' }
+        ];
+        
+        function init() {
+            nodes = [1, 2, 3, 4];
+            callStack = [];
+            stepIndex = 0;
+            renderList();
+            renderCallStack();
+        }
+        
+        function renderList(highlights = {}) {
+            const container = document.getElementById('listContainer');
+            container.innerHTML = '';
+            nodes.forEach((val, i) => {
+                const node = document.createElement('div');
+                node.className = 'list-node';
+                if (highlights.head === i) {
+                    node.classList.add('head');
+                    const label = document.createElement('span');
+                    label.className = 'node-label head';
+                    label.textContent = 'head';
+                    node.appendChild(label);
+                }
+                if (highlights.p === i) {
+                    node.classList.add('p');
+                    const label = document.createElement('span');
+                    label.className = 'node-label p';
+                    label.textContent = 'p';
+                    node.appendChild(label);
+                }
+                if (highlights.swapped && highlights.swapped.includes(i)) {
+                    node.classList.add('swapped');
+                }
+                node.innerHTML += val;
+                container.appendChild(node);
+                if (i < nodes.length - 1) {
+                    const arrow = document.createElement('div');
+                    arrow.className = 'list-arrow';
+                    container.appendChild(arrow);
+                }
+            });
+        }
+        
+        function renderCallStack() {
+            const container = document.getElementById('callStack');
+            container.innerHTML = '<div class="call-stack-title">📚 Recursion Call Stack:</div>';
+            callStack.forEach((frame, i) => {
+                const div = document.createElement('div');
+                div.className = 'call-frame';
+                if (frame.active) div.classList.add('active');
+                if (frame.returning) div.classList.add('returning');
+                div.innerHTML = `
+                    <span class="frame-depth">Depth ${frame.depth}</span>
+                    <span class="frame-params">${frame.params}</span>
+                    <span class="frame-status">${frame.status || ''}</span>
+                `;
+                container.appendChild(div);
+            });
+        }
+        
+        function step() {
+            if (stepIndex >= steps.length) return;
+            
+            const s = steps[stepIndex];
+            document.getElementById('statusMessage').textContent = s.msg;
+            
+            if (s.action === 'call') {
+                callStack.push({ 
+                    depth: s.depth, 
+                    params: s.msg.split(':')[0], 
+                    active: true,
+                    status: 'executing'
+                });
+                if (s.head !== undefined) {
+                    renderList({ head: s.head, p: s.head + 1 < nodes.length ? s.head + 1 : undefined });
+                }
+            } else if (s.action === 'return') {
+                if (callStack.length > 0) {
+                    callStack[callStack.length - 1].returning = true;
+                    callStack[callStack.length - 1].active = false;
+                    callStack[callStack.length - 1].status = 'returned';
+                    setTimeout(() => {
+                        callStack.pop();
+                        if (callStack.length > 0) {
+                            callStack[callStack.length - 1].active = true;
+                            callStack[callStack.length - 1].status = 'executing';
+                        }
+                        renderCallStack();
+                    }, 500);
+                }
+            } else if (s.action === 'swap') {
+                // Perform swap
+                if (s.pair) {
+                    [nodes[s.pair[0]], nodes[s.pair[1]]] = [nodes[s.pair[1]], nodes[s.pair[0]]];
+                    renderList({ swapped: s.pair });
+                }
+            } else if (s.action === 'done') {
+                renderList();
+                document.getElementById('stepBtn').disabled = true;
+                stopAuto();
+            }
+            
+            renderCallStack();
+            stepIndex++;
+        }
+        
+        function toggleAuto() {
+            if (autoInterval) { stopAuto(); }
+            else {
+                document.getElementById('autoBtn').textContent = 'Pause';
+                autoInterval = setInterval(() => {
+                    if (stepIndex >= steps.length) stopAuto();
+                    else step();
+                }, 1200);
+            }
+        }
+        
+        function stopAuto() {
+            if (autoInterval) { clearInterval(autoInterval); autoInterval = null; }
+            document.getElementById('autoBtn').textContent = 'Auto Run';
+        }
+        
+        function reset() {
+            stopAuto();
+            document.getElementById('stepBtn').disabled = false;
+            document.getElementById('statusMessage').textContent = 'Click "Step" or "Auto Run" to start visualization';
+            init();
+        }
+        
+        init();
+    </script>
+</body>
+</html>

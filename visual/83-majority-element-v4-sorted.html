@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Q83: Majority Element - Sorted Middle</title>
+    <link rel="stylesheet" href="visual.css">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🗳️ Q83: Majority Element - Sorted Middle</h1>
+            <p>LeetCode #169 | File: 83-4.py | Approach: Sort and Return Middle</p>
+        </div>
+        
+        <div class="problem-info">
+            <h3>📋 Problem Description</h3>
+            <p>Find the majority element (appears more than n/2 times).</p>
+            <p class="mt-10"><strong>Key Insight:</strong> If an element appears more than n/2 times, 
+            after sorting it MUST occupy the middle position. Simple one-liner!</p>
+        </div>
+
+        <div class="visualization-section">
+            <h3>🎬 Visualization</h3>
+            
+            <div class="controls">
+                <button class="btn btn-primary" onclick="step()">Step</button>
+                <button class="btn btn-success" onclick="toggleAutoRun()">Auto Run</button>
+                <button class="btn btn-warning" onclick="reset()">Reset</button>
+            </div>
+
+            <div class="status-message" id="stepInfo">Click "Step" to see the elegant solution</div>
+            
+            <div class="array-section">
+                <h4>Original Array</h4>
+                <div class="array-display" id="originalArray"></div>
+            </div>
+            
+            <div class="arrow" id="arrow" style="opacity: 0; text-align: center; font-size: 1.5em; margin: 10px 0;">↓ sorted() ↓</div>
+            
+            <div class="array-section">
+                <h4>Sorted Array</h4>
+                <div class="array-display" id="sortedArray"></div>
+            </div>
+            
+            <div class="insight" id="insight" style="opacity: 0; text-align: center; margin: 15px 0; padding: 10px; background: #e8f4fd; border-radius: 8px;">
+                The majority element (>n/2 occurrences) must occupy index n//2 after sorting!
+            </div>
+            
+            <div class="result-display" id="result" style="text-align: center; font-size: 1.2em; margin: 15px 0;"></div>
+            
+            <div class="status-message" id="status">Ready to find majority element</div>
+        </div>
+
+        <div class="code-section">
+            <h3>📄 Python Solution (83-4.py)</h3>
+            <pre><span class="keyword">from</span> typing <span class="keyword">import</span> List
+
+
+<span class="keyword">class</span> Solution:
+    <span class="keyword">def</span> <span class="function">majorityElement</span>(<span class="keyword">self</span>, nums: List[int]) -&gt; int:
+        <span class="keyword">return</span> <span class="function">sorted</span>(nums)[<span class="function">len</span>(nums) // <span class="number">2</span>]</pre>
+        </div>
+    </div>
+
+    <script>
+        const nums = [2, 2, 1, 1, 1, 2, 2];
+        const sorted = [...nums].sort((a, b) => a - b);
+        const middleIdx = Math.floor(nums.length / 2);
+        
+        let currentStep = 0;
+        let autoRunning = false;
+        let autoRunInterval;
+
+        function renderOriginal() {
+            const container = document.getElementById('originalArray');
+            container.innerHTML = '';
+            nums.forEach(num => {
+                const item = document.createElement('div');
+                item.className = 'array-item unsorted';
+                item.textContent = num;
+                container.appendChild(item);
+            });
+        }
+
+        function renderSorted(highlight = false) {
+            const container = document.getElementById('sortedArray');
+            container.innerHTML = '';
+            sorted.forEach((num, i) => {
+                const item = document.createElement('div');
+                item.className = 'array-item sorted';
+                if (highlight && i === middleIdx) {
+                    item.classList.add('middle');
+                }
+                item.textContent = num;
+                container.appendChild(item);
+            });
+        }
+
+        function step() {
+            currentStep++;
+            
+            if (currentStep === 1) {
+                document.getElementById('arrow').style.opacity = '1';
+                document.getElementById('stepInfo').textContent = 
+                    `Step 1: Sort the array → [${sorted.join(', ')}]`;
+                renderSorted(false);
+            } else if (currentStep === 2) {
+                document.getElementById('stepInfo').textContent = 
+                    `Step 2: Find middle index = len(${nums.length}) // 2 = ${middleIdx}`;
+                document.getElementById('insight').style.opacity = '1';
+            } else if (currentStep === 3) {
+                renderSorted(true);
+                document.getElementById('stepInfo').textContent = 
+                    `Step 3: Return sorted[${middleIdx}] = ${sorted[middleIdx]}`;
+                document.getElementById('result').innerHTML = 
+                    `<span class="text-green">Majority Element: <strong>${sorted[middleIdx]}</strong></span>`;
+                document.getElementById('status').textContent = 
+                    'O(n log n) time complexity due to sorting. Elegant one-liner!';
+            }
+        }
+
+        function toggleAutoRun() {
+            autoRunning = !autoRunning;
+            const btn = document.querySelector('.btn-success');
+            if (autoRunning) {
+                btn.textContent = 'Pause';
+                autoRunInterval = setInterval(() => {
+                    if (currentStep >= 3) {
+                        toggleAutoRun(); return;
+                    }
+                    step();
+                }, 1200);
+            } else {
+                btn.textContent = 'Auto Run';
+                clearInterval(autoRunInterval);
+            }
+        }
+
+        function reset() {
+            currentStep = 0;
+            if (autoRunning) toggleAutoRun();
+            document.getElementById('stepInfo').textContent = 'Click "Step" to see the elegant solution';
+            document.getElementById('status').textContent = 'Ready to find majority element';
+            document.getElementById('result').innerHTML = '';
+            document.getElementById('arrow').style.opacity = '0';
+            document.getElementById('insight').style.opacity = '0';
+            document.getElementById('sortedArray').innerHTML = '';
+            renderOriginal();
+        }
+
+        renderOriginal();
+    </script>
+</body>
+</html>

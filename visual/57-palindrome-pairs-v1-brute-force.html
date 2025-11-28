@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Q57: Palindrome Pairs (v1 - Brute Force)</title>
+    <link rel="stylesheet" href="visual.css">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    
+</head>
+<body>
+    <div class="container">
+        <div class="problem-info">
+            <h1>Q57: Palindrome Pairs (v1 - Brute Force)</h1>
+            <p>Check all pairs of words to find which concatenations form palindromes. O(n²k) where k is word length.</p>
+            <div class="problem-meta">
+                <span class="meta-tag">📁 String</span>
+                <span class="meta-tag">⏱️ O(n²k)</span>
+                <span class="meta-tag">💡 Brute Force</span>
+            </div>
+        </div>
+        
+        
+        
+        <div class="visualization-section">
+            <h3>🎬 Visualization</h3>
+            
+            <div class="controls">
+                <button class="btn btn-primary" id="stepBtn" onclick="step()">Step</button>
+                <button class="btn btn-success" id="autoBtn" onclick="toggleAuto()">Auto Run</button>
+                <button class="btn btn-warning" onclick="reset()">Reset</button>
+            </div>
+            
+            <div class="status-message" id="statusMessage">
+                words = ["abcd", "dcba", "lls", "s", "sssll"]. Find all palindrome pairs.
+            </div>
+            
+            <h4 class="mb-10 text-gray-darker">📚 Words</h4>
+            <div class="words-section" id="wordsSection"></div>
+            
+            <h4 class="mb-10 text-gray-darker">🔍 Current Pair Check</h4>
+            <div class="pair-display" id="pairDisplay">
+                <div class="pair-word" id="word1">-</div>
+                <div class="pair-plus">+</div>
+                <div class="pair-word" id="word2">-</div>
+                <div class="pair-plus">=</div>
+                <div class="pair-result" id="combined">-</div>
+            </div>
+            
+            <div class="results-section">
+                <div class="results-title">✅ Found Palindrome Pairs</div>
+                <div class="results-list" id="resultsList"><span class="text-gray">None yet</span></div>
+            </div>
+        </div>
+    </div>
+        
+        <div class="code-section">
+            <h3>📄 Python Solution (57-1.py)</h3>
+            <pre><span class="keyword">from</span> typing <span class="keyword">import</span> List
+
+
+<span class="keyword">class</span> Solution:
+    <span class="keyword">def</span> <span class="function">palindromePairs</span>(<span class="keyword">self</span>, words: List[str]) -&gt; List[List[int]]:
+        <span class="keyword">def</span> <span class="function">is_palindrome</span>(word):
+            <span class="keyword">return</span> word == word[::-<span class="number">1</span>]
+
+        output = []
+        <span class="keyword">for</span> i, word1 <span class="keyword">in</span> <span class="function">enumerate</span>(words):
+            <span class="keyword">for</span> j, word2 <span class="keyword">in</span> <span class="function">enumerate</span>(words):
+                <span class="keyword">if</span> i == j:
+                    <span class="keyword">continue</span>
+                <span class="keyword">if</span> <span class="function">is_palindrome</span>(word1 + word2):
+                    output.<span class="function">append</span>([i, j])
+        <span class="keyword">return</span> output</pre>
+        </div>
+
+    </div>
+
+    <script>
+        const words = ["abcd", "dcba", "lls", "s", "sssll"];
+        
+        let i = 0, j = 0;
+        let results = [];
+        let autoInterval = null;
+        
+        function isPalindrome(s) {
+            return s === s.split('').reverse().join('');
+        }
+        
+        function init() {
+            i = 0;
+            j = 0;
+            results = [];
+            
+            renderWords();
+            renderPair();
+            renderResults();
+        }
+        
+        function renderWords() {
+            const container = document.getElementById('wordsSection');
+            container.innerHTML = words.map((w, idx) => {
+                let cls = 'word-box';
+                if (idx === i || idx === j) cls += ' current';
+                return `<div class="${cls}">[${idx}] ${w}</div>`;
+            }).join('');
+        }
+        
+        function renderPair() {
+            if (i >= words.length) {
+                document.getElementById('word1').textContent = '-';
+                document.getElementById('word2').textContent = '-';
+                document.getElementById('combined').textContent = '-';
+                document.getElementById('combined').className = 'pair-result';
+                return;
+            }
+            
+            document.getElementById('word1').textContent = words[i];
+            document.getElementById('word2').textContent = words[j];
+            
+            const combined = words[i] + words[j];
+            document.getElementById('combined').textContent = combined;
+            
+            if (i !== j && isPalindrome(combined)) {
+                document.getElementById('combined').className = 'pair-result palindrome';
+            } else {
+                document.getElementById('combined').className = 'pair-result not-palindrome';
+            }
+        }
+        
+        function renderResults() {
+            const container = document.getElementById('resultsList');
+            if (results.length === 0) {
+                container.innerHTML = '<span class="text-gray">None yet</span>';
+            } else {
+                container.innerHTML = results.map(([a, b]) => 
+                    `<div class="result-pair">[${a},${b}]: ${words[a]}+${words[b]} = ${words[a]+words[b]}</div>`
+                ).join('');
+            }
+        }
+        
+        function step() {
+            if (i >= words.length) {
+                document.getElementById('statusMessage').textContent = 
+                    `✅ Complete! Found ${results.length} palindrome pairs.`;
+                document.getElementById('stepBtn').disabled = true;
+                stopAuto();
+                return;
+            }
+            
+            const combined = words[i] + words[j];
+            const isPalin = isPalindrome(combined);
+            
+            if (i !== j) {
+                if (isPalin) {
+                    results.push([i, j]);
+                    document.getElementById('statusMessage').textContent = 
+                        `✅ [${i},${j}]: "${combined}" IS a palindrome!`;
+                } else {
+                    document.getElementById('statusMessage').textContent = 
+                        `❌ [${i},${j}]: "${combined}" is not a palindrome.`;
+                }
+            }
+            
+            renderWords();
+            renderPair();
+            renderResults();
+            
+            // Move to next pair
+            j++;
+            if (j >= words.length) {
+                j = 0;
+                i++;
+            }
+            
+            // Skip same index
+            while (i < words.length && i === j) {
+                j++;
+                if (j >= words.length) {
+                    j = 0;
+                    i++;
+                }
+            }
+            
+            if (i >= words.length) {
+                document.getElementById('statusMessage').textContent = 
+                    `✅ Complete! Found ${results.length} palindrome pairs.`;
+                document.getElementById('stepBtn').disabled = true;
+                stopAuto();
+                renderWords();
+                renderPair();
+            }
+        }
+        
+        function toggleAuto() {
+            if (autoInterval) { stopAuto(); }
+            else {
+                document.getElementById('autoBtn').textContent = 'Pause';
+                autoInterval = setInterval(step, 500);
+            }
+        }
+        
+        function stopAuto() {
+            if (autoInterval) { clearInterval(autoInterval); autoInterval = null; }
+            document.getElementById('autoBtn').textContent = 'Auto Run';
+        }
+        
+        function reset() {
+            stopAuto();
+            document.getElementById('stepBtn').disabled = false;
+            document.getElementById('statusMessage').textContent = 
+                'words = ["abcd", "dcba", "lls", "s", "sssll"]. Find all palindrome pairs.';
+            init();
+        }
+        
+        init();
+    </script>
+</body>
+</html>

@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Majority Element - Divide and Conquer</title>
+    <link rel="stylesheet" href="visual.css">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    
+</head>
+<body>
+    <div class="container">
+        <h1>🔢 Majority Element</h1>
+        <p class="subtitle">Divide and Conquer - Majority in halves must be majority of whole</p>
+
+        <div class="controls">
+            <button id="stepBtn">Step</button>
+            <button id="autoBtn">Auto Run</button>
+            <button id="resetBtn">Reset</button>
+        </div>
+
+        <div class="panel">
+            <div class="panel-title">📊 Array</div>
+            <div class="array-container" id="array"></div>
+        </div>
+
+        <div class="panel">
+            <div class="panel-title">🌳 Recursion Tree</div>
+            <div class="tree-container">
+                <svg id="tree"></svg>
+            </div>
+        </div>
+
+        <div class="panel">
+            <div class="panel-title">🏆 Result</div>
+            <div class="result-box">
+                <div class="result-value" id="result">?</div>
+            </div>
+        </div>
+
+        <div class="panel">
+            <div class="panel-title">📋 Status</div>
+            <div class="status-box" id="status">Split array in half, find majority in each half, compare counts to determine winner.</div>
+        </div>
+    
+        <div class="code-section">
+            <h3>📄 Python Solution (83-1.py)</h3>
+            <pre><span class="keyword">from</span> typing <span class="keyword">import</span> List
+
+
+<span class="keyword">class</span> Solution:
+    <span class="keyword">def</span> <span class="function">majorityElement</span>(<span class="keyword">self</span>, nums: List[int]) -&gt; int:
+        <span class="keyword">for</span> num <span class="keyword">in</span> nums:
+            <span class="keyword">if</span> nums.<span class="function">count</span>(num) &gt; <span class="function">len</span>(nums) // <span class="number">2</span>:
+                <span class="keyword">return</span> num</pre>
+        </div>
+
+    </div>
+
+
+    <script>
+        const nums = [2, 2, 1, 1, 1, 2, 2];
+        let steps = [];
+        let stepIdx = 0;
+        let done = false;
+        let autoInterval = null;
+
+        // Build recursion tree
+        function buildTree(arr, lo, hi, depth = 0) {
+            const node = { lo, hi, arr: arr.slice(lo, hi + 1), result: null, depth, children: [] };
+            
+            if (lo === hi) {
+                node.result = arr[lo];
+                steps.push({ node, type: 'base', lo, hi, result: arr[lo] });
+            } else {
+                const mid = Math.floor((lo + hi) / 2);
+                const left = buildTree(arr, lo, mid, depth + 1);
+                const right = buildTree(arr, mid + 1, hi, depth + 1);
+                node.children = [left, right];
+                
+                // Determine majority
+                const leftCount = arr.slice(lo, hi + 1).filter(x => x === left.result).length;
+                const rightCount = arr.slice(lo, hi + 1).filter(x => x === right.result).length;
+                
+                if (left.result === right.result) {
+                    node.result = left.result;
+                } else if (leftCount > rightCount) {
+                    node.result = left.result;
+                } else {
+                    node.result = right.result;
+                }
+                
+                steps.push({ node, type: 'merge', lo, hi, leftResult: left.result, rightResult: right.result, result: node.result, leftCount, rightCount });
+            }
+            
+            return node;
+        }
+
+        const root = buildTree(nums, 0, nums.length - 1);
+        const computedNodes = new Set();
+
+        function render() {
+            // Render array
+            document.getElementById('array').innerHTML = nums.map((v, i) => {
+                let cls = 'array-item default';
+                if (stepIdx > 0 && stepIdx <= steps.length) {
+                    const s = steps[stepIdx - 1];
+                    if (i >= s.lo && i <= s.hi) {
+                        if (v === s.result) cls = 'array-item majority';
+                        else if (i <= Math.floor((s.lo + s.hi) / 2)) cls = 'array-item left-half';
+                        else cls = 'array-item right-half';
+                    }
+                }
+                return `<div class="${cls}">${v}</div>`;
+            }).join('');
+
+            // Render tree
+            renderTree();
+
+            if (done) {
+                document.getElementById('result').textContent = root.result;
+            }
+        }
+
+        function renderTree() {
+            const svg = d3.select("#tree");
+            svg.selectAll("*").remove();
+            
+            const width = 800, height = 280;
+            svg.attr("viewBox", `0 0 ${width} ${height}`);
+            
+            const g = svg.append("g").attr("transform", "translate(50, 30)");
+            
+            const treeLayout = d3.tree().size([width - 100, height - 60]);
+            const hierarchy = d3.hierarchy(root);
+            const treeData = treeLayout(hierarchy);
+            
+            // Links
+            g.selectAll(".link")
+                .data(treeData.links())
+                .enter().append("path")
+                .attr("class", "link")
+                .attr("d", d3.linkVertical().x(d => d.x).y(d => d.y));
+            
+            // Nodes
+            const nodes = g.selectAll(".node")
+                .data(treeData.descendants())
+                .enter().append("g")
+                .attr("class", d => `node ${computedNodes.has(d.data) ? 'computed' : ''}`)
+                .attr("transform", d => `translate(${d.x},${d.y})`);
+            
+            nodes.append("circle").attr("r", 22);
+            nodes.append("text")
+                .attr("dy", 5)
+                .attr("text-anchor", "middle")
+                .text(d => computedNodes.has(d.data) ? d.data.result : '?');
+        }
+
+        function step() {
+            if (done) return;
+
+            if (stepIdx >= steps.length) {
+                done = true;
+                document.getElementById('status').innerHTML = 
+                    `✅ Majority element is ${root.result}!`;
+                document.getElementById('stepBtn').disabled = true;
+                document.getElementById('autoBtn').disabled = true;
+                stopAuto();
+                render();
+                return;
+            }
+
+            const s = steps[stepIdx];
+            computedNodes.add(s.node);
+
+            if (s.type === 'base') {
+                document.getElementById('status').innerHTML = 
+                    `Base case: [${s.lo}] = ${s.result}`;
+            } else {
+                document.getElementById('status').innerHTML = 
+                    `Range [${s.lo}..${s.hi}]: left=${s.leftResult}(${s.leftCount}), right=${s.rightResult}(${s.rightCount}) → majority=${s.result}`;
+            }
+
+            stepIdx++;
+            render();
+        }
+
+        function reset() {
+            stopAuto();
+            stepIdx = 0;
+            computedNodes.clear();
+            done = false;
+            document.getElementById('result').textContent = '?';
+            document.getElementById('stepBtn').disabled = false;
+            document.getElementById('autoBtn').disabled = false;
+            document.getElementById('status').innerHTML = 'Split array in half, find majority in each half, compare counts to determine winner.';
+            render();
+        }
+
+        function stopAuto() {
+            if (autoInterval) { clearInterval(autoInterval); autoInterval = null; }
+            document.getElementById('autoBtn').textContent = 'Auto Run';
+        }
+
+        document.getElementById('stepBtn').onclick = () => { stopAuto(); step(); };
+        document.getElementById('autoBtn').onclick = () => {
+            if (autoInterval) { stopAuto(); }
+            else { autoInterval = setInterval(step, 800); document.getElementById('autoBtn').textContent = '⏸ Pause'; }
+        };
+        document.getElementById('resetBtn').onclick = reset;
+
+        render();
+    </script>
+</body>
+</html>

@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Q55: Kth Largest Element (v4 - Sort)</title>
+    <link rel="stylesheet" href="visual.css">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    
+</head>
+<body>
+    <div class="container">
+        <div class="problem-info">
+            <h1>Q55: Kth Largest Element (v4 - Sort)</h1>
+            <p>Simply sort in descending order and return element at index k-1. Simplest approach but O(n log n).</p>
+            <div class="problem-meta">
+                <span class="meta-tag">📁 Sorting</span>
+                <span class="meta-tag">⏱️ O(n log n)</span>
+                <span class="meta-tag">💡 Direct Approach</span>
+            </div>
+        </div>
+        
+        
+        
+        <div class="visualization-section">
+            <h3>🎬 Visualization</h3>
+            
+            <div class="controls">
+                <button class="btn btn-primary" id="stepBtn" onclick="step()">Step</button>
+                <button class="btn btn-success" id="autoBtn" onclick="toggleAuto()">Auto Run</button>
+                <button class="btn btn-warning" onclick="reset()">Reset</button>
+            </div>
+            
+            <div class="status-message" id="statusMessage">
+                nums = [3, 2, 1, 5, 6, 4], k = 2. Sort descending, return index k-1.
+            </div>
+            
+            <div class="array-section">
+                <div class="array-title" id="arrayTitle">📊 Input Array</div>
+                <div class="array-container" id="arrayContainer"></div>
+            </div>
+            
+            <div class="result-box" id="resultBox" class="d-none">
+                <div class="result-label">sorted(nums, reverse=True)[k-1]</div>
+                <div class="result-value" id="finalResult">-</div>
+            </div>
+        </div>
+    </div>
+        
+        <div class="code-section">
+            <h3>📄 Python Solution (55-4.py)</h3>
+            <pre><span class="keyword">from</span> typing <span class="keyword">import</span> List
+
+
+<span class="keyword">class</span> Solution:
+    <span class="keyword">def</span> <span class="function">findKthLargest</span>(<span class="keyword">self</span>, nums: List[int], k: int) -&gt; int:
+        <span class="keyword">return</span> <span class="function">sorted</span>(nums, reverse=<span class="keyword">True</span>)[k - <span class="number">1</span>]</pre>
+        </div>
+
+    </div>
+
+    <script>
+        const nums = [3, 2, 1, 5, 6, 4];
+        const k = 2;
+        const sorted = [...nums].sort((a, b) => b - a); // [6, 5, 4, 3, 2, 1]
+        
+        let currentArray = [...nums];
+        let stepIndex = 0;
+        let autoInterval = null;
+        
+        function init() {
+            currentArray = [...nums];
+            stepIndex = 0;
+            document.getElementById('arrayTitle').textContent = '📊 Input Array';
+            document.getElementById('resultBox').style.display = 'none';
+            renderArray(-1);
+        }
+        
+        function renderArray(highlightIndex) {
+            const container = document.getElementById('arrayContainer');
+            const maxVal = Math.max(...currentArray);
+            
+            container.innerHTML = currentArray.map((val, i) => {
+                const height = (val / maxVal) * 120 + 30;
+                const isHighlight = (i === highlightIndex);
+                return `
+                    <div class="array-item">
+                        <div class="array-bar${isHighlight ? ' highlight' : ''}" style="height: ${height}px">${val}</div>
+                        <div class="array-index">[${i}]</div>
+                    </div>
+                `;
+            }).join('');
+        }
+        
+        function step() {
+            if (stepIndex === 0) {
+                // Sort
+                currentArray = [...sorted];
+                document.getElementById('arrayTitle').textContent = '📊 Sorted (Descending)';
+                document.getElementById('statusMessage').textContent = 
+                    `sorted(nums, reverse=True) = [${sorted.join(', ')}]`;
+                renderArray(-1);
+                stepIndex++;
+            } else if (stepIndex === 1) {
+                // Highlight kth element
+                renderArray(k - 1);
+                document.getElementById('statusMessage').textContent = 
+                    `Access index k-1 = ${k-1}. Value at index ${k-1} is ${sorted[k-1]}.`;
+                stepIndex++;
+            } else if (stepIndex === 2) {
+                // Show result
+                document.getElementById('resultBox').style.display = 'block';
+                document.getElementById('finalResult').textContent = sorted[k - 1];
+                document.getElementById('statusMessage').textContent = 
+                    `✅ The ${k}th largest element is ${sorted[k-1]}!`;
+                document.getElementById('stepBtn').disabled = true;
+                stopAuto();
+            }
+        }
+        
+        function toggleAuto() {
+            if (autoInterval) { stopAuto(); }
+            else {
+                document.getElementById('autoBtn').textContent = 'Pause';
+                autoInterval = setInterval(step, 1000);
+            }
+        }
+        
+        function stopAuto() {
+            if (autoInterval) { clearInterval(autoInterval); autoInterval = null; }
+            document.getElementById('autoBtn').textContent = 'Auto Run';
+        }
+        
+        function reset() {
+            stopAuto();
+            document.getElementById('stepBtn').disabled = false;
+            document.getElementById('statusMessage').textContent = 
+                'nums = [3, 2, 1, 5, 6, 4], k = 2. Sort descending, return index k-1.';
+            init();
+        }
+        
+        init();
+    </script>
+</body>
+</html>

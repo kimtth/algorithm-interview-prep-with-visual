@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Q9: 3Sum - Brute Force</title>
+    <link rel="stylesheet" href="visual.css">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    
+</head>
+<body>
+    <div class="container">
+        <div class="problem-info">
+            <h1>Q9: 3Sum - Brute Force</h1>
+            <p>Find all unique triplets in the array that sum to zero using three nested loops. O(n³) time complexity.</p>
+            <div class="problem-meta">
+                <span class="meta-tag">📁 Array</span>
+                <span class="meta-tag">⏱️ O(n³)</span>
+                <span class="meta-tag">💡 Triple Nested Loop</span>
+            </div>
+        </div>
+        
+        
+        
+        <div class="visualization-section">
+            <h3>🎬 Visualization</h3>
+            
+            <div class="controls">
+                <button class="btn btn-primary" id="stepBtn" onclick="step()">Step</button>
+                <button class="btn btn-success" id="autoBtn" onclick="toggleAuto()">Auto Run</button>
+                <button class="btn btn-warning" onclick="reset()">Reset</button>
+            </div>
+            
+            <div class="pointer-legend">
+                <div class="legend-item">
+                    <div class="legend-color bg-pink-very-light-border-red"></div>
+                    <span>i pointer</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color legend-box bg-orange-light-border-orange"></div>
+                    <span>j pointer</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color bg-blue-light-border-blue"></div>
+                    <span>k pointer</span>
+                </div>
+            </div>
+            
+            <div class="status-message" id="statusMessage">
+                nums = [-1, 0, 1, 2, -1, -4] → sorted: [-4, -1, -1, 0, 1, 2]. Finding all triplets that sum to 0.
+            </div>
+            
+            <div class="array-display" id="arrayDisplay"></div>
+            
+            <div class="info-section">
+                <div class="info-box">
+                    <div class="info-label">nums[i]</div>
+                    <div class="info-value" id="valI">-</div>
+                </div>
+                <div class="info-box">
+                    <div class="info-label">nums[j]</div>
+                    <div class="info-value" id="valJ">-</div>
+                </div>
+                <div class="info-box">
+                    <div class="info-label">nums[k]</div>
+                    <div class="info-value" id="valK">-</div>
+                </div>
+                <div class="info-box">
+                    <div class="info-label">Sum</div>
+                    <div class="info-value" id="sumValue">-</div>
+                </div>
+            </div>
+            
+            <div class="results-display">
+                <div class="results-title">📋 Found Triplets</div>
+                <div class="results-list" id="resultsList"><span class="text-gray">None yet</span></div>
+            </div>
+        </div>
+    </div>
+        
+        <div class="code-section">
+            <h3>📄 Python Solution (9-1.py)</h3>
+            <pre><span class="keyword">from</span> typing <span class="keyword">import</span> List
+
+
+<span class="keyword">class</span> Solution:
+    <span class="keyword">def</span> <span class="function">threeSum</span>(<span class="keyword">self</span>, nums: List[int]) -&gt; List[List[int]]:
+        results = []
+        nums.<span class="function">sort</span>()
+
+        <span class="comment"># 브루트 포스 n^3 반복</span>
+        <span class="keyword">for</span> i <span class="keyword">in</span> <span class="function">range</span>(<span class="function">len</span>(nums) - <span class="number">2</span>):
+            <span class="comment"># 중복된 값 건너뛰기</span>
+            <span class="keyword">if</span> i &gt; <span class="number">0</span> <span class="keyword">and</span> nums[i] == nums[i - <span class="number">1</span>]:
+                <span class="keyword">continue</span>
+            <span class="keyword">for</span> j <span class="keyword">in</span> <span class="function">range</span>(i + <span class="number">1</span>, <span class="function">len</span>(nums) - <span class="number">1</span>):
+                <span class="keyword">if</span> j &gt; i + <span class="number">1</span> <span class="keyword">and</span> nums[j] == nums[j - <span class="number">1</span>]:
+                    <span class="keyword">continue</span>
+                <span class="keyword">for</span> k <span class="keyword">in</span> <span class="function">range</span>(j + <span class="number">1</span>, <span class="function">len</span>(nums)):
+                    <span class="keyword">if</span> k &gt; j + <span class="number">1</span> <span class="keyword">and</span> nums[k] == nums[k - <span class="number">1</span>]:
+                        <span class="keyword">continue</span>
+                    <span class="keyword">if</span> nums[i] + nums[j] + nums[k] == <span class="number">0</span>:
+                        results.<span class="function">append</span>([nums[i], nums[j], nums[k]])
+
+        <span class="keyword">return</span> results</pre>
+        </div>
+
+    </div>
+
+    <script>
+        const originalNums = [-1, 0, 1, 2, -1, -4];
+        const nums = [...originalNums].sort((a, b) => a - b); // [-4, -1, -1, 0, 1, 2]
+        const n = nums.length;
+        let i = 0, j = 1, k = 2;
+        let results = [];
+        let done = false;
+        let autoInterval = null;
+        
+        function init() {
+            i = 0; j = 1; k = 2;
+            results = [];
+            done = false;
+            render();
+        }
+        
+        function render() {
+            // Array display
+            const arrContainer = document.getElementById('arrayDisplay');
+            arrContainer.innerHTML = '';
+            nums.forEach((val, idx) => {
+                const item = document.createElement('div');
+                item.className = 'array-item';
+                if (idx === i) item.classList.add('i-ptr');
+                if (idx === j) item.classList.add('j-ptr');
+                if (idx === k) item.classList.add('k-ptr');
+                item.innerHTML = `<div class="value">${val}</div><div class="index">[${idx}]</div>`;
+                arrContainer.appendChild(item);
+            });
+            
+            // Values
+            if (!done) {
+                document.getElementById('valI').textContent = nums[i];
+                document.getElementById('valJ').textContent = nums[j];
+                document.getElementById('valK').textContent = nums[k];
+                document.getElementById('sumValue').textContent = nums[i] + nums[j] + nums[k];
+            }
+            
+            // Results
+            const resList = document.getElementById('resultsList');
+            if (results.length === 0) {
+                resList.innerHTML = '<span class="text-gray">None yet</span>';
+            } else {
+                resList.innerHTML = '';
+                results.forEach(r => {
+                    const item = document.createElement('div');
+                    item.className = 'result-item';
+                    item.textContent = `[${r.join(', ')}]`;
+                    resList.appendChild(item);
+                });
+            }
+        }
+        
+        function shouldSkipI() {
+            return i > 0 && nums[i] === nums[i - 1];
+        }
+        
+        function shouldSkipJ() {
+            return j > i + 1 && nums[j] === nums[j - 1];
+        }
+        
+        function shouldSkipK() {
+            return k > j + 1 && nums[k] === nums[k - 1];
+        }
+        
+        function advancePointers() {
+            k++;
+            while (k < n && shouldSkipK()) k++;
+            
+            if (k >= n) {
+                j++;
+                while (j < n - 1 && shouldSkipJ()) j++;
+                k = j + 1;
+                while (k < n && shouldSkipK()) k++;
+            }
+            
+            if (j >= n - 1 || k >= n) {
+                i++;
+                while (i < n - 2 && shouldSkipI()) i++;
+                j = i + 1;
+                while (j < n - 1 && shouldSkipJ()) j++;
+                k = j + 1;
+                while (k < n && shouldSkipK()) k++;
+            }
+            
+            if (i >= n - 2 || j >= n - 1 || k >= n) {
+                done = true;
+            }
+        }
+        
+        function step() {
+            if (done) {
+                document.getElementById('stepBtn').disabled = true;
+                document.getElementById('statusMessage').textContent = 
+                    `✅ Complete! Found ${results.length} triplet(s): ${results.map(r => '[' + r.join(', ') + ']').join(', ')}`;
+                stopAuto();
+                return;
+            }
+            
+            const sum = nums[i] + nums[j] + nums[k];
+            
+            if (sum === 0) {
+                results.push([nums[i], nums[j], nums[k]]);
+                document.getElementById('statusMessage').textContent = 
+                    `✅ Found triplet! ${nums[i]} + ${nums[j]} + ${nums[k]} = 0`;
+            } else {
+                document.getElementById('statusMessage').textContent = 
+                    `${nums[i]} + ${nums[j]} + ${nums[k]} = ${sum} (not zero)`;
+            }
+            
+            advancePointers();
+            render();
+        }
+        
+        function toggleAuto() {
+            if (autoInterval) { stopAuto(); }
+            else {
+                document.getElementById('autoBtn').textContent = 'Pause';
+                autoInterval = setInterval(step, 400);
+            }
+        }
+        
+        function stopAuto() {
+            if (autoInterval) { clearInterval(autoInterval); autoInterval = null; }
+            document.getElementById('autoBtn').textContent = 'Auto Run';
+        }
+        
+        function reset() {
+            stopAuto();
+            document.getElementById('stepBtn').disabled = false;
+            document.getElementById('statusMessage').textContent = 
+                'nums = [-1, 0, 1, 2, -1, -4] → sorted: [-4, -1, -1, 0, 1, 2]. Finding all triplets that sum to 0.';
+            document.getElementById('valI').textContent = '-';
+            document.getElementById('valJ').textContent = '-';
+            document.getElementById('valK').textContent = '-';
+            document.getElementById('sumValue').textContent = '-';
+            init();
+        }
+        
+        init();
+    </script>
+</body>
+</html>

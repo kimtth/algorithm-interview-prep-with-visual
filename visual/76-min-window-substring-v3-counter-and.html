@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Q76: Minimum Window Substring - Counter AND</title>
+    <link rel="stylesheet" href="visual.css">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔍 Q76: Minimum Window Substring</h1>
+            <p>LeetCode #76 | File: 76-3.py | Approach: Counter AND Operation</p>
+        </div>
+        
+        <div class="problem-info">
+            <h3>📋 Problem Description</h3>
+            <p>Find the minimum window in s that contains all characters of t.</p>
+            <p class="mt-10"><strong>Key Insight:</strong> Use Python Counter's & (AND) operation! 
+            When <code>current_count & t_count == t_count</code>, we have all required characters.</p>
+        </div>
+
+        
+                <div class="counter-box">
+                    <h5>current_count (window)</h5>
+                    <div class="items" id="currentCount">{}</div>
+                    <div class="and-result" id="andResult">AND check: false</div>
+                </div>
+            </div>
+            <div class="result-display" id="result"></div>
+        </div>
+
+        <div class="status" id="status">Ready - using Counter & operation</div>
+    </div>
+
+        <div class="controls">
+            <button class="btn btn-primary" onclick="step()">Step</button>
+            <button class="btn btn-success" onclick="toggleAutoRun()">Auto Run</button>
+            <button class="btn btn-warning" onclick="reset()">Reset</button>
+        </div>
+
+        <div class="step-info" id="stepInfo">Click "Step" to begin</div>
+        
+        <div class="visualization" id="viz">
+            <p class="text-center"><strong>s = "ADOBECODEBANC", t = "ABC"</strong></p>
+            <div class="string-display" id="stringDisplay"></div>
+            <div class="counter-section">
+                <div class="counter-box">
+                    <h5>t_count (target)</h5>
+                    <div class="items" id="tCount">{'A':1, 'B':1, 'C':1}</div>
+    
+        <div class="code-section">
+            <h3>📄 Python Solution (76-3.py)</h3>
+            <pre><span class="keyword">import</span> collections
+
+
+<span class="keyword">class</span> Solution:
+    <span class="keyword">def</span> <span class="function">minWindow</span>(<span class="keyword">self</span>, s: str, t: str) -&gt; str:
+        t_count = collections.<span class="function">Counter</span>(t)
+        current_count = collections.<span class="function">Counter</span>()
+
+        start = <span class="function">float</span>('-inf')
+        end = <span class="function">float</span>('inf')
+
+        left = <span class="number">0</span>
+        <span class="comment"># 오른쪽 포인터 이동</span>
+        <span class="keyword">for</span> right, char <span class="keyword">in</span> <span class="function">enumerate</span>(s, <span class="number">1</span>):
+            current_count[char] += <span class="number">1</span>
+
+            <span class="comment"># AND 연산 결과로 왼쪽 포인터 이동 판단</span>
+            <span class="keyword">while</span> current_count &amp; t_count == t_count:
+                <span class="keyword">if</span> right - left &lt; end - start:
+                    start, end = left, right
+                current_count[s[left]] -= <span class="number">1</span>
+                left += <span class="number">1</span>
+
+        <span class="keyword">return</span> s[start: end] <span class="keyword">if</span> end - start &lt;= <span class="function">len</span>(s) <span class="keyword">else</span> ''</pre>
+        </div>
+
+    </div>
+
+    <script>
+        const s = "ADOBECODEBANC";
+        const t = "ABC";
+        const tCount = {};
+        for (const c of t) tCount[c] = (tCount[c] || 0) + 1;
+        
+        let currentCount = {};
+        let left = 0, start = -Infinity, end = Infinity;
+        let right = 0;
+        let autoRunning = false;
+        let autoRunInterval;
+
+        function counterAnd(c1, c2) {
+            const result = {};
+            for (const k of Object.keys(c2)) {
+                if (c1[k]) result[k] = Math.min(c1[k], c2[k]);
+            }
+            return result;
+        }
+
+        function countersEqual(c1, c2) {
+            for (const k of Object.keys(c2)) {
+                if ((c1[k] || 0) < c2[k]) return false;
+            }
+            return true;
+        }
+
+        function formatCounter(c) {
+            const entries = Object.entries(c).filter(([k,v]) => v > 0);
+            if (entries.length === 0) return '{}';
+            return '{' + entries.map(([k,v]) => `'${k}':${v}`).join(', ') + '}';
+        }
+
+        function renderString() {
+            const container = document.getElementById('stringDisplay');
+            container.innerHTML = '';
+            for (let i = 0; i < s.length; i++) {
+                const box = document.createElement('div');
+                box.className = 'char-box';
+                if (i >= left && i < right) box.classList.add('in-window');
+                if (end !== Infinity && i >= start && i < end) box.classList.add('best');
+                box.textContent = s[i];
+                container.appendChild(box);
+            }
+        }
+
+        function step() {
+            if (right >= s.length && !countersEqual(currentCount, tCount)) {
+                document.getElementById('stepInfo').textContent = 
+                    `Done! Best: "${end !== Infinity ? s.slice(start, end) : 'none'}"`;
+                document.getElementById('result').innerHTML = 
+                    `<span class="text-green">Answer: "${s.slice(start, end)}"</span>`;
+                return;
+            }
+
+            if (right < s.length && !countersEqual(currentCount, tCount)) {
+                // Expand right
+                const char = s[right];
+                currentCount[char] = (currentCount[char] || 0) + 1;
+                right++;
+                document.getElementById('stepInfo').textContent = 
+                    `Expand: add '${char}', window [${left}, ${right})`;
+            } else if (countersEqual(currentCount, tCount)) {
+                // Shrink left
+                if (right - left < end - start) {
+                    start = left;
+                    end = right;
+                }
+                currentCount[s[left]]--;
+                if (currentCount[s[left]] === 0) delete currentCount[s[left]];
+                left++;
+                document.getElementById('stepInfo').textContent = 
+                    `Valid! Shrink from left. Best: "${s.slice(start, end)}"`;
+            }
+
+            const valid = countersEqual(currentCount, tCount);
+            document.getElementById('currentCount').textContent = formatCounter(currentCount);
+            document.getElementById('andResult').textContent = 
+                `AND check: ${valid ? '✓ valid' : '✗ need more'}`;
+            document.getElementById('andResult').style.background = valid ? '#c8e6c9' : '#ffcdd2';
+            renderString();
+        }
+
+        function toggleAutoRun() {
+            autoRunning = !autoRunning;
+            const btn = document.querySelector('.btn-success');
+            if (autoRunning) {
+                btn.textContent = 'Pause';
+                autoRunInterval = setInterval(() => {
+                    if (right >= s.length && !countersEqual(currentCount, tCount)) {
+                        step(); toggleAutoRun(); return;
+                    }
+                    step();
+                }, 500);
+            } else {
+                btn.textContent = 'Auto Run';
+                clearInterval(autoRunInterval);
+            }
+        }
+
+        function reset() {
+            currentCount = {};
+            left = 0; start = -Infinity; end = Infinity; right = 0;
+            if (autoRunning) toggleAutoRun();
+            document.getElementById('stepInfo').textContent = 'Click "Step" to begin';
+            document.getElementById('status').textContent = 'Ready - using Counter & operation';
+            document.getElementById('result').innerHTML = '';
+            document.getElementById('currentCount').textContent = '{}';
+            document.getElementById('andResult').textContent = 'AND check: false';
+            document.getElementById('andResult').style.background = '#ffcdd2';
+            renderString();
+        }
+
+        document.getElementById('tCount').textContent = formatCounter(tCount);
+        renderString();
+    </script>
+</body>
+</html>

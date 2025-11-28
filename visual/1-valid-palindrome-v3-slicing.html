@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Q1: Valid Palindrome - Slicing Approach</title>
+    <link rel="stylesheet" href="visual.css">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    
+</head>
+<body>
+    <div class="container">
+        <h1>Q1: Valid Palindrome</h1>
+        <p class="subtitle">Solution 3: Slicing with Regex (Most Pythonic)</p>
+
+        <div class="problem-info">
+            <h3>📋 Problem Description</h3>
+            <p>A phrase is a palindrome if, after converting all uppercase letters to lowercase and removing all non-alphanumeric characters, it reads the same forward and backward.</p>
+            <p><strong>Example:</strong> "A man, a plan, a canal: Panama" → "amanaplanacanalpanama" → true</p>
+            <div class="complexity">
+                <span><strong>Time:</strong> O(n)</span>
+                <span><strong>Space:</strong> O(n)</span>
+            </div>
+            <div class="advantage">
+                ✨ <strong>Advantage:</strong> Most Pythonic solution using regex for filtering and slice [::-1] for reversal. Simple and readable!
+            </div>
+        </div>
+
+        <div class="main-content">
+            
+            </div>
+        </div>
+    </div>
+
+            <div class="visualization-section">
+                <h3>🎬 Visualization</h3>
+                <div class="input-group">
+                    <label for="inputString">Input String:</label>
+                    <input type="text" id="inputString" value="A man, a plan, a canal: Panama">
+                </div>
+                <div class="controls">
+                    <button class="btn btn-primary" id="stepBtn" onclick="step()">Step</button>
+                    <button class="btn btn-success" id="autoBtn" onclick="toggleAuto()">Auto Run</button>
+                    <button class="btn btn-warning" onclick="reset()">Reset</button>
+                </div>
+                <div class="status-message" id="message">Enter a string and click Step or Auto Run to begin</div>
+                <div id="visualization"></div>
+                
+                <div class="legend">
+                    <div class="legend-item">
+                        <div class="legend-color bg-gray-lighter"></div>
+                        <span>Filtered Out</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color bg-yellow"></div>
+                        <span>Current Step</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color bg-green-pale"></div>
+                        <span>Match</span>
+                    </div>
+    
+        <div class="code-section">
+            <h3>📄 Python Solution (1-3.py)</h3>
+            <pre><span class="keyword">import</span> re
+
+
+<span class="keyword">class</span> Solution:
+    <span class="keyword">def</span> <span class="function">isPalindrome</span>(<span class="keyword">self</span>, s: str) -&gt; bool:
+        s = s.<span class="function">lower</span>()
+        <span class="comment"># 정규식으로 불필요한 문자 필터링</span>
+        s = re.<span class="function">sub</span>('[^a-z0-<span class="number">9</span>]', '', s)
+
+        <span class="keyword">return</span> s == s[::-<span class="number">1</span>]  <span class="comment"># 슬라이싱</span></pre>
+        </div>
+
+    </div>
+
+    <script>
+        let originalStr = "";
+        let filteredStr = "";
+        let reversedStr = "";
+        let phase = 0; // 0: not started, 1: show original, 2: lowercase, 3: filter, 4: reverse, 5: compare
+        let isFinished = false;
+        let autoInterval = null;
+        let isAutoRunning = false;
+
+        function init() {
+            originalStr = document.getElementById('inputString').value;
+            filteredStr = "";
+            reversedStr = "";
+            phase = 1;
+            isFinished = false;
+            d3.select("#visualization").selectAll("*").remove();
+        }
+
+        function step() {
+            if (phase === 0) {
+                init();
+            }
+
+            if (isFinished) {
+                reset();
+                return;
+            }
+
+            const vis = d3.select("#visualization");
+
+            if (phase === 1) {
+                // Show original string
+                vis.selectAll("*").remove();
+                const container = vis.append("div").attr("class", "string-display");
+                container.append("span").attr("class", "string-label").text("Step 1: Original String");
+                const row = container.append("div").attr("class", "string-row");
+                
+                originalStr.split('').forEach((char, i) => {
+                    row.append("div")
+                        .attr("class", "char-box highlight")
+                        .text(char);
+                });
+                
+                document.getElementById('message').innerText = `Original: "${originalStr}"`;
+                phase = 2;
+            } else if (phase === 2) {
+                // Lowercase
+                vis.selectAll("*").remove();
+                const container = vis.append("div").attr("class", "string-display");
+                container.append("span").attr("class", "string-label").text("Step 2: s.lower() - Convert to lowercase");
+                const row = container.append("div").attr("class", "string-row");
+                
+                const lowered = originalStr.toLowerCase();
+                lowered.split('').forEach((char, i) => {
+                    row.append("div")
+                        .attr("class", "char-box highlight")
+                        .text(char);
+                });
+                
+                document.getElementById('message').innerText = `After lower(): "${lowered}"`;
+                phase = 3;
+            } else if (phase === 3) {
+                // Filter with regex
+                vis.selectAll("*").remove();
+                const container = vis.append("div").attr("class", "string-display");
+                container.append("span").attr("class", "string-label").text("Step 3: re.sub('[^a-z0-9]', '', s) - Keep only alphanumeric");
+                const row = container.append("div").attr("class", "string-row");
+                
+                const lowered = originalStr.toLowerCase();
+                filteredStr = lowered.replace(/[^a-z0-9]/g, '');
+                
+                lowered.split('').forEach((char, i) => {
+                    const isAlnum = /[a-z0-9]/.test(char);
+                    row.append("div")
+                        .attr("class", "char-box " + (isAlnum ? "highlight" : "filtered-out"))
+                        .text(char);
+                });
+                
+                // Show filtered result below
+                container.append("div").style("margin-top", "10px").style("text-align", "center")
+                    .html(`→ Filtered: "<strong>${filteredStr}</strong>"`);
+                
+                document.getElementById('message').innerText = `After regex filter: "${filteredStr}" (${filteredStr.length} chars)`;
+                phase = 4;
+            } else if (phase === 4) {
+                // Reverse with slicing
+                vis.selectAll("*").remove();
+                const container = vis.append("div").attr("class", "string-display");
+                container.append("span").attr("class", "string-label").text("Step 4: s[::-1] - Reverse the string");
+                
+                // Original
+                const row1 = container.append("div").attr("class", "string-row");
+                container.append("div").style("text-align", "center").style("margin", "5px 0").text("Original: s");
+                const row1cont = container.append("div").attr("class", "string-row");
+                filteredStr.split('').forEach((char, i) => {
+                    row1cont.append("div")
+                        .attr("class", "char-box")
+                        .text(char);
+                });
+                
+                // Arrow
+                container.append("div").style("text-align", "center").style("margin", "10px 0").style("font-size", "1.5em").text("↓ [::-1]");
+                
+                // Reversed
+                reversedStr = filteredStr.split('').reverse().join('');
+                container.append("div").style("text-align", "center").style("margin", "5px 0").text("Reversed: s[::-1]");
+                const row2 = container.append("div").attr("class", "string-row");
+                reversedStr.split('').forEach((char, i) => {
+                    row2.append("div")
+                        .attr("class", "char-box highlight")
+                        .text(char);
+                });
+                
+                document.getElementById('message').innerText = `Reversed: "${reversedStr}"`;
+                phase = 5;
+            } else if (phase === 5) {
+                // Compare
+                vis.selectAll("*").remove();
+                const container = vis.append("div").attr("class", "string-display");
+                container.append("span").attr("class", "string-label").text("Step 5: s == s[::-1] - Compare");
+                
+                const compBox = container.append("div").attr("class", "comparison-box");
+                const compRow = compBox.append("div").attr("class", "comparison-row");
+                
+                compRow.append("div").text(`"${filteredStr}"`);
+                
+                const isPalindrome = filteredStr === reversedStr;
+                compRow.append("div").attr("class", "comparison-arrow").text(isPalindrome ? "==" : "!=");
+                compRow.append("div").text(`"${reversedStr}"`);
+                
+                compBox.append("div")
+                    .attr("class", "result-icon " + (isPalindrome ? "success" : "failure"))
+                    .text(isPalindrome ? "✓" : "✗");
+                
+                compBox.append("div")
+                    .style("margin-top", "10px")
+                    .style("font-size", "1.2em")
+                    .style("font-weight", "bold")
+                    .text(isPalindrome ? "It's a palindrome!" : "Not a palindrome!");
+                
+                document.getElementById('message').innerText = isPalindrome 
+                    ? `✓ "${filteredStr}" == "${reversedStr}" → True` 
+                    : `✗ "${filteredStr}" != "${reversedStr}" → False`;
+                
+                isFinished = true;
+                stopAuto();
+                document.getElementById('stepBtn').innerText = "Restart";
+            }
+        }
+
+        function toggleAuto() {
+            if (isAutoRunning) {
+                stopAuto();
+            } else {
+                startAuto();
+            }
+        }
+
+        function startAuto() {
+            if (phase === 0) init();
+            isAutoRunning = true;
+            document.getElementById('autoBtn').innerText = "Pause";
+            document.getElementById('autoBtn').classList.add("running");
+            autoInterval = setInterval(() => {
+                if (isFinished) {
+                    stopAuto();
+                } else {
+                    step();
+                }
+            }, 1200);
+        }
+
+        function stopAuto() {
+            isAutoRunning = false;
+            document.getElementById('autoBtn').innerText = "Auto Run";
+            document.getElementById('autoBtn').classList.remove("running");
+            if (autoInterval) {
+                clearInterval(autoInterval);
+                autoInterval = null;
+            }
+        }
+
+        function reset() {
+            stopAuto();
+            phase = 0;
+            isFinished = false;
+            d3.select("#visualization").selectAll("*").remove();
+            document.getElementById('message').innerText = "Enter a string and click Step or Auto Run to begin";
+            document.getElementById('stepBtn').innerText = "Step";
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('inputString').addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    reset();
+                    init();
+                }
+            });
+        });
+    </script>
+</body>
+</html>

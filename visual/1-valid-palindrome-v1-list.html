@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Q1: Valid Palindrome - List Approach</title>
+    <link rel="stylesheet" href="visual.css">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    
+</head>
+<body>
+    <div class="container">
+        <div class="problem-info">
+            <h1>Q1: Valid Palindrome</h1>
+            <p>A phrase is a palindrome if, after converting all uppercase letters to lowercase and removing all non-alphanumeric characters, it reads the same forward and backward.</p>
+            <div class="problem-meta">
+                <span class="meta-tag">📁 String</span>
+                <span class="meta-tag">⏱️ O(n²) Time</span>
+                <span class="meta-tag">💾 O(n) Space</span>
+                <span class="meta-tag">💡 List pop(0) &amp; pop()</span>
+            </div>
+        </div>
+        
+        
+        
+        <div class="visualization-section">
+            <h3>🎬 Visualization</h3>
+            <div class="input-group">
+                <label for="inputString">Input String:</label>
+                <input type="text" id="inputString" value="A man, a plan, a canal: Panama">
+            </div>
+            <div class="controls">
+                <button class="btn btn-primary" id="stepBtn" onclick="step()">Step</button>
+                <button class="btn btn-success" id="autoBtn" onclick="toggleAuto()">Auto Run</button>
+                <button class="btn btn-warning" onclick="reset()">Reset</button>
+            </div>
+            <div class="status-message" id="message">Enter a string and click Step or Auto Run to begin</div>
+            <div id="visualization"></div>
+            
+            <div class="legend">
+                <div class="legend-item">
+                    <div class="legend-color bg-yellow"></div>
+                    <span>Left (pop(0))</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color bg-blue-light"></div>
+                    <span>Right (pop())</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color bg-green-pale"></div>
+                    <span>Matched</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color bg-pink-light"></div>
+                    <span>Mismatch</span>
+                </div>
+            </div>
+        </div>
+    </div>
+        
+        <div class="code-section">
+            <h3>📄 Python Solution (1-1.py)</h3>
+            <pre><span class="keyword">class</span> Solution:
+    <span class="keyword">def</span> <span class="function">isPalindrome</span>(<span class="keyword">self</span>, s: str) -&gt; bool:
+        strs = []
+        <span class="keyword">for</span> char <span class="keyword">in</span> s:
+            <span class="keyword">if</span> char.<span class="function">isalnum</span>():
+                strs.<span class="function">append</span>(char.<span class="function">lower</span>())
+
+        <span class="comment"># 팰린드롬 여부 판별</span>
+        <span class="keyword">while</span> <span class="function">len</span>(strs) &gt; <span class="number">1</span>:
+            <span class="keyword">if</span> strs.<span class="function">pop</span>(<span class="number">0</span>) != strs.<span class="function">pop</span>():
+                <span class="keyword">return</span> <span class="keyword">False</span>
+
+        <span class="keyword">return</span> <span class="keyword">True</span></pre>
+        </div>
+
+    </div>
+
+    <script>
+        let chars = [];
+        let displayChars = [];
+        let leftIndex = 0;
+        let rightIndex = 0;
+        let phase = 0; // 0: not started, 1: highlight, 2: compare
+        let isFinished = false;
+        let autoInterval = null;
+        let isAutoRunning = false;
+
+        function init() {
+            const input = document.getElementById('inputString').value;
+            chars = input.toLowerCase().split('').filter(c => /[a-z0-9]/.test(c));
+            displayChars = [...chars];
+            leftIndex = 0;
+            rightIndex = chars.length - 1;
+            phase = 1;
+            isFinished = false;
+            render();
+            
+            if (chars.length === 0) {
+                document.getElementById('message').innerText = "Empty string is a palindrome! ✓";
+                isFinished = true;
+            } else {
+                document.getElementById('message').innerText = `Filtered string: "${chars.join('')}" (${chars.length} chars)`;
+            }
+        }
+
+        function render() {
+            const vis = d3.select("#visualization");
+            vis.selectAll("*").remove();
+
+            const container = vis.append("div").attr("class", "array-display");
+            
+            displayChars.forEach((char, i) => {
+                container.append("div")
+                    .attr("class", "char-box")
+                    .attr("id", "char-" + i)
+                    .text(char);
+            });
+        }
+
+        function step() {
+            if (phase === 0) {
+                init();
+                return;
+            }
+
+            if (isFinished) {
+                reset();
+                return;
+            }
+
+            if (leftIndex > rightIndex) {
+                document.getElementById('message').innerText = "✓ It's a palindrome!";
+                isFinished = true;
+                stopAuto();
+                document.getElementById('stepBtn').innerText = "Restart";
+                return;
+            }
+
+            if (phase === 1) {
+                // Highlight current comparison
+                d3.selectAll(".char-box").classed("highlight-left", false).classed("highlight-right", false);
+                d3.select("#char-" + leftIndex).classed("highlight-left", true);
+                d3.select("#char-" + rightIndex).classed("highlight-right", true);
+                document.getElementById('message').innerText = 
+                    `Comparing: pop(0)='${displayChars[leftIndex]}' vs pop()='${displayChars[rightIndex]}'`;
+                phase = 2;
+            } else if (phase === 2) {
+                const leftChar = displayChars[leftIndex];
+                const rightChar = displayChars[rightIndex];
+
+                if (leftChar !== rightChar) {
+                    d3.select("#char-" + leftIndex).classed("mismatch", true).classed("highlight-left", false);
+                    d3.select("#char-" + rightIndex).classed("mismatch", true).classed("highlight-right", false);
+                    document.getElementById('message').innerText = `✗ Mismatch: '${leftChar}' ≠ '${rightChar}'. Not a palindrome!`;
+                    isFinished = true;
+                    stopAuto();
+                    document.getElementById('stepBtn').innerText = "Restart";
+                } else {
+                    d3.select("#char-" + leftIndex).classed("match", true).classed("highlight-left", false).classed("removed", true);
+                    d3.select("#char-" + rightIndex).classed("match", true).classed("highlight-right", false).classed("removed", true);
+                    document.getElementById('message').innerText = `✓ Match: '${leftChar}' = '${rightChar}'. Both elements removed.`;
+                    leftIndex++;
+                    rightIndex--;
+                    phase = 1;
+                }
+            }
+        }
+
+        function toggleAuto() {
+            if (isAutoRunning) {
+                stopAuto();
+            } else {
+                startAuto();
+            }
+        }
+
+        function startAuto() {
+            if (phase === 0) init();
+            isAutoRunning = true;
+            document.getElementById('autoBtn').innerText = "Pause";
+            document.getElementById('autoBtn').classList.add("running");
+            autoInterval = setInterval(() => {
+                if (isFinished) {
+                    stopAuto();
+                } else {
+                    step();
+                }
+            }, 800);
+        }
+
+        function stopAuto() {
+            isAutoRunning = false;
+            document.getElementById('autoBtn').innerText = "Auto Run";
+            document.getElementById('autoBtn').classList.remove("running");
+            if (autoInterval) {
+                clearInterval(autoInterval);
+                autoInterval = null;
+            }
+        }
+
+        function reset() {
+            stopAuto();
+            phase = 0;
+            isFinished = false;
+            d3.select("#visualization").selectAll("*").remove();
+            document.getElementById('message').innerText = "Enter a string and click Step or Auto Run to begin";
+            document.getElementById('stepBtn').innerText = "Step";
+        }
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('inputString').addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    reset();
+                    init();
+                }
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Q10: Array Partition I - Pythonic Slicing</title>
+    <link rel="stylesheet" href="visual.css">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    
+</head>
+<body>
+    <div class="container">
+        <div class="problem-info">
+            <h1>Q10: Array Partition I</h1>
+            <p>Given an integer array nums of 2n integers, group these integers into n pairs such that the sum of min(aᵢ, bᵢ) for all i is maximized.</p>
+            <div class="problem-meta">
+                <span class="meta-tag">📁 Array</span>
+                <span class="meta-tag">🔢 Greedy</span>
+                <span class="meta-tag">⏱️ O(n log n)</span>
+                <span class="meta-tag">💡 Version 2: Pythonic Slicing</span>
+            </div>
+        </div>
+        
+        
+        
+        <div class="visualization-section">
+            <h3>🎬 Visualization</h3>
+            
+            <div class="controls">
+                <button class="btn btn-primary" id="stepBtn" onclick="step()">Step</button>
+                <button class="btn btn-success" id="autoBtn" onclick="toggleAuto()">Auto Run</button>
+                <button class="btn btn-warning" onclick="reset()">Reset</button>
+            </div>
+            
+            <div class="code-explanation" id="codeExplanation">
+                <h4>🔍 Key Insight</h4>
+                <p><code>sorted(nums)[::2]</code> takes every other element (indices 0, 2, 4, ...) from the sorted array.</p>
+                <p class="mt-8">In a sorted array, the minimum of each pair is always the element at even indices!</p>
+            </div>
+            
+            <div class="status-message" id="statusMessage">
+                Click "Step" or "Auto Run" to start visualization
+            </div>
+            
+            <div class="array-section">
+                <div class="array-label">Original Array:</div>
+                <div class="array-container" id="originalContainer"></div>
+            </div>
+            
+            <div class="array-section">
+                <div class="array-label">Sorted Array (with indices):</div>
+                <div class="array-container" id="sortedContainer"></div>
+            </div>
+            
+            <div class="array-section">
+                <div class="array-label">Selected Elements [::2]:</div>
+                <div class="array-container" id="selectedContainer"></div>
+            </div>
+            
+            <div class="sum-display">
+                <div class="label">sum(sorted(nums)[::2])</div>
+                <div class="value" id="sumValue">0</div>
+                <div class="sum-formula" id="sumFormula"></div>
+            </div>
+        </div>
+    </div>
+        
+        <div class="code-section">
+            <h3>📄 Python Solution (10-2.py)</h3>
+            <pre><span class="keyword">from</span> typing <span class="keyword">import</span> List
+
+
+<span class="keyword">class</span> Solution:
+    <span class="keyword">def</span> <span class="function">arrayPairSum</span>(<span class="keyword">self</span>, nums: List[int]) -&gt; int:
+        sum = <span class="number">0</span>
+        nums.<span class="function">sort</span>()
+
+        <span class="keyword">for</span> i, n <span class="keyword">in</span> <span class="function">enumerate</span>(nums):
+            <span class="comment"># 짝수 번째 값의 합 계산</span>
+            <span class="keyword">if</span> i % <span class="number">2</span> == <span class="number">0</span>:
+                sum += n
+
+        <span class="keyword">return</span> sum</pre>
+        </div>
+
+    </div>
+
+    <script>
+        const originalNums = [1, 4, 3, 2, 5, 6];
+        let sortedNums = [];
+        let currentStep = 0;
+        let autoInterval = null;
+        let selectedElements = [];
+        
+        function init() {
+            renderOriginal();
+            document.getElementById('sortedContainer').innerHTML = '';
+            document.getElementById('selectedContainer').innerHTML = '';
+            document.getElementById('sumValue').textContent = '0';
+            document.getElementById('sumFormula').textContent = '';
+        }
+        
+        function renderOriginal() {
+            const container = document.getElementById('originalContainer');
+            container.innerHTML = '';
+            originalNums.forEach((num, idx) => {
+                const box = document.createElement('div');
+                box.className = 'array-box';
+                box.innerHTML = `${num}<span class="index-label">idx ${idx}</span>`;
+                container.appendChild(box);
+            });
+        }
+        
+        function renderSorted(highlightEven = false, currentIdx = -1) {
+            const container = document.getElementById('sortedContainer');
+            container.innerHTML = '';
+            sortedNums.forEach((num, idx) => {
+                const box = document.createElement('div');
+                box.className = 'array-box sorted';
+                if (highlightEven) {
+                    if (idx % 2 === 0 && idx <= currentIdx) {
+                        box.className += ' selected';
+                    } else if (idx % 2 === 1 && idx <= currentIdx + 1) {
+                        box.className += ' skipped';
+                    }
+                }
+                box.innerHTML = `${num}<span class="index-label">idx ${idx}</span>`;
+                container.appendChild(box);
+            });
+        }
+        
+        function step() {
+            if (currentStep === 0) {
+                // Show original
+                document.getElementById('statusMessage').textContent = 
+                    `Original array: [${originalNums.join(', ')}]. First, we sort it.`;
+                currentStep++;
+            } else if (currentStep === 1) {
+                // Sort
+                sortedNums = [...originalNums].sort((a, b) => a - b);
+                renderSorted(false);
+                document.getElementById('statusMessage').textContent = 
+                    `Sorted array: [${sortedNums.join(', ')}]. Now apply [::2] slicing.`;
+                selectedElements = [];
+                currentStep++;
+            } else if (currentStep < sortedNums.length / 2 + 2) {
+                // Slice step by step
+                const sliceIdx = currentStep - 2;
+                const idx = sliceIdx * 2;
+                if (idx < sortedNums.length) {
+                    selectedElements.push(sortedNums[idx]);
+                    renderSorted(true, idx);
+                    
+                    // Show selected elements
+                    const selectedContainer = document.getElementById('selectedContainer');
+                    selectedContainer.innerHTML = '';
+                    selectedElements.forEach((num, i) => {
+                        const box = document.createElement('div');
+                        box.className = 'array-box selected';
+                        box.textContent = num;
+                        selectedContainer.appendChild(box);
+                    });
+                    
+                    const sum = selectedElements.reduce((a, b) => a + b, 0);
+                    document.getElementById('sumValue').textContent = sum;
+                    document.getElementById('sumFormula').textContent = 
+                        selectedElements.join(' + ') + ' = ' + sum;
+                    
+                    document.getElementById('statusMessage').textContent = 
+                        `Index ${idx} (even): select ${sortedNums[idx]}. Running sum = ${sum}`;
+                    
+                    currentStep++;
+                }
+            }
+            
+            if (currentStep >= sortedNums.length / 2 + 2) {
+                const finalSum = selectedElements.reduce((a, b) => a + b, 0);
+                document.getElementById('statusMessage').textContent = 
+                    `✅ Done! sum(sorted(nums)[::2]) = ${finalSum}`;
+                document.getElementById('stepBtn').disabled = true;
+                stopAuto();
+            }
+        }
+        
+        function toggleAuto() {
+            if (autoInterval) {
+                stopAuto();
+            } else {
+                document.getElementById('autoBtn').textContent = 'Pause';
+                autoInterval = setInterval(() => {
+                    if (currentStep >= sortedNums.length / 2 + 2) {
+                        stopAuto();
+                    } else {
+                        step();
+                    }
+                }, 1200);
+            }
+        }
+        
+        function stopAuto() {
+            if (autoInterval) {
+                clearInterval(autoInterval);
+                autoInterval = null;
+            }
+            document.getElementById('autoBtn').textContent = 'Auto Run';
+        }
+        
+        function reset() {
+            stopAuto();
+            currentStep = 0;
+            selectedElements = [];
+            sortedNums = [];
+            document.getElementById('stepBtn').disabled = false;
+            document.getElementById('statusMessage').textContent = 
+                'Click "Step" or "Auto Run" to start visualization';
+            init();
+        }
+        
+        // Initialize on load
+        init();
+    </script>
+</body>
+</html>

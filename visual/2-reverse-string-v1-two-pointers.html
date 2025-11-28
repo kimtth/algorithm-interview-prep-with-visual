@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Q2: Reverse String - Two Pointers</title>
+    <link rel="stylesheet" href="visual.css">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    
+</head>
+<body>
+    <div class="container">
+        <h1>Q2: Reverse String</h1>
+        <p class="subtitle">Solution 1: Two Pointers (In-place Swap)</p>
+
+        <div class="problem-info">
+            <h3>📋 Problem Description</h3>
+            <p>Write a function that reverses a string. The input string is given as an array of characters. You must do this by modifying the input array in-place with O(1) extra memory.</p>
+            <p><strong>Example:</strong> ["h","e","l","l","o"] → ["o","l","l","e","h"]</p>
+            <div class="complexity">
+                <span><strong>Time:</strong> O(n)</span>
+                <span><strong>Space:</strong> O(1)</span>
+            </div>
+        </div>
+
+        <div class="main-content">
+            
+            </div>
+        </div>
+    </div>
+
+            <div class="visualization-section">
+                <h3>🎬 Visualization</h3>
+                <div class="input-group">
+                    <label for="inputString">Input String:</label>
+                    <input type="text" id="inputString" value="hello">
+                </div>
+                <div class="controls">
+                    <button class="btn btn-primary" id="stepBtn" onclick="step()">Step</button>
+                    <button class="btn btn-success" id="autoBtn" onclick="toggleAuto()">Auto Run</button>
+                    <button class="btn btn-warning" onclick="reset()">Reset</button>
+                </div>
+                <div class="status-message" id="message">Enter a string and click Step or Auto Run to begin</div>
+                <div id="visualization"></div>
+                
+                <div class="legend">
+                    <div class="legend-item">
+                        <div class="legend-color bg-yellow"></div>
+                        <span>Left Pointer</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color bg-blue-light"></div>
+                        <span>Right Pointer</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color bg-green-pale"></div>
+                        <span>Swapped</span>
+                    </div>
+    
+        <div class="code-section">
+            <h3>📄 Python Solution (2-1.py)</h3>
+            <pre><span class="keyword">from</span> typing <span class="keyword">import</span> List
+
+
+<span class="keyword">class</span> Solution:
+    <span class="keyword">def</span> <span class="function">reverseString</span>(<span class="keyword">self</span>, s: List[str]) -&gt; <span class="keyword">None</span>:
+        left, right = <span class="number">0</span>, <span class="function">len</span>(s) - <span class="number">1</span>
+        <span class="keyword">while</span> left &lt; right:
+            s[left], s[right] = s[right], s[left]
+            left += <span class="number">1</span>
+            right -= <span class="number">1</span></pre>
+        </div>
+
+    </div>
+
+    <script>
+        let chars = [];
+        let left = 0;
+        let right = 0;
+        let phase = 0; // 0: not started, 1: highlight, 2: swap
+        let isFinished = false;
+        let autoInterval = null;
+        let isAutoRunning = false;
+        const boxWidth = 48;
+
+        function init() {
+            const input = document.getElementById('inputString').value;
+            chars = input.split('');
+            left = 0;
+            right = chars.length - 1;
+            phase = 1;
+            isFinished = false;
+            render();
+            document.getElementById('message').innerText = `Array: [${chars.map(c => `"${c}"`).join(', ')}]. left=0, right=${right}`;
+        }
+
+        function render() {
+            const vis = d3.select("#visualization");
+            vis.selectAll("*").remove();
+
+            const totalWidth = chars.length * boxWidth;
+            const startX = (400 - totalWidth) / 2; // Center in container
+
+            const container = vis.append("div")
+                .attr("class", "array-display")
+                .style("width", "100%");
+            
+            chars.forEach((char, i) => {
+                container.append("div")
+                    .attr("class", "char-box")
+                    .attr("id", "char-" + i)
+                    .style("left", `calc(50% + ${(i - chars.length/2) * boxWidth}px)`)
+                    .text(char);
+            });
+
+            // Pointer container
+            const pointerContainer = vis.append("div")
+                .attr("class", "pointer-container")
+                .style("width", "100%");
+
+            pointerContainer.append("div")
+                .attr("class", "pointer pointer-left")
+                .attr("id", "left-pointer")
+                .style("left", `calc(50% + ${(left - chars.length/2) * boxWidth + boxWidth/2 - 20}px)`)
+                .text("↑ left");
+
+            pointerContainer.append("div")
+                .attr("class", "pointer pointer-right")
+                .attr("id", "right-pointer")
+                .style("left", `calc(50% + ${(right - chars.length/2) * boxWidth + boxWidth/2 - 20}px)`)
+                .text("↑ right");
+        }
+
+        function step() {
+            if (phase === 0) {
+                init();
+                return;
+            }
+
+            if (isFinished) {
+                reset();
+                return;
+            }
+
+            if (left >= right) {
+                document.getElementById('message').innerText = `✓ Done! Reversed: [${chars.map(c => `"${c}"`).join(', ')}]`;
+                isFinished = true;
+                stopAuto();
+                document.getElementById('stepBtn').innerText = "Restart";
+                return;
+            }
+
+            if (phase === 1) {
+                // Highlight
+                d3.selectAll(".char-box").classed("highlight-left", false).classed("highlight-right", false);
+                d3.select("#char-" + left).classed("highlight-left", true);
+                d3.select("#char-" + right).classed("highlight-right", true);
+                document.getElementById('message').innerText = `Swapping s[${left}]="${chars[left]}" ↔ s[${right}]="${chars[right]}"`;
+                phase = 2;
+            } else if (phase === 2) {
+                // Animate swap
+                const leftBox = d3.select("#char-" + left);
+                const rightBox = d3.select("#char-" + right);
+
+                const leftPos = `calc(50% + ${(right - chars.length/2) * boxWidth}px)`;
+                const rightPos = `calc(50% + ${(left - chars.length/2) * boxWidth}px)`;
+
+                leftBox.transition().duration(500).style("left", leftPos);
+                rightBox.transition().duration(500).style("left", rightPos);
+
+                setTimeout(() => {
+                    // Swap in array
+                    const temp = chars[left];
+                    chars[left] = chars[right];
+                    chars[right] = temp;
+
+                    // Swap IDs
+                    leftBox.attr("id", "temp");
+                    rightBox.attr("id", "char-" + left);
+                    leftBox.attr("id", "char-" + right);
+
+                    leftBox.classed("highlight-left", false).classed("swapped", true);
+                    rightBox.classed("highlight-right", false).classed("swapped", true);
+
+                    left++;
+                    right--;
+                    
+                    // Update pointers
+                    d3.select("#left-pointer")
+                        .transition().duration(300)
+                        .style("left", `calc(50% + ${(left - chars.length/2) * boxWidth + boxWidth/2 - 20}px)`);
+                    d3.select("#right-pointer")
+                        .transition().duration(300)
+                        .style("left", `calc(50% + ${(right - chars.length/2) * boxWidth + boxWidth/2 - 20}px)`);
+
+                    document.getElementById('message').innerText = `Swapped! Now left=${left}, right=${right}`;
+                    phase = 1;
+                }, 500);
+            }
+        }
+
+        function toggleAuto() {
+            if (isAutoRunning) {
+                stopAuto();
+            } else {
+                startAuto();
+            }
+        }
+
+        function startAuto() {
+            if (phase === 0) init();
+            isAutoRunning = true;
+            document.getElementById('autoBtn').innerText = "Pause";
+            document.getElementById('autoBtn').classList.add("running");
+            autoInterval = setInterval(() => {
+                if (isFinished) {
+                    stopAuto();
+                } else {
+                    step();
+                }
+            }, 800);
+        }
+
+        function stopAuto() {
+            isAutoRunning = false;
+            document.getElementById('autoBtn').innerText = "Auto Run";
+            document.getElementById('autoBtn').classList.remove("running");
+            if (autoInterval) {
+                clearInterval(autoInterval);
+                autoInterval = null;
+            }
+        }
+
+        function reset() {
+            stopAuto();
+            phase = 0;
+            isFinished = false;
+            d3.select("#visualization").selectAll("*").remove();
+            document.getElementById('message').innerText = "Enter a string and click Step or Auto Run to begin";
+            document.getElementById('stepBtn').innerText = "Step";
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('inputString').addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    reset();
+                    init();
+                }
+            });
+        });
+    </script>
+</body>
+</html>

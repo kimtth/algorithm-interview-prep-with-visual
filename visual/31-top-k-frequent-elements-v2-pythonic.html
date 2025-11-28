@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Q31: Top K Frequent Elements - Pythonic</title>
+    <link rel="stylesheet" href="visual.css">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    
+</head>
+<body>
+    <div class="container">
+        <div class="problem-info">
+            <h1>Q31: Top K Frequent Elements - Pythonic</h1>
+            <p>Given an integer array and k, return the k most frequent elements using Counter.most_common().</p>
+            <div class="problem-meta">
+                <span class="meta-tag">📁 Counter</span>
+                <span class="meta-tag">⏱️ O(n log n)</span>
+                <span class="meta-tag">💡 One-liner Pythonic</span>
+            </div>
+        </div>
+        
+        
+        
+        <div class="visualization-section">
+            <h3>🎬 Visualization</h3>
+            
+            <div class="controls">
+                <button class="btn btn-primary" id="stepBtn" onclick="step()">Step</button>
+                <button class="btn btn-success" id="autoBtn" onclick="toggleAuto()">Auto Run</button>
+                <button class="btn btn-warning" onclick="reset()">Reset</button>
+            </div>
+            
+            <div class="step-indicator">
+                <div class="step-item" id="step1">1. Counter</div>
+                <div class="step-item" id="step2">2. most_common(k)</div>
+                <div class="step-item" id="step3">3. Extract nums</div>
+            </div>
+            
+            <div class="status-message" id="statusMessage">
+                Input: [1,1,1,2,2,3], k=2. Using Counter.most_common() for elegant solution.
+            </div>
+            
+            <div class="section-title">Input Array:</div>
+            <div class="array-display" id="arrayDisplay"></div>
+            
+            <div class="counter-display" id="counterSection" class="d-none">
+                <div class="section-title mt-0">Step 1: Counter(nums)</div>
+                <div class="counter-code" id="counterCode"></div>
+            </div>
+            
+            <div class="most-common-display" id="mostCommonSection" class="d-none">
+                <div class="section-title mt-0">Step 2: counter.most_common(k)</div>
+                <div class="most-common-items" id="mostCommonItems"></div>
+            </div>
+            
+            <div class="result-section" id="resultSection" class="d-none">
+                <div class="section-title mt-0">Step 3: Extract Numbers</div>
+                <div class="result-code">list(zip(*most_common))[0]</div>
+                <div class="result-items" id="resultItems"></div>
+            </div>
+        </div>
+    </div>
+        
+        <div class="code-section">
+            <h3>📄 Python Solution (31-2.py)</h3>
+            <pre><span class="keyword">import</span> collections
+
+
+<span class="keyword">class</span> Solution:
+    <span class="keyword">def</span> <span class="function">topKFrequent</span>(<span class="keyword">self</span>, nums, k):
+        <span class="keyword">return</span> <span class="function">list</span>(<span class="function">zip</span>(*collections.<span class="function">Counter</span>(nums).<span class="function">most_common</span>(k)))[<span class="number">0</span>]</pre>
+        </div>
+
+    </div>
+
+    <script>
+        const nums = [1, 1, 1, 2, 2, 3];
+        const k = 2;
+        let currentStep = 0;
+        let autoInterval = null;
+        
+        const counter = {};
+        nums.forEach(n => counter[n] = (counter[n] || 0) + 1);
+        const mostCommon = Object.entries(counter)
+            .map(([num, freq]) => [parseInt(num), freq])
+            .sort((a, b) => b[1] - a[1])
+            .slice(0, k);
+        
+        function init() {
+            currentStep = 0;
+            render();
+        }
+        
+        function render() {
+            // Array
+            const arrContainer = document.getElementById('arrayDisplay');
+            arrContainer.innerHTML = '';
+            nums.forEach(n => {
+                const item = document.createElement('div');
+                item.className = 'array-item';
+                item.textContent = n;
+                arrContainer.appendChild(item);
+            });
+            
+            // Step indicators
+            document.getElementById('step1').className = 'step-item' + (currentStep >= 1 ? ' done' : '');
+            document.getElementById('step2').className = 'step-item' + (currentStep >= 2 ? ' done' : '');
+            document.getElementById('step3').className = 'step-item' + (currentStep >= 3 ? ' done' : '');
+            
+            // Counter section
+            document.getElementById('counterSection').style.display = currentStep >= 1 ? 'block' : 'none';
+            if (currentStep >= 1) {
+                const counterStr = Object.entries(counter)
+                    .map(([k, v]) => `${k}: ${v}`)
+                    .join(', ');
+                document.getElementById('counterCode').textContent = `Counter({${counterStr}})`;
+            }
+            
+            // Most common section
+            document.getElementById('mostCommonSection').style.display = currentStep >= 2 ? 'block' : 'none';
+            if (currentStep >= 2) {
+                const container = document.getElementById('mostCommonItems');
+                container.innerHTML = '';
+                mostCommon.forEach(([num, freq], i) => {
+                    const item = document.createElement('div');
+                    item.className = 'common-item' + (currentStep >= 3 ? ' selected' : '');
+                    item.innerHTML = `<div class="common-num">${num}</div><div class="common-freq">freq: ${freq}</div>`;
+                    container.appendChild(item);
+                });
+            }
+            
+            // Result section
+            document.getElementById('resultSection').style.display = currentStep >= 3 ? 'block' : 'none';
+            if (currentStep >= 3) {
+                const container = document.getElementById('resultItems');
+                container.innerHTML = '';
+                mostCommon.forEach(([num, freq]) => {
+                    const item = document.createElement('div');
+                    item.className = 'result-item';
+                    item.textContent = num;
+                    container.appendChild(item);
+                });
+            }
+        }
+        
+        function step() {
+            if (currentStep >= 3) {
+                document.getElementById('stepBtn').disabled = true;
+                stopAuto();
+                return;
+            }
+            
+            currentStep++;
+            
+            if (currentStep === 1) {
+                document.getElementById('statusMessage').textContent = 
+                    'Step 1: Counter(nums) counts frequency of each element';
+            } else if (currentStep === 2) {
+                document.getElementById('statusMessage').textContent = 
+                    `Step 2: most_common(${k}) returns ${k} elements with highest frequency`;
+            } else if (currentStep === 3) {
+                document.getElementById('statusMessage').textContent = 
+                    `✅ Done! Top ${k} frequent: [${mostCommon.map(x => x[0]).join(', ')}]`;
+                document.getElementById('stepBtn').disabled = true;
+                stopAuto();
+            }
+            
+            render();
+        }
+        
+        function toggleAuto() {
+            if (autoInterval) { stopAuto(); }
+            else {
+                document.getElementById('autoBtn').textContent = 'Pause';
+                autoInterval = setInterval(step, 1000);
+            }
+        }
+        
+        function stopAuto() {
+            if (autoInterval) { clearInterval(autoInterval); autoInterval = null; }
+            document.getElementById('autoBtn').textContent = 'Auto Run';
+        }
+        
+        function reset() {
+            stopAuto();
+            document.getElementById('stepBtn').disabled = false;
+            document.getElementById('statusMessage').textContent = 'Input: [1,1,1,2,2,3], k=2. Using Counter.most_common() for elegant solution.';
+            init();
+        }
+        
+        init();
+    </script>
+</body>
+</html>

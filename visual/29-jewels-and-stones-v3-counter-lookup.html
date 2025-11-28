@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Q29: Jewels and Stones - Counter Lookup</title>
+    <link rel="stylesheet" href="visual.css">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>💎 Q29: Jewels and Stones</h1>
+            <p>LeetCode #771 | File: 29-3.py | Approach: Counter Frequency Lookup</p>
+        </div>
+        
+        <div class="problem-info">
+            <h3>📋 Problem Description</h3>
+            <p>You're given strings J (representing jewels) and S (representing stones). Each character in S is a stone. 
+            Count how many stones are also jewels.</p>
+            <p class="mt-10"><strong>Key Insight:</strong> Pre-count stone frequencies using Counter, then sum frequencies for each jewel type.</p>
+        </div>
+
+        
+            <div class="section">
+                <h4>🪨 Stones (S = "aAAbbbb")</h4>
+                <div id="stonesContainer"></div>
+            </div>
+            <div class="section">
+                <h4>📊 Stone Frequency Counter</h4>
+                <table class="counter-table" id="counterTable">
+                    <thead><tr><th>Stone</th><th>Count</th></tr></thead>
+                    <tbody id="counterBody"></tbody>
+                </table>
+            </div>
+            <div class="result-display" id="result"></div>
+        </div>
+
+        <div class="status" id="status">Ready to visualize Counter-based solution</div>
+    </div>
+
+        <div class="controls">
+            <button class="btn btn-primary" onclick="step()">Step</button>
+            <button class="btn btn-success" onclick="toggleAutoRun()">Auto Run</button>
+            <button class="btn btn-warning" onclick="reset()">Reset</button>
+        </div>
+
+        <div class="step-info" id="stepInfo">Click "Step" or "Auto Run" to begin visualization</div>
+        
+        <div class="visualization" id="viz">
+            <div class="section">
+                <h4>💎 Jewels (J = "aA")</h4>
+                <div id="jewelsContainer"></div>
+    
+        <div class="code-section">
+            <h3>📄 Python Solution (29-3.py)</h3>
+            <pre><span class="keyword">import</span> collections
+
+
+<span class="keyword">class</span> Solution:
+    <span class="keyword">def</span> <span class="function">numJewelsInStones</span>(<span class="keyword">self</span>, J: str, S: str) -&gt; int:
+        freqs = collections.<span class="function">Counter</span>(S)  <span class="comment"># 돌(S) 빈도 수 계산</span>
+        count = <span class="number">0</span>
+
+        <span class="comment"># 비교 없이 보석(J) 빈도 수 합산</span>
+        <span class="keyword">for</span> char <span class="keyword">in</span> J:
+            count += freqs[char]
+
+        <span class="keyword">return</span> count</pre>
+        </div>
+
+    </div>
+
+    <script>
+        const jewels = "aA";
+        const stones = "aAAbbbb";
+        let counter = {};
+        let currentStep = 0;
+        let autoRunning = false;
+        let autoRunInterval;
+        let count = 0;
+
+        function renderJewels() {
+            const container = document.getElementById('jewelsContainer');
+            container.innerHTML = '';
+            for (const char of jewels) {
+                const box = document.createElement('span');
+                box.className = 'char-box jewel';
+                box.textContent = char;
+                container.appendChild(box);
+            }
+        }
+
+        function renderStones(highlightChars = [], checkingChars = []) {
+            const container = document.getElementById('stonesContainer');
+            container.innerHTML = '';
+            for (const char of stones) {
+                const box = document.createElement('span');
+                box.className = 'char-box stone';
+                if (highlightChars.includes(char)) box.classList.add('highlight');
+                if (checkingChars.includes(char)) box.classList.add('checking');
+                box.textContent = char;
+                container.appendChild(box);
+            }
+        }
+
+        function renderCounter(activeKey = null) {
+            const tbody = document.getElementById('counterBody');
+            tbody.innerHTML = '';
+            for (const [key, val] of Object.entries(counter)) {
+                const row = document.createElement('tr');
+                const keyCell = document.createElement('td');
+                const valCell = document.createElement('td');
+                keyCell.textContent = key;
+                valCell.textContent = val;
+                if (key === activeKey) {
+                    keyCell.classList.add('active');
+                    valCell.classList.add('active');
+                }
+                row.appendChild(keyCell);
+                row.appendChild(valCell);
+                tbody.appendChild(row);
+            }
+        }
+
+        function step() {
+            const steps = [
+                { action: 'init', desc: 'Initialize: J = "aA" (jewels), S = "aAAbbbb" (stones)' },
+                { action: 'count_stones', desc: 'Step 1: Counter(S) → Count frequency of each stone' },
+                { action: 'lookup_a', desc: 'Step 2: Look up "a" in counter → freqs["a"] = 1. count = 0 + 1 = 1' },
+                { action: 'lookup_A', desc: 'Step 3: Look up "A" in counter → freqs["A"] = 2. count = 1 + 2 = 3' },
+                { action: 'done', desc: 'Result: 3 stones are jewels ✓' }
+            ];
+
+            if (currentStep >= steps.length) {
+                document.getElementById('status').textContent = 'Visualization complete! Click Reset to start over.';
+                return;
+            }
+
+            const s = steps[currentStep];
+            document.getElementById('stepInfo').textContent = s.desc;
+
+            switch(s.action) {
+                case 'init':
+                    renderJewels();
+                    renderStones();
+                    renderCounter();
+                    break;
+                case 'count_stones':
+                    counter = {};
+                    for (const char of stones) {
+                        counter[char] = (counter[char] || 0) + 1;
+                    }
+                    renderStones();
+                    renderCounter();
+                    break;
+                case 'lookup_a':
+                    count = counter['a'] || 0;
+                    renderStones(['a']);
+                    renderCounter('a');
+                    document.getElementById('result').innerHTML = `Count: <strong>${count}</strong>`;
+                    break;
+                case 'lookup_A':
+                    count += counter['A'] || 0;
+                    renderStones(['a', 'A']);
+                    renderCounter('A');
+                    document.getElementById('result').innerHTML = `Count: 1 + 2 = <strong>${count}</strong>`;
+                    break;
+                case 'done':
+                    renderStones(['a', 'A']);
+                    document.getElementById('result').innerHTML = `<span class="text-green">Total Jewels: <strong>3</strong></span>`;
+                    document.getElementById('status').textContent = 'Counter lookup: O(J) time to sum jewel frequencies!';
+                    break;
+            }
+
+            currentStep++;
+        }
+
+        function toggleAutoRun() {
+            autoRunning = !autoRunning;
+            const btn = document.querySelector('.btn-success');
+            if (autoRunning) {
+                btn.textContent = 'Pause';
+                autoRunInterval = setInterval(() => {
+                    if (currentStep >= 5) {
+                        toggleAutoRun();
+                        return;
+                    }
+                    step();
+                }, 1500);
+            } else {
+                btn.textContent = 'Auto Run';
+                clearInterval(autoRunInterval);
+            }
+        }
+
+        function reset() {
+            currentStep = 0;
+            count = 0;
+            counter = {};
+            if (autoRunning) toggleAutoRun();
+            document.getElementById('stepInfo').textContent = 'Click "Step" or "Auto Run" to begin visualization';
+            document.getElementById('status').textContent = 'Ready to visualize Counter-based solution';
+            document.getElementById('result').innerHTML = '';
+            renderJewels();
+            renderStones();
+            renderCounter();
+        }
+
+        // Initialize
+        renderJewels();
+        renderStones();
+    </script>
+</body>
+</html>

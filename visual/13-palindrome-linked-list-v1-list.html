@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Q13: Palindrome Linked List - List Approach</title>
+    <link rel="stylesheet" href="visual.css">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    
+</head>
+<body>
+    <div class="container">
+        <div class="problem-info">
+            <h1>Q13: Palindrome Linked List</h1>
+            <p>Given the head of a singly linked list, determine if it is a palindrome (reads the same forward and backward).</p>
+            <div class="problem-meta">
+                <span class="meta-tag">📁 Linked List</span>
+                <span class="meta-tag">⏱️ O(n)</span>
+                <span class="meta-tag">💾 O(n)</span>
+                <span class="meta-tag">💡 Version 1: List Conversion</span>
+            </div>
+        </div>
+        
+        
+        
+        <div class="visualization-section">
+            <h3>🎬 Visualization</h3>
+            
+            <div class="controls">
+                <button class="btn btn-primary" id="stepBtn" onclick="step()">Step</button>
+                <button class="btn btn-success" id="autoBtn" onclick="toggleAuto()">Auto Run</button>
+                <button class="btn btn-warning" onclick="reset()">Reset</button>
+            </div>
+            
+            <div class="status-message" id="statusMessage">
+                Click "Step" or "Auto Run" to start visualization
+            </div>
+            
+            <div class="array-section">
+                <div class="array-label">Linked List:</div>
+                <div class="linked-list-container" id="linkedListContainer"></div>
+            </div>
+            
+            <div class="array-section">
+                <div class="array-label">Converted Array (q):</div>
+                <div class="array-container" id="arrayContainer"></div>
+            </div>
+            
+            <div id="resultDisplay"></div>
+        </div>
+    </div>
+        
+        <div class="code-section">
+            <h3>📄 Python Solution (13-1.py)</h3>
+            <pre><span class="keyword">from</span> typing <span class="keyword">import</span> List
+
+
+<span class="comment"># Definition for singly-linked list.</span>
+<span class="keyword">class</span> ListNode:
+    <span class="keyword">def</span> <span class="function">__init__</span>(<span class="keyword">self</span>, x):
+        <span class="keyword">self</span>.val = x
+        <span class="keyword">self</span>.next = <span class="keyword">None</span>
+
+
+<span class="keyword">class</span> Solution:
+    <span class="keyword">def</span> <span class="function">isPalindrome</span>(<span class="keyword">self</span>, head: ListNode) -&gt; bool:
+        q: List = []
+
+        <span class="keyword">if</span> <span class="keyword">not</span> head:
+            <span class="keyword">return</span> <span class="keyword">True</span>
+
+        node = head
+        <span class="comment"># 리스트 변환</span>
+        <span class="keyword">while</span> node is <span class="keyword">not</span> <span class="keyword">None</span>:
+            q.<span class="function">append</span>(node.val)
+            node = node.next
+
+        <span class="comment"># 팰린드롬 판별</span>
+        <span class="keyword">while</span> <span class="function">len</span>(q) &gt; <span class="number">1</span>:
+            <span class="keyword">if</span> q.<span class="function">pop</span>(<span class="number">0</span>) != q.<span class="function">pop</span>():
+                <span class="keyword">return</span> <span class="keyword">False</span>
+
+        <span class="keyword">return</span> <span class="keyword">True</span></pre>
+        </div>
+
+    </div>
+
+    <script>
+        const values = [1, 2, 2, 1];
+        let arrayData = [];
+        let phase = 'init'; // init, convert, compare, done
+        let convertIndex = 0;
+        let autoInterval = null;
+        
+        function init() {
+            renderLinkedList();
+            document.getElementById('arrayContainer').innerHTML = '';
+            document.getElementById('resultDisplay').innerHTML = '';
+        }
+        
+        function renderLinkedList() {
+            const container = document.getElementById('linkedListContainer');
+            container.innerHTML = '';
+            values.forEach((val, i) => {
+                const node = document.createElement('div');
+                node.className = 'list-node';
+                node.id = `node-${i}`;
+                node.textContent = val;
+                container.appendChild(node);
+                
+                if (i < values.length - 1) {
+                    const arrow = document.createElement('div');
+                    arrow.className = 'list-arrow';
+                    container.appendChild(arrow);
+                }
+            });
+        }
+        
+        function renderArray() {
+            const container = document.getElementById('arrayContainer');
+            container.innerHTML = '';
+            arrayData.forEach((val, i) => {
+                const box = document.createElement('div');
+                box.className = 'array-box';
+                box.id = `arr-${i}`;
+                box.textContent = val;
+                container.appendChild(box);
+            });
+        }
+        
+        function step() {
+            if (phase === 'init') {
+                phase = 'convert';
+                convertIndex = 0;
+                arrayData = [];
+                document.getElementById('statusMessage').textContent = 
+                    'Converting linked list to array...';
+            } else if (phase === 'convert') {
+                if (convertIndex < values.length) {
+                    // Mark node as traversed
+                    document.getElementById(`node-${convertIndex}`).classList.add('traversed');
+                    
+                    // Add to array
+                    arrayData.push(values[convertIndex]);
+                    renderArray();
+                    
+                    document.getElementById('statusMessage').textContent = 
+                        `Added ${values[convertIndex]} to array. Array: [${arrayData.join(', ')}]`;
+                    
+                    convertIndex++;
+                } else {
+                    phase = 'compare';
+                    document.getElementById('statusMessage').textContent = 
+                        'Conversion complete. Now comparing front and back using pop(0) and pop()...';
+                }
+            } else if (phase === 'compare') {
+                if (arrayData.length <= 1) {
+                    // Done - it's a palindrome
+                    phase = 'done';
+                    document.getElementById('resultDisplay').innerHTML = 
+                        '<div class="result-display success">✅ It\'s a Palindrome!</div>';
+                    document.getElementById('statusMessage').textContent = 
+                        'All pairs matched! The linked list is a palindrome.';
+                    document.getElementById('stepBtn').disabled = true;
+                    stopAuto();
+                } else {
+                    const front = arrayData[0];
+                    const back = arrayData[arrayData.length - 1];
+                    
+                    // Highlight
+                    document.getElementById('arr-0').classList.add('left-ptr');
+                    document.getElementById(`arr-${arrayData.length - 1}`).classList.add('right-ptr');
+                    
+                    if (front === back) {
+                        document.getElementById('statusMessage').textContent = 
+                            `pop(0)=${front}, pop()=${back} → Match! Removing both.`;
+                        
+                        // Remove from array
+                        setTimeout(() => {
+                            arrayData.shift();
+                            arrayData.pop();
+                            renderArray();
+                        }, 600);
+                    } else {
+                        // Mismatch
+                        phase = 'done';
+                        document.getElementById('arr-0').classList.add('mismatch');
+                        document.getElementById(`arr-${arrayData.length - 1}`).classList.add('mismatch');
+                        document.getElementById('resultDisplay').innerHTML = 
+                            '<div class="result-display failure">❌ Not a Palindrome!</div>';
+                        document.getElementById('statusMessage').textContent = 
+                            `pop(0)=${front}, pop()=${back} → Mismatch!`;
+                        document.getElementById('stepBtn').disabled = true;
+                        stopAuto();
+                    }
+                }
+            }
+        }
+        
+        function toggleAuto() {
+            if (autoInterval) {
+                stopAuto();
+            } else {
+                document.getElementById('autoBtn').textContent = 'Pause';
+                autoInterval = setInterval(() => {
+                    if (phase === 'done') {
+                        stopAuto();
+                    } else {
+                        step();
+                    }
+                }, 800);
+            }
+        }
+        
+        function stopAuto() {
+            if (autoInterval) {
+                clearInterval(autoInterval);
+                autoInterval = null;
+            }
+            document.getElementById('autoBtn').textContent = 'Auto Run';
+        }
+        
+        function reset() {
+            stopAuto();
+            phase = 'init';
+            convertIndex = 0;
+            arrayData = [];
+            document.getElementById('stepBtn').disabled = false;
+            document.getElementById('statusMessage').textContent = 
+                'Click "Step" or "Auto Run" to start visualization';
+            init();
+        }
+        
+        // Initialize on load
+        init();
+    </script>
+</body>
+</html>

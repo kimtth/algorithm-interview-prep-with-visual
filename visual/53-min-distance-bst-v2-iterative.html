@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Q53: Minimum Distance BST (v2 - Iterative)</title>
+    <link rel="stylesheet" href="visual.css">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    
+</head>
+<body>
+    <div class="container">
+        <div class="problem-info">
+            <h1>Q53: Minimum Distance in BST (v2 - Iterative)</h1>
+            <p>Find minimum difference using iterative in-order traversal with explicit stack. Morris traversal alternative.</p>
+            <div class="problem-meta">
+                <span class="meta-tag">📁 BST</span>
+                <span class="meta-tag">⏱️ O(n)</span>
+                <span class="meta-tag">💡 Iterative In-order</span>
+            </div>
+        </div>
+        
+        
+        
+        <div class="visualization-section">
+            <h3>🎬 Visualization</h3>
+            
+            <div class="controls">
+                <button class="btn btn-primary" id="stepBtn" onclick="step()">Step</button>
+                <button class="btn btn-success" id="autoBtn" onclick="toggleAuto()">Auto Run</button>
+                <button class="btn btn-warning" onclick="reset()">Reset</button>
+            </div>
+            
+            <div class="legend">
+                <div class="legend-item"><div class="legend-circle bg-cyan"></div> Unvisited</div>
+                <div class="legend-item"><div class="legend-circle legend-color bg-orange"></div> Current</div>
+                <div class="legend-item"><div class="legend-circle legend-color bg-green"></div> Processed</div>
+                <div class="legend-item"><div class="legend-circle legend-color bg-purple-deep"></div> In Stack</div>
+            </div>
+            
+            <div class="status-message" id="statusMessage">
+                BST: [4, 2, 6, 1, 3]. Iterative in-order with stack.
+            </div>
+            
+            <div class="info-section">
+                <div class="info-box">
+                    <div class="info-label">Previous Value</div>
+                    <div class="info-value" id="prevValue">-∞</div>
+                </div>
+                <div class="info-box highlight">
+                    <div class="info-label">Min Difference</div>
+                    <div class="info-value" id="minDiff">∞</div>
+                </div>
+            </div>
+            
+            <div class="split-view">
+                <div class="tree-section">
+                    <div class="tree-container">
+                        <svg id="tree" width="350" height="220"></svg>
+                    </div>
+                </div>
+                
+                <div class="stack-section">
+                    <div class="stack-container">
+                        <div class="stack-title">📚 Stack</div>
+                        <div class="stack-items" id="stackItems">
+                            <div class="stack-empty">Empty</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+        
+        <div class="code-section">
+            <h3>📄 Python Solution (53-2.py)</h3>
+            <pre><span class="keyword">import</span> sys
+
+
+<span class="comment"># Definition for a binary tree node.</span>
+<span class="keyword">class</span> TreeNode:
+    <span class="keyword">def</span> <span class="function">__init__</span>(<span class="keyword">self</span>, x):
+        <span class="keyword">self</span>.val = x
+        <span class="keyword">self</span>.left = <span class="keyword">None</span>
+        <span class="keyword">self</span>.right = <span class="keyword">None</span>
+
+
+<span class="keyword">class</span> Solution:
+    <span class="keyword">def</span> <span class="function">minDiffInBST</span>(<span class="keyword">self</span>, root: TreeNode) -&gt; int:
+        prev = -sys.maxsize
+        result = sys.maxsize
+
+        stack = []
+        node = root
+
+        <span class="comment"># 반복 구조 중위 순회 비교 결과</span>
+        <span class="keyword">while</span> stack <span class="keyword">or</span> node:
+            <span class="keyword">while</span> node:
+                stack.<span class="function">append</span>(node)
+                node = node.left
+
+            node = stack.<span class="function">pop</span>()
+
+            result = <span class="function">min</span>(result, node.val - prev)
+            prev = node.val
+
+            node = node.right
+
+        <span class="keyword">return</span> result</pre>
+        </div>
+
+    </div>
+
+    <script>
+        const nodes = [
+            { id: 4, val: 4, left: 2, right: 6, x: 175, y: 40 },
+            { id: 2, val: 2, left: 1, right: 3, x: 90, y: 110 },
+            { id: 6, val: 6, left: null, right: null, x: 260, y: 110 },
+            { id: 1, val: 1, left: null, right: null, x: 45, y: 180 },
+            { id: 3, val: 3, left: null, right: null, x: 135, y: 180 }
+        ];
+        
+        // Steps: push 4, push 2, push 1, pop 1 (process), pop 2, push 3, pop 3, pop 4, push 6, pop 6
+        const steps = [
+            { action: 'push', node: 4, message: 'Start at root 4. Go left.' },
+            { action: 'push', node: 2, message: 'Push 4, move to 2. Go left.' },
+            { action: 'push', node: 1, message: 'Push 2, move to 1. No left child.' },
+            { action: 'pop', node: 1, message: 'Pop 1. First node, prev=-∞. Go right (null).' },
+            { action: 'pop', node: 2, message: 'Pop 2. Diff = 2-1 = 1. Min = 1. Go right to 3.' },
+            { action: 'push', node: 3, message: 'Push 3. No left child.' },
+            { action: 'pop', node: 3, message: 'Pop 3. Diff = 3-2 = 1. Min = 1. Go right (null).' },
+            { action: 'pop', node: 4, message: 'Pop 4. Diff = 4-3 = 1. Min = 1. Go right to 6.' },
+            { action: 'push', node: 6, message: 'Push 6. No left child.' },
+            { action: 'pop', node: 6, message: 'Pop 6. Diff = 6-4 = 2. Min = 1. Done.' }
+        ];
+        
+        let stack = [];
+        let processed = new Set();
+        let inStack = new Set();
+        let currentNode = null;
+        let prev = null;
+        let minDiff = Infinity;
+        let stepIndex = 0;
+        let autoInterval = null;
+        
+        function getNode(id) {
+            return nodes.find(n => n.id === id);
+        }
+        
+        function init() {
+            stack = [];
+            processed = new Set();
+            inStack = new Set();
+            currentNode = null;
+            prev = null;
+            minDiff = Infinity;
+            stepIndex = 0;
+            
+            document.getElementById('prevValue').textContent = '-∞';
+            document.getElementById('minDiff').textContent = '∞';
+            renderTree();
+            renderStack();
+        }
+        
+        function renderTree() {
+            const svg = d3.select("#tree");
+            svg.selectAll("*").remove();
+            
+            nodes.forEach(node => {
+                if (node.left !== null) {
+                    const child = getNode(node.left);
+                    svg.append("line")
+                        .attr("x1", node.x).attr("y1", node.y)
+                        .attr("x2", child.x).attr("y2", child.y)
+                        .attr("stroke", "#999")
+                        .attr("stroke-width", 2);
+                }
+                if (node.right !== null) {
+                    const child = getNode(node.right);
+                    svg.append("line")
+                        .attr("x1", node.x).attr("y1", node.y)
+                        .attr("x2", child.x).attr("y2", child.y)
+                        .attr("stroke", "#999")
+                        .attr("stroke-width", 2);
+                }
+            });
+            
+            nodes.forEach(node => {
+                let fill = "#3498db";
+                if (processed.has(node.val)) fill = "#4caf50";
+                else if (inStack.has(node.val)) fill = "#9c27b0";
+                if (node.val === currentNode) fill = "#ff9800";
+                
+                svg.append("circle")
+                    .attr("cx", node.x)
+                    .attr("cy", node.y)
+                    .attr("r", 25)
+                    .attr("fill", fill)
+                    .attr("stroke", "#333")
+                    .attr("stroke-width", 2);
+                
+                svg.append("text")
+                    .attr("x", node.x)
+                    .attr("y", node.y + 5)
+                    .attr("text-anchor", "middle")
+                    .attr("fill", "white")
+                    .attr("font-weight", "bold")
+                    .attr("font-size", "14px")
+                    .text(node.val);
+            });
+        }
+        
+        function renderStack() {
+            const container = document.getElementById('stackItems');
+            if (stack.length === 0) {
+                container.innerHTML = '<div class="stack-empty">Empty</div>';
+            } else {
+                container.innerHTML = stack.map(val => 
+                    `<div class="stack-item">${val}</div>`
+                ).join('');
+            }
+        }
+        
+        function step() {
+            if (stepIndex >= steps.length) {
+                document.getElementById('statusMessage').textContent = `✅ Complete! Minimum difference = ${minDiff}`;
+                document.getElementById('stepBtn').disabled = true;
+                stopAuto();
+                currentNode = null;
+                renderTree();
+                return;
+            }
+            
+            const s = steps[stepIndex];
+            currentNode = s.node;
+            
+            if (s.action === 'push') {
+                stack.push(s.node);
+                inStack.add(s.node);
+            } else if (s.action === 'pop') {
+                stack.pop();
+                inStack.delete(s.node);
+                processed.add(s.node);
+                
+                if (prev !== null) {
+                    const diff = s.node - prev;
+                    minDiff = Math.min(minDiff, diff);
+                }
+                prev = s.node;
+            }
+            
+            document.getElementById('prevValue').textContent = prev === null ? '-∞' : prev;
+            document.getElementById('minDiff').textContent = minDiff === Infinity ? '∞' : minDiff;
+            document.getElementById('statusMessage').textContent = s.message;
+            
+            renderTree();
+            renderStack();
+            
+            stepIndex++;
+            
+            if (stepIndex >= steps.length) {
+                setTimeout(() => {
+                    document.getElementById('statusMessage').textContent = `✅ Complete! Minimum difference = ${minDiff}`;
+                    document.getElementById('stepBtn').disabled = true;
+                    stopAuto();
+                    currentNode = null;
+                    renderTree();
+                }, 300);
+            }
+        }
+        
+        function toggleAuto() {
+            if (autoInterval) { stopAuto(); }
+            else {
+                document.getElementById('autoBtn').textContent = 'Pause';
+                autoInterval = setInterval(step, 900);
+            }
+        }
+        
+        function stopAuto() {
+            if (autoInterval) { clearInterval(autoInterval); autoInterval = null; }
+            document.getElementById('autoBtn').textContent = 'Auto Run';
+        }
+        
+        function reset() {
+            stopAuto();
+            document.getElementById('stepBtn').disabled = false;
+            document.getElementById('statusMessage').textContent = 
+                'BST: [4, 2, 6, 1, 3]. Iterative in-order with stack.';
+            init();
+        }
+        
+        init();
+    </script>
+</body>
+</html>

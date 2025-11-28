@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Q43: Diameter of Binary Tree</title>
+    <link rel="stylesheet" href="visual.css">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    
+</head>
+<body>
+    <div class="container">
+        <div class="problem-info">
+            <h1>Q43: Diameter of Binary Tree</h1>
+            <p>Find the diameter of a binary tree - the longest path between any two nodes. The path may or may not pass through the root.</p>
+            <div class="problem-meta">
+                <span class="meta-tag">📁 Tree</span>
+                <span class="meta-tag">⏱️ O(n)</span>
+                <span class="meta-tag">💡 DFS Post-Order</span>
+            </div>
+        </div>
+        
+        
+        
+        <div class="visualization-section">
+            <h3>🎬 Visualization</h3>
+            
+            <div class="controls">
+                <button class="btn btn-primary" id="stepBtn" onclick="step()">Step</button>
+                <button class="btn btn-success" id="autoBtn" onclick="toggleAuto()">Auto Run</button>
+                <button class="btn btn-warning" onclick="reset()">Reset</button>
+            </div>
+            
+            <div class="legend">
+                <div class="legend-item"><div class="legend-circle bg-cyan"></div> Unvisited</div>
+                <div class="legend-item"><div class="legend-circle bg-orange-deep"></div> Processing</div>
+                <div class="legend-item"><div class="legend-circle bg-lime"></div> Completed</div>
+                <div class="legend-item"><div class="legend-circle bg-red-soft"></div> Longest Path</div>
+            </div>
+            
+            <div class="status-message" id="statusMessage">
+                Tree: [1, 2, 3, 4, 5]. Click Step to start DFS traversal.
+            </div>
+            
+            <div class="info-section">
+                <div class="info-box">
+                    <div class="info-label">Current Height</div>
+                    <div class="info-value" id="currentHeight">-</div>
+                </div>
+                <div class="info-box highlight">
+                    <div class="info-label">Longest Diameter</div>
+                    <div class="info-value" id="longestValue">0</div>
+                </div>
+            </div>
+            
+            <div class="tree-container">
+                <svg id="tree" width="600" height="300"></svg>
+            </div>
+            
+            <div class="stack-section">
+                <div class="stack-title">📚 DFS Call Stack</div>
+                <div class="stack-items" id="stackDisplay"><span class="text-gray">Empty</span></div>
+            </div>
+        </div>
+    </div>
+        
+        <div class="code-section">
+            <h3>📄 Python Solution (43-1.py)</h3>
+            <pre><span class="comment"># Definition for a binary tree node.</span>
+<span class="keyword">class</span> TreeNode:
+    <span class="keyword">def</span> <span class="function">__init__</span>(<span class="keyword">self</span>, x):
+        <span class="keyword">self</span>.val = x
+        <span class="keyword">self</span>.left = <span class="keyword">None</span>
+        <span class="keyword">self</span>.right = <span class="keyword">None</span>
+
+
+<span class="keyword">class</span> Solution:
+    longest: int = <span class="number">0</span>
+
+    <span class="keyword">def</span> <span class="function">diameterOfBinaryTree</span>(<span class="keyword">self</span>, root: TreeNode) -&gt; int:
+        <span class="keyword">def</span> <span class="function">dfs</span>(node: TreeNode) -&gt; int:
+            <span class="keyword">if</span> <span class="keyword">not</span> node:
+                <span class="keyword">return</span> -<span class="number">1</span>
+            <span class="comment"># 왼쪽, 오른쪽 각각 리프 노드까지 탐색</span>
+            left = <span class="function">dfs</span>(node.left)
+            right = <span class="function">dfs</span>(node.right)
+
+            <span class="comment"># 가장 긴 경로</span>
+            <span class="keyword">self</span>.longest = <span class="function">max</span>(<span class="keyword">self</span>.longest, left + right + <span class="number">2</span>)
+            <span class="comment"># 상태값</span>
+            <span class="keyword">return</span> <span class="function">max</span>(left, right) + <span class="number">1</span>
+
+        <span class="function">dfs</span>(root)
+        <span class="keyword">return</span> <span class="keyword">self</span>.longest</pre>
+        </div>
+
+    </div>
+
+    <script>
+        // Tree: 1 at root, 2 and 3 as children, 4 and 5 under 2
+        const treeData = {
+            val: 1, id: 0,
+            left: { val: 2, id: 1, left: { val: 4, id: 3 }, right: { val: 5, id: 4 } },
+            right: { val: 3, id: 2 }
+        };
+        
+        let nodes = [];
+        let links = [];
+        let stack = [];
+        let heights = {};
+        let longest = 0;
+        let currentNode = null;
+        let completed = new Set();
+        let pathNodes = [];
+        let done = false;
+        let autoInterval = null;
+        let stepCount = 0;
+        
+        function buildTree(node, x, y, dx) {
+            if (!node) return;
+            nodes.push({ val: node.val, id: node.id, x, y });
+            if (node.left) {
+                links.push({ source: node.id, target: node.left.id });
+                buildTree(node.left, x - dx, y + 70, dx / 2);
+            }
+            if (node.right) {
+                links.push({ source: node.id, target: node.right.id });
+                buildTree(node.right, x + dx, y + 70, dx / 2);
+            }
+        }
+        
+        function getNode(id) { return nodes.find(n => n.id === id); }
+        
+        function init() {
+            nodes = [];
+            links = [];
+            stack = [{ id: 0, phase: 'descend' }];
+            heights = {};
+            longest = 0;
+            currentNode = null;
+            completed = new Set();
+            pathNodes = [];
+            done = false;
+            stepCount = 0;
+            
+            buildTree(treeData, 300, 50, 100);
+            renderTree();
+            renderStack();
+        }
+        
+        function renderTree() {
+            const svg = d3.select("#tree");
+            svg.selectAll("*").remove();
+            
+            // Draw links
+            links.forEach(link => {
+                const source = getNode(link.source);
+                const target = getNode(link.target);
+                const isPath = pathNodes.includes(link.source) && pathNodes.includes(link.target);
+                
+                svg.append("line")
+                    .attr("x1", source.x).attr("y1", source.y)
+                    .attr("x2", target.x).attr("y2", target.y)
+                    .attr("stroke", isPath ? "#e74c3c" : "#999")
+                    .attr("stroke-width", isPath ? 4 : 2);
+            });
+            
+            // Draw nodes
+            nodes.forEach(node => {
+                let fill = "#3498db";
+                if (completed.has(node.id)) fill = "#27ae60";
+                if (currentNode === node.id) fill = "#f39c12";
+                if (pathNodes.includes(node.id)) fill = "#e74c3c";
+                
+                svg.append("circle")
+                    .attr("cx", node.x).attr("cy", node.y)
+                    .attr("r", 25)
+                    .attr("fill", fill)
+                    .attr("stroke", "#333")
+                    .attr("stroke-width", 2);
+                
+                svg.append("text")
+                    .attr("x", node.x).attr("y", node.y + 5)
+                    .attr("text-anchor", "middle")
+                    .attr("fill", "white")
+                    .attr("font-weight", "bold")
+                    .text(node.val);
+                
+                // Show height if computed
+                if (heights[node.id] !== undefined) {
+                    svg.append("text")
+                        .attr("x", node.x + 30).attr("y", node.y)
+                        .attr("font-size", "12px")
+                        .attr("fill", "#666")
+                        .text(`h=${heights[node.id]}`);
+                }
+            });
+        }
+        
+        function renderStack() {
+            const container = document.getElementById('stackDisplay');
+            if (stack.length === 0) {
+                container.innerHTML = '<span class="text-gray">Empty</span>';
+            } else {
+                container.innerHTML = stack.map(s => {
+                    const node = getNode(s.id);
+                    return `<div class="stack-item">${node.val} (${s.phase})</div>`;
+                }).join('');
+            }
+        }
+        
+        function getChildren(id) {
+            return links.filter(l => l.source === id).map(l => l.target);
+        }
+        
+        function step() {
+            if (done || stack.length === 0) {
+                done = true;
+                // Find longest path nodes
+                document.getElementById('statusMessage').textContent = 
+                    `✅ Complete! Diameter = ${longest} (longest path has ${longest + 1} nodes)`;
+                document.getElementById('stepBtn').disabled = true;
+                stopAuto();
+                return;
+            }
+            
+            const current = stack[stack.length - 1];
+            currentNode = current.id;
+            const node = getNode(current.id);
+            const children = getChildren(current.id);
+            
+            if (current.phase === 'descend') {
+                // Need to visit children first
+                const unvisited = children.filter(c => !completed.has(c));
+                if (unvisited.length > 0) {
+                    stack.push({ id: unvisited[0], phase: 'descend' });
+                    document.getElementById('statusMessage').textContent = 
+                        `Descending to node ${getNode(unvisited[0]).val}`;
+                } else {
+                    current.phase = 'compute';
+                    document.getElementById('statusMessage').textContent = 
+                        `Node ${node.val}: all children visited, computing height`;
+                }
+            } else if (current.phase === 'compute') {
+                // Compute height
+                const childHeights = children.map(c => heights[c] !== undefined ? heights[c] : -1);
+                const left = childHeights[0] !== undefined ? childHeights[0] : -1;
+                const right = childHeights[1] !== undefined ? childHeights[1] : -1;
+                
+                const height = Math.max(left, right) + 1;
+                heights[current.id] = height;
+                
+                const diameter = left + right + 2;
+                if (diameter > longest) {
+                    longest = diameter;
+                    document.getElementById('longestValue').textContent = longest;
+                }
+                
+                document.getElementById('currentHeight').textContent = height;
+                document.getElementById('statusMessage').textContent = 
+                    `Node ${node.val}: left=${left}, right=${right}, height=${height}, diameter through here=${diameter}`;
+                
+                completed.add(current.id);
+                stack.pop();
+            }
+            
+            renderTree();
+            renderStack();
+        }
+        
+        function toggleAuto() {
+            if (autoInterval) { stopAuto(); }
+            else {
+                document.getElementById('autoBtn').textContent = 'Pause';
+                autoInterval = setInterval(step, 800);
+            }
+        }
+        
+        function stopAuto() {
+            if (autoInterval) { clearInterval(autoInterval); autoInterval = null; }
+            document.getElementById('autoBtn').textContent = 'Auto Run';
+        }
+        
+        function reset() {
+            stopAuto();
+            document.getElementById('stepBtn').disabled = false;
+            document.getElementById('statusMessage').textContent = 
+                'Tree: [1, 2, 3, 4, 5]. Click Step to start DFS traversal.';
+            document.getElementById('longestValue').textContent = '0';
+            document.getElementById('currentHeight').textContent = '-';
+            init();
+        }
+        
+        init();
+    </script>
+</body>
+</html>

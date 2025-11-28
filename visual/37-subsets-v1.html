@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Q37: Subsets</title>
+    <link rel="stylesheet" href="visual.css">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    
+</head>
+<body>
+    <div class="container">
+        <div class="problem-info">
+            <h1>Q37: Subsets</h1>
+            <p>Given an integer array of unique elements, return all possible subsets (the power set).</p>
+            <div class="problem-meta">
+                <span class="meta-tag">📁 Backtracking</span>
+                <span class="meta-tag">⏱️ O(n × 2^n)</span>
+                <span class="meta-tag">💡 DFS all paths</span>
+            </div>
+        </div>
+        
+        
+        
+        <div class="visualization-section">
+            <h3>🎬 Visualization</h3>
+            
+            <div class="controls">
+                <button class="btn btn-primary" id="stepBtn" onclick="step()">Step</button>
+                <button class="btn btn-success" id="autoBtn" onclick="toggleAuto()">Auto Run</button>
+                <button class="btn btn-warning" onclick="reset()">Reset</button>
+            </div>
+            
+            <div class="status-message" id="statusMessage">
+                Input: [1, 2, 3]. Generate all 2^3 = 8 subsets.
+            </div>
+            
+            <div class="mb-10 text-gray-dark">Input:</div>
+            <div class="input-display" id="inputDisplay"></div>
+            
+            <div class="current-path">
+                <div class="path-label">Current Path</div>
+                <div class="path-items" id="pathDisplay"></div>
+            </div>
+            
+            <div class="results-section">
+                <div class="results-label">Subsets (Power Set):</div>
+                <div class="results-grid" id="resultsGrid"></div>
+            </div>
+            
+            <svg id="treeCanvas"></svg>
+        </div>
+    </div>
+        
+        <div class="code-section">
+            <h3>📄 Python Solution (37-1.py)</h3>
+            <pre><span class="keyword">from</span> typing <span class="keyword">import</span> List
+
+
+<span class="keyword">class</span> Solution:
+    <span class="keyword">def</span> <span class="function">subsets</span>(<span class="keyword">self</span>, nums: List[int]) -&gt; List[List[int]]:
+        result = []
+
+        <span class="keyword">def</span> <span class="function">dfs</span>(index, path):
+            <span class="comment"># 매 번 결과 추가</span>
+            result.<span class="function">append</span>(path)
+
+            <span class="comment"># 경로를 만들면서 DFS</span>
+            <span class="keyword">for</span> i <span class="keyword">in</span> <span class="function">range</span>(index, <span class="function">len</span>(nums)):
+                <span class="function">dfs</span>(i + <span class="number">1</span>, path + [nums[i]])
+
+        <span class="function">dfs</span>(<span class="number">0</span>, [])
+        <span class="keyword">return</span> result</pre>
+        </div>
+
+    </div>
+
+    <script>
+        const nums = [1, 2, 3];
+        let results = [];
+        let stack = [];
+        let currentPath = [];
+        let autoInterval = null;
+        let treeNodes = [{id: 'root', path: '[]', parent: null}];
+        
+        function init() {
+            results = [];
+            stack = [{index: 0, path: []}];
+            currentPath = [];
+            treeNodes = [{id: 'root', path: '[]', parent: null}];
+            
+            // Render input
+            const inputContainer = document.getElementById('inputDisplay');
+            inputContainer.innerHTML = '';
+            nums.forEach(n => {
+                const item = document.createElement('div');
+                item.className = 'input-item';
+                item.textContent = n;
+                inputContainer.appendChild(item);
+            });
+            
+            render();
+        }
+        
+        function render() {
+            // Path
+            const pathContainer = document.getElementById('pathDisplay');
+            pathContainer.innerHTML = currentPath.length ? 
+                currentPath.map(p => `<div class="path-item">${p}</div>`).join('') :
+                '<span class="text-gray">[] (empty set)</span>';
+            
+            // Results
+            const resultsContainer = document.getElementById('resultsGrid');
+            resultsContainer.innerHTML = '';
+            results.forEach((r, i) => {
+                const item = document.createElement('span');
+                item.className = 'result-item' + (i === results.length - 1 ? ' new' : '');
+                item.textContent = r.length ? `[${r.join(', ')}]` : '[]';
+                resultsContainer.appendChild(item);
+            });
+            
+            renderTree();
+        }
+        
+        function renderTree() {
+            const svg = d3.select('#treeCanvas');
+            svg.selectAll('*').remove();
+            
+            const width = svg.node().getBoundingClientRect().width || 800;
+            const height = 280;
+            svg.attr('height', height);
+            
+            if (treeNodes.length <= 1) return;
+            
+            const root = d3.stratify()
+                .id(d => d.id)
+                .parentId(d => d.parent)(treeNodes);
+            
+            const treeLayout = d3.tree().size([width - 60, height - 60]);
+            treeLayout(root);
+            
+            svg.selectAll('.link')
+                .data(root.links())
+                .enter()
+                .append('line')
+                .attr('x1', d => d.source.x + 30)
+                .attr('y1', d => d.source.y + 20)
+                .attr('x2', d => d.target.x + 30)
+                .attr('y2', d => d.target.y + 20)
+                .attr('stroke', '#ccc')
+                .attr('stroke-width', 2);
+            
+            const nodes = svg.selectAll('.node')
+                .data(root.descendants())
+                .enter()
+                .append('g')
+                .attr('transform', d => `translate(${d.x + 30}, ${d.y + 20})`);
+            
+            nodes.append('circle')
+                .attr('r', 16)
+                .attr('fill', d => {
+                    if (JSON.stringify(currentPath) === d.data.path) return '#ff9800';
+                    return '#4caf50';
+                });
+            
+            nodes.append('text')
+                .attr('dy', 5)
+                .attr('text-anchor', 'middle')
+                .attr('fill', 'white')
+                .attr('font-size', '9px')
+                .text(d => d.data.path);
+        }
+        
+        function step() {
+            if (stack.length === 0) {
+                document.getElementById('statusMessage').textContent = 
+                    `✅ Done! Found ${results.length} subsets (2^${nums.length} = ${Math.pow(2, nums.length)}).`;
+                document.getElementById('stepBtn').disabled = true;
+                stopAuto();
+                return;
+            }
+            
+            const state = stack.pop();
+            currentPath = state.path;
+            
+            // Add current path to results
+            results.push([...state.path]);
+            
+            // Add children in reverse order
+            for (let i = nums.length - 1; i >= state.index; i--) {
+                const nextPath = [...state.path, nums[i]];
+                stack.push({index: i + 1, path: nextPath});
+                
+                const nodeId = JSON.stringify(nextPath);
+                if (!treeNodes.find(n => n.id === nodeId)) {
+                    treeNodes.push({
+                        id: nodeId,
+                        path: nodeId,
+                        parent: JSON.stringify(state.path) || 'root'
+                    });
+                }
+            }
+            
+            document.getElementById('statusMessage').textContent = 
+                `Added subset: [${state.path.join(', ')}]${state.path.length === 0 ? ' (empty)' : ''}`;
+            render();
+        }
+        
+        function toggleAuto() {
+            if (autoInterval) { stopAuto(); }
+            else {
+                document.getElementById('autoBtn').textContent = 'Pause';
+                autoInterval = setInterval(step, 500);
+            }
+        }
+        
+        function stopAuto() {
+            if (autoInterval) { clearInterval(autoInterval); autoInterval = null; }
+            document.getElementById('autoBtn').textContent = 'Auto Run';
+        }
+        
+        function reset() {
+            stopAuto();
+            document.getElementById('stepBtn').disabled = false;
+            document.getElementById('statusMessage').textContent = 'Input: [1, 2, 3]. Generate all 2^3 = 8 subsets.';
+            init();
+        }
+        
+        init();
+    </script>
+</body>
+</html>

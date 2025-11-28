@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Q55: Kth Largest Element (v2 - Min Heap)</title>
+    <link rel="stylesheet" href="visual.css">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    
+</head>
+<body>
+    <div class="container">
+        <div class="problem-info">
+            <h1>Q55: Kth Largest Element (v2 - Min Heap)</h1>
+            <p>Heapify array as min heap, then pop (n-k) smallest elements. The top of remaining heap is kth largest.</p>
+            <div class="problem-meta">
+                <span class="meta-tag">📁 Heap</span>
+                <span class="meta-tag">⏱️ O(n + (n-k) log n)</span>
+                <span class="meta-tag">💡 Pop Smallest</span>
+            </div>
+        </div>
+        
+        
+        
+        <div class="visualization-section">
+            <h3>🎬 Visualization</h3>
+            
+            <div class="controls">
+                <button class="btn btn-primary" id="stepBtn" onclick="step()">Step</button>
+                <button class="btn btn-success" id="autoBtn" onclick="toggleAuto()">Auto Run</button>
+                <button class="btn btn-warning" onclick="reset()">Reset</button>
+            </div>
+            
+            <div class="status-message" id="statusMessage">
+                nums = [3, 2, 1, 5, 6, 4], k = 2. Pop (6-2)=4 smallest, then top is answer.
+            </div>
+            
+            <div class="info-section">
+                <div class="info-box">
+                    <div class="info-label">k</div>
+                    <div class="info-value">2</div>
+                </div>
+                <div class="info-box">
+                    <div class="info-label">To Pop</div>
+                    <div class="info-value" id="toPop">4</div>
+                </div>
+                <div class="info-box highlight">
+                    <div class="info-label">Popped</div>
+                    <div class="info-value" id="poppedCount">0</div>
+                </div>
+            </div>
+            
+            <h4 class="mb-10 text-gray-darker">🏔️ Min Heap (smallest at root)</h4>
+            <div class="heap-container">
+                <svg id="heap" width="500" height="200"></svg>
+            </div>
+            
+            <div class="popped-section">
+                <div class="popped-title">🔽 Popped (Smallest First - Discarded)</div>
+                <div class="popped-items" id="poppedItems"><span class="text-gray">None yet</span></div>
+            </div>
+        </div>
+    </div>
+        
+        <div class="code-section">
+            <h3>📄 Python Solution (55-2.py)</h3>
+            <pre><span class="keyword">import</span> heapq
+<span class="keyword">from</span> typing <span class="keyword">import</span> List
+
+
+<span class="keyword">class</span> Solution:
+    <span class="keyword">def</span> <span class="function">findKthLargest</span>(<span class="keyword">self</span>, nums: List[int], k: int) -&gt; int:
+        heapq.<span class="function">heapify</span>(nums)
+
+        <span class="keyword">for</span> _ <span class="keyword">in</span> <span class="function">range</span>(<span class="function">len</span>(nums) - k):
+            heapq.<span class="function">heappop</span>(nums)
+
+        <span class="keyword">return</span> heapq.<span class="function">heappop</span>(nums)</pre>
+        </div>
+
+    </div>
+
+    <script>
+        const originalNums = [3, 2, 1, 5, 6, 4];
+        const k = 2;
+        const toPop = originalNums.length - k;
+        
+        let heap = [];
+        let poppedCount = 0;
+        let popped = [];
+        let phase = 'heapify';
+        let autoInterval = null;
+        
+        function heapify(arr) {
+            const n = arr.length;
+            for (let i = Math.floor(n / 2) - 1; i >= 0; i--) {
+                siftDown(arr, i, n);
+            }
+        }
+        
+        function siftDown(arr, i, n) {
+            while (true) {
+                const left = 2 * i + 1;
+                const right = 2 * i + 2;
+                let smallest = i;
+                if (left < n && arr[left] < arr[smallest]) smallest = left;
+                if (right < n && arr[right] < arr[smallest]) smallest = right;
+                if (smallest === i) break;
+                [arr[i], arr[smallest]] = [arr[smallest], arr[i]];
+                i = smallest;
+            }
+        }
+        
+        function heapPop() {
+            if (heap.length === 0) return null;
+            const result = heap[0];
+            const last = heap.pop();
+            if (heap.length > 0) {
+                heap[0] = last;
+                siftDown(heap, 0, heap.length);
+            }
+            return result;
+        }
+        
+        function init() {
+            heap = [...originalNums];
+            heapify(heap);
+            poppedCount = 0;
+            popped = [];
+            phase = 'heapify';
+            
+            document.getElementById('toPop').textContent = toPop;
+            document.getElementById('poppedCount').textContent = '0';
+            
+            renderHeap();
+            renderPopped();
+        }
+        
+        function getHeapPositions() {
+            const positions = [];
+            const width = 500;
+            const levelHeight = 60;
+            
+            for (let i = 0; i < heap.length; i++) {
+                const level = Math.floor(Math.log2(i + 1));
+                const levelStart = Math.pow(2, level) - 1;
+                const posInLevel = i - levelStart;
+                const nodesInLevel = Math.pow(2, level);
+                const spacing = width / (nodesInLevel + 1);
+                
+                positions.push({
+                    x: spacing * (posInLevel + 1),
+                    y: 35 + level * levelHeight,
+                    val: heap[i]
+                });
+            }
+            return positions;
+        }
+        
+        function renderHeap() {
+            const svg = d3.select("#heap");
+            svg.selectAll("*").remove();
+            
+            const positions = getHeapPositions();
+            
+            for (let i = 1; i < positions.length; i++) {
+                const parent = Math.floor((i - 1) / 2);
+                svg.append("line")
+                    .attr("x1", positions[parent].x).attr("y1", positions[parent].y)
+                    .attr("x2", positions[i].x).attr("y2", positions[i].y)
+                    .attr("stroke", "#999")
+                    .attr("stroke-width", 2);
+            }
+            
+            positions.forEach((pos, i) => {
+                const isRoot = (i === 0);
+                const isAnswer = (poppedCount === toPop && i === 0);
+                
+                svg.append("circle")
+                    .attr("cx", pos.x)
+                    .attr("cy", pos.y)
+                    .attr("r", 24)
+                    .attr("fill", isAnswer ? "#4caf50" : (isRoot ? "#2196f3" : "#667eea"))
+                    .attr("stroke", "#333")
+                    .attr("stroke-width", 2);
+                
+                svg.append("text")
+                    .attr("x", pos.x)
+                    .attr("y", pos.y + 5)
+                    .attr("text-anchor", "middle")
+                    .attr("fill", "white")
+                    .attr("font-weight", "bold")
+                    .attr("font-size", "14px")
+                    .text(pos.val);
+            });
+        }
+        
+        function renderPopped() {
+            const container = document.getElementById('poppedItems');
+            if (popped.length === 0) {
+                container.innerHTML = '<span class="text-gray">None yet</span>';
+            } else {
+                container.innerHTML = popped.map(val => 
+                    `<div class="popped-item">${val}</div>`
+                ).join('');
+            }
+        }
+        
+        function step() {
+            if (phase === 'heapify') {
+                phase = 'pop';
+                document.getElementById('statusMessage').textContent = 
+                    `Heap built! Min heap with ${heap[0]} at root. Now pop ${toPop} smallest.`;
+                return;
+            }
+            
+            if (poppedCount < toPop) {
+                const val = heapPop();
+                popped.push(val);
+                poppedCount++;
+                
+                document.getElementById('poppedCount').textContent = poppedCount;
+                document.getElementById('statusMessage').textContent = 
+                    `Pop smallest: ${val}. ${toPop - poppedCount} more to pop.`;
+                
+                renderHeap();
+                renderPopped();
+            }
+            
+            if (poppedCount === toPop) {
+                document.getElementById('statusMessage').textContent = 
+                    `✅ Done! Root ${heap[0]} is the ${k}th largest element.`;
+                document.getElementById('stepBtn').disabled = true;
+                stopAuto();
+                renderHeap();
+            }
+        }
+        
+        function toggleAuto() {
+            if (autoInterval) { stopAuto(); }
+            else {
+                document.getElementById('autoBtn').textContent = 'Pause';
+                autoInterval = setInterval(step, 700);
+            }
+        }
+        
+        function stopAuto() {
+            if (autoInterval) { clearInterval(autoInterval); autoInterval = null; }
+            document.getElementById('autoBtn').textContent = 'Auto Run';
+        }
+        
+        function reset() {
+            stopAuto();
+            document.getElementById('stepBtn').disabled = false;
+            document.getElementById('statusMessage').textContent = 
+                'nums = [3, 2, 1, 5, 6, 4], k = 2. Pop (6-2)=4 smallest, then top is answer.';
+            init();
+        }
+        
+        init();
+    </script>
+</body>
+</html>

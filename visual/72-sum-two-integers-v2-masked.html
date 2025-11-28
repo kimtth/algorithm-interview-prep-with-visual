@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Q72: Sum of Two Integers - Masked XOR</title>
+    <link rel="stylesheet" href="visual.css">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>➕ Q72: Sum of Two Integers</h1>
+            <p>LeetCode #371 | File: 72-2.py | Approach: Masked XOR with Negative Handling</p>
+        </div>
+        
+        <div class="problem-info">
+            <h3>📋 Problem Description</h3>
+            <p>Calculate the sum of two integers without using + or - operators.</p>
+            <p class="mt-10"><strong>Key Insight:</strong> Use XOR for sum without carry, AND+shift for carry. 
+            Apply 32-bit mask (0xFFFFFFFF) for Python's infinite precision. Handle negative overflow with INT_MAX check.</p>
+        </div>
+
+        
+            <div class="result-display" id="result"></div>
+        </div>
+
+        <div class="status" id="status">Ready to visualize masked bit manipulation</div>
+    </div>
+
+        <div class="controls">
+            <button class="btn btn-primary" onclick="step()">Step</button>
+            <button class="btn btn-success" onclick="toggleAutoRun()">Auto Run</button>
+            <button class="btn btn-warning" onclick="reset()">Reset</button>
+        </div>
+
+        <div class="step-info" id="stepInfo">Click "Step" or "Auto Run" to begin visualization</div>
+        
+        <div class="visualization" id="viz">
+            <div class="constants">
+                <h4>32-bit Constants</h4>
+                <p>MASK = 0xFFFFFFFF (all 1s) | INT_MAX = 0x7FFFFFFF (max positive 32-bit)</p>
+            </div>
+            <div class="bit-section">
+                <h4>Computing: a=5, b=3 → 8</h4>
+                <div id="bitDisplay"></div>
+    
+        <div class="code-section">
+            <h3>📄 Python Solution (72-2.py)</h3>
+            <pre><span class="keyword">class</span> Solution:
+    <span class="keyword">def</span> <span class="function">getSum</span>(<span class="keyword">self</span>, a: int, b: int) -&gt; int:
+        MASK = 0xFFFFFFFF
+        INT_MAX = 0x7FFFFFFF
+        <span class="comment"># 합, 자릿수 처리</span>
+        <span class="keyword">while</span> b != <span class="number">0</span>:
+            a, b = (a ^ b) &amp; MASK, ((a &amp; b) &lt;&lt; <span class="number">1</span>) &amp; MASK
+
+        <span class="comment"># 음수 처리</span>
+        <span class="keyword">if</span> a &gt; INT_MAX:
+            a = ~(a ^ MASK)
+        <span class="keyword">return</span> a</pre>
+        </div>
+
+    </div>
+
+    <script>
+        let a = 5, b = 3;
+        const MASK = 0xFFFFFFFF;
+        const INT_MAX = 0x7FFFFFFF;
+        let currentStep = 0;
+        let autoRunning = false;
+        let autoRunInterval;
+
+        function toBinary(n, bits = 8) {
+            return (n >>> 0).toString(2).padStart(bits, '0').slice(-bits);
+        }
+
+        function renderBits(label, value, highlight = false) {
+            const binary = toBinary(value & 0xFF);
+            let html = `<div class="bit-row"><span class="bit-label">${label} (${value & 0xFF}):</span>`;
+            for (const bit of binary) {
+                html += `<span class="bit bit-${bit}">${bit}</span>`;
+            }
+            html += '</div>';
+            return html;
+        }
+
+        function step() {
+            const display = document.getElementById('bitDisplay');
+            
+            if (currentStep === 0) {
+                display.innerHTML = renderBits('a', a) + renderBits('b', b);
+                document.getElementById('stepInfo').textContent = `Initial: a=${a} (${toBinary(a)}), b=${b} (${toBinary(b)})`;
+            } else if (b !== 0) {
+                const xorResult = (a ^ b) & MASK;
+                const carryResult = ((a & b) << 1) & MASK;
+                
+                display.innerHTML = 
+                    renderBits('a', a) +
+                    renderBits('b', b) +
+                    `<hr class="mx-10">` +
+                    renderBits('a^b', xorResult) +
+                    renderBits('(a&b)<<1', carryResult);
+                
+                document.getElementById('stepInfo').textContent = 
+                    `a^b=${xorResult}, (a&b)<<1=${carryResult}. New: a=${xorResult}, b=${carryResult}`;
+                
+                a = xorResult;
+                b = carryResult;
+            }
+            
+            if (b === 0 && currentStep > 0) {
+                // Check for negative
+                if (a > INT_MAX) {
+                    a = ~(a ^ MASK);
+                }
+                document.getElementById('stepInfo').textContent = `Done! b=0, no more carry. Result: ${a}`;
+                document.getElementById('result').innerHTML = 
+                    `<span class="text-green">5 + 3 = <strong>${a}</strong></span>`;
+                document.getElementById('status').textContent = 'Bit manipulation complete! Mask handles 32-bit overflow.';
+            }
+
+            currentStep++;
+        }
+
+        function toggleAutoRun() {
+            autoRunning = !autoRunning;
+            const btn = document.querySelector('.btn-success');
+            if (autoRunning) {
+                btn.textContent = 'Pause';
+                autoRunInterval = setInterval(() => {
+                    if (b === 0 && currentStep > 0) {
+                        step();
+                        toggleAutoRun();
+                        return;
+                    }
+                    step();
+                }, 1200);
+            } else {
+                btn.textContent = 'Auto Run';
+                clearInterval(autoRunInterval);
+            }
+        }
+
+        function reset() {
+            a = 5;
+            b = 3;
+            currentStep = 0;
+            if (autoRunning) toggleAutoRun();
+            document.getElementById('stepInfo').textContent = 'Click "Step" or "Auto Run" to begin visualization';
+            document.getElementById('status').textContent = 'Ready to visualize masked bit manipulation';
+            document.getElementById('result').innerHTML = '';
+            document.getElementById('bitDisplay').innerHTML = '';
+        }
+    </script>
+</body>
+</html>

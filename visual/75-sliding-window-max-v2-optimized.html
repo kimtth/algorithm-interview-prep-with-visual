@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Q75: Sliding Window Maximum - Optimized Max Tracking</title>
+    <link rel="stylesheet" href="visual.css">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📊 Q75: Sliding Window Maximum</h1>
+            <p>LeetCode #239 | File: 75-2.py | Approach: Optimized Max Tracking</p>
+        </div>
+        
+        <div class="problem-info">
+            <h3>📋 Problem Description</h3>
+            <p>Given an array nums and a window size k, return the max value in each sliding window.</p>
+            <p class="mt-10"><strong>Key Insight:</strong> Track current max. Only recompute max when the old max leaves the window. 
+            Update max when new value is larger.</p>
+        </div>
+
+        
+            <div class="result-container">
+                <h4>Results</h4>
+                <div id="resultsContainer">(waiting...)</div>
+            </div>
+        </div>
+
+        <div class="status" id="status">Ready to visualize optimized max tracking</div>
+    </div>
+
+        <div class="controls">
+            <button class="btn btn-primary" onclick="step()">Step</button>
+            <button class="btn btn-success" onclick="toggleAutoRun()">Auto Run</button>
+            <button class="btn btn-warning" onclick="reset()">Reset</button>
+        </div>
+
+        <div class="step-info" id="stepInfo">Click "Step" or "Auto Run" to begin visualization</div>
+        
+        <div class="visualization" id="viz">
+            <div class="array-container" id="arrayContainer"></div>
+            <div class="info-panel">
+                <div class="info-item">Window Size: <strong>k = 3</strong></div>
+                <div class="info-item" id="currentMax">Current Max: <strong>-∞</strong></div>
+                <div class="info-item" id="windowContent">Window: <strong>[]</strong></div>
+    
+        <div class="code-section">
+            <h3>📄 Python Solution (75-2.py)</h3>
+            <pre><span class="keyword">import</span> collections
+<span class="keyword">from</span> typing <span class="keyword">import</span> List
+
+
+<span class="keyword">class</span> Solution:
+    <span class="keyword">def</span> <span class="function">maxSlidingWindow</span>(<span class="keyword">self</span>, nums: List[int], k: int) -&gt; List[int]:
+        results = []
+        window = collections.<span class="function">deque</span>()
+        current_max = <span class="function">float</span>('-inf')
+        <span class="keyword">for</span> i, v <span class="keyword">in</span> <span class="function">enumerate</span>(nums):
+            window.<span class="function">append</span>(v)
+            <span class="keyword">if</span> i &lt; k - <span class="number">1</span>:
+                <span class="keyword">continue</span>
+
+            <span class="comment"># 새로 추가된 값이 기존 최대값보다 큰 경우 교체</span>
+            <span class="keyword">if</span> current_max == <span class="function">float</span>('-inf'):
+                current_max = <span class="function">max</span>(window)
+            <span class="keyword">elif</span> v &gt; current_max:
+                current_max = v
+
+            results.<span class="function">append</span>(current_max)
+
+            <span class="comment"># 최대값이 윈도우에서 빠지면 초기화</span>
+            <span class="keyword">if</span> current_max == window.<span class="function">popleft</span>():
+                current_max = <span class="function">float</span>('-inf')
+        <span class="keyword">return</span> results</pre>
+        </div>
+
+    </div>
+
+    <script>
+        const nums = [1, 3, -1, -3, 5, 3, 6, 7];
+        const k = 3;
+        let window = [];
+        let currentMax = -Infinity;
+        let results = [];
+        let currentIdx = 0;
+        let currentStep = 0;
+        let autoRunning = false;
+        let autoRunInterval;
+
+        function renderArray() {
+            const container = document.getElementById('arrayContainer');
+            container.innerHTML = '';
+            
+            nums.forEach((num, idx) => {
+                const item = document.createElement('div');
+                item.className = 'array-item';
+                
+                const windowStart = Math.max(0, currentIdx - k + 1);
+                if (idx >= windowStart && idx <= currentIdx && currentIdx >= k - 1) {
+                    item.classList.add('in-window');
+                    if (num === currentMax && currentMax !== -Infinity) {
+                        item.classList.add('max');
+                    }
+                }
+                
+                item.innerHTML = `<span class="idx">[${idx}]</span><span class="val">${num}</span>`;
+                container.appendChild(item);
+            });
+        }
+
+        function renderResults() {
+            const container = document.getElementById('resultsContainer');
+            if (results.length === 0) {
+                container.textContent = '(waiting...)';
+                return;
+            }
+            container.innerHTML = results.map(r => `<span class="result-item">${r}</span>`).join('');
+        }
+
+        function step() {
+            if (currentIdx >= nums.length) {
+                document.getElementById('stepInfo').textContent = `Done! Results: [${results.join(', ')}]`;
+                document.getElementById('status').textContent = 'Optimized: avoids recomputing max when possible!';
+                return;
+            }
+
+            const v = nums[currentIdx];
+            window.push(v);
+            
+            let stepDesc = `i=${currentIdx}, add ${v} to window. `;
+
+            if (currentIdx >= k - 1) {
+                // Update max
+                if (currentMax === -Infinity) {
+                    currentMax = Math.max(...window);
+                    stepDesc += `Compute max(window) = ${currentMax}. `;
+                } else if (v > currentMax) {
+                    currentMax = v;
+                    stepDesc += `New value ${v} > old max, update max. `;
+                } else {
+                    stepDesc += `Keep max = ${currentMax}. `;
+                }
+                
+                results.push(currentMax);
+                stepDesc += `Add ${currentMax} to results. `;
+                
+                // Remove leftmost
+                const removed = window.shift();
+                if (removed === currentMax) {
+                    currentMax = -Infinity;
+                    stepDesc += `Max ${removed} left window, reset max.`;
+                }
+            } else {
+                stepDesc += `Building window (need ${k - currentIdx - 1} more)`;
+            }
+
+            document.getElementById('stepInfo').textContent = stepDesc;
+            document.getElementById('currentMax').innerHTML = 
+                `Current Max: <strong>${currentMax === -Infinity ? '-∞' : currentMax}</strong>`;
+            document.getElementById('windowContent').innerHTML = 
+                `Window: <strong>[${window.join(', ')}]</strong>`;
+            
+            renderArray();
+            renderResults();
+            
+            currentIdx++;
+            currentStep++;
+        }
+
+        function toggleAutoRun() {
+            autoRunning = !autoRunning;
+            const btn = document.querySelector('.btn-success');
+            if (autoRunning) {
+                btn.textContent = 'Pause';
+                autoRunInterval = setInterval(() => {
+                    if (currentIdx >= nums.length) {
+                        toggleAutoRun();
+                        return;
+                    }
+                    step();
+                }, 1200);
+            } else {
+                btn.textContent = 'Auto Run';
+                clearInterval(autoRunInterval);
+            }
+        }
+
+        function reset() {
+            window = [];
+            currentMax = -Infinity;
+            results = [];
+            currentIdx = 0;
+            currentStep = 0;
+            if (autoRunning) toggleAutoRun();
+            document.getElementById('stepInfo').textContent = 'Click "Step" or "Auto Run" to begin visualization';
+            document.getElementById('status').textContent = 'Ready to visualize optimized max tracking';
+            document.getElementById('currentMax').innerHTML = 'Current Max: <strong>-∞</strong>';
+            document.getElementById('windowContent').innerHTML = 'Window: <strong>[]</strong>';
+            renderArray();
+            renderResults();
+        }
+
+        // Initialize
+        renderArray();
+        renderResults();
+    </script>
+</body>
+</html>

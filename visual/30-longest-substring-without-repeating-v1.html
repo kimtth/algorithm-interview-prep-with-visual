@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Q30: Longest Substring Without Repeating Characters</title>
+    <link rel="stylesheet" href="visual.css">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    
+</head>
+<body>
+    <div class="container">
+        <div class="problem-info">
+            <h1>Q30: Longest Substring Without Repeating Characters</h1>
+            <p>Find the length of the longest substring without repeating characters using sliding window.</p>
+            <div class="problem-meta">
+                <span class="meta-tag">📁 Hash Table / Sliding Window</span>
+                <span class="meta-tag">⏱️ O(n)</span>
+                <span class="meta-tag">💡 Two Pointers</span>
+            </div>
+        </div>
+        
+        
+        
+        <div class="visualization-section">
+            <h3>🎬 Visualization</h3>
+            
+            <div class="controls">
+                <button class="btn btn-primary" id="stepBtn" onclick="step()">Step</button>
+                <button class="btn btn-success" id="autoBtn" onclick="toggleAuto()">Auto Run</button>
+                <button class="btn btn-warning" onclick="reset()">Reset</button>
+            </div>
+            
+            <div class="status-message" id="statusMessage">
+                Input: "abcabcbb". Find longest substring without repeating chars.
+            </div>
+            
+            <div class="string-display" id="stringDisplay"></div>
+            
+            <div class="info-section">
+                <div class="info-box">
+                    <div class="info-label">Start</div>
+                    <div class="info-value" id="startValue">0</div>
+                </div>
+                <div class="info-box">
+                    <div class="info-label">Current Index</div>
+                    <div class="info-value" id="indexValue">0</div>
+                </div>
+                <div class="info-box">
+                    <div class="info-label">Window Size</div>
+                    <div class="info-value" id="windowValue">0</div>
+                </div>
+                <div class="info-box bg-green-very-light">
+                    <div class="info-label">Max Length</div>
+                    <div class="info-value" id="maxValue">0</div>
+                </div>
+            </div>
+            
+            <div class="used-section">
+                <div class="used-label">Used Map (char → last index):</div>
+                <div class="used-items" id="usedItems"></div>
+            </div>
+        </div>
+    </div>
+        
+        <div class="code-section">
+            <h3>📄 Python Solution (30-1.py)</h3>
+            <pre><span class="keyword">class</span> Solution:
+    <span class="keyword">def</span> <span class="function">lengthOfLongestSubstring</span>(<span class="keyword">self</span>, s: str) -&gt; int:
+        used = {}
+        max_length = start = <span class="number">0</span>
+        <span class="keyword">for</span> index, char <span class="keyword">in</span> <span class="function">enumerate</span>(s):
+            <span class="comment"># 이미 등장했던 문자라면 `start` 위치 갱신</span>
+            <span class="keyword">if</span> char <span class="keyword">in</span> used <span class="keyword">and</span> start &lt;= used[char]:
+                start = used[char] + <span class="number">1</span>
+            <span class="keyword">else</span>:  <span class="comment"># 최대 부분 문자열 길이 갱신</span>
+                max_length = <span class="function">max</span>(max_length, index - start + <span class="number">1</span>)
+
+            <span class="comment"># 현재 문자의 위치 삽입</span>
+            used[char] = index
+
+        <span class="keyword">return</span> max_length</pre>
+        </div>
+
+    </div>
+
+    <script>
+        const str = "abcabcbb";
+        let used = {};
+        let start = 0;
+        let maxLength = 0;
+        let index = 0;
+        let autoInterval = null;
+        
+        function init() {
+            used = {};
+            start = 0;
+            maxLength = 0;
+            index = 0;
+            render();
+        }
+        
+        function render() {
+            // String display
+            const container = document.getElementById('stringDisplay');
+            container.innerHTML = '';
+            str.split('').forEach((c, i) => {
+                const item = document.createElement('div');
+                item.className = 'char-item';
+                const box = document.createElement('div');
+                box.className = 'char-box';
+                if (i >= start && i <= index) box.classList.add('in-window');
+                if (i === index) box.classList.add('current');
+                box.textContent = c;
+                const idx = document.createElement('div');
+                idx.className = 'char-index';
+                idx.textContent = i;
+                item.appendChild(box);
+                item.appendChild(idx);
+                container.appendChild(item);
+            });
+            
+            // Info
+            document.getElementById('startValue').textContent = start;
+            document.getElementById('indexValue').textContent = index;
+            document.getElementById('windowValue').textContent = index - start + 1;
+            document.getElementById('maxValue').textContent = maxLength;
+            
+            // Used map
+            const usedContainer = document.getElementById('usedItems');
+            usedContainer.innerHTML = '';
+            Object.entries(used).forEach(([k, v]) => {
+                const item = document.createElement('span');
+                item.className = 'used-item';
+                item.textContent = `'${k}': ${v}`;
+                usedContainer.appendChild(item);
+            });
+        }
+        
+        function step() {
+            if (index >= str.length) {
+                document.getElementById('statusMessage').textContent = 
+                    `✅ Done! Max length = ${maxLength}`;
+                document.getElementById('stepBtn').disabled = true;
+                stopAuto();
+                return;
+            }
+            
+            const char = str[index];
+            
+            if (char in used && start <= used[char]) {
+                const oldStart = start;
+                start = used[char] + 1;
+                document.getElementById('statusMessage').textContent = 
+                    `'${char}' duplicate! Move start: ${oldStart} → ${start}`;
+            } else {
+                const newLen = index - start + 1;
+                if (newLen > maxLength) {
+                    maxLength = newLen;
+                    document.getElementById('statusMessage').textContent = 
+                        `New max! '${char}' extends window to length ${maxLength}`;
+                } else {
+                    document.getElementById('statusMessage').textContent = 
+                        `'${char}' added, window = ${newLen}`;
+                }
+            }
+            
+            used[char] = index;
+            render();
+            index++;
+        }
+        
+        function toggleAuto() {
+            if (autoInterval) { stopAuto(); }
+            else {
+                document.getElementById('autoBtn').textContent = 'Pause';
+                autoInterval = setInterval(() => {
+                    if (index >= str.length) {
+                        step();
+                        stopAuto();
+                    } else {
+                        step();
+                    }
+                }, 700);
+            }
+        }
+        
+        function stopAuto() {
+            if (autoInterval) { clearInterval(autoInterval); autoInterval = null; }
+            document.getElementById('autoBtn').textContent = 'Auto Run';
+        }
+        
+        function reset() {
+            stopAuto();
+            document.getElementById('stepBtn').disabled = false;
+            document.getElementById('statusMessage').textContent = 'Input: "abcabcbb". Find longest substring without repeating chars.';
+            init();
+        }
+        
+        init();
+    </script>
+</body>
+</html>

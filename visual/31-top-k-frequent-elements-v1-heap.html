@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Q31: Top K Frequent Elements - Heap</title>
+    <link rel="stylesheet" href="visual.css">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    
+</head>
+<body>
+    <div class="container">
+        <div class="problem-info">
+            <h1>Q31: Top K Frequent Elements - Heap</h1>
+            <p>Given an integer array and k, return the k most frequent elements using a min-heap.</p>
+            <div class="problem-meta">
+                <span class="meta-tag">📁 Heap / Hash Table</span>
+                <span class="meta-tag">⏱️ O(n log k)</span>
+                <span class="meta-tag">💡 Min Heap with Negative</span>
+            </div>
+        </div>
+        
+        
+        
+        <div class="visualization-section">
+            <h3>🎬 Visualization</h3>
+            
+            <div class="controls">
+                <button class="btn btn-primary" id="stepBtn" onclick="step()">Step</button>
+                <button class="btn btn-success" id="autoBtn" onclick="toggleAuto()">Auto Run</button>
+                <button class="btn btn-warning" onclick="reset()">Reset</button>
+            </div>
+            
+            <div class="status-message" id="statusMessage">
+                Input: [1,1,1,2,2,3], k=2. Find top 2 most frequent elements.
+            </div>
+            
+            <div class="section-title">Input Array:</div>
+            <div class="array-display" id="arrayDisplay"></div>
+            
+            <div class="section-title">Frequency Count:</div>
+            <div class="freq-display" id="freqDisplay"></div>
+            
+            <div class="section-title">Min Heap (using negative freq for max behavior):</div>
+            <div class="heap-container">
+                <div class="heap-visual" id="heapDisplay"></div>
+            </div>
+            
+            <div class="section-title">Result (Top K):</div>
+            <div class="result-section">
+                <div class="result-items" id="resultDisplay"></div>
+            </div>
+        </div>
+    </div>
+        
+        <div class="code-section">
+            <h3>📄 Python Solution (31-1.py)</h3>
+            <pre><span class="keyword">import</span> collections
+<span class="keyword">import</span> heapq
+<span class="keyword">from</span> typing <span class="keyword">import</span> List
+
+
+<span class="keyword">class</span> Solution:
+    <span class="keyword">def</span> <span class="function">topKFrequent</span>(<span class="keyword">self</span>, nums: List[int], k: int) -&gt; List[int]:
+        freqs = collections.<span class="function">Counter</span>(nums)
+        freqs_heap = []
+        <span class="comment"># 힙에 음수로 삽입</span>
+        <span class="keyword">for</span> f <span class="keyword">in</span> freqs:
+            heapq.<span class="function">heappush</span>(freqs_heap, (-freqs[f], f))
+
+        topk = <span class="function">list</span>()
+        <span class="comment"># k번 만큼 추출, 민 힙 이므로 가장 작은 음수 순으로 추출</span>
+        <span class="keyword">for</span> _ <span class="keyword">in</span> <span class="function">range</span>(k):
+            topk.<span class="function">append</span>(heapq.<span class="function">heappop</span>(freqs_heap)[<span class="number">1</span>])
+
+        <span class="keyword">return</span> topk</pre>
+        </div>
+
+    </div>
+
+    <script>
+        const nums = [1, 1, 1, 2, 2, 3];
+        const k = 2;
+        let phase = 0; // 0: count, 1: build heap, 2: pop k
+        let freqs = {};
+        let heap = [];
+        let result = [];
+        let countIndex = 0;
+        let heapBuildIndex = 0;
+        let popCount = 0;
+        let freqKeys = [];
+        let autoInterval = null;
+        
+        function init() {
+            phase = 0;
+            freqs = {};
+            heap = [];
+            result = [];
+            countIndex = 0;
+            heapBuildIndex = 0;
+            popCount = 0;
+            freqKeys = [];
+            render();
+        }
+        
+        function render() {
+            // Array
+            const arrContainer = document.getElementById('arrayDisplay');
+            arrContainer.innerHTML = '';
+            nums.forEach((n, i) => {
+                const item = document.createElement('div');
+                item.className = 'array-item';
+                if (i < countIndex) item.classList.add('counted');
+                item.textContent = n;
+                arrContainer.appendChild(item);
+            });
+            
+            // Frequencies
+            const freqContainer = document.getElementById('freqDisplay');
+            freqContainer.innerHTML = '';
+            Object.entries(freqs).forEach(([num, count]) => {
+                const item = document.createElement('div');
+                item.className = 'freq-item';
+                item.innerHTML = `<div class="freq-num">${num}</div><div class="freq-count">count: ${count}</div>`;
+                freqContainer.appendChild(item);
+            });
+            
+            // Heap
+            const heapContainer = document.getElementById('heapDisplay');
+            heapContainer.innerHTML = '';
+            heap.forEach(([negFreq, num]) => {
+                const item = document.createElement('div');
+                item.className = 'heap-item';
+                item.innerHTML = `${num} <small>(${-negFreq})</small>`;
+                heapContainer.appendChild(item);
+            });
+            
+            // Result
+            const resultContainer = document.getElementById('resultDisplay');
+            resultContainer.innerHTML = '';
+            result.forEach(num => {
+                const item = document.createElement('div');
+                item.className = 'result-item';
+                item.textContent = num;
+                resultContainer.appendChild(item);
+            });
+        }
+        
+        function heapPush(item) {
+            heap.push(item);
+            let i = heap.length - 1;
+            while (i > 0) {
+                const parent = Math.floor((i - 1) / 2);
+                if (heap[parent][0] <= heap[i][0]) break;
+                [heap[parent], heap[i]] = [heap[i], heap[parent]];
+                i = parent;
+            }
+        }
+        
+        function heapPop() {
+            if (heap.length === 0) return null;
+            const result = heap[0];
+            const last = heap.pop();
+            if (heap.length > 0) {
+                heap[0] = last;
+                let i = 0;
+                while (true) {
+                    let smallest = i;
+                    const left = 2 * i + 1;
+                    const right = 2 * i + 2;
+                    if (left < heap.length && heap[left][0] < heap[smallest][0]) smallest = left;
+                    if (right < heap.length && heap[right][0] < heap[smallest][0]) smallest = right;
+                    if (smallest === i) break;
+                    [heap[i], heap[smallest]] = [heap[smallest], heap[i]];
+                    i = smallest;
+                }
+            }
+            return result;
+        }
+        
+        function step() {
+            if (phase === 0) {
+                // Counting phase
+                if (countIndex < nums.length) {
+                    const num = nums[countIndex];
+                    freqs[num] = (freqs[num] || 0) + 1;
+                    document.getElementById('statusMessage').textContent = 
+                        `Counting: ${num} → freq[${num}] = ${freqs[num]}`;
+                    countIndex++;
+                    render();
+                    if (countIndex >= nums.length) {
+                        freqKeys = Object.keys(freqs);
+                        phase = 1;
+                    }
+                }
+            } else if (phase === 1) {
+                // Build heap
+                if (heapBuildIndex < freqKeys.length) {
+                    const num = freqKeys[heapBuildIndex];
+                    const freq = freqs[num];
+                    heapPush([-freq, parseInt(num)]);
+                    document.getElementById('statusMessage').textContent = 
+                        `Push to heap: (${-freq}, ${num}) - negative freq for max-heap`;
+                    heapBuildIndex++;
+                    render();
+                    if (heapBuildIndex >= freqKeys.length) {
+                        phase = 2;
+                    }
+                }
+            } else if (phase === 2) {
+                // Pop k elements
+                if (popCount < k) {
+                    const [negFreq, num] = heapPop();
+                    result.push(num);
+                    document.getElementById('statusMessage').textContent = 
+                        `Pop from heap: ${num} (freq=${-negFreq})`;
+                    popCount++;
+                    render();
+                    if (popCount >= k) {
+                        document.getElementById('statusMessage').textContent = 
+                            `✅ Done! Top ${k} frequent: [${result.join(', ')}]`;
+                        document.getElementById('stepBtn').disabled = true;
+                        stopAuto();
+                    }
+                }
+            }
+        }
+        
+        function toggleAuto() {
+            if (autoInterval) { stopAuto(); }
+            else {
+                document.getElementById('autoBtn').textContent = 'Pause';
+                autoInterval = setInterval(step, 600);
+            }
+        }
+        
+        function stopAuto() {
+            if (autoInterval) { clearInterval(autoInterval); autoInterval = null; }
+            document.getElementById('autoBtn').textContent = 'Auto Run';
+        }
+        
+        function reset() {
+            stopAuto();
+            document.getElementById('stepBtn').disabled = false;
+            document.getElementById('statusMessage').textContent = 'Input: [1,1,1,2,2,3], k=2. Find top 2 most frequent elements.';
+            init();
+        }
+        
+        init();
+    </script>
+</body>
+</html>

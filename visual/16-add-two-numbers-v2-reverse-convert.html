@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Q16: Add Two Numbers - Reverse and Convert</title>
+    <link rel="stylesheet" href="visual.css">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    
+</head>
+<body>
+    <div class="container">
+        <div class="problem-info">
+            <h1>Q16: Add Two Numbers</h1>
+            <p>Add two numbers represented as linked lists where digits are stored in reverse order.</p>
+            <div class="problem-meta">
+                <span class="meta-tag">📁 Linked List</span>
+                <span class="meta-tag">⏱️ O(n)</span>
+                <span class="meta-tag">💡 Version 2: Reverse & Convert</span>
+            </div>
+        </div>
+        
+        
+        
+        <div class="visualization-section">
+            <h3>🎬 Visualization</h3>
+            
+            <div class="controls">
+                <button class="btn btn-primary" id="stepBtn" onclick="step()">Step</button>
+                <button class="btn btn-success" id="autoBtn" onclick="toggleAuto()">Auto Run</button>
+                <button class="btn btn-warning" onclick="reset()">Reset</button>
+            </div>
+            
+            <div class="status-message" id="statusMessage">
+                Click "Step" or "Auto Run" to start. Adding 342 + 465 = 807
+            </div>
+            
+            <div class="list-section">
+                <div class="list-label">L1 (342 stored as 2→4→3):</div>
+                <div class="list-container" id="l1Container"></div>
+            </div>
+            
+            <div class="list-section">
+                <div class="list-label">L2 (465 stored as 5→6→4):</div>
+                <div class="list-container" id="l2Container"></div>
+            </div>
+            
+            <div class="step-section">
+                <div class="step-box" id="step1">
+                    <div class="step-title">Step 1: Reverse Lists</div>
+                    <div class="step-content" id="step1Content">-</div>
+                </div>
+                <div class="step-box" id="step2">
+                    <div class="step-title">Step 2: Convert to Numbers</div>
+                    <div class="step-content" id="step2Content">-</div>
+                </div>
+                <div class="step-box" id="step3">
+                    <div class="step-title">Step 3: Add</div>
+                    <div class="step-content" id="step3Content">-</div>
+                </div>
+            </div>
+            
+            <div class="calculation-display" id="calcDisplay" class="d-none"></div>
+            
+            <div class="list-section">
+                <div class="list-label">Result:</div>
+                <div class="list-container" id="resultContainer"></div>
+            </div>
+        </div>
+    </div>
+        
+        <div class="code-section">
+            <h3>📄 Python Solution (16-2.py)</h3>
+            <pre><span class="comment"># Definition for singly-linked list.</span>
+<span class="keyword">class</span> ListNode:
+    <span class="keyword">def</span> <span class="function">__init__</span>(<span class="keyword">self</span>, x):
+        <span class="keyword">self</span>.val = x
+        <span class="keyword">self</span>.next = <span class="keyword">None</span>
+
+
+<span class="keyword">class</span> Solution:
+    <span class="keyword">def</span> <span class="function">addTwoNumbers</span>(<span class="keyword">self</span>, l1: ListNode, l2: ListNode) -&gt; ListNode:
+        root = head = <span class="function">ListNode</span>(<span class="number">0</span>)
+
+        carry = <span class="number">0</span>
+        <span class="keyword">while</span> l1 <span class="keyword">or</span> l2 <span class="keyword">or</span> carry:
+            sum = <span class="number">0</span>
+            <span class="comment"># 두 입력값의 합 계산</span>
+            <span class="keyword">if</span> l1:
+                sum += l1.val
+                l1 = l1.next
+            <span class="keyword">if</span> l2:
+                sum += l2.val
+                l2 = l2.next
+
+            <span class="comment"># 몫(자리올림수)과 나머지(값) 계산</span>
+            carry, val = <span class="function">divmod</span>(sum + carry, <span class="number">10</span>)
+            head.next = <span class="function">ListNode</span>(val)
+            head = head.next
+
+        <span class="keyword">return</span> root.next</pre>
+        </div>
+
+    </div>
+
+    <script>
+        let l1 = [2, 4, 3];  // 342 reversed
+        let l2 = [5, 6, 4];  // 465 reversed
+        let stepIndex = 0;
+        let autoInterval = null;
+        
+        const steps = [
+            { phase: 'init', msg: 'Input: L1 = [2,4,3] (342), L2 = [5,6,4] (465)' },
+            { phase: 'reverse1', msg: 'Step 1: Reverse L1: [2,4,3] → [3,4,2]' },
+            { phase: 'reverse2', msg: 'Step 1: Reverse L2: [5,6,4] → [4,6,5]' },
+            { phase: 'convert', msg: 'Step 2: Convert to integers: "342" and "465"' },
+            { phase: 'add', msg: 'Step 3: Add: 342 + 465 = 807' },
+            { phase: 'toList', msg: 'Convert 807 back to reversed linked list: [7,0,8]' },
+            { phase: 'done', msg: '✅ Done! Result: [7 → 0 → 8] representing 807' }
+        ];
+        
+        function init() {
+            stepIndex = 0;
+            renderList('l1Container', l1, []);
+            renderList('l2Container', l2, []);
+            renderList('resultContainer', [], []);
+            document.getElementById('step1').className = 'step-box';
+            document.getElementById('step2').className = 'step-box';
+            document.getElementById('step3').className = 'step-box';
+            document.getElementById('step1Content').textContent = '-';
+            document.getElementById('step2Content').textContent = '-';
+            document.getElementById('step3Content').textContent = '-';
+            document.getElementById('calcDisplay').style.display = 'none';
+        }
+        
+        function renderList(containerId, nodes, highlights) {
+            const container = document.getElementById(containerId);
+            container.innerHTML = '';
+            nodes.forEach((val, i) => {
+                const node = document.createElement('div');
+                node.className = 'list-node';
+                if (highlights.includes(i)) node.classList.add('highlight');
+                node.textContent = val;
+                container.appendChild(node);
+                if (i < nodes.length - 1) {
+                    const arrow = document.createElement('div');
+                    arrow.className = 'list-arrow';
+                    container.appendChild(arrow);
+                }
+            });
+        }
+        
+        function step() {
+            if (stepIndex >= steps.length) return;
+            
+            const s = steps[stepIndex];
+            document.getElementById('statusMessage').textContent = s.msg;
+            
+            if (s.phase === 'reverse1') {
+                document.getElementById('step1').className = 'step-box active';
+                renderList('l1Container', [3, 4, 2], [0, 1, 2]);
+                document.getElementById('step1Content').textContent = 'L1: [3,4,2]';
+            } else if (s.phase === 'reverse2') {
+                renderList('l2Container', [4, 6, 5], [0, 1, 2]);
+                document.getElementById('step1Content').textContent = 'L1: [3,4,2], L2: [4,6,5]';
+                document.getElementById('step1').className = 'step-box complete';
+            } else if (s.phase === 'convert') {
+                document.getElementById('step2').className = 'step-box active';
+                document.getElementById('step2Content').textContent = '342, 465';
+            } else if (s.phase === 'add') {
+                document.getElementById('step2').className = 'step-box complete';
+                document.getElementById('step3').className = 'step-box active';
+                document.getElementById('step3Content').textContent = '807';
+                document.getElementById('calcDisplay').style.display = 'block';
+                document.getElementById('calcDisplay').innerHTML = '342 + 465 = <strong>807</strong>';
+            } else if (s.phase === 'toList') {
+                document.getElementById('step3').className = 'step-box complete';
+                renderList('resultContainer', [7, 0, 8], [0, 1, 2]);
+            } else if (s.phase === 'done') {
+                document.getElementById('stepBtn').disabled = true;
+                stopAuto();
+            }
+            
+            stepIndex++;
+        }
+        
+        function toggleAuto() {
+            if (autoInterval) { stopAuto(); }
+            else {
+                document.getElementById('autoBtn').textContent = 'Pause';
+                autoInterval = setInterval(() => {
+                    if (stepIndex >= steps.length) stopAuto();
+                    else step();
+                }, 1200);
+            }
+        }
+        
+        function stopAuto() {
+            if (autoInterval) { clearInterval(autoInterval); autoInterval = null; }
+            document.getElementById('autoBtn').textContent = 'Auto Run';
+        }
+        
+        function reset() {
+            stopAuto();
+            document.getElementById('stepBtn').disabled = false;
+            document.getElementById('statusMessage').textContent = 'Click "Step" or "Auto Run" to start. Adding 342 + 465 = 807';
+            init();
+        }
+        
+        init();
+    </script>
+</body>
+</html>

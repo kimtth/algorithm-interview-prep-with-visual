@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Q24: Implement Queue using Stacks</title>
+    <link rel="stylesheet" href="visual.css">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    
+</head>
+<body>
+    <div class="container">
+        <div class="problem-info">
+            <h1>Q24: Implement Queue using Stacks</h1>
+            <p>Implement a FIFO queue using only LIFO stack operations.</p>
+            <div class="problem-meta">
+                <span class="meta-tag">📁 Stack / Queue</span>
+                <span class="meta-tag">⏱️ Amortized O(1)</span>
+                <span class="meta-tag">💡 Two Stacks</span>
+            </div>
+        </div>
+        
+        
+        
+        <div class="visualization-section">
+            <h3>🎬 Visualization</h3>
+            
+            <div class="controls">
+                <button class="btn btn-primary" id="stepBtn" onclick="step()">Step</button>
+                <button class="btn btn-success" id="autoBtn" onclick="toggleAuto()">Auto Run</button>
+                <button class="btn btn-warning" onclick="reset()">Reset</button>
+            </div>
+            
+            <div class="status-message" id="statusMessage">
+                Operations: push(1), push(2), push(3), pop(), pop()
+            </div>
+            
+            <div class="stacks-container">
+                <div class="stack-box">
+                    <div class="stack-label">Input Stack (for push):</div>
+                    <div class="stack-items" id="inputStack"></div>
+                </div>
+                
+                <div class="transfer-arrow" id="transferArrow" class="visibility-hidden">→</div>
+                
+                <div class="stack-box">
+                    <div class="stack-label">Output Stack (for pop):</div>
+                    <div class="stack-items" id="outputStack"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+        
+        <div class="code-section">
+            <h3>📄 Python Solution (24-1.py)</h3>
+            <pre><span class="keyword">class</span> MyQueue:
+    <span class="keyword">def</span> <span class="function">__init__</span>(<span class="keyword">self</span>):
+        <span class="keyword">self</span>.input = []
+        <span class="keyword">self</span>.output = []
+
+    <span class="keyword">def</span> <span class="function">push</span>(<span class="keyword">self</span>, x):
+        <span class="keyword">self</span>.input.<span class="function">append</span>(x)
+
+    <span class="keyword">def</span> <span class="function">pop</span>(<span class="keyword">self</span>):
+        <span class="keyword">self</span>.<span class="function">peek</span>()
+        <span class="keyword">return</span> <span class="keyword">self</span>.output.<span class="function">pop</span>()
+
+    <span class="keyword">def</span> <span class="function">peek</span>(<span class="keyword">self</span>):
+        <span class="comment"># output이 없으면 모두 재입력</span>
+        <span class="keyword">if</span> <span class="keyword">not</span> <span class="keyword">self</span>.output:
+            <span class="keyword">while</span> <span class="keyword">self</span>.input:
+                <span class="keyword">self</span>.output.<span class="function">append</span>(<span class="keyword">self</span>.input.<span class="function">pop</span>())
+        <span class="keyword">return</span> <span class="keyword">self</span>.output[-<span class="number">1</span>]
+
+    <span class="keyword">def</span> <span class="function">empty</span>(<span class="keyword">self</span>):
+        <span class="keyword">return</span> <span class="keyword">self</span>.input == [] <span class="keyword">and</span> <span class="keyword">self</span>.output == []</pre>
+        </div>
+
+    </div>
+
+    <script>
+        let inputStack = [];
+        let outputStack = [];
+        let stepIndex = 0;
+        let autoInterval = null;
+        
+        const operations = [
+            { op: 'push', val: 1, msg: 'push(1): Add to input stack' },
+            { op: 'push', val: 2, msg: 'push(2): Add to input stack' },
+            { op: 'push', val: 3, msg: 'push(3): Add to input stack' },
+            { op: 'transfer', msg: 'pop() called, output empty → Transfer input to output' },
+            { op: 'pop', msg: 'pop(): Return 1 from output stack (FIFO achieved!)' },
+            { op: 'pop', msg: 'pop(): Return 2 from output stack' },
+            { op: 'done', msg: '✅ Done! Queue behavior with two stacks.' }
+        ];
+        
+        function init() {
+            inputStack = [];
+            outputStack = [];
+            stepIndex = 0;
+            renderStacks();
+            document.getElementById('transferArrow').style.visibility = 'hidden';
+        }
+        
+        function renderStacks() {
+            const inputContainer = document.getElementById('inputStack');
+            inputContainer.innerHTML = '';
+            inputStack.forEach(val => {
+                const item = document.createElement('div');
+                item.className = 'stack-item input';
+                item.textContent = val;
+                inputContainer.appendChild(item);
+            });
+            
+            const outputContainer = document.getElementById('outputStack');
+            outputContainer.innerHTML = '';
+            outputStack.forEach(val => {
+                const item = document.createElement('div');
+                item.className = 'stack-item output';
+                item.textContent = val;
+                outputContainer.appendChild(item);
+            });
+        }
+        
+        function step() {
+            if (stepIndex >= operations.length) return;
+            
+            const op = operations[stepIndex];
+            document.getElementById('statusMessage').textContent = op.msg;
+            
+            if (op.op === 'push') {
+                inputStack.push(op.val);
+            } else if (op.op === 'transfer') {
+                document.getElementById('transferArrow').style.visibility = 'visible';
+                while (inputStack.length > 0) {
+                    outputStack.push(inputStack.pop());
+                }
+            } else if (op.op === 'pop') {
+                outputStack.pop();
+            } else if (op.op === 'done') {
+                document.getElementById('stepBtn').disabled = true;
+                stopAuto();
+            }
+            
+            renderStacks();
+            stepIndex++;
+        }
+        
+        function toggleAuto() {
+            if (autoInterval) { stopAuto(); }
+            else {
+                document.getElementById('autoBtn').textContent = 'Pause';
+                autoInterval = setInterval(() => {
+                    if (stepIndex >= operations.length) stopAuto();
+                    else step();
+                }, 1000);
+            }
+        }
+        
+        function stopAuto() {
+            if (autoInterval) { clearInterval(autoInterval); autoInterval = null; }
+            document.getElementById('autoBtn').textContent = 'Auto Run';
+        }
+        
+        function reset() {
+            stopAuto();
+            document.getElementById('stepBtn').disabled = false;
+            document.getElementById('statusMessage').textContent = 'Operations: push(1), push(2), push(3), pop(), pop()';
+            init();
+        }
+        
+        init();
+    </script>
+</body>
+</html>

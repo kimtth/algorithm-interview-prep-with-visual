@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Q81: Gas Station - Greedy Single Pass</title>
+    <link rel="stylesheet" href="visual.css">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>⛽ Q81: Gas Station</h1>
+            <p>LeetCode #134 | File: 81-2.py | Approach: Greedy Single Pass</p>
+        </div>
+        
+        <div class="problem-info">
+            <h3>📋 Problem Description</h3>
+            <p>Complete a circuit of gas stations. Find the starting index, or -1 if impossible.</p>
+            <p class="mt-10"><strong>Key Insight:</strong> If total gas ≥ total cost, solution exists. 
+            When fuel goes negative at station i, start must be after i.</p>
+        </div>
+
+        
+            <div class="result-display" id="result"></div>
+        </div>
+
+        <div class="status" id="status">Ready to find the starting station</div>
+    </div>
+
+        <div class="controls">
+            <button class="btn btn-primary" onclick="step()">Step</button>
+            <button class="btn btn-success" onclick="toggleAutoRun()">Auto Run</button>
+            <button class="btn btn-warning" onclick="reset()">Reset</button>
+        </div>
+
+        <div class="step-info" id="stepInfo">Click "Step" to begin</div>
+        
+        <div class="visualization" id="viz">
+            <div class="stations-container" id="stationsContainer"></div>
+            <div class="info-panel">
+                <div class="info-item" id="startInfo">Start: <strong>0</strong></div>
+                <div class="info-item" id="fuelInfo">Fuel: <strong>0</strong></div>
+                <div class="info-item" id="totalInfo">Total gas: 15, Total cost: 15 ✓</div>
+    
+        <div class="code-section">
+            <h3>📄 Python Solution (81-2.py)</h3>
+            <pre><span class="keyword">from</span> typing <span class="keyword">import</span> List
+
+
+<span class="keyword">class</span> Solution:
+    <span class="keyword">def</span> <span class="function">canCompleteCircuit</span>(<span class="keyword">self</span>, gas: List[int], cost: List[int]) -&gt; int:
+        <span class="comment"># 모든 주유소 방문 가능 여부 판별</span>
+        <span class="keyword">if</span> <span class="function">sum</span>(gas) &lt; <span class="function">sum</span>(cost):
+            <span class="keyword">return</span> -<span class="number">1</span>
+
+        start, fuel = <span class="number">0</span>, <span class="number">0</span>
+        <span class="keyword">for</span> i <span class="keyword">in</span> <span class="function">range</span>(<span class="function">len</span>(gas)):
+            <span class="comment"># 출발점이 안되는 지점 판별</span>
+            <span class="keyword">if</span> gas[i] + fuel &lt; cost[i]:
+                start = i + <span class="number">1</span>
+                fuel = <span class="number">0</span>
+            <span class="keyword">else</span>:
+                fuel += gas[i] - cost[i]
+        <span class="keyword">return</span> start</pre>
+        </div>
+
+    </div>
+
+    <script>
+        const gas = [1, 2, 3, 4, 5];
+        const cost = [3, 4, 5, 1, 2];
+        let start = 0, fuel = 0;
+        let currentIdx = -1;
+        let autoRunning = false;
+        let autoRunInterval;
+
+        function renderStations() {
+            const container = document.getElementById('stationsContainer');
+            container.innerHTML = '';
+            for (let i = 0; i < gas.length; i++) {
+                const station = document.createElement('div');
+                station.className = 'station';
+                if (i === currentIdx) station.classList.add('current');
+                if (i === start && currentIdx >= 0) station.classList.add('start');
+                station.innerHTML = `
+                    <h5>Station ${i}</h5>
+                    <div>Gas: ${gas[i]}</div>
+                    <div>Cost: ${cost[i]}</div>
+                    <div><small>Net: ${gas[i] - cost[i]}</small></div>
+                `;
+                container.appendChild(station);
+            }
+        }
+
+        function step() {
+            currentIdx++;
+            
+            if (currentIdx >= gas.length) {
+                document.getElementById('stepInfo').textContent = `Done! Start from station ${start}`;
+                document.getElementById('result').innerHTML = 
+                    `<span class="text-green">Answer: Station <strong>${start}</strong></span>`;
+                document.getElementById('status').textContent = 
+                    'Single pass O(n): find where fuel stays non-negative!';
+                return;
+            }
+
+            const i = currentIdx;
+            let desc;
+            
+            if (gas[i] + fuel < cost[i]) {
+                desc = `Station ${i}: gas=${gas[i]}, fuel=${fuel}, cost=${cost[i]}. Can't reach next! Reset start to ${i + 1}`;
+                start = i + 1;
+                fuel = 0;
+            } else {
+                fuel += gas[i] - cost[i];
+                desc = `Station ${i}: gain ${gas[i]}, spend ${cost[i]}, fuel becomes ${fuel}`;
+            }
+
+            document.getElementById('stepInfo').textContent = desc;
+            document.getElementById('startInfo').innerHTML = `Start: <strong>${start}</strong>`;
+            document.getElementById('fuelInfo').innerHTML = `Fuel: <strong>${fuel}</strong>`;
+            renderStations();
+        }
+
+        function toggleAutoRun() {
+            autoRunning = !autoRunning;
+            const btn = document.querySelector('.btn-success');
+            if (autoRunning) {
+                btn.textContent = 'Pause';
+                autoRunInterval = setInterval(() => {
+                    if (currentIdx >= gas.length - 1) {
+                        step(); toggleAutoRun(); return;
+                    }
+                    step();
+                }, 1000);
+            } else {
+                btn.textContent = 'Auto Run';
+                clearInterval(autoRunInterval);
+            }
+        }
+
+        function reset() {
+            start = 0; fuel = 0; currentIdx = -1;
+            if (autoRunning) toggleAutoRun();
+            document.getElementById('stepInfo').textContent = 'Click "Step" to begin';
+            document.getElementById('status').textContent = 'Ready to find the starting station';
+            document.getElementById('result').innerHTML = '';
+            document.getElementById('startInfo').innerHTML = 'Start: <strong>0</strong>';
+            document.getElementById('fuelInfo').innerHTML = 'Fuel: <strong>0</strong>';
+            renderStations();
+        }
+
+        renderStations();
+    </script>
+</body>
+</html>

@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Q35: Combinations - itertools</title>
+    <link rel="stylesheet" href="visual.css">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    
+</head>
+<body>
+    <div class="container">
+        <div class="problem-info">
+            <h1>Q35: Combinations - itertools</h1>
+            <p>Generate all combinations using Python's itertools.combinations() for elegant one-liner solution.</p>
+            <div class="problem-meta">
+                <span class="meta-tag">📁 itertools</span>
+                <span class="meta-tag">⏱️ O(C(n,k))</span>
+                <span class="meta-tag">💡 Pythonic One-liner</span>
+            </div>
+        </div>
+        
+        
+        
+        <div class="visualization-section">
+            <h3>🎬 Visualization</h3>
+            
+            <div class="controls">
+                <button class="btn btn-primary" id="stepBtn" onclick="step()">Step</button>
+                <button class="btn btn-success" id="autoBtn" onclick="toggleAuto()">Auto Run</button>
+                <button class="btn btn-warning" onclick="reset()">Reset</button>
+            </div>
+            
+            <div class="step-indicator">
+                <div class="step-item" id="step1">1. range(1, n+1)</div>
+                <div class="step-item" id="step2">2. combinations(..., k)</div>
+                <div class="step-item" id="step3">3. list()</div>
+            </div>
+            
+            <div class="status-message" id="statusMessage">
+                One-liner: itertools.combinations(range(1, 5), 2)
+            </div>
+            
+            <div class="params-display">
+                <div class="param-box">
+                    <div class="param-label">n</div>
+                    <div class="param-value">4</div>
+                </div>
+                <div class="param-box">
+                    <div class="param-label">k</div>
+                    <div class="param-value">2</div>
+                </div>
+            </div>
+            
+            <div class="itertools-box" id="itertoolsBox" class="d-none">
+                <div class="itertools-code" id="itertoolsCode"></div>
+            </div>
+            
+            <div class="results-section" id="resultsSection" class="d-none">
+                <div class="results-label">C(4,2) = 6 combinations:</div>
+                <div class="results-grid" id="resultsGrid"></div>
+            </div>
+        </div>
+    </div>
+        
+        <div class="code-section">
+            <h3>📄 Python Solution (35-2.py)</h3>
+            <pre><span class="keyword">import</span> itertools
+<span class="keyword">from</span> typing <span class="keyword">import</span> List
+
+
+<span class="keyword">class</span> Solution:
+    <span class="keyword">def</span> <span class="function">combine</span>(<span class="keyword">self</span>, n: int, k: int) -&gt; List[List[int]]:
+        <span class="keyword">return</span> <span class="function">list</span>(itertools.<span class="function">combinations</span>(<span class="function">range</span>(<span class="number">1</span>, n + <span class="number">1</span>), k))</pre>
+        </div>
+
+    </div>
+
+    <script>
+        const n = 4, k = 2;
+        const allCombs = [
+            [1, 2], [1, 3], [1, 4], [2, 3], [2, 4], [3, 4]
+        ];
+        
+        let currentStep = 0;
+        let showIndex = 0;
+        let autoInterval = null;
+        
+        function init() {
+            currentStep = 0;
+            showIndex = 0;
+            render();
+        }
+        
+        function render() {
+            document.getElementById('step1').className = 'step-item' + (currentStep >= 1 ? ' done' : '');
+            document.getElementById('step2').className = 'step-item' + (currentStep >= 2 ? ' done' : '');
+            document.getElementById('step3').className = 'step-item' + (currentStep >= 3 ? ' done' : '');
+            
+            const itertoolsBox = document.getElementById('itertoolsBox');
+            itertoolsBox.style.display = currentStep >= 1 ? 'block' : 'none';
+            
+            if (currentStep === 1) {
+                document.getElementById('itertoolsCode').textContent = 'range(1, 5) → [1, 2, 3, 4]';
+            } else if (currentStep >= 2) {
+                document.getElementById('itertoolsCode').textContent = 
+                    'itertools.combinations([1,2,3,4], 2) → iterator of 6 combinations';
+            }
+            
+            document.getElementById('resultsSection').style.display = currentStep >= 3 ? 'block' : 'none';
+            
+            if (currentStep >= 3) {
+                const container = document.getElementById('resultsGrid');
+                container.innerHTML = '';
+                allCombs.forEach((comb, i) => {
+                    const item = document.createElement('div');
+                    item.className = 'result-item' + (i < showIndex ? ' show' : '');
+                    item.textContent = `(${comb.join(', ')})`;
+                    container.appendChild(item);
+                });
+            }
+        }
+        
+        function step() {
+            if (currentStep < 3) {
+                currentStep++;
+                if (currentStep === 1) {
+                    document.getElementById('statusMessage').textContent = 
+                        'Step 1: range(1, n+1) creates [1, 2, 3, 4]';
+                } else if (currentStep === 2) {
+                    document.getElementById('statusMessage').textContent = 
+                        'Step 2: itertools.combinations() generates all k-combinations';
+                } else {
+                    document.getElementById('statusMessage').textContent = 
+                        'Step 3: Convert to list';
+                }
+                render();
+            } else if (showIndex < allCombs.length) {
+                showIndex++;
+                document.getElementById('statusMessage').textContent = 
+                    `Combination ${showIndex}/${allCombs.length}: (${allCombs[showIndex-1].join(', ')})`;
+                render();
+            } else {
+                document.getElementById('statusMessage').textContent = 
+                    `✅ Done! All ${allCombs.length} combinations.`;
+                document.getElementById('stepBtn').disabled = true;
+                stopAuto();
+            }
+        }
+        
+        function toggleAuto() {
+            if (autoInterval) { stopAuto(); }
+            else {
+                document.getElementById('autoBtn').textContent = 'Pause';
+                autoInterval = setInterval(step, 500);
+            }
+        }
+        
+        function stopAuto() {
+            if (autoInterval) { clearInterval(autoInterval); autoInterval = null; }
+            document.getElementById('autoBtn').textContent = 'Auto Run';
+        }
+        
+        function reset() {
+            stopAuto();
+            document.getElementById('stepBtn').disabled = false;
+            document.getElementById('statusMessage').textContent = 'One-liner: itertools.combinations(range(1, 5), 2)';
+            init();
+        }
+        
+        init();
+    </script>
+</body>
+</html>

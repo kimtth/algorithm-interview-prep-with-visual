@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Q16: Add Two Numbers - Full Adder</title>
+    <link rel="stylesheet" href="visual.css">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    
+</head>
+<body>
+    <div class="container">
+        <div class="problem-info">
+            <h1>Q16: Add Two Numbers</h1>
+            <p>Given two non-empty linked lists representing non-negative integers (digits in reverse order), add them and return the sum as a linked list.</p>
+            <div class="problem-meta">
+                <span class="meta-tag">📁 Linked List</span>
+                <span class="meta-tag">➕ Math</span>
+                <span class="meta-tag">⏱️ O(max(n,m))</span>
+                <span class="meta-tag">💡 Full Adder</span>
+            </div>
+        </div>
+        
+        
+        
+        <div class="visualization-section">
+            <h3>🎬 Visualization</h3>
+            
+            <div class="controls">
+                <button class="btn btn-primary" id="stepBtn" onclick="step()">Step</button>
+                <button class="btn btn-success" id="autoBtn" onclick="toggleAuto()">Auto Run</button>
+                <button class="btn btn-warning" onclick="reset()">Reset</button>
+            </div>
+            
+            <div class="carry-display">
+                <div class="carry-label">Carry</div>
+                <div class="carry-value" id="carryValue">0</div>
+            </div>
+            
+            <div class="status-message" id="statusMessage">
+                Click "Step" or "Auto Run" to start (342 + 465 = 807)
+            </div>
+            
+            <div class="addition-display" id="additionDisplay">
+                <div class="addition-formula">Ready to add...</div>
+            </div>
+            
+            <div class="list-section">
+                <div class="list-label">L1 (342 reversed):</div>
+                <div class="list-container" id="l1Container"></div>
+            </div>
+            
+            <div class="list-section">
+                <div class="list-label">L2 (465 reversed):</div>
+                <div class="list-container" id="l2Container"></div>
+            </div>
+            
+            <div class="list-section">
+                <div class="list-label">Result (807 reversed):</div>
+                <div class="list-container" id="resultContainer"></div>
+            </div>
+        </div>
+    </div>
+        
+        <div class="code-section">
+            <h3>📄 Python Solution (16-1.py)</h3>
+            <pre><span class="keyword">from</span> typing <span class="keyword">import</span> List
+
+
+<span class="comment"># Definition for singly-linked list.</span>
+<span class="keyword">class</span> ListNode:
+    <span class="keyword">def</span> <span class="function">__init__</span>(<span class="keyword">self</span>, x):
+        <span class="keyword">self</span>.val = x
+        <span class="keyword">self</span>.next = <span class="keyword">None</span>
+
+
+<span class="keyword">class</span> Solution:
+    <span class="comment"># 연결 리스트 뒤집기</span>
+    <span class="keyword">def</span> <span class="function">reverseList</span>(<span class="keyword">self</span>, head: ListNode) -&gt; ListNode:
+        node, prev = head, <span class="keyword">None</span>
+
+        <span class="keyword">while</span> node:
+            next, node.next = node.next, prev
+            prev, node = node, next
+
+        <span class="keyword">return</span> prev
+
+    <span class="comment"># 연결 리스트를 파이썬 리스트로 변환</span>
+    <span class="keyword">def</span> <span class="function">toList</span>(<span class="keyword">self</span>, node: ListNode) -&gt; List:
+        list: List = []
+        <span class="keyword">while</span> node:
+            list.<span class="function">append</span>(node.val)
+            node = node.next
+        <span class="keyword">return</span> list
+
+    <span class="comment"># 파이썬 리스트를 연결 리스트로 변환</span>
+    <span class="keyword">def</span> <span class="function">toReversedLinkedList</span>(<span class="keyword">self</span>, result: str) -&gt; ListNode:
+        prev: ListNode = <span class="keyword">None</span>
+        <span class="keyword">for</span> r <span class="keyword">in</span> result:
+            node = <span class="function">ListNode</span>(r)
+            node.next = prev
+            prev = node
+
+        <span class="keyword">return</span> node
+
+    <span class="comment"># 두 연결 리스트의 덧셈</span>
+    <span class="keyword">def</span> <span class="function">addTwoNumbers</span>(<span class="keyword">self</span>, l1: ListNode, l2: ListNode) -&gt; ListNode:
+        a = <span class="keyword">self</span>.<span class="function">toList</span>(<span class="keyword">self</span>.<span class="function">reverseList</span>(l1))
+        b = <span class="keyword">self</span>.<span class="function">toList</span>(<span class="keyword">self</span>.<span class="function">reverseList</span>(l2))
+
+        resultStr = <span class="function">int</span>(''.<span class="function">join</span>(<span class="function">str</span>(e) <span class="keyword">for</span> e <span class="keyword">in</span> a)) + \
+                    <span class="function">int</span>(''.<span class="function">join</span>(<span class="function">str</span>(e) <span class="keyword">for</span> e <span class="keyword">in</span> b))
+
+        <span class="comment"># 최종 계산 결과 연결 리스트 변환</span>
+        <span class="keyword">return</span> <span class="keyword">self</span>.<span class="function">toReversedLinkedList</span>(<span class="function">str</span>(resultStr))</pre>
+        </div>
+
+    </div>
+
+    <script>
+        const l1 = [2, 4, 3]; // 342 reversed
+        const l2 = [5, 6, 4]; // 465 reversed
+        let result = [];
+        let idx = 0;
+        let carry = 0;
+        let autoInterval = null;
+        let phase = 'init';
+        
+        function init() {
+            renderList('l1Container', l1, 'l1');
+            renderList('l2Container', l2, 'l2');
+            document.getElementById('resultContainer').innerHTML = '';
+            document.getElementById('carryValue').textContent = '0';
+            document.getElementById('additionDisplay').innerHTML = '<div class="addition-formula">Ready to add...</div>';
+        }
+        
+        function renderList(containerId, data, cls) {
+            const container = document.getElementById(containerId);
+            container.innerHTML = '';
+            data.forEach((val, i) => {
+                const node = document.createElement('div');
+                node.className = `list-node ${cls}`;
+                node.id = `${containerId}-${i}`;
+                node.textContent = val;
+                if (i < idx) node.classList.add('processed');
+                if (i === idx) node.classList.add('current');
+                container.appendChild(node);
+                if (i < data.length - 1) {
+                    const arrow = document.createElement('div');
+                    arrow.className = 'list-arrow';
+                    container.appendChild(arrow);
+                }
+            });
+        }
+        
+        function renderResult() {
+            const container = document.getElementById('resultContainer');
+            container.innerHTML = '';
+            result.forEach((val, i) => {
+                const node = document.createElement('div');
+                node.className = 'list-node result';
+                node.textContent = val;
+                container.appendChild(node);
+                if (i < result.length - 1) {
+                    const arrow = document.createElement('div');
+                    arrow.className = 'list-arrow';
+                    container.appendChild(arrow);
+                }
+            });
+        }
+        
+        function step() {
+            if (idx >= Math.max(l1.length, l2.length) && carry === 0) {
+                phase = 'done';
+                document.getElementById('statusMessage').textContent = 
+                    `✅ Done! Result: ${result.join(' → ')} (which is 807 in reverse)`;
+                document.getElementById('stepBtn').disabled = true;
+                stopAuto();
+                return;
+            }
+            
+            const v1 = idx < l1.length ? l1[idx] : 0;
+            const v2 = idx < l2.length ? l2[idx] : 0;
+            const sum = v1 + v2 + carry;
+            const val = sum % 10;
+            carry = Math.floor(sum / 10);
+            
+            result.push(val);
+            
+            document.getElementById('additionDisplay').innerHTML = 
+                `<div class="addition-formula">${v1} + ${v2} + carry(${carry === 0 && sum >= 10 ? 1 : (sum - val) / 10}) = ${sum} → digit: ${val}, carry: ${carry}</div>`;
+            
+            document.getElementById('carryValue').textContent = carry;
+            document.getElementById('statusMessage').textContent = 
+                `Position ${idx}: ${v1} + ${v2} + carry = ${sum}. Store ${val}, carry ${carry}`;
+            
+            renderList('l1Container', l1, 'l1');
+            renderList('l2Container', l2, 'l2');
+            renderResult();
+            
+            idx++;
+        }
+        
+        function toggleAuto() {
+            if (autoInterval) {
+                stopAuto();
+            } else {
+                document.getElementById('autoBtn').textContent = 'Pause';
+                autoInterval = setInterval(() => {
+                    if (phase === 'done') stopAuto();
+                    else step();
+                }, 1200);
+            }
+        }
+        
+        function stopAuto() {
+            if (autoInterval) { clearInterval(autoInterval); autoInterval = null; }
+            document.getElementById('autoBtn').textContent = 'Auto Run';
+        }
+        
+        function reset() {
+            stopAuto();
+            phase = 'init';
+            idx = 0;
+            carry = 0;
+            result = [];
+            document.getElementById('stepBtn').disabled = false;
+            document.getElementById('statusMessage').textContent = 'Click "Step" or "Auto Run" to start (342 + 465 = 807)';
+            init();
+        }
+        
+        init();
+    </script>
+</body>
+</html>

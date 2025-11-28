@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Q11: Product of Array Except Self</title>
+    <link rel="stylesheet" href="visual.css">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    
+</head>
+<body>
+    <div class="container">
+        <div class="problem-info">
+            <h1>Q11: Product of Array Except Self</h1>
+            <p>Given an integer array nums, return an array where each element is the product of all array elements except itself. Solve without division in O(n) time.</p>
+            <div class="problem-meta">
+                <span class="meta-tag">📁 Array</span>
+                <span class="meta-tag">🔢 Prefix/Suffix</span>
+                <span class="meta-tag">⏱️ O(n)</span>
+                <span class="meta-tag">💾 O(1) extra</span>
+            </div>
+        </div>
+        
+        
+        
+        <div class="visualization-section">
+            <h3>🎬 Visualization</h3>
+            
+            <div class="controls">
+                <button class="btn btn-primary" id="stepBtn" onclick="step()">Step</button>
+                <button class="btn btn-success" id="autoBtn" onclick="toggleAuto()">Auto Run</button>
+                <button class="btn btn-warning" onclick="reset()">Reset</button>
+            </div>
+            
+            <div class="phase-indicator">
+                <div class="phase-box left" id="leftPhase">
+                    <div class="phase-title">Left Sweep</div>
+                    <div class="phase-arrow">→ → →</div>
+                </div>
+                <div class="phase-box right" id="rightPhase">
+                    <div class="phase-title">Right Sweep</div>
+                    <div class="phase-arrow">← ← ←</div>
+                </div>
+            </div>
+            
+            <div class="product-display" id="productDisplay">
+                Running Product (P) = 1
+            </div>
+            
+            <div class="status-message" id="statusMessage">
+                Click "Step" or "Auto Run" to start visualization
+            </div>
+            
+            <div class="array-section">
+                <div class="array-label">Input Array (nums):</div>
+                <div class="array-container" id="inputContainer"></div>
+            </div>
+            
+            <div class="array-section">
+                <div class="array-label">Output Array (out):</div>
+                <div class="array-container" id="outputContainer"></div>
+            </div>
+        </div>
+    </div>
+        
+        <div class="code-section">
+            <h3>📄 Python Solution (11-1.py)</h3>
+            <pre><span class="keyword">from</span> typing <span class="keyword">import</span> List
+
+
+<span class="keyword">class</span> Solution:
+    <span class="keyword">def</span> <span class="function">productExceptSelf</span>(<span class="keyword">self</span>, nums: List[int]) -&gt; List[int]:
+        out = []
+        p = <span class="number">1</span>
+        <span class="comment"># 왼쪽 곱셈</span>
+        <span class="keyword">for</span> i <span class="keyword">in</span> <span class="function">range</span>(<span class="number">0</span>, <span class="function">len</span>(nums)):
+            out.<span class="function">append</span>(p)
+            p = p * nums[i]
+        p = <span class="number">1</span>
+        <span class="comment"># 왼쪽 곱셈 결과에 오른쪽 값을 차례대로 곱셈</span>
+        <span class="keyword">for</span> i <span class="keyword">in</span> <span class="function">range</span>(<span class="function">len</span>(nums) - <span class="number">1</span>, <span class="number">0</span> - <span class="number">1</span>, -<span class="number">1</span>):
+            out[i] = out[i] * p
+            p = p * nums[i]
+        <span class="keyword">return</span> out</pre>
+        </div>
+
+    </div>
+
+    <script>
+        const nums = [1, 2, 3, 4];
+        let out = [];
+        let p = 1;
+        let currentIndex = 0;
+        let phase = 'init'; // init, left, right, done
+        let autoInterval = null;
+        
+        function init() {
+            renderInput();
+            renderOutput([]);
+            document.getElementById('productDisplay').textContent = 'Running Product (P) = 1';
+            document.getElementById('leftPhase').classList.remove('active');
+            document.getElementById('rightPhase').classList.remove('active');
+        }
+        
+        function renderInput() {
+            const container = document.getElementById('inputContainer');
+            container.innerHTML = '';
+            nums.forEach((num, idx) => {
+                const box = document.createElement('div');
+                box.className = 'array-box';
+                box.id = `input-${idx}`;
+                box.innerHTML = `${num}<span class="index-label">[${idx}]</span>`;
+                container.appendChild(box);
+            });
+        }
+        
+        function renderOutput(arr) {
+            const container = document.getElementById('outputContainer');
+            container.innerHTML = '';
+            // Always show n boxes
+            for (let i = 0; i < nums.length; i++) {
+                const box = document.createElement('div');
+                box.className = 'array-box';
+                box.id = `output-${i}`;
+                box.innerHTML = arr[i] !== undefined ? 
+                    `${arr[i]}<span class="index-label">[${i}]</span>` : 
+                    `?<span class="index-label">[${i}]</span>`;
+                container.appendChild(box);
+            }
+        }
+        
+        function clearHighlights() {
+            document.querySelectorAll('.array-box').forEach(box => {
+                box.classList.remove('highlight');
+            });
+        }
+        
+        function step() {
+            if (phase === 'init') {
+                phase = 'left';
+                currentIndex = 0;
+                out = [];
+                p = 1;
+                document.getElementById('leftPhase').classList.add('active');
+                document.getElementById('statusMessage').textContent = 
+                    'Starting Left Sweep: Store product of all elements to the LEFT';
+            } else if (phase === 'left') {
+                if (currentIndex < nums.length) {
+                    clearHighlights();
+                    
+                    // out.append(p)
+                    out.push(p);
+                    renderOutput(out);
+                    
+                    // Highlight current position
+                    document.getElementById(`input-${currentIndex}`).classList.add('highlight');
+                    document.getElementById(`output-${currentIndex}`).classList.add('left-updated');
+                    document.getElementById(`output-${currentIndex}`).classList.add('highlight');
+                    
+                    document.getElementById('statusMessage').textContent = 
+                        `Left[${currentIndex}]: out[${currentIndex}] = ${p} (product of left elements). Then P = ${p} × ${nums[currentIndex]} = ${p * nums[currentIndex]}`;
+                    
+                    // Update p for next iteration
+                    p = p * nums[currentIndex];
+                    document.getElementById('productDisplay').textContent = `Running Product (P) = ${p}`;
+                    
+                    currentIndex++;
+                } else {
+                    // Switch to right sweep
+                    phase = 'right';
+                    currentIndex = nums.length - 1;
+                    p = 1;
+                    document.getElementById('leftPhase').classList.remove('active');
+                    document.getElementById('rightPhase').classList.add('active');
+                    document.getElementById('productDisplay').textContent = 'Running Product (P) = 1';
+                    document.getElementById('statusMessage').textContent = 
+                        'Left sweep done! Starting Right Sweep: Multiply by product of all elements to the RIGHT';
+                    clearHighlights();
+                }
+            } else if (phase === 'right') {
+                if (currentIndex >= 0) {
+                    clearHighlights();
+                    
+                    const oldVal = out[currentIndex];
+                    out[currentIndex] = out[currentIndex] * p;
+                    renderOutput(out);
+                    
+                    // Highlight current position
+                    document.getElementById(`input-${currentIndex}`).classList.add('highlight');
+                    const outBox = document.getElementById(`output-${currentIndex}`);
+                    outBox.classList.add('right-updated');
+                    outBox.classList.add('highlight');
+                    
+                    document.getElementById('statusMessage').textContent = 
+                        `Right[${currentIndex}]: out[${currentIndex}] = ${oldVal} × ${p} = ${out[currentIndex]}. Then P = ${p} × ${nums[currentIndex]} = ${p * nums[currentIndex]}`;
+                    
+                    // Update p for next iteration
+                    p = p * nums[currentIndex];
+                    document.getElementById('productDisplay').textContent = `Running Product (P) = ${p}`;
+                    
+                    currentIndex--;
+                } else {
+                    // Done
+                    phase = 'done';
+                    document.getElementById('rightPhase').classList.remove('active');
+                    clearHighlights();
+                    
+                    // Mark all output as complete
+                    for (let i = 0; i < nums.length; i++) {
+                        document.getElementById(`output-${i}`).classList.add('complete');
+                    }
+                    
+                    document.getElementById('statusMessage').textContent = 
+                        `✅ Done! Result: [${out.join(', ')}]`;
+                    document.getElementById('stepBtn').disabled = true;
+                    stopAuto();
+                }
+            }
+        }
+        
+        function toggleAuto() {
+            if (autoInterval) {
+                stopAuto();
+            } else {
+                document.getElementById('autoBtn').textContent = 'Pause';
+                autoInterval = setInterval(() => {
+                    if (phase === 'done') {
+                        stopAuto();
+                    } else {
+                        step();
+                    }
+                }, 1200);
+            }
+        }
+        
+        function stopAuto() {
+            if (autoInterval) {
+                clearInterval(autoInterval);
+                autoInterval = null;
+            }
+            document.getElementById('autoBtn').textContent = 'Auto Run';
+        }
+        
+        function reset() {
+            stopAuto();
+            phase = 'init';
+            currentIndex = 0;
+            out = [];
+            p = 1;
+            document.getElementById('stepBtn').disabled = false;
+            document.getElementById('statusMessage').textContent = 
+                'Click "Step" or "Auto Run" to start visualization';
+            init();
+        }
+        
+        // Initialize on load
+        init();
+    </script>
+</body>
+</html>

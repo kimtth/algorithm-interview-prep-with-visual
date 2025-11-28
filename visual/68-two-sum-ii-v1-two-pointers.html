@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Two Sum II - Two Pointers</title>
+    <link rel="stylesheet" href="visual.css">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    
+</head>
+<body>
+    <div class="container">
+        <h1>🎯 Two Sum II - Sorted Array</h1>
+        <p class="subtitle">O(n) Two Pointers - Array is sorted!</p>
+
+        <div class="controls">
+            <button id="stepBtn">Step</button>
+            <button id="autoBtn">Auto Run</button>
+            <button id="resetBtn">Reset</button>
+            <div class="target-display">Target: <span id="target">9</span></div>
+        </div>
+
+        <div class="panel">
+            <div class="panel-title">📊 Sorted Array</div>
+            <div class="array-container" id="array"></div>
+            <div class="sum-display">
+                <div class="sum-formula" id="formula">nums[left] + nums[right] = ?</div>
+                <div class="sum-result" id="sum-result">-</div>
+            </div>
+        </div>
+
+        <div class="panel">
+            <div class="panel-title">📊 Status</div>
+            <div class="status-box" id="status">Click "Step" or "Auto Run" to find two numbers</div>
+        </div>
+    
+        <div class="code-section">
+            <h3>📄 Python Solution (68-1.py)</h3>
+            <pre><span class="keyword">from</span> typing <span class="keyword">import</span> List
+
+
+<span class="keyword">class</span> Solution:
+    <span class="keyword">def</span> <span class="function">twoSum</span>(<span class="keyword">self</span>, numbers: List[int], target: int) -&gt; List[int]:
+        left, right = <span class="number">0</span>, <span class="function">len</span>(numbers) - <span class="number">1</span>
+        <span class="keyword">while</span> <span class="keyword">not</span> left == right:
+            <span class="keyword">if</span> numbers[left] + numbers[right] &lt; target:
+                left += <span class="number">1</span>
+            <span class="keyword">elif</span> numbers[left] + numbers[right] &gt; target:
+                right -= <span class="number">1</span>
+            <span class="keyword">else</span>:
+                <span class="keyword">return</span> left + <span class="number">1</span>, right + <span class="number">1</span>  <span class="comment"># 리턴 값 +1</span></pre>
+        </div>
+
+    </div>
+
+
+    <script>
+        const nums = [2, 7, 11, 15];
+        const target = 9;
+        let left = 0, right = nums.length - 1;
+        let found = false;
+        let autoInterval = null;
+
+        document.getElementById('target').textContent = target;
+
+        function render() {
+            const container = document.getElementById('array');
+            container.innerHTML = nums.map((val, i) => {
+                let cls = 'array-item default';
+                let pointers = '';
+                
+                if (found && (i === left || i === right)) {
+                    cls = 'array-item found';
+                } else if (i === left) {
+                    cls = 'array-item left';
+                    pointers = '<span class="pointer left-ptr">L↓</span>';
+                } else if (i === right) {
+                    cls = 'array-item right';
+                    pointers = '<span class="pointer right-ptr">R↓</span>';
+                }
+                
+                return `<div class="${cls}">${pointers}<span class="value">${val}</span><span class="index">[${i}]</span></div>`;
+            }).join('');
+
+            const sum = nums[left] + nums[right];
+            document.getElementById('formula').textContent = 
+                `nums[${left}] + nums[${right}] = ${nums[left]} + ${nums[right]} = ${sum}`;
+            
+            const resultEl = document.getElementById('sum-result');
+            if (sum < target) {
+                resultEl.textContent = `${sum} < ${target} → Move left pointer right`;
+                resultEl.className = 'sum-result too-small';
+            } else if (sum > target) {
+                resultEl.textContent = `${sum} > ${target} → Move right pointer left`;
+                resultEl.className = 'sum-result too-big';
+            } else {
+                resultEl.textContent = `${sum} = ${target} → Found!`;
+                resultEl.className = 'sum-result equal';
+            }
+        }
+
+        function step() {
+            if (found || left >= right) return;
+
+            const sum = nums[left] + nums[right];
+            
+            if (sum === target) {
+                found = true;
+                document.getElementById('status').innerHTML = 
+                    `✅ Found! nums[${left}] + nums[${right}] = ${nums[left]} + ${nums[right]} = ${target}. Return [${left+1}, ${right+1}]`;
+                document.getElementById('stepBtn').disabled = true;
+                document.getElementById('autoBtn').disabled = true;
+                stopAuto();
+            } else if (sum < target) {
+                document.getElementById('status').innerHTML = 
+                    `Sum ${sum} < target ${target}. Need larger sum → move left pointer right.`;
+                left++;
+            } else {
+                document.getElementById('status').innerHTML = 
+                    `Sum ${sum} > target ${target}. Need smaller sum → move right pointer left.`;
+                right--;
+            }
+
+            render();
+        }
+
+        function reset() {
+            stopAuto();
+            left = 0;
+            right = nums.length - 1;
+            found = false;
+            document.getElementById('stepBtn').disabled = false;
+            document.getElementById('autoBtn').disabled = false;
+            document.getElementById('status').innerHTML = 'Click "Step" or "Auto Run" to find two numbers';
+            render();
+        }
+
+        function stopAuto() {
+            if (autoInterval) { clearInterval(autoInterval); autoInterval = null; }
+            document.getElementById('autoBtn').textContent = 'Auto Run';
+        }
+
+        document.getElementById('stepBtn').onclick = () => { stopAuto(); step(); };
+        document.getElementById('autoBtn').onclick = () => {
+            if (autoInterval) { stopAuto(); }
+            else { autoInterval = setInterval(step, 800); document.getElementById('autoBtn').textContent = '⏸ Pause'; }
+        };
+        document.getElementById('resetBtn').onclick = reset;
+
+        render();
+    </script>
+</body>
+</html>

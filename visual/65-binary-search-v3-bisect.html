@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Binary Search - Bisect</title>
+    <link rel="stylesheet" href="visual.css">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 Binary Search - Python bisect</h1>
+        <p class="subtitle">O(log n) using Python's bisect_left module</p>
+
+        <div class="controls">
+            <button id="stepBtn">Step</button>
+            <button id="autoBtn">Auto Run</button>
+            <button id="resetBtn">Reset</button>
+            <div class="target-display">Target: <span id="target">9</span></div>
+        </div>
+
+        <div class="step-indicator">
+            <div class="step-item" id="step1">1. bisect_left</div>
+            <div class="step-item" id="step2">2. Check Index</div>
+            <div class="step-item" id="step3">3. Compare Value</div>
+        </div>
+
+        <div class="panel">
+            <div class="panel-title">📊 Sorted Array</div>
+            <div class="array-container" id="array"></div>
+            <div class="bisect-info">
+                <div>bisect_left(nums, <span id="target-val">9</span>) = </div>
+                <div class="bisect-result" id="bisect-result">?</div>
+            </div>
+        </div>
+
+        <div class="panel">
+            <div class="panel-title">📊 Status</div>
+            <div class="status-box" id="status">Click "Step" or "Auto Run" to search using bisect</div>
+        </div>
+
+        <div class="panel">
+            <div class="panel-title">💻 Algorithm</div>
+            <div class="code-box" id="code">
+<span id="line1">import bisect</span>
+<span id="line2"></span>
+<span id="line3">def search(nums, target):</span>
+<span id="line4">    index = bisect.bisect_left(nums, target)</span>
+<span id="line5">    </span>
+<span id="line6">    if index < len(nums) and nums[index] == target:</span>
+<span id="line7">        return index</span>
+<span id="line8">    else:</span>
+<span id="line9">        return -1</span>
+            </div>
+        </div>
+    
+        <div class="code-section">
+            <h3>📄 Python Solution (65-3.py)</h3>
+            <pre><span class="keyword">import</span> bisect
+<span class="keyword">from</span> typing <span class="keyword">import</span> List
+
+
+<span class="keyword">class</span> Solution:
+    <span class="keyword">def</span> <span class="function">search</span>(<span class="keyword">self</span>, nums: List[int], target: int) -&gt; int:
+        index = bisect.<span class="function">bisect_left</span>(nums, target)
+
+        <span class="keyword">if</span> index &lt; <span class="function">len</span>(nums) <span class="keyword">and</span> nums[index] == target:
+            <span class="keyword">return</span> index
+        <span class="keyword">else</span>:
+            <span class="keyword">return</span> -<span class="number">1</span></pre>
+        </div>
+
+    </div>
+
+
+    <script>
+        const nums = [-1, 0, 3, 5, 9, 12];
+        const target = 9;
+        let step = 0;
+        let bisectIndex = -1;
+        let found = -1;
+        let autoInterval = null;
+
+        document.getElementById('target').textContent = target;
+        document.getElementById('target-val').textContent = target;
+
+        function renderArray() {
+            const container = document.getElementById('array');
+            
+            container.innerHTML = nums.map((val, i) => {
+                let cls = 'array-item default';
+                let marker = '';
+                
+                if (found === i) {
+                    cls = 'array-item found';
+                } else if (found === -2 && i === bisectIndex) {
+                    cls = 'array-item not-found';
+                } else if (i === bisectIndex) {
+                    cls = 'array-item bisect-point';
+                    marker = '<span class="insert-marker">↓</span>';
+                }
+                
+                return `<div class="${cls}">${marker}<span class="value">${val}</span><span class="index">[${i}]</span></div>`;
+            }).join('');
+        }
+
+        function updateStepIndicator() {
+            for (let i = 1; i <= 3; i++) {
+                const el = document.getElementById(`step${i}`);
+                el.classList.remove('active', 'done');
+                if (i < step) el.classList.add('done');
+                else if (i === step) el.classList.add('active');
+            }
+        }
+
+        function highlightCode(lineNum) {
+            document.querySelectorAll('.code-box span').forEach(span => {
+                span.classList.remove('highlight');
+            });
+            if (lineNum) {
+                const line = document.getElementById(`line${lineNum}`);
+                if (line) line.classList.add('highlight');
+            }
+        }
+
+        // Simulate bisect_left
+        function bisectLeft(arr, x) {
+            let lo = 0, hi = arr.length;
+            while (lo < hi) {
+                const mid = Math.floor((lo + hi) / 2);
+                if (arr[mid] < x) lo = mid + 1;
+                else hi = mid;
+            }
+            return lo;
+        }
+
+        function executeStep() {
+            step++;
+            updateStepIndicator();
+
+            switch(step) {
+                case 1:
+                    highlightCode(4);
+                    bisectIndex = bisectLeft(nums, target);
+                    document.getElementById('bisect-result').textContent = bisectIndex;
+                    document.getElementById('status').innerHTML = 
+                        `bisect_left finds insertion point: index = ${bisectIndex}<br>
+                        This is where ${target} would be inserted to maintain sorted order.`;
+                    break;
+                    
+                case 2:
+                    highlightCode(6);
+                    const inBounds = bisectIndex < nums.length;
+                    document.getElementById('status').innerHTML = 
+                        `Check: index (${bisectIndex}) < len(nums) (${nums.length})? ${inBounds ? '✓ Yes' : '✗ No'}<br>
+                        ${inBounds ? 'Index is valid, proceed to compare values.' : 'Index out of bounds, target not found.'}`;
+                    
+                    if (!inBounds) {
+                        step = 4;
+                        found = -2;
+                        highlightCode(9);
+                        document.getElementById('status').innerHTML = 
+                            `❌ Index ${bisectIndex} >= length ${nums.length}. Target not found. Return -1`;
+                        document.getElementById('stepBtn').disabled = true;
+                        document.getElementById('autoBtn').disabled = true;
+                        stopAuto();
+                    }
+                    break;
+                    
+                case 3:
+                    const matches = nums[bisectIndex] === target;
+                    
+                    if (matches) {
+                        highlightCode(7);
+                        found = bisectIndex;
+                        document.getElementById('status').innerHTML = 
+                            `✅ nums[${bisectIndex}] = ${nums[bisectIndex]} == ${target}. Found! Return ${bisectIndex}`;
+                    } else {
+                        highlightCode(9);
+                        found = -2;
+                        document.getElementById('status').innerHTML = 
+                            `❌ nums[${bisectIndex}] = ${nums[bisectIndex]} != ${target}. Not found. Return -1`;
+                    }
+                    
+                    document.getElementById('stepBtn').disabled = true;
+                    document.getElementById('autoBtn').disabled = true;
+                    stopAuto();
+                    break;
+            }
+
+            renderArray();
+        }
+
+        function reset() {
+            stopAuto();
+            step = 0;
+            bisectIndex = -1;
+            found = -1;
+            
+            document.getElementById('stepBtn').disabled = false;
+            document.getElementById('autoBtn').disabled = false;
+            document.getElementById('status').innerHTML = 'Click "Step" or "Auto Run" to search using bisect';
+            document.getElementById('bisect-result').textContent = '?';
+            highlightCode(null);
+            updateStepIndicator();
+            renderArray();
+        }
+
+        function stopAuto() {
+            if (autoInterval) {
+                clearInterval(autoInterval);
+                autoInterval = null;
+                document.getElementById('autoBtn').textContent = 'Auto Run';
+            }
+        }
+
+        document.getElementById('stepBtn').addEventListener('click', () => {
+            stopAuto();
+            executeStep();
+        });
+
+        document.getElementById('autoBtn').addEventListener('click', () => {
+            if (autoInterval) {
+                stopAuto();
+            } else {
+                autoInterval = setInterval(executeStep, 1000);
+                document.getElementById('autoBtn').textContent = '⏸ Pause';
+            }
+        });
+
+        document.getElementById('resetBtn').addEventListener('click', reset);
+
+        // Initialize
+        renderArray();
+    </script>
+</body>
+</html>

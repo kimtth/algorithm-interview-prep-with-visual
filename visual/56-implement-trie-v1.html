@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Q56: Implement Trie</title>
+    <link rel="stylesheet" href="visual.css">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    
+</head>
+<body>
+    <div class="container">
+        <div class="problem-info">
+            <h1>Q56: Implement Trie (Prefix Tree)</h1>
+            <p>A trie stores strings with shared prefixes. Each node represents a character, and paths from root form words. Supports insert, search, and startsWith operations.</p>
+            <div class="problem-meta">
+                <span class="meta-tag">📁 Trie</span>
+                <span class="meta-tag">⏱️ O(m) per operation</span>
+                <span class="meta-tag">💡 Prefix Tree</span>
+            </div>
+        </div>
+        
+        
+        
+        <div class="visualization-section">
+            <h3>🎬 Interactive Trie Visualization</h3>
+            
+            <div class="controls">
+                <div class="input-group">
+                    <input type="text" id="wordInput" placeholder="Enter word..." onkeypress="if(event.key==='Enter')insertWord()">
+                    <button class="btn btn-primary" onclick="insertWord()">Insert</button>
+                    <button class="btn btn-info" onclick="searchWord()">Search</button>
+                    <button class="btn btn-success" onclick="prefixSearch()">StartsWith</button>
+                </div>
+                <button class="btn btn-warning" onclick="reset()">Reset</button>
+            </div>
+            
+            <div class="legend">
+                <div class="legend-item"><div class="legend-circle legend-color bg-purple-trie"></div> Node</div>
+                <div class="legend-item"><div class="legend-circle legend-color bg-green"></div> Word End</div>
+                <div class="legend-item"><div class="legend-circle legend-color bg-orange"></div> Current Path</div>
+            </div>
+            
+            <div class="status-message" id="statusMessage">
+                Type a word and click Insert, Search, or StartsWith.
+            </div>
+            
+            <div class="trie-container">
+                <svg id="trie" width="900" height="400"></svg>
+            </div>
+            
+            <div class="words-section">
+                <div class="words-title">📚 Stored Words</div>
+                <div class="words-list" id="wordsList"><span class="text-gray">No words yet</span></div>
+            </div>
+        </div>
+    </div>
+        
+        <div class="code-section">
+            <h3>📄 Python Solution (56-1.py)</h3>
+            <pre><span class="keyword">import</span> collections
+
+
+<span class="comment"># 트라이의 노드</span>
+<span class="keyword">class</span> TrieNode:
+    <span class="keyword">def</span> <span class="function">__init__</span>(<span class="keyword">self</span>):
+        <span class="keyword">self</span>.word = <span class="keyword">False</span>
+        <span class="keyword">self</span>.children = collections.<span class="function">defaultdict</span>(TrieNode)
+
+
+<span class="keyword">class</span> Trie:
+    <span class="keyword">def</span> <span class="function">__init__</span>(<span class="keyword">self</span>):
+        <span class="keyword">self</span>.root = <span class="function">TrieNode</span>()
+
+    <span class="comment"># 단어 삽입</span>
+    <span class="keyword">def</span> <span class="function">insert</span>(<span class="keyword">self</span>, word: str) -&gt; <span class="keyword">None</span>:
+        node = <span class="keyword">self</span>.root
+        <span class="keyword">for</span> char <span class="keyword">in</span> word:
+            node = node.children[char]
+        node.word = <span class="keyword">True</span>
+
+    <span class="comment"># 단어 존재 여부 판별</span>
+    <span class="keyword">def</span> <span class="function">search</span>(<span class="keyword">self</span>, word: str) -&gt; bool:
+        node = <span class="keyword">self</span>.root
+        <span class="keyword">for</span> char <span class="keyword">in</span> word:
+            <span class="keyword">if</span> char <span class="keyword">not</span> <span class="keyword">in</span> node.children:
+                <span class="keyword">return</span> <span class="keyword">False</span>
+            node = node.children[char]
+
+        <span class="keyword">return</span> node.word
+
+    <span class="comment"># 문자열로 시작 단어 존재 여부 판별</span>
+    <span class="keyword">def</span> <span class="function">startsWith</span>(<span class="keyword">self</span>, prefix: str) -&gt; bool:
+        node = <span class="keyword">self</span>.root
+        <span class="keyword">for</span> char <span class="keyword">in</span> prefix:
+            <span class="keyword">if</span> char <span class="keyword">not</span> <span class="keyword">in</span> node.children:
+                <span class="keyword">return</span> <span class="keyword">False</span>
+            node = node.children[char]
+
+        <span class="keyword">return</span> <span class="keyword">True</span></pre>
+        </div>
+
+    </div>
+
+    <script>
+        class TrieNode {
+            constructor() {
+                this.children = {};
+                this.isWord = false;
+            }
+        }
+        
+        let root = new TrieNode();
+        let words = [];
+        let highlightPath = [];
+        
+        function insert(word) {
+            let node = root;
+            for (const char of word) {
+                if (!node.children[char]) {
+                    node.children[char] = new TrieNode();
+                }
+                node = node.children[char];
+            }
+            node.isWord = true;
+            if (!words.includes(word)) words.push(word);
+        }
+        
+        function search(word) {
+            let node = root;
+            highlightPath = [];
+            for (const char of word) {
+                if (!node.children[char]) {
+                    return { found: false, path: highlightPath };
+                }
+                highlightPath.push(char);
+                node = node.children[char];
+            }
+            return { found: node.isWord, path: highlightPath };
+        }
+        
+        function startsWith(prefix) {
+            let node = root;
+            highlightPath = [];
+            for (const char of prefix) {
+                if (!node.children[char]) {
+                    return { found: false, path: highlightPath };
+                }
+                highlightPath.push(char);
+                node = node.children[char];
+            }
+            return { found: true, path: highlightPath };
+        }
+        
+        function renderTrie() {
+            const svg = d3.select("#trie");
+            svg.selectAll("*").remove();
+            
+            const width = 900, height = 400;
+            const nodeRadius = 22;
+            
+            // Build tree structure for visualization
+            const nodes = [];
+            const links = [];
+            
+            function traverse(node, x, y, parentId, edgeLabel, level, leftBound, rightBound) {
+                const id = nodes.length;
+                nodes.push({ id, x, y, isWord: node.isWord, label: edgeLabel || 'root' });
+                
+                if (parentId !== null) {
+                    links.push({ source: parentId, target: id, label: edgeLabel });
+                }
+                
+                const children = Object.keys(node.children).sort();
+                const childCount = children.length;
+                
+                if (childCount > 0) {
+                    const spacing = (rightBound - leftBound) / (childCount + 1);
+                    children.forEach((char, i) => {
+                        const childX = leftBound + spacing * (i + 1);
+                        const childY = y + 70;
+                        const childLeft = leftBound + spacing * i;
+                        const childRight = leftBound + spacing * (i + 1);
+                        traverse(node.children[char], childX, childY, id, char, level + 1, childLeft, childRight);
+                    });
+                }
+            }
+            
+            traverse(root, width / 2, 40, null, null, 0, 0, width);
+            
+            // Check which nodes are in highlight path
+            function getHighlightedNodes() {
+                if (highlightPath.length === 0) return new Set();
+                const highlighted = new Set([0]); // root
+                let pathStr = '';
+                let node = root;
+                for (const char of highlightPath) {
+                    pathStr += char;
+                    // Find the node id with this path
+                    for (let i = 1; i < nodes.length; i++) {
+                        if (nodes[i].label === char) {
+                            // Check if parent is highlighted
+                            const link = links.find(l => l.target === i);
+                            if (link && highlighted.has(link.source)) {
+                                highlighted.add(i);
+                                break;
+                            }
+                        }
+                    }
+                    node = node.children[char];
+                }
+                return highlighted;
+            }
+            
+            const highlightedNodes = getHighlightedNodes();
+            
+            // Draw edges
+            links.forEach(link => {
+                const source = nodes[link.source];
+                const target = nodes[link.target];
+                const isHighlighted = highlightedNodes.has(link.source) && highlightedNodes.has(link.target);
+                
+                svg.append("line")
+                    .attr("x1", source.x).attr("y1", source.y)
+                    .attr("x2", target.x).attr("y2", target.y)
+                    .attr("stroke", isHighlighted ? "#ff9800" : "#999")
+                    .attr("stroke-width", isHighlighted ? 3 : 2);
+                
+                // Edge label
+                const midX = (source.x + target.x) / 2;
+                const midY = (source.y + target.y) / 2;
+                svg.append("text")
+                    .attr("x", midX + 8)
+                    .attr("y", midY)
+                    .attr("font-size", "14px")
+                    .attr("fill", isHighlighted ? "#e65100" : "#333")
+                    .attr("font-weight", "bold")
+                    .text(link.label);
+            });
+            
+            // Draw nodes
+            nodes.forEach((node, i) => {
+                let fill = "#667eea";
+                if (node.isWord) fill = "#4caf50";
+                if (highlightedNodes.has(i)) fill = "#ff9800";
+                
+                svg.append("circle")
+                    .attr("cx", node.x)
+                    .attr("cy", node.y)
+                    .attr("r", nodeRadius)
+                    .attr("fill", fill)
+                    .attr("stroke", "#333")
+                    .attr("stroke-width", 2);
+                
+                if (i === 0) {
+                    svg.append("text")
+                        .attr("x", node.x)
+                        .attr("y", node.y + 5)
+                        .attr("text-anchor", "middle")
+                        .attr("fill", "white")
+                        .attr("font-weight", "bold")
+                        .attr("font-size", "11px")
+                        .text("root");
+                }
+            });
+            
+            renderWords();
+        }
+        
+        function renderWords() {
+            const container = document.getElementById('wordsList');
+            if (words.length === 0) {
+                container.innerHTML = '<span class="text-gray">No words yet</span>';
+            } else {
+                container.innerHTML = words.map(w => 
+                    `<div class="word-tag">${w}</div>`
+                ).join('');
+            }
+        }
+        
+        function insertWord() {
+            const input = document.getElementById('wordInput');
+            const word = input.value.trim().toLowerCase();
+            if (!word) return;
+            
+            insert(word);
+            highlightPath = [];
+            document.getElementById('statusMessage').textContent = 
+                `Inserted "${word}" into trie.`;
+            input.value = '';
+            renderTrie();
+        }
+        
+        function searchWord() {
+            const input = document.getElementById('wordInput');
+            const word = input.value.trim().toLowerCase();
+            if (!word) return;
+            
+            const result = search(word);
+            if (result.found) {
+                document.getElementById('statusMessage').textContent = 
+                    `✅ "${word}" found in trie!`;
+            } else {
+                document.getElementById('statusMessage').textContent = 
+                    `❌ "${word}" not found.`;
+            }
+            renderTrie();
+        }
+        
+        function prefixSearch() {
+            const input = document.getElementById('wordInput');
+            const prefix = input.value.trim().toLowerCase();
+            if (!prefix) return;
+            
+            const result = startsWith(prefix);
+            if (result.found) {
+                document.getElementById('statusMessage').textContent = 
+                    `✅ Words starting with "${prefix}" exist!`;
+            } else {
+                document.getElementById('statusMessage').textContent = 
+                    `❌ No words start with "${prefix}".`;
+            }
+            renderTrie();
+        }
+        
+        function reset() {
+            root = new TrieNode();
+            words = [];
+            highlightPath = [];
+            document.getElementById('wordInput').value = '';
+            document.getElementById('statusMessage').textContent = 
+                'Type a word and click Insert, Search, or StartsWith.';
+            renderTrie();
+        }
+        
+        // Initialize with some words
+        ['apple', 'app', 'apply'].forEach(w => insert(w));
+        renderTrie();
+    </script>
+</body>
+</html>

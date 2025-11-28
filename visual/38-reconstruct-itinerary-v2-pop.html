@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Q38: Reconstruct Itinerary - DFS pop()</title>
+    <link rel="stylesheet" href="visual.css">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    
+</head>
+<body>
+    <div class="container">
+        <div class="problem-info">
+            <h1>Q38: Reconstruct Itinerary - DFS pop()</h1>
+            <p>Optimized version using reverse sort + pop() instead of pop(0) for O(1) removal.</p>
+            <div class="problem-meta">
+                <span class="meta-tag">📁 Graph / DFS</span>
+                <span class="meta-tag">⏱️ O(E log E)</span>
+                <span class="meta-tag">💡 Reverse Sort Optimization</span>
+            </div>
+        </div>
+        
+        
+        
+        <div class="visualization-section">
+            <h3>🎬 Visualization</h3>
+            
+            <div class="controls">
+                <button class="btn btn-primary" id="stepBtn" onclick="step()">Step</button>
+                <button class="btn btn-success" id="autoBtn" onclick="toggleAuto()">Auto Run</button>
+                <button class="btn btn-warning" onclick="reset()">Reset</button>
+            </div>
+            
+            <div class="note-box">
+                <strong>Key Optimization:</strong> By sorting in reverse and using pop() (O(1)), we get the same lexical order result as pop(0) (O(n)) but with better performance.
+            </div>
+            
+            <div class="status-message" id="statusMessage">
+                Same tickets, but graph built with reverse sort for O(1) pop().
+            </div>
+            
+            <div class="graph-section">
+                <div class="graph-box">
+                    <div class="graph-title">Graph (Reverse Sorted)</div>
+                    <div id="graphDisplay"></div>
+                </div>
+                <div class="graph-box">
+                    <div class="graph-title">DFS Stack</div>
+                    <div id="stackDisplay"></div>
+                </div>
+            </div>
+            
+            <div class="route-section">
+                <div class="route-label">Route (reversed at end):</div>
+                <div class="route-items" id="routeDisplay"></div>
+            </div>
+        </div>
+    </div>
+        
+        <div class="code-section">
+            <h3>📄 Python Solution (38-2.py)</h3>
+            <pre><span class="keyword">import</span> collections
+<span class="keyword">from</span> typing <span class="keyword">import</span> List
+
+
+<span class="keyword">class</span> Solution:
+    <span class="keyword">def</span> <span class="function">findItinerary</span>(<span class="keyword">self</span>, tickets: List[List[str]]) -&gt; List[str]:
+        graph = collections.<span class="function">defaultdict</span>(list)
+        <span class="comment"># 그래프 뒤집어서 구성</span>
+        <span class="keyword">for</span> a, b <span class="keyword">in</span> <span class="function">sorted</span>(tickets, reverse=<span class="keyword">True</span>):
+            graph[a].<span class="function">append</span>(b)
+
+        route = []
+
+        <span class="keyword">def</span> <span class="function">dfs</span>(a):
+            <span class="comment"># 마지막 값을 읽어 어휘순 방문</span>
+            <span class="keyword">while</span> graph[a]:
+                <span class="function">dfs</span>(graph[a].<span class="function">pop</span>())
+            route.<span class="function">append</span>(a)
+
+        <span class="function">dfs</span>('JFK')
+        <span class="comment"># 다시 뒤집어 어휘순 결과로</span>
+        <span class="keyword">return</span> route[::-<span class="number">1</span>]</pre>
+        </div>
+
+    </div>
+
+    <script>
+        const tickets = [["JFK","SFO"],["JFK","ATL"],["SFO","ATL"],["ATL","JFK"],["ATL","SFO"]];
+        let graph = {};
+        let route = [];
+        let dfsStack = [];
+        let currentNode = '';
+        let autoInterval = null;
+        
+        function init() {
+            // Build REVERSE sorted graph
+            graph = {};
+            tickets.slice().sort().reverse().forEach(([a, b]) => {
+                if (!graph[a]) graph[a] = [];
+                graph[a].push(b);
+            });
+            
+            route = [];
+            dfsStack = ['JFK'];
+            currentNode = 'JFK';
+            render();
+        }
+        
+        function render() {
+            // Graph display
+            const graphContainer = document.getElementById('graphDisplay');
+            graphContainer.innerHTML = '';
+            Object.entries(graph).forEach(([node, neighbors]) => {
+                const item = document.createElement('div');
+                item.className = 'graph-item' + (node === currentNode ? ' current' : '');
+                item.textContent = `${node} → [${neighbors.join(', ')}] (pop from end)`;
+                graphContainer.appendChild(item);
+            });
+            
+            // Stack display
+            const stackContainer = document.getElementById('stackDisplay');
+            stackContainer.innerHTML = '';
+            dfsStack.forEach((node, i) => {
+                const item = document.createElement('div');
+                item.className = 'graph-item' + (i === dfsStack.length - 1 ? ' current' : '');
+                item.textContent = node;
+                stackContainer.appendChild(item);
+            });
+            
+            // Route display
+            const routeContainer = document.getElementById('routeDisplay');
+            routeContainer.innerHTML = '';
+            route.forEach((node, i) => {
+                if (i > 0) {
+                    const arrow = document.createElement('span');
+                    arrow.className = 'route-arrow';
+                    arrow.textContent = '←';
+                    routeContainer.appendChild(arrow);
+                }
+                const item = document.createElement('span');
+                item.className = 'route-item';
+                item.textContent = node;
+                routeContainer.appendChild(item);
+            });
+        }
+        
+        function step() {
+            if (dfsStack.length === 0) {
+                document.getElementById('statusMessage').textContent = 
+                    `✅ Done! Itinerary: ${route.slice().reverse().join(' → ')}`;
+                document.getElementById('stepBtn').disabled = true;
+                stopAuto();
+                return;
+            }
+            
+            currentNode = dfsStack[dfsStack.length - 1];
+            
+            if (graph[currentNode] && graph[currentNode].length > 0) {
+                const next = graph[currentNode].pop(); // O(1) operation!
+                dfsStack.push(next);
+                document.getElementById('statusMessage').textContent = 
+                    `From ${currentNode}, pop() → ${next} (O(1) operation)`;
+            } else {
+                const node = dfsStack.pop();
+                route.push(node);
+                document.getElementById('statusMessage').textContent = 
+                    `No more flights from ${node}, add to route`;
+            }
+            
+            render();
+        }
+        
+        function toggleAuto() {
+            if (autoInterval) { stopAuto(); }
+            else {
+                document.getElementById('autoBtn').textContent = 'Pause';
+                autoInterval = setInterval(step, 700);
+            }
+        }
+        
+        function stopAuto() {
+            if (autoInterval) { clearInterval(autoInterval); autoInterval = null; }
+            document.getElementById('autoBtn').textContent = 'Auto Run';
+        }
+        
+        function reset() {
+            stopAuto();
+            document.getElementById('stepBtn').disabled = false;
+            document.getElementById('statusMessage').textContent = 'Same tickets, but graph built with reverse sort for O(1) pop().';
+            init();
+        }
+        
+        init();
+    </script>
+</body>
+</html>

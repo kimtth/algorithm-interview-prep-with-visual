@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fibonacci - All Approaches</title>
+    <link rel="stylesheet" href="visual.css">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    
+</head>
+<body>
+    <div class="container">
+        <h1>🐇 Fibonacci Number</h1>
+        <p class="subtitle">Compare: Recursive → Memoization → Tabulation → Space Optimized</p>
+
+        <div class="tabs">
+            <button class="tab active" data-method="recursive">Recursive</button>
+            <button class="tab" data-method="memo">Memoization</button>
+            <button class="tab" data-method="tabulation">Tabulation</button>
+            <button class="tab" data-method="optimized">Space Optimized</button>
+        </div>
+
+        <div class="controls">
+            <button id="stepBtn">Step</button>
+            <button id="autoBtn">Auto Run</button>
+            <button id="resetBtn">Reset</button>
+        </div>
+
+        <div class="panel">
+            <div class="panel-title">📊 Fibonacci Sequence (n = 7)</div>
+            <div class="fib-display" id="fib"></div>
+            <div class="complexity" id="complexity">Time: O(2ⁿ) | Space: O(n)</div>
+        </div>
+
+        <div class="panel" id="memo-panel" class="d-none">
+            <div class="panel-title">💾 Memoization Cache</div>
+            <div class="memo-table" id="memo"></div>
+        </div>
+
+        <div class="panel">
+            <div class="panel-title">🎯 Result: F(7)</div>
+            <div class="result-box">
+                <div class="result-value" id="result">?</div>
+                <div class="result-label" id="calls">Calls: 0</div>
+            </div>
+        </div>
+
+        <div class="panel">
+            <div class="panel-title">📋 Status</div>
+            <div class="status-box" id="status">Click Step to compute F(7)</div>
+        </div>
+    
+        <div class="code-section">
+            <h3>📄 Python Solution (85-1.py)</h3>
+            <pre><span class="keyword">class</span> Solution:
+    <span class="keyword">def</span> <span class="function">fib</span>(<span class="keyword">self</span>, N: int) -&gt; int:
+        <span class="keyword">if</span> N &lt;= <span class="number">1</span>:
+            <span class="keyword">return</span> N
+        <span class="keyword">return</span> <span class="keyword">self</span>.<span class="function">fib</span>(N - <span class="number">1</span>) + <span class="keyword">self</span>.<span class="function">fib</span>(N - <span class="number">2</span>)</pre>
+        </div>
+
+    </div>
+
+
+    <script>
+        const N = 7;
+        let method = 'recursive';
+        let fibValues = new Array(N + 1).fill(null);
+        let memo = {};
+        let currentIdx = 0;
+        let calls = 0;
+        let done = false;
+        let autoInterval = null;
+        let prevTwo = [0, 1];
+
+        const complexities = {
+            recursive: 'Time: O(2ⁿ) | Space: O(n) call stack',
+            memo: 'Time: O(n) | Space: O(n)',
+            tabulation: 'Time: O(n) | Space: O(n)',
+            optimized: 'Time: O(n) | Space: O(1)'
+        };
+
+        function render() {
+            document.getElementById('fib').innerHTML = fibValues.map((v, i) => {
+                let cls = 'fib-item default';
+                if (v !== null) cls = 'fib-item computed';
+                if (i === currentIdx && !done) cls = 'fib-item current';
+                return `<div class="${cls}"><span class="idx">F(${i})</span><span class="val">${v !== null ? v : '?'}</span></div>`;
+            }).join('');
+
+            document.getElementById('memo-panel').style.display = (method === 'memo') ? 'block' : 'none';
+            document.getElementById('memo').innerHTML = Object.keys(memo).length > 0
+                ? Object.entries(memo).map(([k, v]) => `<div class="memo-item">[${k}]=${v}</div>`).join('')
+                : '<span class="text-gray">Empty</span>';
+
+            document.getElementById('result').textContent = fibValues[N] !== null ? fibValues[N] : '?';
+            document.getElementById('calls').textContent = `Calls: ${calls}`;
+            document.getElementById('complexity').textContent = complexities[method];
+        }
+
+        function step() {
+            if (done) return;
+
+            calls++;
+
+            if (method === 'recursive' || method === 'memo') {
+                // Simulate bottom-up for visualization (actual recursive would be complex to visualize)
+                if (currentIdx <= N) {
+                    if (currentIdx <= 1) {
+                        fibValues[currentIdx] = currentIdx;
+                        if (method === 'memo') memo[currentIdx] = currentIdx;
+                        document.getElementById('status').innerHTML = `Base case: F(${currentIdx}) = ${currentIdx}`;
+                    } else {
+                        fibValues[currentIdx] = fibValues[currentIdx - 1] + fibValues[currentIdx - 2];
+                        if (method === 'memo') memo[currentIdx] = fibValues[currentIdx];
+                        document.getElementById('status').innerHTML = 
+                            `F(${currentIdx}) = F(${currentIdx-1}) + F(${currentIdx-2}) = ${fibValues[currentIdx-1]} + ${fibValues[currentIdx-2]} = ${fibValues[currentIdx]}`;
+                    }
+                    currentIdx++;
+                }
+
+                if (currentIdx > N) {
+                    done = true;
+                    document.getElementById('status').innerHTML = `✅ F(${N}) = ${fibValues[N]}`;
+                    document.getElementById('stepBtn').disabled = true;
+                    document.getElementById('autoBtn').disabled = true;
+                    stopAuto();
+                }
+            } else if (method === 'tabulation') {
+                if (currentIdx <= N) {
+                    if (currentIdx <= 1) {
+                        fibValues[currentIdx] = currentIdx;
+                        document.getElementById('status').innerHTML = `Initialize: dp[${currentIdx}] = ${currentIdx}`;
+                    } else {
+                        fibValues[currentIdx] = fibValues[currentIdx - 1] + fibValues[currentIdx - 2];
+                        document.getElementById('status').innerHTML = 
+                            `dp[${currentIdx}] = dp[${currentIdx-1}] + dp[${currentIdx-2}] = ${fibValues[currentIdx]}`;
+                    }
+                    currentIdx++;
+                }
+
+                if (currentIdx > N) {
+                    done = true;
+                    document.getElementById('status').innerHTML = `✅ dp[${N}] = ${fibValues[N]}`;
+                    document.getElementById('stepBtn').disabled = true;
+                    document.getElementById('autoBtn').disabled = true;
+                    stopAuto();
+                }
+            } else {
+                // Space optimized
+                if (currentIdx <= N) {
+                    if (currentIdx <= 1) {
+                        fibValues[currentIdx] = currentIdx;
+                        document.getElementById('status').innerHTML = `Initialize: prev=${prevTwo[0]}, curr=${prevTwo[1]}`;
+                    } else {
+                        const next = prevTwo[0] + prevTwo[1];
+                        fibValues[currentIdx] = next;
+                        document.getElementById('status').innerHTML = 
+                            `next = ${prevTwo[0]} + ${prevTwo[1]} = ${next}. Shift: prev=${prevTwo[1]}, curr=${next}`;
+                        prevTwo = [prevTwo[1], next];
+                    }
+                    currentIdx++;
+                }
+
+                if (currentIdx > N) {
+                    done = true;
+                    document.getElementById('status').innerHTML = `✅ F(${N}) = ${fibValues[N]} (only 2 variables used!)`;
+                    document.getElementById('stepBtn').disabled = true;
+                    document.getElementById('autoBtn').disabled = true;
+                    stopAuto();
+                }
+            }
+
+            render();
+        }
+
+        function reset() {
+            stopAuto();
+            fibValues = new Array(N + 1).fill(null);
+            memo = {};
+            currentIdx = 0;
+            calls = 0;
+            prevTwo = [0, 1];
+            done = false;
+            document.getElementById('stepBtn').disabled = false;
+            document.getElementById('autoBtn').disabled = false;
+            document.getElementById('status').innerHTML = 'Click Step to compute F(7)';
+            render();
+        }
+
+        function stopAuto() {
+            if (autoInterval) { clearInterval(autoInterval); autoInterval = null; }
+            document.getElementById('autoBtn').textContent = 'Auto Run';
+        }
+
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.onclick = () => {
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+                method = tab.dataset.method;
+                reset();
+            };
+        });
+
+        document.getElementById('stepBtn').onclick = () => { stopAuto(); step(); };
+        document.getElementById('autoBtn').onclick = () => {
+            if (autoInterval) { stopAuto(); }
+            else { autoInterval = setInterval(step, 600); document.getElementById('autoBtn').textContent = '⏸ Pause'; }
+        };
+        document.getElementById('resetBtn').onclick = reset;
+
+        render();
+    </script>
+</body>
+</html>

@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Q69: Search a 2D Matrix II - Any Check</title>
+    <link rel="stylesheet" href="visual.css">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔍 Q69: Search a 2D Matrix II</h1>
+            <p>LeetCode #240 | File: 69-2.py | Approach: Pythonic Any Check</p>
+        </div>
+        
+        <div class="problem-info">
+            <h3>📋 Problem Description</h3>
+            <p>Search for a target in a 2D matrix where rows and columns are sorted. Return true if found.</p>
+            <p class="mt-10"><strong>Key Insight:</strong> One-liner using <code>any()</code> with generator expression - check if target exists in any row!</p>
+        </div>
+
+        
+            <div class="result-display" id="result"></div>
+        </div>
+
+        <div class="status" id="status">Ready to visualize the Pythonic one-liner</div>
+    </div>
+
+        <div class="controls">
+            <button class="btn btn-primary" onclick="step()">Step</button>
+            <button class="btn btn-success" onclick="toggleAutoRun()">Auto Run</button>
+            <button class="btn btn-warning" onclick="reset()">Reset</button>
+        </div>
+
+        <div class="step-info" id="stepInfo">Click "Step" or "Auto Run" to begin visualization</div>
+        
+        <div class="visualization" id="viz">
+            <p class="text-center mb-15"><strong>Target: 5</strong></p>
+            <div class="matrix-container">
+                <div class="matrix" id="matrix"></div>
+    
+        <div class="code-section">
+            <h3>📄 Python Solution (69-2.py)</h3>
+            <pre><span class="keyword">class</span> Solution:
+    <span class="keyword">def</span> <span class="function">searchMatrix</span>(<span class="keyword">self</span>, matrix, target):
+        <span class="keyword">return</span> <span class="function">any</span>(target <span class="keyword">in</span> row <span class="keyword">for</span> row <span class="keyword">in</span> matrix)</pre>
+        </div>
+
+    </div>
+
+    <script>
+        const matrix = [
+            [1, 4, 7, 11],
+            [2, 5, 8, 12],
+            [3, 6, 9, 16],
+            [10, 13, 14, 17]
+        ];
+        const target = 5;
+        let currentRow = -1;
+        let found = false;
+        let foundPos = null;
+        let currentStep = 0;
+        let autoRunning = false;
+        let autoRunInterval;
+        let checkedRows = [];
+
+        function renderMatrix() {
+            const container = document.getElementById('matrix');
+            container.innerHTML = '';
+            container.style.gridTemplateColumns = `repeat(${matrix[0].length}, 50px)`;
+            
+            matrix.forEach((row, rowIdx) => {
+                row.forEach((val, colIdx) => {
+                    const cell = document.createElement('div');
+                    cell.className = 'cell';
+                    if (foundPos && foundPos[0] === rowIdx && foundPos[1] === colIdx) {
+                        cell.classList.add('found');
+                    } else if (rowIdx === currentRow) {
+                        cell.classList.add('checking');
+                    } else if (checkedRows.includes(rowIdx)) {
+                        cell.classList.add('checked');
+                    }
+                    cell.textContent = val;
+                    container.appendChild(cell);
+                });
+            });
+        }
+
+        function step() {
+            if (found || currentRow >= matrix.length) {
+                if (!found) {
+                    document.getElementById('stepInfo').textContent = 'Target not found in any row!';
+                    document.getElementById('result').innerHTML = '<span class="text-red">Result: False</span>';
+                }
+                return;
+            }
+
+            currentRow++;
+            
+            if (currentRow < matrix.length) {
+                const row = matrix[currentRow];
+                const inRow = row.includes(target);
+                
+                document.getElementById('stepInfo').textContent = 
+                    `Checking row ${currentRow}: [${row.join(', ')}] → ${target} in row? ${inRow}`;
+                
+                if (inRow) {
+                    found = true;
+                    const colIdx = row.indexOf(target);
+                    foundPos = [currentRow, colIdx];
+                    document.getElementById('result').innerHTML = 
+                        `<span class="text-green">Found at row ${currentRow}! Result: True</span>`;
+                    document.getElementById('status').textContent = 
+                        'any() short-circuits - stops at first True!';
+                } else {
+                    checkedRows.push(currentRow);
+                }
+                
+                renderMatrix();
+            }
+
+            currentStep++;
+        }
+
+        function toggleAutoRun() {
+            autoRunning = !autoRunning;
+            const btn = document.querySelector('.btn-success');
+            if (autoRunning) {
+                btn.textContent = 'Pause';
+                autoRunInterval = setInterval(() => {
+                    if (found || currentRow >= matrix.length - 1) {
+                        step();
+                        toggleAutoRun();
+                        return;
+                    }
+                    step();
+                }, 1000);
+            } else {
+                btn.textContent = 'Auto Run';
+                clearInterval(autoRunInterval);
+            }
+        }
+
+        function reset() {
+            currentRow = -1;
+            found = false;
+            foundPos = null;
+            currentStep = 0;
+            checkedRows = [];
+            if (autoRunning) toggleAutoRun();
+            document.getElementById('stepInfo').textContent = 'Click "Step" or "Auto Run" to begin visualization';
+            document.getElementById('status').textContent = 'Ready to visualize the Pythonic one-liner';
+            document.getElementById('result').innerHTML = '';
+            renderMatrix();
+        }
+
+        // Initialize
+        renderMatrix();
+    </script>
+</body>
+</html>
