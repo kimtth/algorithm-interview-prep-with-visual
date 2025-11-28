@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Q29: Jewels and Stones - Pythonic One-liner</title>
+    <link rel="stylesheet" href="visual.css">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    
+</head>
+<body>
+    <div class="container">
+        <div class="problem-info">
+            <h1>Q29: Jewels and Stones</h1>
+            <p>Count how many stones you have that are also jewels using Pythonic one-liner.</p>
+            <div class="problem-meta">
+                <span class="meta-tag">📁 Hash Table</span>
+                <span class="meta-tag">⏱️ O(J × S)</span>
+                <span class="meta-tag">💡 Version 2: Pythonic</span>
+            </div>
+        </div>
+        
+        
+        
+        <div class="visualization-section">
+            <h3>🎬 Visualization</h3>
+            
+            <div class="controls">
+                <button class="btn btn-primary" id="stepBtn" onclick="step()">Step</button>
+                <button class="btn btn-success" id="autoBtn" onclick="toggleAuto()">Auto Run</button>
+                <button class="btn btn-warning" onclick="reset()">Reset</button>
+            </div>
+            
+            <div class="status-message" id="statusMessage">
+                J = "aA", S = "aAAbbbb". Check each stone: is it in J?
+            </div>
+            
+            <div class="expression-display" id="expressionDisplay">
+                sum(s in "aA" for s in "aAAbbbb")
+            </div>
+            
+            <div class="stones-display" id="stonesDisplay"></div>
+            
+            <div class="result-box" id="resultBox">sum(...) = 0</div>
+        </div>
+    </div>
+        
+        <div class="code-section">
+            <h3>📄 Python Solution (29-2.py)</h3>
+            <pre><span class="keyword">import</span> collections
+
+
+<span class="keyword">class</span> Solution:
+    <span class="keyword">def</span> <span class="function">numJewelsInStones</span>(<span class="keyword">self</span>, J: str, S: str) -&gt; int:
+        freqs = collections.<span class="function">defaultdict</span>(int)
+        count = <span class="number">0</span>
+
+        <span class="comment"># 비교 없이 돌(S) 빈도 수 계산</span>
+        <span class="keyword">for</span> char <span class="keyword">in</span> S:
+            freqs[char] += <span class="number">1</span>
+
+        <span class="comment"># 비교 없이 보석(J) 빈도 수 합산</span>
+        <span class="keyword">for</span> char <span class="keyword">in</span> J:
+            count += freqs[char]
+
+        <span class="keyword">return</span> count</pre>
+        </div>
+
+    </div>
+
+    <script>
+        const jewels = "aA";
+        const stones = "aAAbbbb";
+        let checks = [];
+        let index = 0;
+        let autoInterval = null;
+        
+        function init() {
+            checks = [];
+            index = 0;
+            renderStones();
+            document.getElementById('resultBox').textContent = 'sum(...) = 0';
+        }
+        
+        function renderStones() {
+            const container = document.getElementById('stonesDisplay');
+            container.innerHTML = '';
+            
+            stones.split('').forEach((s, i) => {
+                const item = document.createElement('div');
+                item.className = 'stone-item';
+                
+                const charDiv = document.createElement('div');
+                charDiv.className = 'stone-char';
+                if (i === index) charDiv.classList.add('current');
+                if (checks[i] === true) charDiv.classList.add('jewel');
+                charDiv.textContent = s;
+                
+                const checkDiv = document.createElement('div');
+                checkDiv.className = 'stone-check';
+                if (i < checks.length) {
+                    checkDiv.textContent = checks[i] ? 'True (1)' : 'False (0)';
+                    checkDiv.classList.add(checks[i] ? 'true' : 'false');
+                } else {
+                    checkDiv.textContent = '?';
+                }
+                
+                item.appendChild(charDiv);
+                item.appendChild(checkDiv);
+                container.appendChild(item);
+            });
+        }
+        
+        function step() {
+            if (index >= stones.length) {
+                const total = checks.filter(c => c).length;
+                document.getElementById('statusMessage').textContent = 
+                    `✅ Done! sum(${checks.map(c => c ? '1' : '0').join(' + ')}) = ${total}`;
+                document.getElementById('stepBtn').disabled = true;
+                stopAuto();
+                return;
+            }
+            
+            const s = stones[index];
+            const isJewel = jewels.includes(s);
+            checks.push(isJewel);
+            
+            document.getElementById('statusMessage').textContent = 
+                `'${s}' in "${jewels}" → ${isJewel}`;
+            
+            const total = checks.filter(c => c).length;
+            document.getElementById('resultBox').textContent = `sum(...) = ${total}`;
+            
+            index++;
+            renderStones();
+        }
+        
+        function toggleAuto() {
+            if (autoInterval) { stopAuto(); }
+            else {
+                document.getElementById('autoBtn').textContent = 'Pause';
+                autoInterval = setInterval(() => {
+                    if (index >= stones.length) {
+                        step();
+                        stopAuto();
+                    } else {
+                        step();
+                    }
+                }, 600);
+            }
+        }
+        
+        function stopAuto() {
+            if (autoInterval) { clearInterval(autoInterval); autoInterval = null; }
+            document.getElementById('autoBtn').textContent = 'Auto Run';
+        }
+        
+        function reset() {
+            stopAuto();
+            document.getElementById('stepBtn').disabled = false;
+            document.getElementById('statusMessage').textContent = 'J = "aA", S = "aAAbbbb". Check each stone: is it in J?';
+            document.getElementById('expressionDisplay').textContent = 'sum(s in "aA" for s in "aAAbbbb")';
+            init();
+        }
+        
+        init();
+    </script>
+</body>
+</html>

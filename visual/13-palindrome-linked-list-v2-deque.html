@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Q13: Palindrome Linked List - Deque</title>
+    <link rel="stylesheet" href="visual.css">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    
+</head>
+<body>
+    <div class="container">
+        <div class="problem-info">
+            <h1>Q13: Palindrome Linked List</h1>
+            <p>Given the head of a singly linked list, determine if it is a palindrome.</p>
+            <div class="problem-meta">
+                <span class="meta-tag">📁 Linked List</span>
+                <span class="meta-tag">⏱️ O(n)</span>
+                <span class="meta-tag">💾 O(n)</span>
+                <span class="meta-tag">💡 Version 2: Deque (O(1) popleft)</span>
+            </div>
+        </div>
+        
+        
+        
+        <div class="visualization-section">
+            <h3>🎬 Visualization</h3>
+            
+            <div class="controls">
+                <button class="btn btn-primary" id="stepBtn" onclick="step()">Step</button>
+                <button class="btn btn-success" id="autoBtn" onclick="toggleAuto()">Auto Run</button>
+                <button class="btn btn-warning" onclick="reset()">Reset</button>
+            </div>
+            
+            <div class="comparison-box">
+                <h4>🚀 Deque Advantage</h4>
+                <p><code>list.pop(0)</code> = O(n) vs <code>deque.popleft()</code> = O(1)</p>
+            </div>
+            
+            <div class="status-message" id="statusMessage">
+                Click "Step" or "Auto Run" to start visualization
+            </div>
+            
+            <div class="array-section">
+                <div class="array-label">Linked List:</div>
+                <div class="linked-list-container" id="linkedListContainer"></div>
+            </div>
+            
+            <div class="array-section">
+                <div class="array-label">Deque:</div>
+                <div class="deque-container">
+                    <div class="deque-label">popleft()<br>O(1)</div>
+                    <div class="deque-items" id="dequeContainer"></div>
+                    <div class="deque-label">pop()<br>O(1)</div>
+                </div>
+            </div>
+            
+            <div id="resultDisplay"></div>
+        </div>
+    </div>
+        
+        <div class="code-section">
+            <h3>📄 Python Solution (13-2.py)</h3>
+            <pre><span class="keyword">import</span> collections
+<span class="keyword">from</span> typing <span class="keyword">import</span> Deque
+
+
+<span class="comment"># Definition for singly-linked list.</span>
+<span class="keyword">class</span> ListNode:
+    <span class="keyword">def</span> <span class="function">__init__</span>(<span class="keyword">self</span>, x):
+        <span class="keyword">self</span>.val = x
+        <span class="keyword">self</span>.next = <span class="keyword">None</span>
+
+
+<span class="keyword">class</span> Solution:
+    <span class="keyword">def</span> <span class="function">isPalindrome</span>(<span class="keyword">self</span>, head: ListNode) -&gt; bool:
+        <span class="comment"># 데크 자료형 선언</span>
+        q: Deque = collections.<span class="function">deque</span>()
+
+        <span class="keyword">if</span> <span class="keyword">not</span> head:
+            <span class="keyword">return</span> <span class="keyword">True</span>
+
+        node = head
+        <span class="keyword">while</span> node is <span class="keyword">not</span> <span class="keyword">None</span>:
+            q.<span class="function">append</span>(node.val)
+            node = node.next
+
+        <span class="keyword">while</span> <span class="function">len</span>(q) &gt; <span class="number">1</span>:
+            <span class="keyword">if</span> q.<span class="function">popleft</span>() != q.<span class="function">pop</span>():
+                <span class="keyword">return</span> <span class="keyword">False</span>
+
+        <span class="keyword">return</span> <span class="keyword">True</span></pre>
+        </div>
+
+    </div>
+
+    <script>
+        const values = [1, 2, 2, 1];
+        let dequeData = [];
+        let phase = 'init';
+        let convertIndex = 0;
+        let autoInterval = null;
+        
+        function init() {
+            renderLinkedList();
+            document.getElementById('dequeContainer').innerHTML = '';
+            document.getElementById('resultDisplay').innerHTML = '';
+        }
+        
+        function renderLinkedList() {
+            const container = document.getElementById('linkedListContainer');
+            container.innerHTML = '';
+            values.forEach((val, i) => {
+                const node = document.createElement('div');
+                node.className = 'list-node';
+                node.id = `node-${i}`;
+                node.textContent = val;
+                container.appendChild(node);
+                
+                if (i < values.length - 1) {
+                    const arrow = document.createElement('div');
+                    arrow.className = 'list-arrow';
+                    container.appendChild(arrow);
+                }
+            });
+        }
+        
+        function renderDeque() {
+            const container = document.getElementById('dequeContainer');
+            container.innerHTML = '';
+            dequeData.forEach((val, i) => {
+                const box = document.createElement('div');
+                box.className = 'deque-box';
+                box.id = `deq-${i}`;
+                box.textContent = val;
+                container.appendChild(box);
+            });
+        }
+        
+        function step() {
+            if (phase === 'init') {
+                phase = 'convert';
+                convertIndex = 0;
+                dequeData = [];
+            } else if (phase === 'convert') {
+                if (convertIndex < values.length) {
+                    document.getElementById(`node-${convertIndex}`).classList.add('traversed');
+                    dequeData.push(values[convertIndex]);
+                    renderDeque();
+                    document.getElementById('statusMessage').textContent = 
+                        `Appended ${values[convertIndex]} to deque.`;
+                    convertIndex++;
+                } else {
+                    phase = 'compare';
+                    document.getElementById('statusMessage').textContent = 
+                        'Now comparing with popleft() and pop() - both O(1)!';
+                }
+            } else if (phase === 'compare') {
+                if (dequeData.length <= 1) {
+                    phase = 'done';
+                    document.getElementById('resultDisplay').innerHTML = 
+                        '<div class="result-display success">✅ It\'s a Palindrome!</div>';
+                    document.getElementById('statusMessage').textContent = 
+                        'All pairs matched!';
+                    document.getElementById('stepBtn').disabled = true;
+                    stopAuto();
+                } else {
+                    const front = dequeData[0];
+                    const back = dequeData[dequeData.length - 1];
+                    
+                    document.getElementById('deq-0').classList.add('left-ptr');
+                    document.getElementById(`deq-${dequeData.length - 1}`).classList.add('right-ptr');
+                    
+                    if (front === back) {
+                        document.getElementById('statusMessage').textContent = 
+                            `popleft()=${front}, pop()=${back} → Match!`;
+                        setTimeout(() => {
+                            dequeData.shift();
+                            dequeData.pop();
+                            renderDeque();
+                        }, 600);
+                    } else {
+                        phase = 'done';
+                        document.getElementById('deq-0').classList.add('mismatch');
+                        document.getElementById(`deq-${dequeData.length - 1}`).classList.add('mismatch');
+                        document.getElementById('resultDisplay').innerHTML = 
+                            '<div class="result-display failure">❌ Not a Palindrome!</div>';
+                        document.getElementById('statusMessage').textContent = 
+                            `popleft()=${front}, pop()=${back} → Mismatch!`;
+                        document.getElementById('stepBtn').disabled = true;
+                        stopAuto();
+                    }
+                }
+            }
+        }
+        
+        function toggleAuto() {
+            if (autoInterval) {
+                stopAuto();
+            } else {
+                document.getElementById('autoBtn').textContent = 'Pause';
+                autoInterval = setInterval(() => {
+                    if (phase === 'done') {
+                        stopAuto();
+                    } else {
+                        step();
+                    }
+                }, 800);
+            }
+        }
+        
+        function stopAuto() {
+            if (autoInterval) {
+                clearInterval(autoInterval);
+                autoInterval = null;
+            }
+            document.getElementById('autoBtn').textContent = 'Auto Run';
+        }
+        
+        function reset() {
+            stopAuto();
+            phase = 'init';
+            convertIndex = 0;
+            dequeData = [];
+            document.getElementById('stepBtn').disabled = false;
+            document.getElementById('statusMessage').textContent = 
+                'Click "Step" or "Auto Run" to start visualization';
+            init();
+        }
+        
+        init();
+    </script>
+</body>
+</html>

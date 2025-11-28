@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Q20: Valid Parentheses</title>
+    <link rel="stylesheet" href="visual.css">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    
+</head>
+<body>
+    <div class="container">
+        <div class="problem-info">
+            <h1>Q20: Valid Parentheses</h1>
+            <p>Determine if the input string has valid matching brackets: (), {}, []</p>
+            <div class="problem-meta">
+                <span class="meta-tag">📁 Stack</span>
+                <span class="meta-tag">⏱️ O(n)</span>
+                <span class="meta-tag">💾 O(n)</span>
+            </div>
+        </div>
+        
+        
+        
+        <div class="visualization-section">
+            <h3>🎬 Visualization</h3>
+            
+            <div class="controls">
+                <button class="btn btn-primary" id="stepBtn" onclick="step()">Step</button>
+                <button class="btn btn-success" id="autoBtn" onclick="toggleAuto()">Auto Run</button>
+                <button class="btn btn-warning" onclick="reset()">Reset</button>
+            </div>
+            
+            <div class="status-message" id="statusMessage">
+                Click "Step" or "Auto Run" to start
+            </div>
+            
+            <div class="input-display" id="inputDisplay"></div>
+            
+            <div class="stack-section">
+                <div class="stack-container">
+                    <div class="stack-label">Stack:</div>
+                    <div class="stack-items" id="stackItems"></div>
+                </div>
+                
+                <div class="table-section">
+                    <div class="table-label">Mapping Table:</div>
+                    <div class="mapping-table" id="mappingTable">
+                        <div class="mapping-item" id="map1">') → ('</div>
+                        <div class="mapping-item" id="map2">'} → {'</div>
+                        <div class="mapping-item" id="map3">'] → ['</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+        
+        <div class="code-section">
+            <h3>📄 Python Solution (20-1.py)</h3>
+            <pre><span class="keyword">class</span> Solution:
+    <span class="keyword">def</span> <span class="function">isValid</span>(<span class="keyword">self</span>, s: str) -&gt; bool:
+        stack = []
+        table = {
+            ')': '(',
+            '}': '{',
+            ']': '[',
+        }
+
+        <span class="comment"># 스택 이용 예외 처리 및 일치 여부 판별</span>
+        <span class="keyword">for</span> char <span class="keyword">in</span> s:
+            <span class="keyword">if</span> char <span class="keyword">not</span> <span class="keyword">in</span> table:
+                stack.<span class="function">append</span>(char)
+            <span class="keyword">elif</span> <span class="keyword">not</span> stack <span class="keyword">or</span> table[char] != stack.<span class="function">pop</span>():
+                <span class="keyword">return</span> <span class="keyword">False</span>
+        <span class="keyword">return</span> <span class="function">len</span>(stack) == <span class="number">0</span></pre>
+        </div>
+
+    </div>
+
+    <script>
+        const input = "({[]})";
+        let stack = [];
+        let index = 0;
+        let autoInterval = null;
+        const table = { ')': '(', '}': '{', ']': '[' };
+        
+        function init() {
+            stack = [];
+            index = 0;
+            renderInput();
+            renderStack();
+        }
+        
+        function renderInput() {
+            const container = document.getElementById('inputDisplay');
+            container.innerHTML = '';
+            input.split('').forEach((char, i) => {
+                const box = document.createElement('div');
+                box.className = 'char-box';
+                if (i === index) box.classList.add('current');
+                if (i < index) box.classList.add('matched');
+                box.textContent = char;
+                container.appendChild(box);
+            });
+        }
+        
+        function renderStack() {
+            const container = document.getElementById('stackItems');
+            container.innerHTML = '';
+            stack.forEach(item => {
+                const div = document.createElement('div');
+                div.className = 'stack-item';
+                div.textContent = item;
+                container.appendChild(div);
+            });
+        }
+        
+        function highlightMapping(char) {
+            document.querySelectorAll('.mapping-item').forEach(el => el.classList.remove('active'));
+            if (char === ')') document.getElementById('map1').classList.add('active');
+            if (char === '}') document.getElementById('map2').classList.add('active');
+            if (char === ']') document.getElementById('map3').classList.add('active');
+        }
+        
+        function step() {
+            if (index >= input.length) {
+                const valid = stack.length === 0;
+                document.getElementById('statusMessage').textContent = 
+                    valid ? '✅ Valid! Stack is empty.' : '❌ Invalid! Stack not empty.';
+                document.getElementById('stepBtn').disabled = true;
+                stopAuto();
+                return;
+            }
+            
+            const char = input[index];
+            
+            if (!(char in table)) {
+                // Opening bracket
+                stack.push(char);
+                document.getElementById('statusMessage').textContent = 
+                    `'${char}' is opening bracket → Push to stack`;
+            } else {
+                // Closing bracket
+                highlightMapping(char);
+                const expected = table[char];
+                if (stack.length === 0 || stack[stack.length - 1] !== expected) {
+                    document.getElementById('statusMessage').textContent = 
+                        `❌ '${char}' doesn't match! Invalid.`;
+                    document.getElementById('stepBtn').disabled = true;
+                    stopAuto();
+                    return;
+                }
+                stack.pop();
+                document.getElementById('statusMessage').textContent = 
+                    `'${char}' matches '${expected}' → Pop from stack`;
+            }
+            
+            index++;
+            renderInput();
+            renderStack();
+        }
+        
+        function toggleAuto() {
+            if (autoInterval) { stopAuto(); }
+            else {
+                document.getElementById('autoBtn').textContent = 'Pause';
+                autoInterval = setInterval(() => {
+                    if (index >= input.length || document.getElementById('stepBtn').disabled) stopAuto();
+                    else step();
+                }, 800);
+            }
+        }
+        
+        function stopAuto() {
+            if (autoInterval) { clearInterval(autoInterval); autoInterval = null; }
+            document.getElementById('autoBtn').textContent = 'Auto Run';
+        }
+        
+        function reset() {
+            stopAuto();
+            document.getElementById('stepBtn').disabled = false;
+            document.getElementById('statusMessage').textContent = 'Click "Step" or "Auto Run" to start';
+            document.querySelectorAll('.mapping-item').forEach(el => el.classList.remove('active'));
+            init();
+        }
+        
+        init();
+    </script>
+</body>
+</html>

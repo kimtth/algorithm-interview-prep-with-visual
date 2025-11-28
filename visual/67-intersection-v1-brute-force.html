@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Intersection of Two Arrays - Brute Force</title>
+    <link rel="stylesheet" href="visual.css">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 Intersection of Two Arrays</h1>
+        <p class="subtitle">Brute Force O(n²) - Nested Loops with Set</p>
+
+        <div class="controls">
+            <button id="stepBtn">Step</button>
+            <button id="autoBtn">Auto Run</button>
+            <button id="resetBtn">Reset</button>
+        </div>
+
+        <div class="panel">
+            <div class="panel-title">📊 Arrays</div>
+            <div class="array-row">
+                <span class="array-label">nums1:</span>
+                <div class="array-container" id="nums1"></div>
+            </div>
+            <div class="array-row">
+                <span class="array-label">nums2:</span>
+                <div class="array-container" id="nums2"></div>
+            </div>
+        </div>
+
+        <div class="panel">
+            <div class="panel-title">✅ Result (Unique Intersection)</div>
+            <div class="result-container" id="result"></div>
+        </div>
+
+        <div class="panel">
+            <div class="panel-title">📋 Status</div>
+            <div class="status-box" id="status">Click "Step" to start finding intersection</div>
+        </div>
+    
+        <div class="code-section">
+            <h3>📄 Python Solution (67-1.py)</h3>
+            <pre><span class="keyword">from</span> typing <span class="keyword">import</span> List, Set
+
+
+<span class="keyword">class</span> Solution:
+    <span class="keyword">def</span> <span class="function">intersection</span>(<span class="keyword">self</span>, nums1: List[int], nums2: List[int]) -&gt; List[int]:
+        result: Set = <span class="function">set</span>()
+        <span class="keyword">for</span> n1 <span class="keyword">in</span> nums1:
+            <span class="keyword">for</span> n2 <span class="keyword">in</span> nums2:
+                <span class="keyword">if</span> n1 == n2:
+                    result.<span class="function">add</span>(n1)
+
+        <span class="keyword">return</span> result</pre>
+        </div>
+
+    </div>
+
+
+    <script>
+        const nums1 = [1, 2, 2, 1];
+        const nums2 = [2, 2];
+        const result = new Set();
+        let i = 0, j = 0;
+        let done = false;
+        let autoInterval = null;
+
+        function render() {
+            document.getElementById('nums1').innerHTML = nums1.map((val, idx) => {
+                let cls = 'array-item default';
+                if (idx === i) cls = 'array-item checking-i';
+                return `<div class="${cls}">${val}</div>`;
+            }).join('');
+
+            document.getElementById('nums2').innerHTML = nums2.map((val, idx) => {
+                let cls = 'array-item default';
+                if (i < nums1.length && idx === j) cls = 'array-item checking-j';
+                return `<div class="${cls}">${val}</div>`;
+            }).join('');
+
+            document.getElementById('result').innerHTML = 
+                [...result].map(v => `<div class="array-item added">${v}</div>`).join('') || 
+                '<span class="text-gray">Empty</span>';
+        }
+
+        function step() {
+            if (done) return;
+
+            if (i >= nums1.length) {
+                done = true;
+                document.getElementById('status').innerHTML = 
+                    `✅ Complete! Intersection: [${[...result].join(', ')}]`;
+                document.getElementById('stepBtn').disabled = true;
+                document.getElementById('autoBtn').disabled = true;
+                stopAuto();
+                render();
+                return;
+            }
+
+            const v1 = nums1[i], v2 = nums2[j];
+            
+            if (v1 === v2) {
+                if (!result.has(v1)) {
+                    result.add(v1);
+                    document.getElementById('status').innerHTML = 
+                        `Match! nums1[${i}]=${v1} == nums2[${j}]=${v2}. Added ${v1} to result.`;
+                } else {
+                    document.getElementById('status').innerHTML = 
+                        `Match! nums1[${i}]=${v1} == nums2[${j}]=${v2}. Already in result, skip.`;
+                }
+            } else {
+                document.getElementById('status').innerHTML = 
+                    `No match: nums1[${i}]=${v1} != nums2[${j}]=${v2}`;
+            }
+
+            j++;
+            if (j >= nums2.length) { j = 0; i++; }
+
+            render();
+        }
+
+        function reset() {
+            stopAuto();
+            i = 0; j = 0;
+            result.clear();
+            done = false;
+            document.getElementById('stepBtn').disabled = false;
+            document.getElementById('autoBtn').disabled = false;
+            document.getElementById('status').innerHTML = 'Click "Step" to start finding intersection';
+            render();
+        }
+
+        function stopAuto() {
+            if (autoInterval) { clearInterval(autoInterval); autoInterval = null; }
+            document.getElementById('autoBtn').textContent = 'Auto Run';
+        }
+
+        document.getElementById('stepBtn').onclick = () => { stopAuto(); step(); };
+        document.getElementById('autoBtn').onclick = () => {
+            if (autoInterval) { stopAuto(); }
+            else { autoInterval = setInterval(step, 600); document.getElementById('autoBtn').textContent = '⏸ Pause'; }
+        };
+        document.getElementById('resetBtn').onclick = reset;
+
+        render();
+    </script>
+</body>
+</html>

@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Search 2D Matrix - Staircase</title>
+    <link rel="stylesheet" href="visual.css">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 Search 2D Matrix II</h1>
+        <p class="subtitle">Staircase Search O(m+n) - Start from top-right corner</p>
+
+        <div class="controls">
+            <button id="stepBtn">Step</button>
+            <button id="autoBtn">Auto Run</button>
+            <button id="resetBtn">Reset</button>
+            <div class="target-display">Target: <span id="target">5</span></div>
+        </div>
+
+        <div class="panel">
+            <div class="panel-title">📊 Matrix (Rows & Columns Sorted)</div>
+            <div class="arrow">← smaller values | larger values →</div>
+            <div class="matrix" id="matrix"></div>
+            <div class="arrow">↓ larger values</div>
+        </div>
+
+        <div class="panel">
+            <div class="panel-title">📊 Current Position</div>
+            <div class="info-grid">
+                <div class="info-item">
+                    <div class="info-label">Row</div>
+                    <div class="info-value" id="row-val">0</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Column</div>
+                    <div class="info-value" id="col-val">3</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Value</div>
+                    <div class="info-value" id="cur-val">?</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="panel">
+            <div class="panel-title">📋 Status</div>
+            <div class="status-box" id="status">Start from top-right corner. Click "Step" to search.</div>
+        </div>
+    
+        <div class="code-section">
+            <h3>📄 Python Solution (69-1.py)</h3>
+            <pre><span class="keyword">class</span> Solution:
+    <span class="keyword">def</span> <span class="function">searchMatrix</span>(<span class="keyword">self</span>, matrix, target):
+        <span class="comment"># 예외 처리</span>
+        <span class="keyword">if</span> <span class="keyword">not</span> matrix:
+            <span class="keyword">return</span> <span class="keyword">False</span>
+
+        <span class="comment"># 첫 행의 맨 뒤</span>
+        row = <span class="number">0</span>
+        col = <span class="function">len</span>(matrix[<span class="number">0</span>]) - <span class="number">1</span>
+
+        <span class="keyword">while</span> row &lt;= <span class="function">len</span>(matrix) - <span class="number">1</span> <span class="keyword">and</span> col &gt;= <span class="number">0</span>:
+            <span class="keyword">if</span> target == matrix[row][col]:
+                <span class="keyword">return</span> <span class="keyword">True</span>
+            <span class="comment"># 타겟이 작으면 왼쪽으로</span>
+            <span class="keyword">elif</span> target &lt; matrix[row][col]:
+                col -= <span class="number">1</span>
+            <span class="comment"># 타겟이 크면 아래로</span>
+            <span class="keyword">elif</span> target &gt; matrix[row][col]:
+                row += <span class="number">1</span>
+        <span class="keyword">return</span> <span class="keyword">False</span></pre>
+        </div>
+
+    </div>
+
+
+    <script>
+        const matrix = [
+            [1,  4,  7, 11, 15],
+            [2,  5,  8, 12, 19],
+            [3,  6,  9, 16, 22],
+            [10, 13, 14, 17, 24],
+            [18, 21, 23, 26, 30]
+        ];
+        const target = 5;
+        let row = 0, col = matrix[0].length - 1;
+        const visited = new Set();
+        let found = false, done = false;
+        let autoInterval = null;
+
+        document.getElementById('target').textContent = target;
+
+        function render() {
+            const matrixEl = document.getElementById('matrix');
+            matrixEl.innerHTML = matrix.map((r, ri) => 
+                `<div class="matrix-row">${r.map((v, ci) => {
+                    let cls = 'matrix-cell default';
+                    const key = `${ri},${ci}`;
+                    if (found && ri === row && ci === col) cls = 'matrix-cell found';
+                    else if (ri === row && ci === col) cls = 'matrix-cell current';
+                    else if (visited.has(key)) cls = 'matrix-cell visited';
+                    return `<div class="${cls}">${v}</div>`;
+                }).join('')}</div>`
+            ).join('');
+
+            document.getElementById('row-val').textContent = row;
+            document.getElementById('col-val').textContent = col;
+            document.getElementById('cur-val').textContent = (row >= 0 && col >= 0 && row < matrix.length && col < matrix[0].length) ? matrix[row][col] : '-';
+        }
+
+        function step() {
+            if (done) return;
+
+            if (row >= matrix.length || col < 0) {
+                done = true;
+                document.getElementById('status').innerHTML = `❌ Target ${target} not found in matrix.`;
+                document.getElementById('stepBtn').disabled = true;
+                document.getElementById('autoBtn').disabled = true;
+                stopAuto();
+                return;
+            }
+
+            const val = matrix[row][col];
+            visited.add(`${row},${col}`);
+
+            if (val === target) {
+                found = true;
+                done = true;
+                document.getElementById('status').innerHTML = 
+                    `✅ Found! matrix[${row}][${col}] = ${val} = target ${target}`;
+                document.getElementById('stepBtn').disabled = true;
+                document.getElementById('autoBtn').disabled = true;
+                stopAuto();
+            } else if (val > target) {
+                document.getElementById('status').innerHTML = 
+                    `matrix[${row}][${col}] = ${val} > ${target}. Move LEFT (smaller values).`;
+                col--;
+            } else {
+                document.getElementById('status').innerHTML = 
+                    `matrix[${row}][${col}] = ${val} < ${target}. Move DOWN (larger values).`;
+                row++;
+            }
+
+            render();
+        }
+
+        function reset() {
+            stopAuto();
+            row = 0;
+            col = matrix[0].length - 1;
+            visited.clear();
+            found = false;
+            done = false;
+            document.getElementById('stepBtn').disabled = false;
+            document.getElementById('autoBtn').disabled = false;
+            document.getElementById('status').innerHTML = 'Start from top-right corner. Click "Step" to search.';
+            render();
+        }
+
+        function stopAuto() {
+            if (autoInterval) { clearInterval(autoInterval); autoInterval = null; }
+            document.getElementById('autoBtn').textContent = 'Auto Run';
+        }
+
+        document.getElementById('stepBtn').onclick = () => { stopAuto(); step(); };
+        document.getElementById('autoBtn').onclick = () => {
+            if (autoInterval) { stopAuto(); }
+            else { autoInterval = setInterval(step, 800); document.getElementById('autoBtn').textContent = '⏸ Pause'; }
+        };
+        document.getElementById('resetBtn').onclick = reset;
+
+        render();
+    </script>
+</body>
+</html>

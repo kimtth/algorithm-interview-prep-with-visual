@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Q3: Reorder Log Files</title>
+    <link rel="stylesheet" href="visual.css">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    
+</head>
+<body>
+    <div class="container">
+        <h1>Q3: Reorder Log Files</h1>
+        <p class="subtitle">Lambda Sort with Multiple Keys</p>
+
+        <div class="problem-info">
+            <h3>📋 Problem Description</h3>
+            <p>Reorder logs so that:</p>
+            <ul>
+                <li><strong>Letter-logs</strong> come before digit-logs</li>
+                <li>Letter-logs are sorted by content, then by identifier</li>
+                <li>Digit-logs maintain their original order</li>
+            </ul>
+            <div class="complexity">
+                <span><strong>Time:</strong> O(n log n)</span>
+                <span><strong>Space:</strong> O(n)</span>
+            </div>
+        </div>
+
+        <div class="main-content">
+            
+            </div>
+        </div>
+    </div>
+
+            <div class="visualization-section">
+                <h3>🎬 Visualization</h3>
+                <div class="controls">
+                    <button class="btn btn-primary" id="stepBtn" onclick="step()">Step</button>
+                    <button class="btn btn-success" id="autoBtn" onclick="toggleAuto()">Auto Run</button>
+                    <button class="btn btn-warning" onclick="reset()">Reset</button>
+                </div>
+                <div class="status-message" id="message">Click Step or Auto Run to begin</div>
+                <div id="visualization"></div>
+                
+                <div class="legend">
+                    <div class="legend-item">
+                        <div class="legend-color bg-blue-light-border-blue-left"></div>
+                        <span>Letter Log</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color bg-orange-light-border-orange-left"></div>
+                        <span>Digit Log</span>
+                    </div>
+    
+        <div class="code-section">
+            <h3>📄 Python Solution (3-1.py)</h3>
+            <pre><span class="keyword">from</span> typing <span class="keyword">import</span> List
+
+
+<span class="keyword">class</span> Solution:
+    <span class="keyword">def</span> <span class="function">reorderLogFiles</span>(<span class="keyword">self</span>, logs: List[str]) -&gt; List[str]:
+        letters, digits = [], []
+        <span class="keyword">for</span> log <span class="keyword">in</span> logs:
+            <span class="keyword">if</span> log.<span class="function">split</span>()[<span class="number">1</span>].<span class="function">isdigit</span>():
+                digits.<span class="function">append</span>(log)
+            <span class="keyword">else</span>:
+                letters.<span class="function">append</span>(log)
+
+        <span class="comment"># 두 개의 키를 람다 표현식으로 정렬</span>
+        letters.<span class="function">sort</span>(key=<span class="keyword">lambda</span> x: (x.<span class="function">split</span>()[<span class="number">1</span>:], x.<span class="function">split</span>()[<span class="number">0</span>]))
+        <span class="keyword">return</span> letters + digits</pre>
+        </div>
+
+    </div>
+
+    <script>
+        const initialLogs = [
+            "dig1 8 1 5 1",
+            "let1 art can",
+            "dig2 3 6",
+            "let2 own kit dig",
+            "let3 art zero"
+        ];
+
+        let logs = [];
+        let letterLogs = [];
+        let digitLogs = [];
+        let phase = 0;
+        let isFinished = false;
+        let autoInterval = null;
+        let isAutoRunning = false;
+
+        function createLogElement(log, id) {
+            const parts = log.split(' ');
+            const logId = parts[0];
+            const content = parts.slice(1).join(' ');
+            const isDigit = !isNaN(parts[1]);
+            
+            return {
+                id: id,
+                raw: log,
+                logId: logId,
+                content: content,
+                isDigit: isDigit
+            };
+        }
+
+        function renderLog(container, log) {
+            const item = container.append("div")
+                .attr("class", `log-item ${log.isDigit ? 'digit-log' : 'letter-log'}`);
+            item.append("span").attr("class", "log-id").text(log.logId);
+            item.append("span").attr("class", "log-content").text(log.content);
+        }
+
+        function init() {
+            logs = initialLogs.map((log, i) => createLogElement(log, i));
+            letterLogs = [];
+            digitLogs = [];
+            phase = 1;
+            isFinished = false;
+        }
+
+        function step() {
+            if (phase === 0) {
+                init();
+            }
+
+            if (isFinished) {
+                reset();
+                return;
+            }
+
+            const vis = d3.select("#visualization");
+
+            if (phase === 1) {
+                // Show input logs
+                vis.selectAll("*").remove();
+                vis.append("div").attr("class", "step-indicator").text("Step 1: Input Logs");
+                
+                const container = vis.append("div").attr("class", "log-container");
+                logs.forEach(log => renderLog(container, log));
+                
+                document.getElementById('message').innerText = "Input logs loaded. Next: Separate letter and digit logs.";
+                phase = 2;
+            } else if (phase === 2) {
+                // Separate
+                vis.selectAll("*").remove();
+                vis.append("div").attr("class", "step-indicator").text("Step 2: Separate Letter and Digit Logs");
+                
+                logs.forEach(log => {
+                    if (log.isDigit) digitLogs.push(log);
+                    else letterLogs.push(log);
+                });
+                
+                const groupContainer = vis.append("div").attr("class", "group-container");
+                
+                const leftGroup = groupContainer.append("div").attr("class", "group-box");
+                leftGroup.append("div").attr("class", "group-title letter-title").text("Letter Logs");
+                const leftContainer = leftGroup.append("div").attr("class", "log-container");
+                letterLogs.forEach(log => renderLog(leftContainer, log));
+                
+                const rightGroup = groupContainer.append("div").attr("class", "group-box");
+                rightGroup.append("div").attr("class", "group-title digit-title").text("Digit Logs (Keep Order)");
+                const rightContainer = rightGroup.append("div").attr("class", "log-container");
+                digitLogs.forEach(log => renderLog(rightContainer, log));
+                
+                document.getElementById('message').innerText = `Separated: ${letterLogs.length} letter logs, ${digitLogs.length} digit logs`;
+                phase = 3;
+            } else if (phase === 3) {
+                // Sort letters
+                vis.selectAll("*").remove();
+                vis.append("div").attr("class", "step-indicator").text("Step 3: Sort Letter Logs (content, then id)");
+                
+                letterLogs.sort((a, b) => {
+                    const contentCompare = a.content.localeCompare(b.content);
+                    if (contentCompare !== 0) return contentCompare;
+                    return a.logId.localeCompare(b.logId);
+                });
+                
+                const groupContainer = vis.append("div").attr("class", "group-container");
+                
+                const leftGroup = groupContainer.append("div").attr("class", "group-box");
+                leftGroup.append("div").attr("class", "group-title letter-title").text("Letter Logs (Sorted!)");
+                const leftContainer = leftGroup.append("div").attr("class", "log-container");
+                letterLogs.forEach(log => renderLog(leftContainer, log));
+                
+                const rightGroup = groupContainer.append("div").attr("class", "group-box");
+                rightGroup.append("div").attr("class", "group-title digit-title").text("Digit Logs (Keep Order)");
+                const rightContainer = rightGroup.append("div").attr("class", "log-container");
+                digitLogs.forEach(log => renderLog(rightContainer, log));
+                
+                vis.append("div").style("text-align", "center").style("margin-top", "10px").style("font-family", "monospace")
+                    .html('key=<span class="text-blue">lambda x: (x.split()[1:], x.split()[0])</span>');
+                
+                document.getElementById('message').innerText = "Letter logs sorted by content, then by identifier";
+                phase = 4;
+            } else if (phase === 4) {
+                // Merge result
+                vis.selectAll("*").remove();
+                vis.append("div").attr("class", "step-indicator").text("Step 4: Return letters + digits");
+                
+                const container = vis.append("div").attr("class", "log-container");
+                letterLogs.forEach(log => renderLog(container, log));
+                digitLogs.forEach(log => renderLog(container, log));
+                
+                vis.append("div").style("text-align", "center").style("margin-top", "15px")
+                    .style("font-size", "2em").style("color", "#4caf50").text("✓");
+                
+                document.getElementById('message').innerText = "✓ Done! Letter logs first (sorted), then digit logs (original order)";
+                isFinished = true;
+                stopAuto();
+                document.getElementById('stepBtn').innerText = "Restart";
+            }
+        }
+
+        function toggleAuto() {
+            if (isAutoRunning) {
+                stopAuto();
+            } else {
+                startAuto();
+            }
+        }
+
+        function startAuto() {
+            if (phase === 0) init();
+            isAutoRunning = true;
+            document.getElementById('autoBtn').innerText = "Pause";
+            document.getElementById('autoBtn').classList.add("running");
+            autoInterval = setInterval(() => {
+                if (isFinished) {
+                    stopAuto();
+                } else {
+                    step();
+                }
+            }, 1500);
+        }
+
+        function stopAuto() {
+            isAutoRunning = false;
+            document.getElementById('autoBtn').innerText = "Auto Run";
+            document.getElementById('autoBtn').classList.remove("running");
+            if (autoInterval) {
+                clearInterval(autoInterval);
+                autoInterval = null;
+            }
+        }
+
+        function reset() {
+            stopAuto();
+            phase = 0;
+            isFinished = false;
+            logs = [];
+            letterLogs = [];
+            digitLogs = [];
+            d3.select("#visualization").selectAll("*").remove();
+            document.getElementById('message').innerText = "Click Step or Auto Run to begin";
+            document.getElementById('stepBtn').innerText = "Step";
+        }
+    </script>
+</body>
+</html>

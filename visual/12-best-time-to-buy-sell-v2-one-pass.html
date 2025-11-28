@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Q12: Best Time to Buy and Sell Stock - One Pass</title>
+    <link rel="stylesheet" href="visual.css">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    
+</head>
+<body>
+    <div class="container">
+        <div class="problem-info">
+            <h1>Q12: Best Time to Buy and Sell Stock</h1>
+            <p>Given an array prices where prices[i] is the price of a stock on day i, find the maximum profit by choosing a single day to buy and a single day to sell in the future.</p>
+            <div class="problem-meta">
+                <span class="meta-tag">📁 Array</span>
+                <span class="meta-tag">⏱️ O(n)</span>
+                <span class="meta-tag">💾 O(1)</span>
+                <span class="meta-tag">💡 Version 2: One Pass</span>
+            </div>
+        </div>
+        
+        
+        
+        <div class="visualization-section">
+            <h3>🎬 Visualization</h3>
+            
+            <div class="controls">
+                <button class="btn btn-primary" id="stepBtn" onclick="step()">Step</button>
+                <button class="btn btn-success" id="autoBtn" onclick="toggleAuto()">Auto Run</button>
+                <button class="btn btn-warning" onclick="reset()">Reset</button>
+            </div>
+            
+            <div class="stats-display">
+                <div class="stat-box min">
+                    <div class="stat-label">Min Price</div>
+                    <div class="stat-value" id="minPrice">∞</div>
+                </div>
+                <div class="stat-box current">
+                    <div class="stat-label">Current Price</div>
+                    <div class="stat-value" id="currentPrice">-</div>
+                </div>
+                <div class="stat-box profit">
+                    <div class="stat-label">Max Profit</div>
+                    <div class="stat-value" id="maxProfit">0</div>
+                </div>
+            </div>
+            
+            <div class="status-message" id="statusMessage">
+                Click "Step" or "Auto Run" to start visualization
+            </div>
+            
+            <div class="chart-container" id="chartContainer"></div>
+            
+            <div class="array-section">
+                <div class="array-label">Stock Prices:</div>
+                <div class="array-container" id="pricesContainer"></div>
+            </div>
+        </div>
+    </div>
+        
+        <div class="code-section">
+            <h3>📄 Python Solution (12-2.py)</h3>
+            <pre><span class="keyword">import</span> sys
+<span class="keyword">from</span> typing <span class="keyword">import</span> List
+
+
+<span class="keyword">class</span> Solution:
+    <span class="keyword">def</span> <span class="function">maxProfit</span>(<span class="keyword">self</span>, prices: List[int]) -&gt; int:
+        profit = <span class="number">0</span>
+        min_price = sys.maxsize
+
+        <span class="comment"># 최소값과 최대값 계속 갱신</span>
+        <span class="keyword">for</span> price <span class="keyword">in</span> prices:
+            min_price = <span class="function">min</span>(min_price, price)
+            profit = <span class="function">max</span>(profit, price - min_price)
+
+        <span class="keyword">return</span> profit</pre>
+        </div>
+
+    </div>
+
+    <script>
+        const prices = [7, 1, 5, 3, 6, 4];
+        let currentIndex = -1;
+        let minPrice = Infinity;
+        let maxProfit = 0;
+        let minPriceDay = -1;
+        let autoInterval = null;
+        
+        // D3 Setup
+        const margin = { top: 20, right: 30, bottom: 40, left: 50 };
+        let svg, xScale, yScale, width, height;
+        
+        function initChart() {
+            const container = document.getElementById('chartContainer');
+            container.innerHTML = '';
+            
+            width = container.offsetWidth - margin.left - margin.right;
+            height = container.offsetHeight - margin.top - margin.bottom;
+            
+            svg = d3.select('#chartContainer')
+                .append('svg')
+                .attr('width', container.offsetWidth)
+                .attr('height', container.offsetHeight)
+                .append('g')
+                .attr('transform', `translate(${margin.left},${margin.top})`);
+            
+            xScale = d3.scaleLinear()
+                .domain([0, prices.length - 1])
+                .range([0, width]);
+            
+            yScale = d3.scaleLinear()
+                .domain([0, d3.max(prices) + 1])
+                .range([height, 0]);
+            
+            // X Axis
+            svg.append('g')
+                .attr('transform', `translate(0,${height})`)
+                .call(d3.axisBottom(xScale).ticks(prices.length).tickFormat(d => `Day ${d}`));
+            
+            // Y Axis
+            svg.append('g')
+                .call(d3.axisLeft(yScale).tickFormat(d => `$${d}`));
+            
+            // Line
+            const line = d3.line()
+                .x((d, i) => xScale(i))
+                .y(d => yScale(d));
+            
+            svg.append('path')
+                .datum(prices)
+                .attr('fill', 'none')
+                .attr('stroke', '#667eea')
+                .attr('stroke-width', 3)
+                .attr('d', line);
+            
+            // Dots
+            svg.selectAll('.dot')
+                .data(prices)
+                .enter()
+                .append('circle')
+                .attr('class', 'dot')
+                .attr('cx', (d, i) => xScale(i))
+                .attr('cy', d => yScale(d))
+                .attr('r', 6)
+                .attr('fill', '#667eea');
+            
+            // Min price line (hidden initially)
+            svg.append('line')
+                .attr('class', 'min-line')
+                .attr('x1', 0)
+                .attr('x2', width)
+                .attr('y1', yScale(0))
+                .attr('y2', yScale(0))
+                .attr('stroke', '#4caf50')
+                .attr('stroke-width', 2)
+                .attr('stroke-dasharray', '5,5')
+                .style('opacity', 0);
+        }
+        
+        function init() {
+            renderPrices();
+            initChart();
+        }
+        
+        function renderPrices() {
+            const container = document.getElementById('pricesContainer');
+            container.innerHTML = '';
+            prices.forEach((price, idx) => {
+                const box = document.createElement('div');
+                box.className = 'price-box';
+                box.id = `price-${idx}`;
+                box.innerHTML = `$${price}<span class="day-label">Day ${idx}</span>`;
+                container.appendChild(box);
+            });
+        }
+        
+        function step() {
+            currentIndex++;
+            
+            if (currentIndex >= prices.length) {
+                document.getElementById('statusMessage').textContent = 
+                    `✅ Done! Max profit = $${maxProfit}`;
+                document.getElementById('stepBtn').disabled = true;
+                stopAuto();
+                return;
+            }
+            
+            const price = prices[currentIndex];
+            document.getElementById('currentPrice').textContent = `$${price}`;
+            
+            // Clear previous highlights
+            document.querySelectorAll('.price-box').forEach(box => {
+                box.classList.remove('current-day');
+            });
+            
+            // Update min price
+            const prevMin = minPrice;
+            if (price < minPrice) {
+                minPrice = price;
+                minPriceDay = currentIndex;
+                document.getElementById('minPrice').textContent = `$${minPrice}`;
+            }
+            
+            // Highlight min and current
+            if (minPriceDay >= 0) {
+                document.getElementById(`price-${minPriceDay}`).classList.add('min-day');
+            }
+            document.getElementById(`price-${currentIndex}`).classList.add('current-day', 'checked');
+            
+            // Calculate potential profit
+            const potentialProfit = price - minPrice;
+            if (potentialProfit > maxProfit) {
+                maxProfit = potentialProfit;
+                document.getElementById('maxProfit').textContent = `$${maxProfit}`;
+            }
+            
+            // Update min line on chart
+            svg.select('.min-line')
+                .style('opacity', 1)
+                .transition()
+                .duration(300)
+                .attr('y1', yScale(minPrice))
+                .attr('y2', yScale(minPrice));
+            
+            // Draw profit indicator
+            svg.selectAll('.profit-line').remove();
+            if (potentialProfit > 0) {
+                svg.append('line')
+                    .attr('class', 'profit-line')
+                    .attr('x1', xScale(currentIndex))
+                    .attr('x2', xScale(currentIndex))
+                    .attr('y1', yScale(minPrice))
+                    .attr('y2', yScale(price))
+                    .attr('stroke', '#ff9800')
+                    .attr('stroke-width', 3);
+            }
+            
+            // Highlight current dot
+            svg.selectAll('.dot')
+                .attr('fill', (d, i) => {
+                    if (i === minPriceDay) return '#4caf50';
+                    if (i === currentIndex) return '#ff9800';
+                    if (i < currentIndex) return '#90caf9';
+                    return '#667eea';
+                })
+                .attr('r', (d, i) => (i === currentIndex || i === minPriceDay) ? 8 : 6);
+            
+            document.getElementById('statusMessage').textContent = 
+                `Day ${currentIndex}: Price=$${price}, Min=$${minPrice}, Potential profit=$${potentialProfit}, Max profit=$${maxProfit}`;
+        }
+        
+        function toggleAuto() {
+            if (autoInterval) {
+                stopAuto();
+            } else {
+                document.getElementById('autoBtn').textContent = 'Pause';
+                autoInterval = setInterval(() => {
+                    if (currentIndex >= prices.length - 1) {
+                        step();
+                        stopAuto();
+                    } else {
+                        step();
+                    }
+                }, 1200);
+            }
+        }
+        
+        function stopAuto() {
+            if (autoInterval) {
+                clearInterval(autoInterval);
+                autoInterval = null;
+            }
+            document.getElementById('autoBtn').textContent = 'Auto Run';
+        }
+        
+        function reset() {
+            stopAuto();
+            currentIndex = -1;
+            minPrice = Infinity;
+            maxProfit = 0;
+            minPriceDay = -1;
+            document.getElementById('stepBtn').disabled = false;
+            document.getElementById('minPrice').textContent = '∞';
+            document.getElementById('currentPrice').textContent = '-';
+            document.getElementById('maxProfit').textContent = '0';
+            document.getElementById('statusMessage').textContent = 
+                'Click "Step" or "Auto Run" to start visualization';
+            init();
+        }
+        
+        // Initialize on load
+        init();
+    </script>
+</body>
+</html>

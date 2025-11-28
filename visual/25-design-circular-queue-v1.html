@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Q25: Design Circular Queue</title>
+    <link rel="stylesheet" href="visual.css">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    
+</head>
+<body>
+    <div class="container">
+        <div class="problem-info">
+            <h1>Q25: Design Circular Queue</h1>
+            <p>Design a circular queue with fixed size using two pointers (front and rear).</p>
+            <div class="problem-meta">
+                <span class="meta-tag">📁 Queue</span>
+                <span class="meta-tag">⏱️ O(1) operations</span>
+                <span class="meta-tag">💡 Two Pointers</span>
+            </div>
+        </div>
+        
+        
+        
+        <div class="visualization-section">
+            <h3>🎬 Visualization (size = 5)</h3>
+            
+            <div class="controls">
+                <button class="btn btn-primary" id="stepBtn" onclick="step()">Step</button>
+                <button class="btn btn-success" id="autoBtn" onclick="toggleAuto()">Auto Run</button>
+                <button class="btn btn-warning" onclick="reset()">Reset</button>
+            </div>
+            
+            <div class="pointer-display">
+                <div class="pointer-box front">
+                    <div class="pointer-label">p1 (front)</div>
+                    <div class="pointer-value" id="frontPtr">0</div>
+                </div>
+                <div class="pointer-box rear">
+                    <div class="pointer-label">p2 (rear)</div>
+                    <div class="pointer-value" id="rearPtr">0</div>
+                </div>
+            </div>
+            
+            <div class="status-message" id="statusMessage">
+                Click "Step" to run: enQueue(1,2,3), deQueue(), enQueue(4,5,6)
+            </div>
+            
+            <div class="array-view" id="arrayView"></div>
+            
+            <svg id="circularView" width="300" height="300"></svg>
+        </div>
+    </div>
+        
+        <div class="code-section">
+            <h3>📄 Python Solution (25-1.py)</h3>
+            <pre><span class="keyword">class</span> MyCircularQueue:
+    <span class="keyword">def</span> <span class="function">__init__</span>(<span class="keyword">self</span>, k: int):
+        <span class="keyword">self</span>.q = [<span class="keyword">None</span>] * k
+        <span class="keyword">self</span>.maxlen = k
+        <span class="keyword">self</span>.p1 = <span class="number">0</span>
+        <span class="keyword">self</span>.p2 = <span class="number">0</span>
+
+    <span class="comment"># enQueue(): 리어 포인터 이동</span>
+    <span class="keyword">def</span> <span class="function">enQueue</span>(<span class="keyword">self</span>, value: int) -&gt; bool:
+        <span class="keyword">if</span> <span class="keyword">self</span>.q[<span class="keyword">self</span>.p2] is <span class="keyword">None</span>:
+            <span class="keyword">self</span>.q[<span class="keyword">self</span>.p2] = value
+            <span class="keyword">self</span>.p2 = (<span class="keyword">self</span>.p2 + <span class="number">1</span>) % <span class="keyword">self</span>.maxlen
+            <span class="keyword">return</span> <span class="keyword">True</span>
+        <span class="keyword">else</span>:
+            <span class="keyword">return</span> <span class="keyword">False</span>
+
+    <span class="comment"># deQueue(): 프론트 포인터 이동</span>
+    <span class="keyword">def</span> <span class="function">deQueue</span>(<span class="keyword">self</span>) -&gt; bool:
+        <span class="keyword">if</span> <span class="keyword">self</span>.q[<span class="keyword">self</span>.p1] is <span class="keyword">None</span>:
+            <span class="keyword">return</span> <span class="keyword">False</span>
+        <span class="keyword">else</span>:
+            <span class="keyword">self</span>.q[<span class="keyword">self</span>.p1] = <span class="keyword">None</span>
+            <span class="keyword">self</span>.p1 = (<span class="keyword">self</span>.p1 + <span class="number">1</span>) % <span class="keyword">self</span>.maxlen
+            <span class="keyword">return</span> <span class="keyword">True</span>
+
+    <span class="keyword">def</span> <span class="function">Front</span>(<span class="keyword">self</span>) -&gt; int:
+        <span class="keyword">return</span> -<span class="number">1</span> <span class="keyword">if</span> <span class="keyword">self</span>.q[<span class="keyword">self</span>.p1] is <span class="keyword">None</span> <span class="keyword">else</span> <span class="keyword">self</span>.q[<span class="keyword">self</span>.p1]
+
+    <span class="keyword">def</span> <span class="function">Rear</span>(<span class="keyword">self</span>) -&gt; int:
+        <span class="keyword">return</span> -<span class="number">1</span> <span class="keyword">if</span> <span class="keyword">self</span>.q[<span class="keyword">self</span>.p2 - <span class="number">1</span>] is <span class="keyword">None</span> <span class="keyword">else</span> <span class="keyword">self</span>.q[<span class="keyword">self</span>.p2 - <span class="number">1</span>]
+
+    <span class="keyword">def</span> <span class="function">isEmpty</span>(<span class="keyword">self</span>) -&gt; bool:
+        <span class="keyword">return</span> <span class="keyword">self</span>.p1 == <span class="keyword">self</span>.p2 <span class="keyword">and</span> <span class="keyword">self</span>.q[<span class="keyword">self</span>.p1] is <span class="keyword">None</span>
+
+    <span class="keyword">def</span> <span class="function">isFull</span>(<span class="keyword">self</span>) -&gt; bool:
+        <span class="keyword">return</span> <span class="keyword">self</span>.p1 == <span class="keyword">self</span>.p2 <span class="keyword">and</span> <span class="keyword">self</span>.q[<span class="keyword">self</span>.p1] is <span class="keyword">not</span> <span class="keyword">None</span></pre>
+        </div>
+
+    </div>
+
+    <script>
+        const SIZE = 5;
+        let queue = new Array(SIZE).fill(null);
+        let p1 = 0, p2 = 0;
+        let stepIndex = 0;
+        let autoInterval = null;
+        
+        const operations = [
+            { op: 'enQueue', val: 1 },
+            { op: 'enQueue', val: 2 },
+            { op: 'enQueue', val: 3 },
+            { op: 'deQueue' },
+            { op: 'enQueue', val: 4 },
+            { op: 'enQueue', val: 5 },
+            { op: 'enQueue', val: 6 },  // Wraps around!
+            { op: 'done' }
+        ];
+        
+        function init() {
+            queue = new Array(SIZE).fill(null);
+            p1 = 0;
+            p2 = 0;
+            stepIndex = 0;
+            renderArray();
+            renderCircular();
+            updatePointers();
+        }
+        
+        function updatePointers() {
+            document.getElementById('frontPtr').textContent = p1;
+            document.getElementById('rearPtr').textContent = p2;
+        }
+        
+        function renderArray() {
+            const container = document.getElementById('arrayView');
+            container.innerHTML = '';
+            queue.forEach((val, i) => {
+                const cell = document.createElement('div');
+                cell.className = 'array-cell';
+                if (val !== null) cell.classList.add('filled');
+                if (i === p1) cell.classList.add('front');
+                if (i === p2) cell.classList.add('rear');
+                cell.innerHTML = `
+                    <div class="cell-value">${val !== null ? val : '-'}</div>
+                    <div class="cell-index">[${i}]</div>
+                `;
+                container.appendChild(cell);
+            });
+        }
+        
+        function renderCircular() {
+            const svg = d3.select('#circularView');
+            svg.selectAll('*').remove();
+            
+            const cx = 150, cy = 150, r = 100;
+            
+            for (let i = 0; i < SIZE; i++) {
+                const angle = (2 * Math.PI * i / SIZE) - Math.PI / 2;
+                const x = cx + r * Math.cos(angle);
+                const y = cy + r * Math.sin(angle);
+                
+                svg.append('circle')
+                    .attr('cx', x)
+                    .attr('cy', y)
+                    .attr('r', 25)
+                    .attr('fill', queue[i] !== null ? '#e3f2fd' : 'white')
+                    .attr('stroke', i === p1 ? '#4caf50' : (i === p2 ? '#ff9800' : '#e0e0e0'))
+                    .attr('stroke-width', i === p1 || i === p2 ? 3 : 2);
+                
+                svg.append('text')
+                    .attr('x', x)
+                    .attr('y', y + 5)
+                    .attr('text-anchor', 'middle')
+                    .attr('font-size', '16px')
+                    .attr('font-weight', 'bold')
+                    .text(queue[i] !== null ? queue[i] : '-');
+            }
+        }
+        
+        function step() {
+            if (stepIndex >= operations.length) return;
+            
+            const op = operations[stepIndex];
+            
+            if (op.op === 'enQueue') {
+                if (queue[p2] === null) {
+                    queue[p2] = op.val;
+                    document.getElementById('statusMessage').textContent = 
+                        `enQueue(${op.val}): Add at p2=${p2}, move p2 to ${(p2 + 1) % SIZE}`;
+                    p2 = (p2 + 1) % SIZE;
+                } else {
+                    document.getElementById('statusMessage').textContent = 
+                        `enQueue(${op.val}): Queue full!`;
+                }
+            } else if (op.op === 'deQueue') {
+                if (queue[p1] !== null) {
+                    const val = queue[p1];
+                    queue[p1] = null;
+                    document.getElementById('statusMessage').textContent = 
+                        `deQueue(): Remove ${val} at p1=${p1}, move p1 to ${(p1 + 1) % SIZE}`;
+                    p1 = (p1 + 1) % SIZE;
+                }
+            } else if (op.op === 'done') {
+                document.getElementById('statusMessage').textContent = 
+                    `✅ Done! Circular wrap-around demonstrated.`;
+                document.getElementById('stepBtn').disabled = true;
+                stopAuto();
+            }
+            
+            renderArray();
+            renderCircular();
+            updatePointers();
+            stepIndex++;
+        }
+        
+        function toggleAuto() {
+            if (autoInterval) { stopAuto(); }
+            else {
+                document.getElementById('autoBtn').textContent = 'Pause';
+                autoInterval = setInterval(() => {
+                    if (stepIndex >= operations.length) stopAuto();
+                    else step();
+                }, 1000);
+            }
+        }
+        
+        function stopAuto() {
+            if (autoInterval) { clearInterval(autoInterval); autoInterval = null; }
+            document.getElementById('autoBtn').textContent = 'Auto Run';
+        }
+        
+        function reset() {
+            stopAuto();
+            document.getElementById('stepBtn').disabled = false;
+            document.getElementById('statusMessage').textContent = 'Click "Step" to run: enQueue(1,2,3), deQueue(), enQueue(4,5,6)';
+            init();
+        }
+        
+        init();
+    </script>
+</body>
+</html>

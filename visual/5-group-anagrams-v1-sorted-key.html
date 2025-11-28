@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Q5: Group Anagrams</title>
+    <link rel="stylesheet" href="visual.css">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    
+</head>
+<body>
+    <div class="container">
+        <h1>Q5: Group Anagrams</h1>
+        <p class="subtitle">Sorted Key + defaultdict</p>
+
+        <div class="problem-info">
+            <h3>📋 Problem Description</h3>
+            <p>Given an array of strings, group anagrams together. Anagrams are words that have the same characters with the same frequencies.</p>
+            <p><strong>Example:</strong> ["eat","tea","tan","ate","nat","bat"] → [["eat","tea","ate"],["tan","nat"],["bat"]]</p>
+            <div class="complexity">
+                <span><strong>Time:</strong> O(n × k log k)</span>
+                <span><strong>Space:</strong> O(n × k)</span>
+            </div>
+            <p class="text-md text-gray-dark mt-5">where n = number of strings, k = max string length</p>
+        </div>
+
+        <div class="main-content">
+            
+            </div>
+        </div>
+    </div>
+
+            <div class="visualization-section">
+                <h3>🎬 Visualization</h3>
+                <div class="controls">
+                    <button class="btn btn-primary" id="stepBtn" onclick="step()">Step</button>
+                    <button class="btn btn-success" id="autoBtn" onclick="toggleAuto()">Auto Run</button>
+                    <button class="btn btn-warning" onclick="reset()">Reset</button>
+                </div>
+                <div class="status-message" id="message">Click Step or Auto Run to begin</div>
+                <div id="visualization"></div>
+                
+                <div class="legend">
+                    <div class="legend-item">
+                        <div class="legend-color bg-yellow"></div>
+                        <span>Current Word</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color bg-blue-light-border-blue-dashed"></div>
+                        <span>Anagram Group</span>
+                    </div>
+    
+        <div class="code-section">
+            <h3>📄 Python Solution (5-1.py)</h3>
+            <pre><span class="keyword">import</span> collections
+<span class="keyword">from</span> typing <span class="keyword">import</span> List
+
+
+<span class="keyword">class</span> Solution:
+    <span class="keyword">def</span> <span class="function">groupAnagrams</span>(<span class="keyword">self</span>, strs: List[str]) -&gt; List[List[str]]:
+        anagrams = collections.<span class="function">defaultdict</span>(list)
+
+        <span class="keyword">for</span> word <span class="keyword">in</span> strs:
+            <span class="comment"># 정렬하여 딕셔너리에 추가</span>
+            anagrams[''.<span class="function">join</span>(<span class="function">sorted</span>(word))].<span class="function">append</span>(word)
+        <span class="keyword">return</span> <span class="function">list</span>(anagrams.<span class="function">values</span>())</pre>
+        </div>
+
+    </div>
+
+    <script>
+        const inputWords = ["eat", "tea", "tan", "ate", "nat", "bat"];
+        let currentIndex = 0;
+        let subStep = 0;
+        let phase = 0;
+        let buckets = {};
+        let isFinished = false;
+        let autoInterval = null;
+        let isAutoRunning = false;
+
+        function init() {
+            currentIndex = 0;
+            subStep = 0;
+            phase = 1;
+            buckets = {};
+            isFinished = false;
+        }
+
+        function render() {
+            const vis = d3.select("#visualization");
+            vis.selectAll("*").remove();
+            
+            // Input area
+            const inputArea = vis.append("div").attr("class", "input-area");
+            inputWords.forEach((word, i) => {
+                const box = inputArea.append("div")
+                    .attr("class", "word-box")
+                    .attr("id", "word-" + i)
+                    .text(word);
+                
+                if (i < currentIndex) {
+                    box.classed("processed", true);
+                } else if (i === currentIndex && phase >= 1) {
+                    box.classed("active", true);
+                }
+            });
+            
+            // Buckets area
+            const bucketsArea = vis.append("div").attr("class", "buckets-area");
+            Object.keys(buckets).forEach(key => {
+                const bucket = bucketsArea.append("div").attr("class", "bucket");
+                bucket.append("div").attr("class", "bucket-label").text(`"${key}"`);
+                buckets[key].forEach(word => {
+                    bucket.append("div").attr("class", "bucket-item").text(word);
+                });
+            });
+        }
+
+        function step() {
+            if (phase === 0) {
+                init();
+                render();
+                document.getElementById('message').innerText = `Input: [${inputWords.map(w => `"${w}"`).join(', ')}]`;
+                return;
+            }
+
+            if (isFinished) {
+                reset();
+                return;
+            }
+
+            if (currentIndex >= inputWords.length) {
+                // Show final result
+                const result = Object.values(buckets);
+                document.getElementById('message').innerText = `✓ Done! ${result.length} groups found.`;
+                
+                d3.select("#visualization").append("div")
+                    .style("text-align", "center").style("margin-top", "15px")
+                    .html(`<span class="text-2xl text-green">✓</span>`);
+                
+                isFinished = true;
+                stopAuto();
+                document.getElementById('stepBtn').innerText = "Restart";
+                return;
+            }
+
+            const currentWord = inputWords[currentIndex];
+            
+            if (subStep === 0) {
+                // Highlight word
+                render();
+                document.getElementById('message').innerText = `Processing: "${currentWord}"`;
+                subStep = 1;
+            } else if (subStep === 1) {
+                // Show sorted key
+                const sortedKey = currentWord.split('').sort().join('');
+                const wordBox = d3.select("#word-" + currentIndex);
+                wordBox.append("div").attr("class", "sorted-label").text(`sorted: "${sortedKey}"`);
+                document.getElementById('message').innerText = `''.join(sorted("${currentWord}")) = "${sortedKey}"`;
+                subStep = 2;
+            } else if (subStep === 2) {
+                // Add to bucket
+                const sortedKey = currentWord.split('').sort().join('');
+                if (!buckets[sortedKey]) {
+                    buckets[sortedKey] = [];
+                }
+                buckets[sortedKey].push(currentWord);
+                
+                currentIndex++;
+                subStep = 0;
+                render();
+                
+                document.getElementById('message').innerText = `Added "${currentWord}" to bucket["${sortedKey}"]`;
+            }
+        }
+
+        function toggleAuto() {
+            if (isAutoRunning) {
+                stopAuto();
+            } else {
+                startAuto();
+            }
+        }
+
+        function startAuto() {
+            if (phase === 0) init();
+            isAutoRunning = true;
+            document.getElementById('autoBtn').innerText = "Pause";
+            document.getElementById('autoBtn').classList.add("running");
+            autoInterval = setInterval(() => {
+                if (isFinished) {
+                    stopAuto();
+                } else {
+                    step();
+                }
+            }, 800);
+        }
+
+        function stopAuto() {
+            isAutoRunning = false;
+            document.getElementById('autoBtn').innerText = "Auto Run";
+            document.getElementById('autoBtn').classList.remove("running");
+            if (autoInterval) {
+                clearInterval(autoInterval);
+                autoInterval = null;
+            }
+        }
+
+        function reset() {
+            stopAuto();
+            phase = 0;
+            isFinished = false;
+            currentIndex = 0;
+            subStep = 0;
+            buckets = {};
+            d3.select("#visualization").selectAll("*").remove();
+            document.getElementById('message').innerText = "Click Step or Auto Run to begin";
+            document.getElementById('stepBtn').innerText = "Step";
+        }
+    </script>
+</body>
+</html>

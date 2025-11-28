@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Q17: Swap Nodes in Pairs - Value Swap</title>
+    <link rel="stylesheet" href="visual.css">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    
+</head>
+<body>
+    <div class="container">
+        <div class="problem-info">
+            <h1>Q17: Swap Nodes in Pairs</h1>
+            <p>Given a linked list, swap every two adjacent nodes and return its head.</p>
+            <div class="problem-meta">
+                <span class="meta-tag">📁 Linked List</span>
+                <span class="meta-tag">⏱️ O(n)</span>
+                <span class="meta-tag">💡 Version 1: Swap Values</span>
+            </div>
+        </div>
+        
+        
+        
+        <div class="visualization-section">
+            <h3>🎬 Visualization</h3>
+            
+            <div class="controls">
+                <button class="btn btn-primary" id="stepBtn" onclick="step()">Step</button>
+                <button class="btn btn-success" id="autoBtn" onclick="toggleAuto()">Auto Run</button>
+                <button class="btn btn-warning" onclick="reset()">Reset</button>
+            </div>
+            
+            <div class="status-message" id="statusMessage">
+                Click "Step" or "Auto Run" to start visualization
+            </div>
+            
+            <div class="swap-indicator" id="swapIndicator" class="d-none">
+                <div class="swap-box a" id="swapA">?</div>
+                <div class="swap-arrow">⟷</div>
+                <div class="swap-box b" id="swapB">?</div>
+            </div>
+            
+            <div class="list-section">
+                <div class="list-label">Linked List:</div>
+                <div class="list-container" id="listContainer"></div>
+            </div>
+        </div>
+    </div>
+        
+        <div class="code-section">
+            <h3>📄 Python Solution (17-1.py)</h3>
+            <pre><span class="comment"># Definition for singly-linked list.</span>
+<span class="keyword">class</span> ListNode:
+    <span class="keyword">def</span> <span class="function">__init__</span>(<span class="keyword">self</span>, x):
+        <span class="keyword">self</span>.val = x
+        <span class="keyword">self</span>.next = <span class="keyword">None</span>
+
+
+<span class="keyword">class</span> Solution:
+    <span class="keyword">def</span> <span class="function">swapPairs</span>(<span class="keyword">self</span>, head: ListNode) -&gt; ListNode:
+        cur = head
+
+        <span class="keyword">while</span> cur <span class="keyword">and</span> cur.next:
+            <span class="comment"># 값만 교환</span>
+            cur.val, cur.next.val = cur.next.val, cur.val
+            cur = cur.next.next
+
+        <span class="keyword">return</span> head</pre>
+        </div>
+
+    </div>
+
+    <script>
+        let values = [1, 2, 3, 4];
+        let curIdx = 0;
+        let autoInterval = null;
+        let phase = 'init';
+        let subStep = 0; // 0: highlight, 1: swap
+        
+        function init() {
+            values = [1, 2, 3, 4];
+            renderList();
+            document.getElementById('swapIndicator').style.display = 'none';
+        }
+        
+        function renderList() {
+            const container = document.getElementById('listContainer');
+            container.innerHTML = '';
+            values.forEach((val, i) => {
+                const node = document.createElement('div');
+                node.className = 'list-node';
+                if (i === curIdx) node.classList.add('current');
+                if (i === curIdx + 1) node.classList.add('next');
+                if (i < curIdx) node.classList.add('swapped');
+                node.textContent = val;
+                container.appendChild(node);
+                if (i < values.length - 1) {
+                    const arrow = document.createElement('div');
+                    arrow.className = 'list-arrow';
+                    container.appendChild(arrow);
+                }
+            });
+        }
+        
+        function step() {
+            if (curIdx >= values.length - 1) {
+                phase = 'done';
+                document.getElementById('statusMessage').textContent = 
+                    `✅ Done! Result: [${values.join(' → ')}]`;
+                document.getElementById('swapIndicator').style.display = 'none';
+                document.getElementById('stepBtn').disabled = true;
+                stopAuto();
+                return;
+            }
+            
+            if (subStep === 0) {
+                // Highlight pair
+                document.getElementById('swapIndicator').style.display = 'flex';
+                document.getElementById('swapA').textContent = values[curIdx];
+                document.getElementById('swapB').textContent = values[curIdx + 1];
+                document.getElementById('statusMessage').textContent = 
+                    `Pair (${values[curIdx]}, ${values[curIdx + 1]}): Ready to swap values`;
+                renderList();
+                subStep = 1;
+            } else {
+                // Swap
+                [values[curIdx], values[curIdx + 1]] = [values[curIdx + 1], values[curIdx]];
+                document.getElementById('swapA').textContent = values[curIdx];
+                document.getElementById('swapB').textContent = values[curIdx + 1];
+                document.getElementById('statusMessage').textContent = 
+                    `Swapped! Now (${values[curIdx]}, ${values[curIdx + 1]}). Move cur to next pair.`;
+                curIdx += 2;
+                renderList();
+                subStep = 0;
+            }
+        }
+        
+        function toggleAuto() {
+            if (autoInterval) { stopAuto(); }
+            else {
+                document.getElementById('autoBtn').textContent = 'Pause';
+                autoInterval = setInterval(() => {
+                    if (phase === 'done') stopAuto();
+                    else step();
+                }, 1000);
+            }
+        }
+        
+        function stopAuto() {
+            if (autoInterval) { clearInterval(autoInterval); autoInterval = null; }
+            document.getElementById('autoBtn').textContent = 'Auto Run';
+        }
+        
+        function reset() {
+            stopAuto();
+            phase = 'init';
+            curIdx = 0;
+            subStep = 0;
+            document.getElementById('stepBtn').disabled = false;
+            document.getElementById('statusMessage').textContent = 'Click "Step" or "Auto Run" to start visualization';
+            init();
+        }
+        
+        init();
+    </script>
+</body>
+</html>

@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Q4: Most Common Word</title>
+    <link rel="stylesheet" href="visual.css">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    
+</head>
+<body>
+    <div class="container">
+        <h1>Q4: Most Common Word</h1>
+        <p class="subtitle">Regex + Counter</p>
+
+        <div class="problem-info">
+            <h3>📋 Problem Description</h3>
+            <p>Given a paragraph and a list of banned words, find the most frequent word that is not in the banned list. It is guaranteed there is at least one word that isn't banned.</p>
+            <p><strong>Input:</strong> paragraph = "Bob hit a ball, the hit BALL flew far after it was hit."<br>banned = ["hit"]</p>
+            <div class="complexity">
+                <span><strong>Time:</strong> O(n)</span>
+                <span><strong>Space:</strong> O(n)</span>
+            </div>
+        </div>
+
+        <div class="main-content">
+            
+            </div>
+        </div>
+    </div>
+
+            <div class="visualization-section">
+                <h3>🎬 Visualization</h3>
+                <div class="controls">
+                    <button class="btn btn-primary" id="stepBtn" onclick="step()">Step</button>
+                    <button class="btn btn-success" id="autoBtn" onclick="toggleAuto()">Auto Run</button>
+                    <button class="btn btn-warning" onclick="reset()">Reset</button>
+                </div>
+                <div class="status-message" id="message">Click Step or Auto Run to begin</div>
+                <div id="visualization"></div>
+                
+                <div class="legend">
+                    <div class="legend-item">
+                        <div class="legend-color bg-blue-light-border-blue-solid"></div>
+                        <span>Kept Word</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color bg-pink-very-light"></div>
+                        <span>Banned Word</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color bg-green"></div>
+                        <span>Most Common</span>
+                    </div>
+    
+        <div class="code-section">
+            <h3>📄 Python Solution (4-1.py)</h3>
+            <pre><span class="keyword">import</span> collections
+<span class="keyword">import</span> re
+<span class="keyword">from</span> typing <span class="keyword">import</span> List
+
+
+<span class="keyword">class</span> Solution:
+    <span class="keyword">def</span> <span class="function">mostCommonWord</span>(<span class="keyword">self</span>, paragraph: str, banned: List[str]) -&gt; str:
+        words = [word <span class="keyword">for</span> word <span class="keyword">in</span> re.<span class="function">sub</span>(r'[^\w]', ' ', paragraph)
+            .<span class="function">lower</span>().<span class="function">split</span>()
+                 <span class="keyword">if</span> word <span class="keyword">not</span> <span class="keyword">in</span> banned]
+
+        counts = collections.<span class="function">Counter</span>(words)
+        <span class="comment"># 가장 흔하게 등장하는 단어의 첫 번째 인덱스 리턴</span>
+        <span class="keyword">return</span> counts.<span class="function">most_common</span>(<span class="number">1</span>)[<span class="number">0</span>][<span class="number">0</span>]</pre>
+        </div>
+
+    </div>
+
+    <script>
+        const paragraph = "Bob hit a ball, the hit BALL flew far after it was hit.";
+        const banned = ["hit"];
+        
+        let phase = 0;
+        let words = [];
+        let counts = {};
+        let isFinished = false;
+        let autoInterval = null;
+        let isAutoRunning = false;
+
+        function init() {
+            phase = 1;
+            words = [];
+            counts = {};
+            isFinished = false;
+        }
+
+        function step() {
+            if (phase === 0) {
+                init();
+            }
+
+            if (isFinished) {
+                reset();
+                return;
+            }
+
+            const vis = d3.select("#visualization");
+
+            if (phase === 1) {
+                // Show original paragraph
+                vis.selectAll("*").remove();
+                vis.append("div").attr("class", "step-indicator").text("Step 1: Original Paragraph");
+                vis.append("div").attr("class", "text-box").text(paragraph);
+                vis.append("div").style("margin-top", "10px").style("font-family", "monospace")
+                    .html(`banned = [<span class="text-red">"${banned.join('", "')}"</span>]`);
+                
+                document.getElementById('message').innerText = `Paragraph loaded. Banned: [${banned.join(", ")}]`;
+                phase = 2;
+            } else if (phase === 2) {
+                // Clean and split
+                vis.selectAll("*").remove();
+                vis.append("div").attr("class", "step-indicator").text("Step 2: re.sub(r'[^\\w]', ' ', paragraph).lower().split()");
+                
+                const cleanText = paragraph.replace(/[^\w]/g, ' ').toLowerCase();
+                words = cleanText.split(/\s+/).filter(w => w.length > 0);
+                
+                const textBox = vis.append("div").attr("class", "text-box");
+                words.forEach(w => {
+                    textBox.append("span").attr("class", "word").text(w);
+                });
+                
+                document.getElementById('message').innerText = `Cleaned and split: ${words.length} words`;
+                phase = 3;
+            } else if (phase === 3) {
+                // Filter banned and count
+                vis.selectAll("*").remove();
+                vis.append("div").attr("class", "step-indicator").text("Step 3: Filter banned + Counter");
+                
+                const textBox = vis.append("div").attr("class", "text-box");
+                words.forEach(w => {
+                    const isBanned = banned.includes(w);
+                    textBox.append("span")
+                        .attr("class", "word " + (isBanned ? "banned" : "kept"))
+                        .text(w);
+                    
+                    if (!isBanned) {
+                        counts[w] = (counts[w] || 0) + 1;
+                    }
+                });
+                
+                document.getElementById('message').innerText = `Filtered banned words. Counting frequencies...`;
+                phase = 4;
+            } else if (phase === 4) {
+                // Draw chart
+                vis.selectAll("*").remove();
+                vis.append("div").attr("class", "step-indicator").text("Step 4: counts.most_common(1)");
+                
+                const data = Object.keys(counts).map(k => ({ word: k, count: counts[k] }));
+                data.sort((a, b) => b.count - a.count);
+                
+                const chartContainer = vis.append("div").attr("class", "chart-container");
+                
+                const svgWidth = 400;
+                const svgHeight = 200;
+                const margin = { top: 20, right: 20, bottom: 40, left: 40 };
+                const width = svgWidth - margin.left - margin.right;
+                const height = svgHeight - margin.top - margin.bottom;
+
+                const svg = chartContainer.append("svg")
+                    .attr("width", svgWidth)
+                    .attr("height", svgHeight)
+                    .append("g")
+                    .attr("transform", `translate(${margin.left},${margin.top})`);
+
+                const x = d3.scaleBand().range([0, width]).padding(0.2);
+                const y = d3.scaleLinear().range([height, 0]);
+
+                x.domain(data.map(d => d.word));
+                y.domain([0, d3.max(data, d => d.count)]);
+
+                svg.selectAll(".bar")
+                    .data(data)
+                    .enter().append("rect")
+                    .attr("class", "bar")
+                    .attr("id", d => "bar-" + d.word)
+                    .attr("x", d => x(d.word))
+                    .attr("width", x.bandwidth())
+                    .attr("y", height)
+                    .attr("height", 0)
+                    .transition().duration(600)
+                    .attr("y", d => y(d.count))
+                    .attr("height", d => height - y(d.count));
+
+                svg.append("g")
+                    .attr("transform", `translate(0,${height})`)
+                    .call(d3.axisBottom(x))
+                    .selectAll("text")
+                    .style("font-size", "10px");
+
+                svg.append("g").call(d3.axisLeft(y).ticks(d3.max(data, d => d.count)));
+
+                document.getElementById('message').innerText = "Word frequency chart generated";
+                phase = 5;
+            } else if (phase === 5) {
+                // Highlight winner
+                const data = Object.keys(counts).map(k => ({ word: k, count: counts[k] }));
+                data.sort((a, b) => b.count - a.count);
+                const maxWord = data[0].word;
+                
+                d3.select("#bar-" + maxWord).attr("class", "bar winner");
+                
+                vis.append("div").style("text-align", "center").style("margin-top", "15px")
+                    .html(`<span class="text-2xl text-green">✓</span><br>
+                           <span class="text-xl font-bold">"${maxWord}"</span> (count: ${data[0].count})`);
+                
+                document.getElementById('message').innerText = `✓ Most common word: "${maxWord}" appears ${data[0].count} time(s)`;
+                isFinished = true;
+                stopAuto();
+                document.getElementById('stepBtn').innerText = "Restart";
+            }
+        }
+
+        function toggleAuto() {
+            if (isAutoRunning) {
+                stopAuto();
+            } else {
+                startAuto();
+            }
+        }
+
+        function startAuto() {
+            if (phase === 0) init();
+            isAutoRunning = true;
+            document.getElementById('autoBtn').innerText = "Pause";
+            document.getElementById('autoBtn').classList.add("running");
+            autoInterval = setInterval(() => {
+                if (isFinished) {
+                    stopAuto();
+                } else {
+                    step();
+                }
+            }, 1200);
+        }
+
+        function stopAuto() {
+            isAutoRunning = false;
+            document.getElementById('autoBtn').innerText = "Auto Run";
+            document.getElementById('autoBtn').classList.remove("running");
+            if (autoInterval) {
+                clearInterval(autoInterval);
+                autoInterval = null;
+            }
+        }
+
+        function reset() {
+            stopAuto();
+            phase = 0;
+            isFinished = false;
+            words = [];
+            counts = {};
+            d3.select("#visualization").selectAll("*").remove();
+            document.getElementById('message').innerText = "Click Step or Auto Run to begin";
+            document.getElementById('stepBtn').innerText = "Step";
+        }
+    </script>
+</body>
+</html>

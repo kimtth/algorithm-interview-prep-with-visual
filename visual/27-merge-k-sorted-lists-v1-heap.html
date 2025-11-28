@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Q27: Merge K Sorted Lists</title>
+    <link rel="stylesheet" href="visual.css">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    
+</head>
+<body>
+    <div class="container">
+        <div class="problem-info">
+            <h1>Q27: Merge K Sorted Lists</h1>
+            <p>Merge k sorted linked lists into one sorted linked list using a min-heap.</p>
+            <div class="problem-meta">
+                <span class="meta-tag">📁 Heap / Linked List</span>
+                <span class="meta-tag">⏱️ O(n log k)</span>
+                <span class="meta-tag">💡 Priority Queue</span>
+            </div>
+        </div>
+        
+        
+        
+        <div class="visualization-section">
+            <h3>🎬 Visualization</h3>
+            
+            <div class="controls">
+                <button class="btn btn-primary" id="stepBtn" onclick="step()">Step</button>
+                <button class="btn btn-success" id="autoBtn" onclick="toggleAuto()">Auto Run</button>
+                <button class="btn btn-warning" onclick="reset()">Reset</button>
+            </div>
+            
+            <div class="status-message" id="statusMessage">
+                Click "Step" to merge 3 sorted lists using min-heap
+            </div>
+            
+            <div class="lists-section" id="listsSections"></div>
+            
+            <div class="heap-section">
+                <div class="heap-label">Min Heap (value, list_index):</div>
+                <div class="heap-items" id="heapItems"></div>
+            </div>
+            
+            <div class="result-section">
+                <div class="result-label">Merged Result:</div>
+                <div class="result-nodes" id="resultNodes"></div>
+            </div>
+        </div>
+    </div>
+        
+        <div class="code-section">
+            <h3>📄 Python Solution (27-1.py)</h3>
+            <pre><span class="keyword">import</span> heapq
+<span class="keyword">from</span> typing <span class="keyword">import</span> List
+
+
+<span class="comment"># Definition for singly-linked list.</span>
+<span class="keyword">class</span> ListNode:
+    <span class="keyword">def</span> <span class="function">__init__</span>(<span class="keyword">self</span>, x):
+        <span class="keyword">self</span>.val = x
+        <span class="keyword">self</span>.next = <span class="keyword">None</span>
+
+
+<span class="keyword">class</span> Solution:
+    <span class="keyword">def</span> <span class="function">mergeKLists</span>(<span class="keyword">self</span>, lists: List[ListNode]) -&gt; ListNode:
+        root = result = <span class="function">ListNode</span>(<span class="keyword">None</span>)
+        heap = []
+
+        <span class="comment"># 각 연결 리스트의 루트를 힙에 저장</span>
+        <span class="keyword">for</span> i <span class="keyword">in</span> <span class="function">range</span>(<span class="function">len</span>(lists)):
+            <span class="keyword">if</span> lists[i]:
+                heapq.<span class="function">heappush</span>(heap, (lists[i].val, i, lists[i]))
+
+        <span class="comment"># 힙 추출 이후 다음 노드는 다시 저장</span>
+        <span class="keyword">while</span> heap:
+            node = heapq.<span class="function">heappop</span>(heap)
+            idx = node[<span class="number">1</span>]
+            result.next = node[<span class="number">2</span>]
+
+            result = result.next
+            <span class="keyword">if</span> result.next:
+                heapq.<span class="function">heappush</span>(heap, (result.next.val, idx, result.next))
+
+        <span class="keyword">return</span> root.next</pre>
+        </div>
+
+    </div>
+
+    <script>
+        let lists = [
+            [1, 4, 5],
+            [1, 3, 4],
+            [2, 6]
+        ];
+        let pointers = [0, 0, 0];
+        let heap = [];
+        let result = [];
+        let stepIndex = 0;
+        let autoInterval = null;
+        let initialized = false;
+        
+        function init() {
+            lists = [[1, 4, 5], [1, 3, 4], [2, 6]];
+            pointers = [0, 0, 0];
+            heap = [];
+            result = [];
+            stepIndex = 0;
+            initialized = false;
+            renderLists();
+            renderHeap();
+            renderResult();
+        }
+        
+        function renderLists() {
+            const container = document.getElementById('listsSections');
+            container.innerHTML = '';
+            lists.forEach((list, i) => {
+                const row = document.createElement('div');
+                row.className = 'list-row';
+                row.innerHTML = `<span class="list-label">List ${i + 1}:</span>`;
+                const nodes = document.createElement('div');
+                nodes.className = 'list-nodes';
+                list.forEach((val, j) => {
+                    if (j > 0) {
+                        const arrow = document.createElement('span');
+                        arrow.className = 'node-arrow';
+                        arrow.textContent = '→';
+                        nodes.appendChild(arrow);
+                    }
+                    const node = document.createElement('div');
+                    node.className = 'node';
+                    if (j < pointers[i]) node.classList.add('used');
+                    if (j === pointers[i]) node.classList.add('current');
+                    node.textContent = val;
+                    nodes.appendChild(node);
+                });
+                row.appendChild(nodes);
+                container.appendChild(row);
+            });
+        }
+        
+        function renderHeap() {
+            const container = document.getElementById('heapItems');
+            container.innerHTML = '';
+            const sorted = [...heap].sort((a, b) => a[0] - b[0]);
+            heap.forEach((item, i) => {
+                const div = document.createElement('div');
+                div.className = 'heap-item';
+                if (i === 0 || item[0] === sorted[0][0]) div.classList.add('min');
+                div.textContent = `(${item[0]}, L${item[1] + 1})`;
+                container.appendChild(div);
+            });
+        }
+        
+        function renderResult() {
+            const container = document.getElementById('resultNodes');
+            container.innerHTML = '';
+            result.forEach((val, i) => {
+                if (i > 0) {
+                    const arrow = document.createElement('span');
+                    arrow.className = 'node-arrow';
+                    arrow.textContent = '→';
+                    container.appendChild(arrow);
+                }
+                const node = document.createElement('div');
+                node.className = 'result-node';
+                node.textContent = val;
+                container.appendChild(node);
+            });
+        }
+        
+        function step() {
+            if (!initialized) {
+                // Initialize heap with first elements
+                for (let i = 0; i < lists.length; i++) {
+                    if (lists[i].length > 0) {
+                        heap.push([lists[i][0], i]);
+                    }
+                }
+                heap.sort((a, b) => a[0] - b[0]);
+                initialized = true;
+                document.getElementById('statusMessage').textContent = 
+                    'Initialize: Push first node from each list to heap';
+                renderHeap();
+                return;
+            }
+            
+            if (heap.length === 0) {
+                document.getElementById('statusMessage').textContent = 
+                    `✅ Done! Merged: [${result.join(' → ')}]`;
+                document.getElementById('stepBtn').disabled = true;
+                stopAuto();
+                return;
+            }
+            
+            // Pop min
+            heap.sort((a, b) => a[0] - b[0]);
+            const [val, idx] = heap.shift();
+            result.push(val);
+            pointers[idx]++;
+            
+            // Push next from same list
+            if (pointers[idx] < lists[idx].length) {
+                heap.push([lists[idx][pointers[idx]], idx]);
+            }
+            
+            document.getElementById('statusMessage').textContent = 
+                `Pop min ${val} from List ${idx + 1}, add to result. ` +
+                (pointers[idx] < lists[idx].length ? 
+                    `Push next (${lists[idx][pointers[idx]]}) to heap.` : 
+                    `List ${idx + 1} exhausted.`);
+            
+            renderLists();
+            renderHeap();
+            renderResult();
+        }
+        
+        function toggleAuto() {
+            if (autoInterval) { stopAuto(); }
+            else {
+                document.getElementById('autoBtn').textContent = 'Pause';
+                autoInterval = setInterval(() => {
+                    if (heap.length === 0 && initialized) {
+                        step(); // Final step
+                        stopAuto();
+                    } else {
+                        step();
+                    }
+                }, 800);
+            }
+        }
+        
+        function stopAuto() {
+            if (autoInterval) { clearInterval(autoInterval); autoInterval = null; }
+            document.getElementById('autoBtn').textContent = 'Auto Run';
+        }
+        
+        function reset() {
+            stopAuto();
+            document.getElementById('stepBtn').disabled = false;
+            document.getElementById('statusMessage').textContent = 'Click "Step" to merge 3 sorted lists using min-heap';
+            init();
+        }
+        
+        init();
+    </script>
+</body>
+</html>

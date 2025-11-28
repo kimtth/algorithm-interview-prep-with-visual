@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Largest Number</title>
+    <link rel="stylesheet" href="visual.css">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    
+</head>
+<body>
+    <div class="container">
+        <h1>🔢 Largest Number</h1>
+        <p class="subtitle">Custom comparator: compare str(a)+str(b) vs str(b)+str(a)</p>
+
+        <div class="controls">
+            <button id="stepBtn">Step</button>
+            <button id="autoBtn">Auto Run</button>
+            <button id="resetBtn">Reset</button>
+        </div>
+
+        <div class="panel">
+            <div class="panel-title">📝 Numbers (Insertion Sort with Custom Compare)</div>
+            <div class="numbers-container" id="numbers"></div>
+        </div>
+
+        <div class="panel">
+            <div class="panel-title">⚖️ Comparison</div>
+            <div class="comparison-box" id="comparison">
+                <div class="comparison-row">
+                    <span id="comp-left">-</span>
+                    <span class="vs">vs</span>
+                    <span id="comp-right">-</span>
+                </div>
+                <div class="compare-result" id="compare-result">-</div>
+            </div>
+        </div>
+
+        <div class="panel">
+            <div class="panel-title">🏆 Result</div>
+            <div class="result-box" id="result">-</div>
+        </div>
+
+        <div class="panel">
+            <div class="panel-title">📊 Status</div>
+            <div class="status-box" id="status">Click "Step" or "Auto Run" to find the largest number</div>
+        </div>
+
+        <div class="panel">
+            <div class="panel-title">💻 Algorithm</div>
+            <div class="code-box" id="code">
+<span id="line1">def to_swap(n1, n2):</span>
+<span id="line2">    return str(n1) + str(n2) < str(n2) + str(n1)</span>
+<span id="line3"></span>
+<span id="line4">def largestNumber(nums):</span>
+<span id="line5">    i = 1</span>
+<span id="line6">    while i < len(nums):</span>
+<span id="line7">        j = i</span>
+<span id="line8">        while j > 0 and to_swap(nums[j-1], nums[j]):</span>
+<span id="line9">            nums[j], nums[j-1] = nums[j-1], nums[j]</span>
+<span id="line10">            j -= 1</span>
+<span id="line11">        i += 1</span>
+<span id="line12">    return ''.join(map(str, nums))</span>
+            </div>
+        </div>
+    
+        <div class="code-section">
+            <h3>📄 Python Solution (61-1.py)</h3>
+            <pre><span class="keyword">from</span> typing <span class="keyword">import</span> List
+
+
+<span class="keyword">class</span> Solution:
+    <span class="comment"># 문제에 적합한 비교 함수</span>
+    @staticmethod
+    <span class="keyword">def</span> <span class="function">to_swap</span>(n1: int, n2: int) -&gt; bool:
+        <span class="keyword">return</span> <span class="function">str</span>(n1) + <span class="function">str</span>(n2) &lt; <span class="function">str</span>(n2) + <span class="function">str</span>(n1)
+
+    <span class="comment"># 삽입 정렬 구현</span>
+    <span class="keyword">def</span> <span class="function">largestNumber</span>(<span class="keyword">self</span>, nums: List[int]) -&gt; str:
+        i = <span class="number">1</span>
+        <span class="keyword">while</span> i &lt; <span class="function">len</span>(nums):
+            j = i
+            <span class="keyword">while</span> j &gt; <span class="number">0</span> <span class="keyword">and</span> <span class="keyword">self</span>.<span class="function">to_swap</span>(nums[j - <span class="number">1</span>], nums[j]):
+                nums[j], nums[j - <span class="number">1</span>] = nums[j - <span class="number">1</span>], nums[j]
+                j -= <span class="number">1</span>
+            i += <span class="number">1</span>
+
+        <span class="keyword">return</span> <span class="function">str</span>(<span class="function">int</span>(''.<span class="function">join</span>(<span class="function">map</span>(str, nums))))</pre>
+        </div>
+
+    </div>
+
+
+    <script>
+        const initialNums = [3, 30, 34, 5, 9];
+        let nums = [...initialNums];
+        let i = 1;
+        let j = 1;
+        let phase = 'compare'; // 'compare', 'swap', 'next'
+        let autoInterval = null;
+        let done = false;
+
+        function renderNumbers() {
+            const container = document.getElementById('numbers');
+            container.innerHTML = nums.map((n, idx) => {
+                let cls = 'number-box';
+                if (done) {
+                    cls += ' sorted';
+                } else if (idx === j - 1 && phase === 'compare') {
+                    cls += ' comparing';
+                } else if (idx === j && phase === 'compare') {
+                    cls += ' current';
+                } else if ((idx === j || idx === j - 1) && phase === 'swap') {
+                    cls += ' swapping';
+                } else if (idx < i && !done) {
+                    cls += ' sorted';
+                }
+                return `<div class="${cls}">${n}</div>`;
+            }).join('');
+        }
+
+        function updateComparison(n1, n2, result) {
+            if (n1 === null) {
+                document.getElementById('comp-left').textContent = '-';
+                document.getElementById('comp-right').textContent = '-';
+                document.getElementById('compare-result').textContent = '-';
+                return;
+            }
+
+            const left = `${n1}${n2}`;
+            const right = `${n2}${n1}`;
+            document.getElementById('comp-left').textContent = `"${left}"`;
+            document.getElementById('comp-right').textContent = `"${right}"`;
+            
+            if (result !== null) {
+                const shouldSwap = left < right;
+                document.getElementById('compare-result').innerHTML = 
+                    `${left} ${shouldSwap ? '<' : '≥'} ${right} → ${shouldSwap ? '✅ Swap needed' : '❌ No swap'}`;
+            }
+        }
+
+        function updateResult() {
+            if (done) {
+                const result = nums.join('');
+                // Handle edge case where all zeros
+                document.getElementById('result').textContent = 
+                    parseInt(result) === 0 ? '0' : result;
+            } else {
+                document.getElementById('result').textContent = '-';
+            }
+        }
+
+        function highlightCode(lineNum) {
+            document.querySelectorAll('.code-box span').forEach(span => {
+                span.classList.remove('highlight');
+            });
+            if (lineNum) {
+                const line = document.getElementById(`line${lineNum}`);
+                if (line) line.classList.add('highlight');
+            }
+        }
+
+        function toSwap(n1, n2) {
+            return `${n1}${n2}` < `${n2}${n1}`;
+        }
+
+        function executeStep() {
+            if (done) return;
+
+            if (i >= nums.length) {
+                done = true;
+                highlightCode(12);
+                document.getElementById('status').innerHTML = 
+                    `✅ Sort complete! Largest number: ${nums.join('')}`;
+                document.getElementById('stepBtn').disabled = true;
+                document.getElementById('autoBtn').disabled = true;
+                updateComparison(null);
+                updateResult();
+                stopAuto();
+                renderNumbers();
+                return;
+            }
+
+            if (phase === 'compare') {
+                if (j > 0) {
+                    highlightCode(8);
+                    updateComparison(nums[j - 1], nums[j], true);
+                    
+                    if (toSwap(nums[j - 1], nums[j])) {
+                        phase = 'swap';
+                        document.getElementById('status').innerHTML = 
+                            `Compare: "${nums[j-1]}${nums[j]}" < "${nums[j]}${nums[j-1]}" → Swap needed`;
+                    } else {
+                        phase = 'next';
+                        document.getElementById('status').innerHTML = 
+                            `Compare: "${nums[j-1]}${nums[j]}" ≥ "${nums[j]}${nums[j-1]}" → No swap, move to next i`;
+                    }
+                } else {
+                    phase = 'next';
+                }
+            } else if (phase === 'swap') {
+                highlightCode(9);
+                [nums[j], nums[j - 1]] = [nums[j - 1], nums[j]];
+                j--;
+                document.getElementById('status').innerHTML = 
+                    `Swapped! Array: [${nums.join(', ')}]. j = ${j}`;
+                phase = 'compare';
+            } else if (phase === 'next') {
+                i++;
+                j = i;
+                highlightCode(11);
+                document.getElementById('status').innerHTML = 
+                    `Move to next element: i = ${i}`;
+                phase = 'compare';
+                updateComparison(null);
+            }
+
+            renderNumbers();
+        }
+
+        function reset() {
+            stopAuto();
+            nums = [...initialNums];
+            i = 1;
+            j = 1;
+            phase = 'compare';
+            done = false;
+            
+            document.getElementById('stepBtn').disabled = false;
+            document.getElementById('autoBtn').disabled = false;
+            document.getElementById('status').innerHTML = 'Click "Step" or "Auto Run" to find the largest number';
+            updateComparison(null);
+            updateResult();
+            highlightCode(null);
+            renderNumbers();
+        }
+
+        function stopAuto() {
+            if (autoInterval) {
+                clearInterval(autoInterval);
+                autoInterval = null;
+                document.getElementById('autoBtn').textContent = 'Auto Run';
+            }
+        }
+
+        document.getElementById('stepBtn').addEventListener('click', () => {
+            stopAuto();
+            executeStep();
+        });
+
+        document.getElementById('autoBtn').addEventListener('click', () => {
+            if (autoInterval) {
+                stopAuto();
+            } else {
+                autoInterval = setInterval(executeStep, 600);
+                document.getElementById('autoBtn').textContent = '⏸ Pause';
+            }
+        });
+
+        document.getElementById('resetBtn').addEventListener('click', reset);
+
+        // Initialize
+        renderNumbers();
+        updateResult();
+    </script>
+</body>
+</html>

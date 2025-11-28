@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Q76: Minimum Window Substring - Optimized Counter</title>
+    <link rel="stylesheet" href="visual.css">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔍 Q76: Minimum Window Substring</h1>
+            <p>LeetCode #76 | File: 76-2.py | Approach: Optimized Two Pointers with Missing Counter</p>
+        </div>
+        
+        <div class="problem-info">
+            <h3>📋 Problem Description</h3>
+            <p>Find the minimum window in s that contains all characters of t.</p>
+            <p class="mt-10"><strong>Key Insight:</strong> Use a "missing" counter to track how many chars still needed. 
+            When missing=0, we have a valid window. Shrink from left while valid.</p>
+        </div>
+
+        
+            <div class="result-display" id="result"></div>
+        </div>
+
+        <div class="status" id="status">Ready</div>
+    </div>
+
+        <div class="controls">
+            <button class="btn btn-primary" onclick="step()">Step</button>
+            <button class="btn btn-success" onclick="toggleAutoRun()">Auto Run</button>
+            <button class="btn btn-warning" onclick="reset()">Reset</button>
+        </div>
+
+        <div class="step-info" id="stepInfo">Click "Step" to begin</div>
+        
+        <div class="visualization" id="viz">
+            <p class="text-center"><strong>s = "ADOBECODEBANC", t = "ABC"</strong></p>
+            <div class="string-display" id="stringDisplay"></div>
+            <div class="info-row">
+                <div class="info-item" id="missingInfo">missing: 3</div>
+                <div class="info-item" id="windowInfo">window: [0, 0)</div>
+                <div class="info-item" id="bestInfo">best: none</div>
+    
+        <div class="code-section">
+            <h3>📄 Python Solution (76-2.py)</h3>
+            <pre><span class="keyword">import</span> collections
+
+
+<span class="keyword">class</span> Solution:
+    <span class="keyword">def</span> <span class="function">minWindow</span>(<span class="keyword">self</span>, s: str, t: str) -&gt; str:
+        need = collections.<span class="function">Counter</span>(t)
+        missing = <span class="function">len</span>(t)
+        left = start = end = <span class="number">0</span>
+
+        <span class="comment"># 오른쪽 포인터 이동</span>
+        <span class="keyword">for</span> right, char <span class="keyword">in</span> <span class="function">enumerate</span>(s, <span class="number">1</span>):
+            missing -= need[char] &gt; <span class="number">0</span>
+            need[char] -= <span class="number">1</span>
+
+            <span class="comment"># 필요 문자가 0이면 왼쪽 포인터 이동 판단</span>
+            <span class="keyword">if</span> missing == <span class="number">0</span>:
+                <span class="keyword">while</span> left &lt; right <span class="keyword">and</span> need[s[left]] &lt; <span class="number">0</span>:
+                    need[s[left]] += <span class="number">1</span>
+                    left += <span class="number">1</span>
+
+                <span class="keyword">if</span> <span class="keyword">not</span> end <span class="keyword">or</span> right - left &lt;= end - start:
+                    start, end = left, right
+                need[s[left]] += <span class="number">1</span>
+                missing += <span class="number">1</span>
+                left += <span class="number">1</span>
+        <span class="keyword">return</span> s[start:end]</pre>
+        </div>
+
+    </div>
+
+    <script>
+        const s = "ADOBECODEBANC";
+        const t = "ABC";
+        let need = {};
+        let missing = t.length;
+        let left = 0, start = 0, end = 0;
+        let right = 0;
+        let currentStep = 0;
+        let autoRunning = false;
+        let autoRunInterval;
+
+        // Initialize need counter
+        for (const c of t) need[c] = (need[c] || 0) + 1;
+
+        function renderString() {
+            const container = document.getElementById('stringDisplay');
+            container.innerHTML = '';
+            for (let i = 0; i < s.length; i++) {
+                const box = document.createElement('div');
+                box.className = 'char-box';
+                if (i >= left && i < right) {
+                    box.classList.add('in-window');
+                    if (t.includes(s[i])) box.classList.add('needed');
+                }
+                if (end > 0 && i >= start && i < end) {
+                    box.classList.add('best');
+                }
+                box.textContent = s[i];
+                container.appendChild(box);
+            }
+        }
+
+        function step() {
+            if (right >= s.length) {
+                document.getElementById('stepInfo').textContent = `Done! Best window: "${s.slice(start, end)}"`;
+                document.getElementById('result').innerHTML = `<span class="text-green">Answer: "${s.slice(start, end)}"</span>`;
+                return;
+            }
+
+            const char = s[right];
+            if (need[char] !== undefined && need[char] > 0) missing--;
+            if (need[char] === undefined) need[char] = 0;
+            need[char]--;
+            right++;
+
+            let desc = `right=${right-1} ('${char}'): `;
+
+            if (missing === 0) {
+                // Shrink
+                while (left < right && need[s[left]] < 0) {
+                    need[s[left]]++;
+                    left++;
+                }
+                if (end === 0 || right - left <= end - start) {
+                    start = left;
+                    end = right;
+                    desc += `Valid! Best: [${start},${end}) = "${s.slice(start,end)}" `;
+                }
+                need[s[left]]++;
+                missing++;
+                left++;
+            } else {
+                desc += `missing=${missing}, need more chars`;
+            }
+
+            document.getElementById('stepInfo').textContent = desc;
+            document.getElementById('missingInfo').textContent = `missing: ${missing}`;
+            document.getElementById('windowInfo').textContent = `window: [${left}, ${right})`;
+            document.getElementById('bestInfo').textContent = end > 0 ? `best: "${s.slice(start, end)}"` : 'best: none';
+            renderString();
+            currentStep++;
+        }
+
+        function toggleAutoRun() {
+            autoRunning = !autoRunning;
+            const btn = document.querySelector('.btn-success');
+            if (autoRunning) {
+                btn.textContent = 'Pause';
+                autoRunInterval = setInterval(() => {
+                    if (right >= s.length) { toggleAutoRun(); return; }
+                    step();
+                }, 600);
+            } else {
+                btn.textContent = 'Auto Run';
+                clearInterval(autoRunInterval);
+            }
+        }
+
+        function reset() {
+            need = {};
+            for (const c of t) need[c] = (need[c] || 0) + 1;
+            missing = t.length;
+            left = start = end = right = 0;
+            currentStep = 0;
+            if (autoRunning) toggleAutoRun();
+            document.getElementById('stepInfo').textContent = 'Click "Step" to begin';
+            document.getElementById('status').textContent = 'Ready';
+            document.getElementById('result').innerHTML = '';
+            document.getElementById('missingInfo').textContent = 'missing: 3';
+            document.getElementById('windowInfo').textContent = 'window: [0, 0)';
+            document.getElementById('bestInfo').textContent = 'best: none';
+            renderString();
+        }
+
+        renderString();
+    </script>
+</body>
+</html>

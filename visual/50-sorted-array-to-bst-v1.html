@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Q50: Convert Sorted Array to BST</title>
+    <link rel="stylesheet" href="visual.css">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    
+</head>
+<body>
+    <div class="container">
+        <div class="problem-info">
+            <h1>Q50: Convert Sorted Array to BST</h1>
+            <p>Convert a sorted array into a height-balanced BST using divide and conquer. Pick the middle element as root, recursively build left and right subtrees.</p>
+            <div class="problem-meta">
+                <span class="meta-tag">📁 Divide & Conquer</span>
+                <span class="meta-tag">⏱️ O(n)</span>
+                <span class="meta-tag">💡 Binary Search</span>
+            </div>
+        </div>
+        
+        
+        
+        <div class="visualization-section">
+            <h3>🎬 Visualization</h3>
+            
+            <div class="controls">
+                <button class="btn btn-primary" id="stepBtn" onclick="step()">Step</button>
+                <button class="btn btn-success" id="autoBtn" onclick="toggleAuto()">Auto Run</button>
+                <button class="btn btn-warning" onclick="reset()">Reset</button>
+            </div>
+            
+            <div class="legend">
+                <div class="legend-item"><div class="legend-box bg-green-border-green-dark"></div> Mid (Root)</div>
+                <div class="legend-item"><div class="legend-box bg-orange-light-border-orange"></div> Left Half</div>
+                <div class="legend-item"><div class="legend-box bg-green-very-light-border-green"></div> Right Half</div>
+                <div class="legend-item"><div class="legend-box bg-gray-light-border-gray"></div> Processed</div>
+            </div>
+            
+            <div class="status-message" id="statusMessage">
+                nums = [-10, -3, 0, 5, 9]. Build height-balanced BST.
+            </div>
+            
+            <div class="split-view">
+                <div class="array-section">
+                    <h4 class="mb-15 text-gray-darker">📊 Sorted Array</h4>
+                    <div class="array-container" id="arrayContainer"></div>
+                </div>
+                
+                <div class="tree-section">
+                    <h4 class="mb-15 text-gray-darker">🌳 BST Being Built</h4>
+                    <div class="tree-container">
+                        <svg id="tree" width="400" height="280"></svg>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+        
+        <div class="code-section">
+            <h3>📄 Python Solution (50-1.py)</h3>
+            <pre><span class="keyword">from</span> typing <span class="keyword">import</span> List
+
+
+<span class="comment"># Definition for a binary tree node.</span>
+<span class="keyword">class</span> TreeNode:
+    <span class="keyword">def</span> <span class="function">__init__</span>(<span class="keyword">self</span>, x):
+        <span class="keyword">self</span>.val = x
+        <span class="keyword">self</span>.left = <span class="keyword">None</span>
+        <span class="keyword">self</span>.right = <span class="keyword">None</span>
+
+
+<span class="keyword">class</span> Solution:
+    <span class="keyword">def</span> <span class="function">sortedArrayToBST</span>(<span class="keyword">self</span>, nums: List[int]) -&gt; TreeNode:
+        <span class="keyword">if</span> <span class="keyword">not</span> nums:
+            <span class="keyword">return</span> <span class="keyword">None</span>
+
+        mid = <span class="function">len</span>(nums) // <span class="number">2</span>
+
+        <span class="comment"># 분할 정복으로 이진 검색 결과 트리 구성</span>
+        node = <span class="function">TreeNode</span>(nums[mid])
+        node.left = <span class="keyword">self</span>.<span class="function">sortedArrayToBST</span>(nums[:mid])
+        node.right = <span class="keyword">self</span>.<span class="function">sortedArrayToBST</span>(nums[mid + <span class="number">1</span>:])
+
+        <span class="keyword">return</span> node</pre>
+        </div>
+
+    </div>
+
+    <script>
+        const nums = [-10, -3, 0, 5, 9];
+        let treeNodes = [];
+        let treeEdges = [];
+        let steps = [];
+        let stepIndex = 0;
+        let autoInterval = null;
+        let processed = new Set();
+        
+        function generateSteps(arr, left, right, parentId, side) {
+            if (left > right) return null;
+            
+            const mid = Math.floor((left + right) / 2);
+            const nodeId = steps.length;
+            const value = arr[mid];
+            
+            steps.push({
+                type: 'create',
+                index: mid,
+                value: value,
+                nodeId: nodeId,
+                parentId: parentId,
+                side: side,
+                range: [left, right]
+            });
+            
+            generateSteps(arr, left, mid - 1, nodeId, 'left');
+            generateSteps(arr, mid + 1, right, nodeId, 'right');
+            
+            return nodeId;
+        }
+        
+        function init() {
+            treeNodes = [];
+            treeEdges = [];
+            steps = [];
+            stepIndex = 0;
+            processed = new Set();
+            
+            generateSteps(nums, 0, nums.length - 1, null, null);
+            
+            renderArray([]);
+            renderTree();
+        }
+        
+        function renderArray(highlights) {
+            const container = document.getElementById('arrayContainer');
+            container.innerHTML = nums.map((num, i) => {
+                let cls = 'array-item';
+                if (processed.has(i)) cls += ' processed';
+                else if (highlights.mid === i) cls += ' mid';
+                else if (highlights.left && i >= highlights.left[0] && i <= highlights.left[1]) cls += ' left-half';
+                else if (highlights.right && i >= highlights.right[0] && i <= highlights.right[1]) cls += ' right-half';
+                return `<div class="${cls}">${num}</div>`;
+            }).join('');
+        }
+        
+        function renderTree() {
+            const svg = d3.select("#tree");
+            svg.selectAll("*").remove();
+            
+            if (treeNodes.length === 0) return;
+            
+            // Calculate positions using simple layout
+            const width = 400, height = 280;
+            const levels = {};
+            
+            function assignLevel(nodeId, level, xMin, xMax) {
+                if (nodeId === undefined || nodeId === null) return;
+                const node = treeNodes.find(n => n.id === nodeId);
+                if (!node) return;
+                
+                const x = (xMin + xMax) / 2;
+                node.x = x;
+                node.y = 40 + level * 55;
+                
+                if (!levels[level]) levels[level] = [];
+                levels[level].push(node);
+                
+                if (node.left !== undefined) assignLevel(node.left, level + 1, xMin, x);
+                if (node.right !== undefined) assignLevel(node.right, level + 1, x, xMax);
+            }
+            
+            const root = treeNodes.find(n => n.parentId === null);
+            if (root) assignLevel(root.id, 0, 30, width - 30);
+            
+            // Draw edges
+            treeEdges.forEach(edge => {
+                const parent = treeNodes.find(n => n.id === edge.from);
+                const child = treeNodes.find(n => n.id === edge.to);
+                if (parent && child && parent.x && child.x) {
+                    svg.append("line")
+                        .attr("x1", parent.x).attr("y1", parent.y)
+                        .attr("x2", child.x).attr("y2", child.y)
+                        .attr("stroke", "#999")
+                        .attr("stroke-width", 2);
+                }
+            });
+            
+            // Draw nodes
+            treeNodes.forEach(node => {
+                if (!node.x) return;
+                
+                svg.append("circle")
+                    .attr("cx", node.x)
+                    .attr("cy", node.y)
+                    .attr("r", 22)
+                    .attr("fill", node.isNew ? "#4caf50" : "#667eea")
+                    .attr("stroke", "#333")
+                    .attr("stroke-width", 2);
+                
+                svg.append("text")
+                    .attr("x", node.x)
+                    .attr("y", node.y + 5)
+                    .attr("text-anchor", "middle")
+                    .attr("fill", "white")
+                    .attr("font-weight", "bold")
+                    .attr("font-size", "14px")
+                    .text(node.value);
+            });
+        }
+        
+        function step() {
+            if (stepIndex >= steps.length) {
+                document.getElementById('statusMessage').textContent = '✅ Complete! Height-balanced BST built.';
+                document.getElementById('stepBtn').disabled = true;
+                stopAuto();
+                return;
+            }
+            
+            // Reset isNew flags
+            treeNodes.forEach(n => n.isNew = false);
+            
+            const s = steps[stepIndex];
+            processed.add(s.index);
+            
+            const node = {
+                id: s.nodeId,
+                value: s.value,
+                parentId: s.parentId,
+                isNew: true
+            };
+            treeNodes.push(node);
+            
+            if (s.parentId !== null) {
+                const parent = treeNodes.find(n => n.id === s.parentId);
+                if (s.side === 'left') parent.left = s.nodeId;
+                else parent.right = s.nodeId;
+                treeEdges.push({from: s.parentId, to: s.nodeId});
+            }
+            
+            const highlights = { mid: s.index };
+            const [left, right] = s.range;
+            const mid = s.index;
+            if (left < mid) highlights.left = [left, mid - 1];
+            if (mid < right) highlights.right = [mid + 1, right];
+            
+            renderArray(highlights);
+            renderTree();
+            
+            document.getElementById('statusMessage').textContent = 
+                `Pick mid index ${mid} → value ${s.value}. Create node.`;
+            
+            stepIndex++;
+            
+            if (stepIndex >= steps.length) {
+                setTimeout(() => {
+                    document.getElementById('statusMessage').textContent = '✅ Complete! Height-balanced BST built.';
+                    document.getElementById('stepBtn').disabled = true;
+                    stopAuto();
+                }, 300);
+            }
+        }
+        
+        function toggleAuto() {
+            if (autoInterval) { stopAuto(); }
+            else {
+                document.getElementById('autoBtn').textContent = 'Pause';
+                autoInterval = setInterval(step, 800);
+            }
+        }
+        
+        function stopAuto() {
+            if (autoInterval) { clearInterval(autoInterval); autoInterval = null; }
+            document.getElementById('autoBtn').textContent = 'Auto Run';
+        }
+        
+        function reset() {
+            stopAuto();
+            document.getElementById('stepBtn').disabled = false;
+            document.getElementById('statusMessage').textContent = 
+                'nums = [-10, -3, 0, 5, 9]. Build height-balanced BST.';
+            init();
+        }
+        
+        init();
+    </script>
+</body>
+</html>

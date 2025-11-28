@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Best Time to Buy/Sell Stock II - Greedy</title>
+    <link rel="stylesheet" href="visual.css">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    
+</head>
+<body>
+    <div class="container">
+        <h1>📈 Best Time to Buy and Sell Stock II</h1>
+        <p class="subtitle">Greedy O(n) - Capture every positive price difference</p>
+
+        <div class="controls">
+            <button id="stepBtn">Step</button>
+            <button id="autoBtn">Auto Run</button>
+            <button id="resetBtn">Reset</button>
+        </div>
+
+        <div class="panel">
+            <div class="panel-title">📊 Stock Prices</div>
+            <div id="chart"></div>
+            <div class="profit-display">
+                <div class="profit-item">
+                    <div class="profit-label">Current Diff</div>
+                    <div class="profit-value" id="current-diff">0</div>
+                </div>
+                <div class="profit-item">
+                    <div class="profit-label">Total Profit</div>
+                    <div class="profit-value positive" id="total-profit">0</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="panel">
+            <div class="panel-title">📋 Status</div>
+            <div class="status-box" id="status">Greedy: Add (prices[i] - prices[i-1]) if positive. This equals buying before every rise and selling at the peak.</div>
+        </div>
+    
+        <div class="code-section">
+            <h3>📄 Python Solution (78-1.py)</h3>
+            <pre><span class="keyword">from</span> typing <span class="keyword">import</span> List
+
+
+<span class="keyword">class</span> Solution:
+    <span class="keyword">def</span> <span class="function">maxProfit</span>(<span class="keyword">self</span>, prices: List[int]) -&gt; int:
+        result = <span class="number">0</span>
+        <span class="comment"># 값이 오르는 경우 매 번 그리디 계산</span>
+        <span class="keyword">for</span> i <span class="keyword">in</span> <span class="function">range</span>(<span class="function">len</span>(prices) - <span class="number">1</span>):
+            <span class="keyword">if</span> prices[i + <span class="number">1</span>] &gt; prices[i]:
+                result += prices[i + <span class="number">1</span>] - prices[i]
+        <span class="keyword">return</span> result</pre>
+        </div>
+
+    </div>
+
+
+    <script>
+        const prices = [7, 1, 5, 3, 6, 4];
+        let idx = 1;
+        let profit = 0;
+        let done = false;
+        let autoInterval = null;
+        let gains = [];
+
+        const margin = { top: 30, right: 30, bottom: 40, left: 50 };
+        const width = 800 - margin.left - margin.right;
+        const height = 300 - margin.top - margin.bottom;
+
+        const svg = d3.select("#chart")
+            .append("svg")
+            .attr("viewBox", `0 0 ${width + margin.left + margin.right} ${height + margin.top + margin.bottom}`)
+            .append("g")
+            .attr("transform", `translate(${margin.left},${margin.top})`);
+
+        const x = d3.scaleLinear().domain([0, prices.length - 1]).range([0, width]);
+        const y = d3.scaleLinear().domain([0, d3.max(prices) + 1]).range([height, 0]);
+
+        svg.append("g").attr("transform", `translate(0,${height})`).call(d3.axisBottom(x).ticks(prices.length).tickFormat(d => `Day ${d}`));
+        svg.append("g").call(d3.axisLeft(y));
+
+        const line = d3.line().x((d, i) => x(i)).y(d => y(d));
+
+        svg.append("path")
+            .datum(prices)
+            .attr("fill", "none")
+            .attr("stroke", "#667eea")
+            .attr("stroke-width", 3)
+            .attr("d", line);
+
+        svg.selectAll(".dot")
+            .data(prices)
+            .enter().append("circle")
+            .attr("class", "dot")
+            .attr("cx", (d, i) => x(i))
+            .attr("cy", d => y(d))
+            .attr("r", 8)
+            .attr("fill", "#667eea");
+
+        svg.selectAll(".label")
+            .data(prices)
+            .enter().append("text")
+            .attr("x", (d, i) => x(i))
+            .attr("y", d => y(d) - 15)
+            .attr("text-anchor", "middle")
+            .attr("font-weight", "bold")
+            .attr("fill", "#333")
+            .text(d => `$${d}`);
+
+        function render() {
+            // Highlight segments
+            svg.selectAll(".segment").remove();
+            
+            for (let i = 0; i < gains.length; i++) {
+                const g = gains[i];
+                svg.append("line")
+                    .attr("class", "segment")
+                    .attr("x1", x(g.from))
+                    .attr("y1", y(prices[g.from]))
+                    .attr("x2", x(g.to))
+                    .attr("y2", y(prices[g.to]))
+                    .attr("stroke", g.profit > 0 ? "#4caf50" : "#f44336")
+                    .attr("stroke-width", 5)
+                    .attr("opacity", 0.7);
+            }
+
+            // Update current comparison
+            if (idx < prices.length) {
+                const diff = prices[idx] - prices[idx - 1];
+                document.getElementById('current-diff').textContent = diff > 0 ? `+${diff}` : diff;
+                document.getElementById('current-diff').className = `profit-value ${diff > 0 ? 'positive' : 'negative'}`;
+            }
+            
+            document.getElementById('total-profit').textContent = profit;
+        }
+
+        function step() {
+            if (done) return;
+
+            if (idx >= prices.length) {
+                done = true;
+                document.getElementById('status').innerHTML = 
+                    `✅ Done! Maximum profit: $${profit}`;
+                document.getElementById('stepBtn').disabled = true;
+                document.getElementById('autoBtn').disabled = true;
+                document.getElementById('current-diff').textContent = '-';
+                stopAuto();
+                return;
+            }
+
+            const diff = prices[idx] - prices[idx - 1];
+            gains.push({ from: idx - 1, to: idx, profit: diff > 0 ? diff : 0 });
+
+            if (diff > 0) {
+                profit += diff;
+                document.getElementById('status').innerHTML = 
+                    `Day ${idx - 1} → ${idx}: $${prices[idx - 1]} → $${prices[idx]}. Gain +$${diff}. Total profit: $${profit}`;
+            } else {
+                document.getElementById('status').innerHTML = 
+                    `Day ${idx - 1} → ${idx}: $${prices[idx - 1]} → $${prices[idx]}. Loss ${diff}. Skip (no trade).`;
+            }
+
+            idx++;
+            render();
+        }
+
+        function reset() {
+            stopAuto();
+            idx = 1;
+            profit = 0;
+            gains = [];
+            done = false;
+            document.getElementById('stepBtn').disabled = false;
+            document.getElementById('autoBtn').disabled = false;
+            document.getElementById('status').innerHTML = 'Greedy: Add (prices[i] - prices[i-1]) if positive. This equals buying before every rise and selling at the peak.';
+            document.getElementById('current-diff').textContent = '0';
+            document.getElementById('current-diff').className = 'profit-value';
+            render();
+        }
+
+        function stopAuto() {
+            if (autoInterval) { clearInterval(autoInterval); autoInterval = null; }
+            document.getElementById('autoBtn').textContent = 'Auto Run';
+        }
+
+        document.getElementById('stepBtn').onclick = () => { stopAuto(); step(); };
+        document.getElementById('autoBtn').onclick = () => {
+            if (autoInterval) { stopAuto(); }
+            else { autoInterval = setInterval(step, 800); document.getElementById('autoBtn').textContent = '⏸ Pause'; }
+        };
+        document.getElementById('resetBtn').onclick = reset;
+
+        render();
+    </script>
+</body>
+</html>

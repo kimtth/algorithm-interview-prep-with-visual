@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Q29: Jewels and Stones - Sum Comprehension</title>
+    <link rel="stylesheet" href="visual.css">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>💎 Q29: Jewels and Stones</h1>
+            <p>LeetCode #771 | File: 29-4.py | Approach: Pythonic Sum Comprehension</p>
+        </div>
+        
+        <div class="problem-info">
+            <h3>📋 Problem Description</h3>
+            <p>You're given strings J (representing jewels) and S (representing stones). Each character in S is a stone. 
+            Count how many stones are also jewels.</p>
+            <p class="mt-10"><strong>Key Insight:</strong> Use a generator expression: <code>sum(s in J for s in S)</code>. 
+            For each stone, check if it's in J (True=1, False=0), then sum all the boolean values!</p>
+        </div>
+
+        
+            <div class="section">
+                <h4>🪨 Stones (S = "aAAbbbb")</h4>
+                <div id="stonesContainer"></div>
+            </div>
+            <div class="section">
+                <h4>✅ Boolean Generator: [s in J for s in S]</h4>
+                <div class="bool-display" id="boolDisplay"></div>
+            </div>
+            <div class="result-display" id="result"></div>
+        </div>
+
+        <div class="status" id="status">Ready to visualize the one-liner solution</div>
+    </div>
+
+        <div class="controls">
+            <button class="btn btn-primary" onclick="step()">Step</button>
+            <button class="btn btn-success" onclick="toggleAutoRun()">Auto Run</button>
+            <button class="btn btn-warning" onclick="reset()">Reset</button>
+        </div>
+
+        <div class="step-info" id="stepInfo">Click "Step" or "Auto Run" to begin visualization</div>
+        
+        <div class="visualization" id="viz">
+            <div class="section">
+                <h4>💎 Jewels (J = "aA")</h4>
+                <div id="jewelsContainer"></div>
+    
+        <div class="code-section">
+            <h3>📄 Python Solution (29-4.py)</h3>
+            <pre><span class="keyword">class</span> Solution:
+    <span class="keyword">def</span> <span class="function">numJewelsInStones</span>(<span class="keyword">self</span>, J: str, S: str) -&gt; int:
+        <span class="keyword">return</span> <span class="function">sum</span>(s <span class="keyword">in</span> J <span class="keyword">for</span> s <span class="keyword">in</span> S)</pre>
+        </div>
+
+    </div>
+
+    <script>
+        const jewels = "aA";
+        const stones = "aAAbbbb";
+        let currentStep = 0;
+        let autoRunning = false;
+        let autoRunInterval;
+        let boolValues = [];
+
+        function renderJewels() {
+            const container = document.getElementById('jewelsContainer');
+            container.innerHTML = '';
+            for (const char of jewels) {
+                const box = document.createElement('span');
+                box.className = 'char-box jewel';
+                box.textContent = char;
+                container.appendChild(box);
+            }
+        }
+
+        function renderStones(checkingIdx = -1, processedMask = []) {
+            const container = document.getElementById('stonesContainer');
+            container.innerHTML = '';
+            for (let i = 0; i < stones.length; i++) {
+                const char = stones[i];
+                const box = document.createElement('span');
+                box.className = 'char-box stone';
+                if (i === checkingIdx) {
+                    box.classList.add('checking');
+                } else if (processedMask[i] !== undefined) {
+                    box.classList.add(processedMask[i] ? 'match' : 'nomatch');
+                }
+                box.textContent = char;
+                container.appendChild(box);
+            }
+        }
+
+        function renderBoolDisplay() {
+            const container = document.getElementById('boolDisplay');
+            container.innerHTML = '';
+            boolValues.forEach((val, idx) => {
+                const item = document.createElement('span');
+                item.className = 'bool-item ' + (val ? 'bool-true' : 'bool-false');
+                item.textContent = val ? 'True' : 'False';
+                container.appendChild(item);
+            });
+        }
+
+        function step() {
+            const totalSteps = stones.length + 2;
+            
+            if (currentStep >= totalSteps) {
+                document.getElementById('status').textContent = 'Visualization complete! Click Reset to start over.';
+                return;
+            }
+
+            if (currentStep === 0) {
+                document.getElementById('stepInfo').textContent = 'Initialize: J = "aA", S = "aAAbbbb". Check each stone against jewels.';
+                renderStones();
+                renderBoolDisplay();
+            } else if (currentStep <= stones.length) {
+                const idx = currentStep - 1;
+                const char = stones[idx];
+                const isJewel = jewels.includes(char);
+                boolValues.push(isJewel);
+                
+                const processedMask = boolValues.slice();
+                document.getElementById('stepInfo').textContent = 
+                    `Step ${currentStep}: Check "${char}" in J → ${isJewel ? 'True (is jewel!)' : 'False (not jewel)'}`;
+                renderStones(idx, processedMask);
+                renderBoolDisplay();
+                
+                const currentSum = boolValues.filter(v => v).length;
+                document.getElementById('result').innerHTML = `Running sum: <strong>${currentSum}</strong>`;
+            } else {
+                const total = boolValues.filter(v => v).length;
+                document.getElementById('stepInfo').textContent = 
+                    `Result: sum([True, True, True, False, False, False, False]) = ${total}`;
+                document.getElementById('result').innerHTML = 
+                    `<span class="text-green">Total Jewels: <strong>${total}</strong></span>`;
+                document.getElementById('status').textContent = 'One line does it all: sum(s in J for s in S)';
+            }
+
+            currentStep++;
+        }
+
+        function toggleAutoRun() {
+            autoRunning = !autoRunning;
+            const btn = document.querySelector('.btn-success');
+            if (autoRunning) {
+                btn.textContent = 'Pause';
+                autoRunInterval = setInterval(() => {
+                    if (currentStep >= stones.length + 2) {
+                        toggleAutoRun();
+                        return;
+                    }
+                    step();
+                }, 800);
+            } else {
+                btn.textContent = 'Auto Run';
+                clearInterval(autoRunInterval);
+            }
+        }
+
+        function reset() {
+            currentStep = 0;
+            boolValues = [];
+            if (autoRunning) toggleAutoRun();
+            document.getElementById('stepInfo').textContent = 'Click "Step" or "Auto Run" to begin visualization';
+            document.getElementById('status').textContent = 'Ready to visualize the one-liner solution';
+            document.getElementById('result').innerHTML = '';
+            renderJewels();
+            renderStones();
+            renderBoolDisplay();
+        }
+
+        // Initialize
+        renderJewels();
+        renderStones();
+    </script>
+</body>
+</html>

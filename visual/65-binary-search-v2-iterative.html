@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Binary Search - Iterative</title>
+    <link rel="stylesheet" href="visual.css">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 Binary Search - Iterative</h1>
+        <p class="subtitle">O(log n) - While loop approach (no recursion overhead)</p>
+
+        <div class="controls">
+            <button id="stepBtn">Step</button>
+            <button id="autoBtn">Auto Run</button>
+            <button id="resetBtn">Reset</button>
+            <div class="target-display">Target: <span id="target">9</span></div>
+        </div>
+
+        <div class="panel">
+            <div class="panel-title">📊 Sorted Array</div>
+            <div class="array-container" id="array"></div>
+            <div class="vars-display">
+                <div class="var-item" id="var-left">left = 0</div>
+                <div class="var-item" id="var-right">right = 5</div>
+                <div class="var-item" id="var-mid">mid = -</div>
+            </div>
+        </div>
+
+        <div class="panel">
+            <div class="panel-title">🔄 Iterations</div>
+            <div class="iteration-box" id="iterations"></div>
+        </div>
+
+        <div class="panel">
+            <div class="panel-title">📊 Status</div>
+            <div class="status-box" id="status">Click "Step" or "Auto Run" to search for target</div>
+        </div>
+
+        <div class="panel">
+            <div class="panel-title">💻 Algorithm</div>
+            <div class="code-box" id="code">
+<span id="line1">def search(nums, target):</span>
+<span id="line2">    left, right = 0, len(nums) - 1</span>
+<span id="line3">    while left <= right:</span>
+<span id="line4">        mid = (left + right) // 2</span>
+<span id="line5">        if nums[mid] < target:</span>
+<span id="line6">            left = mid + 1</span>
+<span id="line7">        elif nums[mid] > target:</span>
+<span id="line8">            right = mid - 1</span>
+<span id="line9">        else:</span>
+<span id="line10">            return mid</span>
+<span id="line11">    return -1</span>
+            </div>
+        </div>
+    
+        <div class="code-section">
+            <h3>📄 Python Solution (65-2.py)</h3>
+            <pre><span class="keyword">from</span> typing <span class="keyword">import</span> List
+
+
+<span class="keyword">class</span> Solution:
+    <span class="keyword">def</span> <span class="function">search</span>(<span class="keyword">self</span>, nums: List[int], target: int) -&gt; int:
+        left, right = <span class="number">0</span>, <span class="function">len</span>(nums) - <span class="number">1</span>
+        <span class="keyword">while</span> left &lt;= right:
+            mid = (left + right) // <span class="number">2</span>
+
+            <span class="keyword">if</span> nums[mid] &lt; target:
+                left = mid + <span class="number">1</span>
+            <span class="keyword">elif</span> nums[mid] &gt; target:
+                right = mid - <span class="number">1</span>
+            <span class="keyword">else</span>:
+                <span class="keyword">return</span> mid
+        <span class="keyword">return</span> -<span class="number">1</span></pre>
+        </div>
+
+    </div>
+
+
+    <script>
+        const nums = [-1, 0, 3, 5, 9, 12];
+        const target = 9;
+        let left = 0;
+        let right = nums.length - 1;
+        let mid = -1;
+        let found = -1;
+        let iterations = [];
+        let autoInterval = null;
+        let phase = 'check'; // 'check', 'calc-mid', 'compare', 'adjust'
+
+        document.getElementById('target').textContent = target;
+
+        function renderArray() {
+            const container = document.getElementById('array');
+            
+            container.innerHTML = nums.map((val, i) => {
+                let cls = 'array-item';
+                let pointers = '';
+                
+                if (found === i) {
+                    cls += ' found';
+                } else if (i >= left && i <= right) {
+                    cls += ' in-range';
+                    if (i === mid) cls = 'array-item mid';
+                } else {
+                    cls += ' out-range';
+                }
+                
+                if (i === left) pointers += '<span class="pointer left">L↓</span>';
+                if (i === right) pointers += '<span class="pointer right">R↓</span>';
+                if (i === mid && mid >= 0) pointers += '<span class="pointer mid">↑mid</span>';
+                
+                return `<div class="${cls}">${pointers}<span class="value">${val}</span><span class="index">[${i}]</span></div>`;
+            }).join('');
+
+            document.getElementById('var-left').textContent = `left = ${left}`;
+            document.getElementById('var-right').textContent = `right = ${right}`;
+            document.getElementById('var-mid').textContent = `mid = ${mid >= 0 ? mid : '-'}`;
+        }
+
+        function renderIterations() {
+            const container = document.getElementById('iterations');
+            if (iterations.length === 0) {
+                container.innerHTML = '<div class="empty-text">No iterations yet</div>';
+                return;
+            }
+            
+            container.innerHTML = iterations.map((it, i) => {
+                const isCurrent = i === iterations.length - 1;
+                return `<div class="iteration-item ${isCurrent ? 'current' : 'past'}">
+                    Iteration ${i + 1}: left=${it.left}, right=${it.right}, mid=${it.mid}, nums[mid]=${it.midVal}
+                    ${it.action ? `→ ${it.action}` : ''}
+                </div>`;
+            }).join('');
+        }
+
+        function highlightCode(lineNum) {
+            document.querySelectorAll('.code-box span').forEach(span => {
+                span.classList.remove('highlight');
+            });
+            if (lineNum) {
+                const line = document.getElementById(`line${lineNum}`);
+                if (line) line.classList.add('highlight');
+            }
+        }
+
+        function executeStep() {
+            if (found >= 0) return;
+
+            if (phase === 'check') {
+                highlightCode(3);
+                if (left > right) {
+                    highlightCode(11);
+                    document.getElementById('status').innerHTML = 
+                        `❌ left (${left}) > right (${right}). Target not found. Return -1`;
+                    document.getElementById('stepBtn').disabled = true;
+                    document.getElementById('autoBtn').disabled = true;
+                    stopAuto();
+                } else {
+                    document.getElementById('status').innerHTML = 
+                        `Check: left (${left}) <= right (${right}) ✓ Continue loop`;
+                    phase = 'calc-mid';
+                }
+            } else if (phase === 'calc-mid') {
+                mid = Math.floor((left + right) / 2);
+                highlightCode(4);
+                iterations.push({ left, right, mid, midVal: nums[mid] });
+                document.getElementById('status').innerHTML = 
+                    `Calculate: mid = (${left} + ${right}) / 2 = ${mid}. nums[mid] = ${nums[mid]}`;
+                phase = 'compare';
+            } else if (phase === 'compare') {
+                const midVal = nums[mid];
+                
+                if (midVal < target) {
+                    highlightCode(6);
+                    iterations[iterations.length - 1].action = `${midVal} < ${target}, search right`;
+                    document.getElementById('status').innerHTML = 
+                        `Compare: ${midVal} < ${target}. Search right half: left = mid + 1 = ${mid + 1}`;
+                    left = mid + 1;
+                    phase = 'check';
+                } else if (midVal > target) {
+                    highlightCode(8);
+                    iterations[iterations.length - 1].action = `${midVal} > ${target}, search left`;
+                    document.getElementById('status').innerHTML = 
+                        `Compare: ${midVal} > ${target}. Search left half: right = mid - 1 = ${mid - 1}`;
+                    right = mid - 1;
+                    phase = 'check';
+                } else {
+                    highlightCode(10);
+                    iterations[iterations.length - 1].action = `Found!`;
+                    found = mid;
+                    document.getElementById('status').innerHTML = 
+                        `✅ Found! nums[${mid}] = ${target}. Return ${mid}`;
+                    document.getElementById('stepBtn').disabled = true;
+                    document.getElementById('autoBtn').disabled = true;
+                    stopAuto();
+                }
+            }
+
+            renderArray();
+            renderIterations();
+        }
+
+        function reset() {
+            stopAuto();
+            left = 0;
+            right = nums.length - 1;
+            mid = -1;
+            found = -1;
+            iterations = [];
+            phase = 'check';
+            
+            document.getElementById('stepBtn').disabled = false;
+            document.getElementById('autoBtn').disabled = false;
+            document.getElementById('status').innerHTML = 'Click "Step" or "Auto Run" to search for target';
+            highlightCode(null);
+            renderArray();
+            renderIterations();
+        }
+
+        function stopAuto() {
+            if (autoInterval) {
+                clearInterval(autoInterval);
+                autoInterval = null;
+                document.getElementById('autoBtn').textContent = 'Auto Run';
+            }
+        }
+
+        document.getElementById('stepBtn').addEventListener('click', () => {
+            stopAuto();
+            executeStep();
+        });
+
+        document.getElementById('autoBtn').addEventListener('click', () => {
+            if (autoInterval) {
+                stopAuto();
+            } else {
+                autoInterval = setInterval(executeStep, 700);
+                document.getElementById('autoBtn').textContent = '⏸ Pause';
+            }
+        });
+
+        document.getElementById('resetBtn').addEventListener('click', reset);
+
+        // Initialize
+        renderArray();
+        renderIterations();
+    </script>
+</body>
+</html>

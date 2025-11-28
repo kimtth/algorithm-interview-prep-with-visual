@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Binary Search - Index Method</title>
+    <link rel="stylesheet" href="visual.css">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 Binary Search - Index Method</h1>
+        <p class="subtitle">O(n) - Simple but NOT binary search! (Linear scan)</p>
+
+        <div class="controls">
+            <button id="stepBtn">Step</button>
+            <button id="autoBtn">Auto Run</button>
+            <button id="resetBtn">Reset</button>
+            <div class="target-display">Target: <span id="target">9</span></div>
+        </div>
+
+        <div class="warning-box">
+            <h4>⚠️ Note</h4>
+            <p>This solution uses Python's list.index() which is O(n) linear search, NOT O(log n) binary search!</p>
+        </div>
+
+        <div class="panel">
+            <div class="panel-title">📊 Array (Linear Scan)</div>
+            <div class="array-container" id="array"></div>
+            <div class="complexity-note">
+                ⏱️ Time Complexity: O(n) - scans from left to right
+            </div>
+        </div>
+
+        <div class="panel">
+            <div class="panel-title">📊 Status</div>
+            <div class="status-box" id="status">Click "Step" or "Auto Run" to search using index()</div>
+        </div>
+
+        <div class="panel">
+            <div class="panel-title">💻 Algorithm</div>
+            <div class="code-box" id="code">
+<span id="line1">def search(nums, target):</span>
+<span id="line2">    try:</span>
+<span id="line3">        return nums.index(target)  # O(n) linear scan!</span>
+<span id="line4">    except ValueError:</span>
+<span id="line5">        return -1</span>
+            </div>
+        </div>
+    
+        <div class="code-section">
+            <h3>📄 Python Solution (65-4.py)</h3>
+            <pre><span class="keyword">from</span> typing <span class="keyword">import</span> List
+
+
+<span class="keyword">class</span> Solution:
+    <span class="keyword">def</span> <span class="function">search</span>(<span class="keyword">self</span>, nums: List[int], target: int) -&gt; int:
+        <span class="keyword">try</span>:
+            <span class="keyword">return</span> nums.<span class="function">index</span>(target)
+        <span class="keyword">except</span> ValueError:
+            <span class="keyword">return</span> -<span class="number">1</span></pre>
+        </div>
+
+    </div>
+
+
+    <script>
+        const nums = [-1, 0, 3, 5, 9, 12];
+        const target = 9;
+        let scanIndex = -1;
+        let found = -1;
+        let autoInterval = null;
+
+        document.getElementById('target').textContent = target;
+
+        function renderArray() {
+            const container = document.getElementById('array');
+            
+            container.innerHTML = nums.map((val, i) => {
+                let cls = 'array-item default';
+                
+                if (found === i) {
+                    cls = 'array-item found';
+                } else if (i === scanIndex) {
+                    cls = 'array-item scanning';
+                }
+                
+                return `<div class="${cls}"><span class="value">${val}</span><span class="index">[${i}]</span></div>`;
+            }).join('');
+        }
+
+        function highlightCode(lineNum) {
+            document.querySelectorAll('.code-box span').forEach(span => {
+                span.classList.remove('highlight');
+            });
+            if (lineNum) {
+                const line = document.getElementById(`line${lineNum}`);
+                if (line) line.classList.add('highlight');
+            }
+        }
+
+        function executeStep() {
+            if (found >= 0) return;
+
+            scanIndex++;
+            
+            if (scanIndex >= nums.length) {
+                highlightCode(5);
+                document.getElementById('status').innerHTML = 
+                    `❌ Scanned all elements. Target ${target} not found. Return -1<br>
+                    (Would raise ValueError, caught by except)`;
+                document.getElementById('stepBtn').disabled = true;
+                document.getElementById('autoBtn').disabled = true;
+                stopAuto();
+            } else if (nums[scanIndex] === target) {
+                highlightCode(3);
+                found = scanIndex;
+                document.getElementById('status').innerHTML = 
+                    `✅ Found at index ${scanIndex}! nums.index(${target}) = ${scanIndex}<br>
+                    (Took ${scanIndex + 1} comparisons vs log₂(${nums.length})≈${Math.ceil(Math.log2(nums.length))} for binary search)`;
+                document.getElementById('stepBtn').disabled = true;
+                document.getElementById('autoBtn').disabled = true;
+                stopAuto();
+            } else {
+                highlightCode(3);
+                document.getElementById('status').innerHTML = 
+                    `Scanning index ${scanIndex}: nums[${scanIndex}] = ${nums[scanIndex]} ≠ ${target}`;
+            }
+
+            renderArray();
+        }
+
+        function reset() {
+            stopAuto();
+            scanIndex = -1;
+            found = -1;
+            
+            document.getElementById('stepBtn').disabled = false;
+            document.getElementById('autoBtn').disabled = false;
+            document.getElementById('status').innerHTML = 'Click "Step" or "Auto Run" to search using index()';
+            highlightCode(null);
+            renderArray();
+        }
+
+        function stopAuto() {
+            if (autoInterval) {
+                clearInterval(autoInterval);
+                autoInterval = null;
+                document.getElementById('autoBtn').textContent = 'Auto Run';
+            }
+        }
+
+        document.getElementById('stepBtn').addEventListener('click', () => {
+            stopAuto();
+            executeStep();
+        });
+
+        document.getElementById('autoBtn').addEventListener('click', () => {
+            if (autoInterval) {
+                stopAuto();
+            } else {
+                autoInterval = setInterval(executeStep, 500);
+                document.getElementById('autoBtn').textContent = '⏸ Pause';
+            }
+        });
+
+        document.getElementById('resetBtn').addEventListener('click', reset);
+
+        // Initialize
+        renderArray();
+    </script>
+</body>
+</html>

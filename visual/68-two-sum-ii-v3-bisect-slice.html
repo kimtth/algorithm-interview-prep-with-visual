@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Q68: Two Sum II - Bisect Left (Slice)</title>
+    <link rel="stylesheet" href="visual.css">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔍 Q68: Two Sum II - Input Array Is Sorted</h1>
+            <p>LeetCode #167 | File: 68-3.py | Approach: Bisect Left with Slice</p>
+        </div>
+        
+        <div class="problem-info">
+            <h3>📋 Problem Description</h3>
+            <p>Given a 1-indexed sorted array, find two numbers that add up to target. Return their indices.</p>
+            <p class="mt-10"><strong>Key Insight:</strong> Use Python's bisect_left on a slice of the array (elements after k) to find the complement.</p>
+        </div>
+
+        
+            <div class="array-section">
+                <div class="array-label" id="sliceLabel">Slice: numbers[k+1:]</div>
+                <div class="array-container" id="sliceArray"></div>
+            </div>
+            <div class="info-panel" id="infoPanel">
+                <p id="infoText">Waiting to start...</p>
+            </div>
+            <div class="result-display" id="result"></div>
+        </div>
+
+        <div class="status" id="status">Ready to visualize bisect_left with slice</div>
+    </div>
+
+        <div class="controls">
+            <button class="btn btn-primary" onclick="step()">Step</button>
+            <button class="btn btn-success" onclick="toggleAutoRun()">Auto Run</button>
+            <button class="btn btn-warning" onclick="reset()">Reset</button>
+        </div>
+
+        <div class="step-info" id="stepInfo">Click "Step" or "Auto Run" to begin visualization</div>
+        
+        <div class="visualization" id="viz">
+            <div class="array-section">
+                <div class="array-label">Original Array (target = 9)</div>
+                <div class="array-container" id="originalArray"></div>
+    
+        <div class="code-section">
+            <h3>📄 Python Solution (68-3.py)</h3>
+            <pre><span class="keyword">import</span> bisect
+<span class="keyword">from</span> typing <span class="keyword">import</span> List
+
+
+<span class="keyword">class</span> Solution:
+    <span class="keyword">def</span> <span class="function">twoSum</span>(<span class="keyword">self</span>, numbers: List[int], target: int) -&gt; List[int]:
+        <span class="keyword">for</span> k, v <span class="keyword">in</span> <span class="function">enumerate</span>(numbers):
+            expected = target - v
+            i = bisect.<span class="function">bisect_left</span>(numbers[k + <span class="number">1</span>:], expected)
+            <span class="keyword">if</span> i &lt; <span class="function">len</span>(numbers[k + <span class="number">1</span>:]) <span class="keyword">and</span> numbers[i + k + <span class="number">1</span>] == expected:
+                <span class="keyword">return</span> k + <span class="number">1</span>, i + k + <span class="number">2</span></pre>
+        </div>
+
+    </div>
+
+    <script>
+        const numbers = [2, 3, 4, 6, 9];
+        const target = 9;
+        let k = 0;
+        let currentStep = 0;
+        let autoRunning = false;
+        let autoRunInterval;
+        let found = false;
+        let foundIndices = [];
+
+        function renderOriginal(currentK = -1, foundIdx = []) {
+            const container = document.getElementById('originalArray');
+            container.innerHTML = '';
+            numbers.forEach((num, idx) => {
+                const item = document.createElement('div');
+                item.className = 'array-item';
+                if (foundIdx.includes(idx)) {
+                    item.classList.add('found');
+                } else if (idx === currentK) {
+                    item.classList.add('current');
+                } else if (idx > currentK && currentK >= 0) {
+                    item.classList.add('slice');
+                }
+                item.innerHTML = `<span class="idx">[${idx}]</span><span class="val">${num}</span>`;
+                container.appendChild(item);
+            });
+        }
+
+        function renderSlice(startIdx, bisectResult = -1) {
+            const container = document.getElementById('sliceArray');
+            container.innerHTML = '';
+            const slice = numbers.slice(startIdx);
+            
+            document.getElementById('sliceLabel').textContent = 
+                `Slice: numbers[${startIdx}:] = [${slice.join(', ')}]`;
+            
+            slice.forEach((num, idx) => {
+                const item = document.createElement('div');
+                item.className = 'array-item slice';
+                if (idx === bisectResult) {
+                    item.classList.add('bisect-result');
+                }
+                item.innerHTML = `<span class="idx">[${idx}]</span><span class="val">${num}</span>`;
+                container.appendChild(item);
+            });
+        }
+
+        function step() {
+            if (found || k >= numbers.length) {
+                document.getElementById('status').textContent = 'Complete!';
+                return;
+            }
+
+            const expected = target - numbers[k];
+            const slice = numbers.slice(k + 1);
+            
+            // Find bisect_left position
+            let bisectPos = 0;
+            while (bisectPos < slice.length && slice[bisectPos] < expected) {
+                bisectPos++;
+            }
+
+            document.getElementById('stepInfo').textContent = 
+                `k=${k}, v=${numbers[k]}, expected=${expected}, bisect_left result: ${bisectPos}`;
+            
+            renderOriginal(k);
+            renderSlice(k + 1, bisectPos);
+            
+            // Check if found
+            if (bisectPos < slice.length && slice[bisectPos] === expected) {
+                found = true;
+                const actualIdx = bisectPos + k + 1;
+                foundIndices = [k, actualIdx];
+                document.getElementById('infoText').innerHTML = 
+                    `✅ Found! numbers[${actualIdx}] = ${expected}<br>
+                    Slice index ${bisectPos} → Original index ${actualIdx}<br>
+                    Return: (${k + 1}, ${actualIdx + 1}) [1-indexed]`;
+                document.getElementById('result').innerHTML = 
+                    `<span class="text-green">Answer: <strong>[${k + 1}, ${actualIdx + 1}]</strong></span>`;
+                renderOriginal(k, foundIndices);
+            } else {
+                document.getElementById('infoText').innerHTML = 
+                    `Checking k=${k}: v=${numbers[k]}, need ${expected}<br>
+                    bisect_left(${JSON.stringify(slice)}, ${expected}) = ${bisectPos}<br>
+                    ${bisectPos < slice.length ? `slice[${bisectPos}]=${slice[bisectPos]} ≠ ${expected}` : 'Index out of bounds'} → Try next k`;
+                k++;
+            }
+
+            currentStep++;
+        }
+
+        function toggleAutoRun() {
+            autoRunning = !autoRunning;
+            const btn = document.querySelector('.btn-success');
+            if (autoRunning) {
+                btn.textContent = 'Pause';
+                autoRunInterval = setInterval(() => {
+                    if (found || k >= numbers.length) {
+                        toggleAutoRun();
+                        return;
+                    }
+                    step();
+                }, 1500);
+            } else {
+                btn.textContent = 'Auto Run';
+                clearInterval(autoRunInterval);
+            }
+        }
+
+        function reset() {
+            k = 0;
+            currentStep = 0;
+            found = false;
+            foundIndices = [];
+            if (autoRunning) toggleAutoRun();
+            document.getElementById('stepInfo').textContent = 'Click "Step" or "Auto Run" to begin visualization';
+            document.getElementById('status').textContent = 'Ready to visualize bisect_left with slice';
+            document.getElementById('result').innerHTML = '';
+            document.getElementById('infoText').textContent = 'Waiting to start...';
+            document.getElementById('sliceLabel').textContent = 'Slice: numbers[k+1:]';
+            renderOriginal();
+            document.getElementById('sliceArray').innerHTML = '';
+        }
+
+        // Initialize
+        renderOriginal();
+    </script>
+</body>
+</html>

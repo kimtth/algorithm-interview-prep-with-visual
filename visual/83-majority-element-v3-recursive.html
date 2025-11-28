@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Q83: Majority Element - Divide & Conquer</title>
+    <link rel="stylesheet" href="visual.css">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🗳️ Q83: Majority Element - Divide & Conquer</h1>
+            <p>LeetCode #169 | File: 83-3.py | Approach: Recursive Divide & Conquer</p>
+        </div>
+        
+        <div class="problem-info">
+            <h3>📋 Problem Description</h3>
+            <p>Find the majority element using divide and conquer recursion.</p>
+            <p class="mt-10"><strong>Key Insight:</strong> Split array in half, find majority in each half recursively. 
+            If both halves agree, that's the answer. Otherwise, count both candidates and pick the one with more occurrences.</p>
+        </div>
+
+        
+
+        <div class="status" id="status">Ready to find majority element</div>
+    </div>
+
+        <div class="controls">
+            <button class="btn btn-primary" onclick="step()">Step</button>
+            <button class="btn btn-success" onclick="toggleAutoRun()">Auto Run</button>
+            <button class="btn btn-warning" onclick="reset()">Reset</button>
+        </div>
+
+        <div class="step-info" id="stepInfo">Click "Step" to visualize divide & conquer</div>
+        
+        <div class="visualization">
+            <svg id="treeSvg" width="1050" height="380"></svg>
+            <div class="result-display" id="result"></div>
+    
+        <div class="code-section">
+            <h3>📄 Python Solution (83-3.py)</h3>
+            <pre><span class="keyword">import</span> collections
+<span class="keyword">from</span> typing <span class="keyword">import</span> List
+
+
+<span class="keyword">class</span> Solution:
+    <span class="keyword">def</span> <span class="function">majorityElement</span>(<span class="keyword">self</span>, nums: List[int]) -&gt; int:
+        <span class="keyword">if</span> <span class="keyword">not</span> nums:
+            <span class="keyword">return</span> <span class="keyword">None</span>
+        <span class="keyword">if</span> <span class="function">len</span>(nums) == <span class="number">1</span>:
+            <span class="keyword">return</span> nums[<span class="number">0</span>]
+
+        half = <span class="function">len</span>(nums) // <span class="number">2</span>
+        a = <span class="keyword">self</span>.<span class="function">majorityElement</span>(nums[:half])
+        b = <span class="keyword">self</span>.<span class="function">majorityElement</span>(nums[half:])
+
+        <span class="keyword">return</span> [b, a][nums.<span class="function">count</span>(a) &gt; half]</pre>
+        </div>
+
+    </div>
+
+    <script>
+        const nums = [2, 2, 1, 1, 1, 2, 2];
+        
+        // Pre-computed tree structure for visualization
+        const treeData = {
+            id: 0,
+            range: [0, 7],
+            nums: nums,
+            children: [
+                {
+                    id: 1,
+                    range: [0, 3],
+                    nums: [2, 2, 1],
+                    children: [
+                        { id: 3, range: [0, 1], nums: [2], result: 2, children: [] },
+                        { id: 4, range: [1, 3], nums: [2, 1], 
+                          children: [
+                            { id: 7, range: [1, 2], nums: [2], result: 2, children: [] },
+                            { id: 8, range: [2, 3], nums: [1], result: 1, children: [] }
+                          ]
+                        }
+                    ]
+                },
+                {
+                    id: 2,
+                    range: [3, 7],
+                    nums: [1, 1, 2, 2],
+                    children: [
+                        { id: 5, range: [3, 5], nums: [1, 1],
+                          children: [
+                            { id: 9, range: [3, 4], nums: [1], result: 1, children: [] },
+                            { id: 10, range: [4, 5], nums: [1], result: 1, children: [] }
+                          ]
+                        },
+                        { id: 6, range: [5, 7], nums: [2, 2],
+                          children: [
+                            { id: 11, range: [5, 6], nums: [2], result: 2, children: [] },
+                            { id: 12, range: [6, 7], nums: [2], result: 2, children: [] }
+                          ]
+                        }
+                    ]
+                }
+            ]
+        };
+
+        // BFS order for step-by-step
+        const steps = [
+            { phase: 'divide', node: treeData, desc: 'Start: [2,2,1,1,1,2,2] - split at middle' },
+            { phase: 'divide', node: treeData.children[0], desc: 'Left half: [2,2,1]' },
+            { phase: 'divide', node: treeData.children[1], desc: 'Right half: [1,1,2,2]' },
+            { phase: 'base', node: treeData.children[0].children[0], desc: 'Base case: [2] → returns 2' },
+            { phase: 'divide', node: treeData.children[0].children[1], desc: 'Subarray [2,1] - split' },
+            { phase: 'base', node: treeData.children[0].children[1].children[0], desc: 'Base: [2] → 2' },
+            { phase: 'base', node: treeData.children[0].children[1].children[1], desc: 'Base: [1] → 1' },
+            { phase: 'merge', node: treeData.children[0].children[1], desc: 'Merge: count(2)=1, count(1)=1 in [2,1]. Tie→ returns 2' },
+            { phase: 'merge', node: treeData.children[0], desc: 'Merge left: a=2, b=2. Same! Returns 2' },
+            { phase: 'divide', node: treeData.children[1].children[0], desc: 'Right-left: [1,1]' },
+            { phase: 'base', node: treeData.children[1].children[0].children[0], desc: 'Base: [1] → 1' },
+            { phase: 'base', node: treeData.children[1].children[0].children[1], desc: 'Base: [1] → 1' },
+            { phase: 'merge', node: treeData.children[1].children[0], desc: 'Merge: both 1. Returns 1' },
+            { phase: 'divide', node: treeData.children[1].children[1], desc: 'Right-right: [2,2]' },
+            { phase: 'base', node: treeData.children[1].children[1].children[0], desc: 'Base: [2] → 2' },
+            { phase: 'base', node: treeData.children[1].children[1].children[1], desc: 'Base: [2] → 2' },
+            { phase: 'merge', node: treeData.children[1].children[1], desc: 'Merge: both 2. Returns 2' },
+            { phase: 'merge', node: treeData.children[1], desc: 'Merge right: a=1, b=2. Count in [1,1,2,2]: count(1)=2, count(2)=2. Tie→ returns 2' },
+            { phase: 'final', node: treeData, desc: 'Final: a=2, b=2. Same! Majority = 2' }
+        ];
+
+        let currentStep = -1;
+        let processedNodes = new Set();
+        let nodeResults = {};
+        let autoRunning = false;
+        let autoRunInterval;
+
+        const svg = d3.select('#treeSvg');
+        const nodePositions = {
+            0: { x: 525, y: 40 },
+            1: { x: 262, y: 120 },
+            2: { x: 787, y: 120 },
+            3: { x: 131, y: 200 },
+            4: { x: 393, y: 200 },
+            5: { x: 656, y: 200 },
+            6: { x: 918, y: 200 },
+            7: { x: 328, y: 280 },
+            8: { x: 458, y: 280 },
+            9: { x: 591, y: 280 },
+            10: { x: 721, y: 280 },
+            11: { x: 853, y: 280 },
+            12: { x: 983, y: 280 }
+        };
+
+        function drawTree() {
+            svg.selectAll('*').remove();
+            
+            // Draw edges
+            const edges = [
+                [0, 1], [0, 2], [1, 3], [1, 4], [4, 7], [4, 8],
+                [2, 5], [2, 6], [5, 9], [5, 10], [6, 11], [6, 12]
+            ];
+            edges.forEach(([from, to]) => {
+                svg.append('line')
+                    .attr('x1', nodePositions[from].x)
+                    .attr('y1', nodePositions[from].y + 20)
+                    .attr('x2', nodePositions[to].x)
+                    .attr('y2', nodePositions[to].y - 20)
+                    .attr('stroke', '#ccc')
+                    .attr('stroke-width', 2);
+            });
+
+            // Draw nodes
+            const nodeData = [
+                { id: 0, label: '[2,2,1,1,1,2,2]' },
+                { id: 1, label: '[2,2,1]' },
+                { id: 2, label: '[1,1,2,2]' },
+                { id: 3, label: '[2]' },
+                { id: 4, label: '[2,1]' },
+                { id: 5, label: '[1,1]' },
+                { id: 6, label: '[2,2]' },
+                { id: 7, label: '[2]' },
+                { id: 8, label: '[1]' },
+                { id: 9, label: '[1]' },
+                { id: 10, label: '[1]' },
+                { id: 11, label: '[2]' },
+                { id: 12, label: '[2]' }
+            ];
+
+            nodeData.forEach(n => {
+                const pos = nodePositions[n.id];
+                const isProcessed = processedNodes.has(n.id);
+                const result = nodeResults[n.id];
+
+                svg.append('rect')
+                    .attr('x', pos.x - 50)
+                    .attr('y', pos.y - 18)
+                    .attr('width', 100)
+                    .attr('height', 36)
+                    .attr('rx', 8)
+                    .attr('fill', result !== undefined ? '#4caf50' : (isProcessed ? '#e3f2fd' : '#f5f5f5'))
+                    .attr('stroke', isProcessed ? '#2196f3' : '#ddd')
+                    .attr('stroke-width', 2);
+
+                svg.append('text')
+                    .attr('x', pos.x)
+                    .attr('y', pos.y - 2)
+                    .attr('text-anchor', 'middle')
+                    .attr('font-size', '12px')
+                    .attr('fill', result !== undefined ? 'white' : '#333')
+                    .text(n.label);
+
+                if (result !== undefined) {
+                    svg.append('text')
+                        .attr('x', pos.x)
+                        .attr('y', pos.y + 12)
+                        .attr('text-anchor', 'middle')
+                        .attr('font-size', '11px')
+                        .attr('fill', 'white')
+                        .attr('font-weight', 'bold')
+                        .text('→ ' + result);
+                }
+            });
+        }
+
+        function step() {
+            currentStep++;
+            if (currentStep >= steps.length) {
+                document.getElementById('result').innerHTML = 
+                    '<span class="text-green">Majority Element: <strong>2</strong></span>';
+                document.getElementById('status').textContent = 
+                    'Divide & conquer: O(n log n) time complexity';
+                return;
+            }
+
+            const s = steps[currentStep];
+            processedNodes.add(s.node.id);
+            
+            if (s.phase === 'base' || s.phase === 'merge' || s.phase === 'final') {
+                nodeResults[s.node.id] = 2; // Simplified: all resolve to 2 eventually
+                if (s.node.id === 3 || s.node.id === 7 || s.node.id === 11 || s.node.id === 12 || 
+                    s.node.id === 4 || s.node.id === 6 || s.node.id === 1 || s.node.id === 2 || s.node.id === 0) {
+                    nodeResults[s.node.id] = 2;
+                } else {
+                    nodeResults[s.node.id] = 1;
+                }
+                // Fix specific results
+                if (s.node.id === 8 || s.node.id === 9 || s.node.id === 10 || s.node.id === 5) {
+                    nodeResults[s.node.id] = 1;
+                }
+            }
+
+            document.getElementById('stepInfo').textContent = s.desc;
+            drawTree();
+        }
+
+        function toggleAutoRun() {
+            autoRunning = !autoRunning;
+            const btn = document.querySelector('.btn-success');
+            if (autoRunning) {
+                btn.textContent = 'Pause';
+                autoRunInterval = setInterval(() => {
+                    if (currentStep >= steps.length - 1) {
+                        step(); toggleAutoRun(); return;
+                    }
+                    step();
+                }, 900);
+            } else {
+                btn.textContent = 'Auto Run';
+                clearInterval(autoRunInterval);
+            }
+        }
+
+        function reset() {
+            currentStep = -1;
+            processedNodes.clear();
+            nodeResults = {};
+            if (autoRunning) toggleAutoRun();
+            document.getElementById('stepInfo').textContent = 'Click "Step" to visualize divide & conquer';
+            document.getElementById('status').textContent = 'Ready to find majority element';
+            document.getElementById('result').innerHTML = '';
+            drawTree();
+        }
+
+        drawTree();
+    </script>
+</body>
+</html>

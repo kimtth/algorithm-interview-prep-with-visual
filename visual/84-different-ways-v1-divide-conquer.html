@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Different Ways to Add Parentheses</title>
+    <link rel="stylesheet" href="visual.css">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    
+</head>
+<body>
+    <div class="container">
+        <h1>🧮 Different Ways to Add Parentheses</h1>
+        <p class="subtitle">Divide and Conquer - Split at each operator, combine results</p>
+
+        <div class="controls">
+            <button id="stepBtn">Step</button>
+            <button id="autoBtn">Auto Run</button>
+            <button id="resetBtn">Reset</button>
+        </div>
+
+        <div class="panel">
+            <div class="panel-title">📝 Expression</div>
+            <div class="expression" id="expr">2 * 3 - 4 * 5</div>
+            <div class="ways-container" id="ways"></div>
+        </div>
+
+        <div class="panel">
+            <div class="panel-title">🌳 Current Evaluation Tree</div>
+            <div class="tree-container">
+                <svg id="tree"></svg>
+            </div>
+        </div>
+
+        <div class="panel">
+            <div class="panel-title">📊 All Possible Results</div>
+            <div class="result-box" id="results"></div>
+        </div>
+
+        <div class="panel">
+            <div class="panel-title">📋 Status</div>
+            <div class="status-box" id="status">For each operator, split into left and right subexpressions, compute all combinations.</div>
+        </div>
+    
+        <div class="code-section">
+            <h3>📄 Python Solution (84-1.py)</h3>
+            <pre><span class="keyword">from</span> typing <span class="keyword">import</span> List
+
+
+<span class="keyword">class</span> Solution:
+    <span class="keyword">def</span> <span class="function">diffWaysToCompute</span>(<span class="keyword">self</span>, input: str) -&gt; List[int]:
+        <span class="keyword">def</span> <span class="function">compute</span>(left, right, op):
+            results = []
+            <span class="keyword">for</span> l <span class="keyword">in</span> left:
+                <span class="keyword">for</span> r <span class="keyword">in</span> right:
+                    results.<span class="function">append</span>(<span class="function">eval</span>(<span class="function">str</span>(l) + op + <span class="function">str</span>(r)))
+            <span class="keyword">return</span> results
+
+        <span class="keyword">if</span> input.<span class="function">isdigit</span>():
+            <span class="keyword">return</span> [<span class="function">int</span>(input)]
+
+        results = []
+        <span class="keyword">for</span> index, value <span class="keyword">in</span> <span class="function">enumerate</span>(input):
+            <span class="keyword">if</span> value <span class="keyword">in</span> "-+*":
+                left = <span class="keyword">self</span>.<span class="function">diffWaysToCompute</span>(input[:index])
+                right = <span class="keyword">self</span>.<span class="function">diffWaysToCompute</span>(input[index + <span class="number">1</span>:])
+
+                results.<span class="function">extend</span>(<span class="function">compute</span>(left, right, value))
+        <span class="keyword">return</span> results</pre>
+        </div>
+
+    </div>
+
+
+    <script>
+        const expression = "2*3-4*5";
+        
+        // All ways to parenthesize
+        const allWays = [
+            { expr: "((2*3)-(4*5))", tree: { op: '-', left: { op: '*', left: 2, right: 3 }, right: { op: '*', left: 4, right: 5 } }, result: -14 },
+            { expr: "(2*((3-4)*5))", tree: { op: '*', left: 2, right: { op: '*', left: { op: '-', left: 3, right: 4 }, right: 5 } }, result: -10 },
+            { expr: "(2*(3-(4*5)))", tree: { op: '*', left: 2, right: { op: '-', left: 3, right: { op: '*', left: 4, right: 5 } } }, result: -34 },
+            { expr: "((2*(3-4))*5)", tree: { op: '*', left: { op: '*', left: 2, right: { op: '-', left: 3, right: 4 } }, right: 5 }, result: -10 },
+            { expr: "(((2*3)-4)*5)", tree: { op: '*', left: { op: '-', left: { op: '*', left: 2, right: 3 }, right: 4 }, right: 5 }, result: 10 }
+        ];
+
+        let wayIdx = -1;
+        let results = new Set();
+        let done = false;
+        let autoInterval = null;
+
+        function render() {
+            // Ways
+            document.getElementById('ways').innerHTML = allWays.map((w, i) => {
+                const active = i === wayIdx ? 'active' : '';
+                return `<div class="way-card ${active}">
+                    <div class="way-expr">${w.expr}</div>
+                    <div class="way-result">= ${w.result}</div>
+                </div>`;
+            }).join('');
+
+            // Results
+            document.getElementById('results').innerHTML = results.size > 0
+                ? [...results].sort((a, b) => a - b).map(r => `<div class="result-item">${r}</div>`).join('')
+                : '<span class="text-gray">None yet</span>';
+
+            // Tree
+            if (wayIdx >= 0 && wayIdx < allWays.length) {
+                renderTree(allWays[wayIdx].tree);
+            } else {
+                d3.select("#tree").selectAll("*").remove();
+            }
+        }
+
+        function renderTree(treeData) {
+            const svg = d3.select("#tree");
+            svg.selectAll("*").remove();
+            
+            const width = 350, height = 180;
+            svg.attr("viewBox", `0 0 ${width} ${height}`);
+            
+            // Convert to d3 hierarchy format
+            function toHierarchy(node) {
+                if (typeof node === 'number') {
+                    return { name: node.toString(), children: [] };
+                }
+                return {
+                    name: node.op,
+                    children: [toHierarchy(node.left), toHierarchy(node.right)]
+                };
+            }
+            
+            const root = d3.hierarchy(toHierarchy(treeData));
+            const treeLayout = d3.tree().size([width - 60, height - 60]);
+            treeLayout(root);
+            
+            const g = svg.append("g").attr("transform", "translate(30, 30)");
+            
+            // Links
+            g.selectAll(".link")
+                .data(root.links())
+                .enter().append("path")
+                .attr("fill", "none")
+                .attr("stroke", "#999")
+                .attr("stroke-width", 2)
+                .attr("d", d3.linkVertical().x(d => d.x).y(d => d.y));
+            
+            // Nodes
+            const nodes = g.selectAll(".node")
+                .data(root.descendants())
+                .enter().append("g")
+                .attr("transform", d => `translate(${d.x},${d.y})`);
+            
+            nodes.append("circle")
+                .attr("r", 20)
+                .attr("fill", d => d.children ? "#667eea" : "#4caf50")
+                .attr("stroke", d => d.children ? "#5a67d8" : "#2e7d32")
+                .attr("stroke-width", 2);
+            
+            nodes.append("text")
+                .attr("dy", 5)
+                .attr("text-anchor", "middle")
+                .attr("fill", "white")
+                .attr("font-weight", "bold")
+                .text(d => d.data.name);
+        }
+
+        function step() {
+            if (done) return;
+
+            wayIdx++;
+
+            if (wayIdx >= allWays.length) {
+                done = true;
+                document.getElementById('status').innerHTML = 
+                    `✅ All ${allWays.length} ways evaluated! Results: [${[...results].sort((a,b)=>a-b).join(', ')}]`;
+                document.getElementById('stepBtn').disabled = true;
+                document.getElementById('autoBtn').disabled = true;
+                stopAuto();
+                render();
+                return;
+            }
+
+            const way = allWays[wayIdx];
+            results.add(way.result);
+            
+            document.getElementById('status').innerHTML = 
+                `Way ${wayIdx + 1}: ${way.expr} = ${way.result}`;
+            
+            render();
+        }
+
+        function reset() {
+            stopAuto();
+            wayIdx = -1;
+            results.clear();
+            done = false;
+            document.getElementById('stepBtn').disabled = false;
+            document.getElementById('autoBtn').disabled = false;
+            document.getElementById('status').innerHTML = 'For each operator, split into left and right subexpressions, compute all combinations.';
+            render();
+        }
+
+        function stopAuto() {
+            if (autoInterval) { clearInterval(autoInterval); autoInterval = null; }
+            document.getElementById('autoBtn').textContent = 'Auto Run';
+        }
+
+        document.getElementById('stepBtn').onclick = () => { stopAuto(); step(); };
+        document.getElementById('autoBtn').onclick = () => {
+            if (autoInterval) { stopAuto(); }
+            else { autoInterval = setInterval(step, 1000); document.getElementById('autoBtn').textContent = '⏸ Pause'; }
+        };
+        document.getElementById('resetBtn').onclick = reset;
+
+        render();
+    </script>
+</body>
+</html>

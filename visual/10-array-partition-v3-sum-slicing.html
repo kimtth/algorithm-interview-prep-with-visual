@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Q10: Array Partition - Sum with Slicing</title>
+    <link rel="stylesheet" href="visual.css">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔢 Q10: Array Partition I</h1>
+            <p>LeetCode #561 | File: 10-3.py | Approach: Pythonic Sum with Slicing</p>
+        </div>
+        
+        <div class="problem-info">
+            <h3>📋 Problem Description</h3>
+            <p>Given an integer array nums of 2n integers, group these integers into n pairs (a1, b1), (a2, b2), ..., (an, bn) 
+            such that the sum of min(ai, bi) for all i is maximized. Return the maximized sum.</p>
+            <p class="mt-10"><strong>Key Insight:</strong> After sorting, pair adjacent elements. The smaller one in each pair will be at even indices (0, 2, 4...). Just sum elements at even indices!</p>
+        </div>
+
+        
+
+        <div class="status" id="status">Ready to visualize the one-liner solution</div>
+    </div>
+
+        <div class="controls">
+            <button class="btn btn-primary" onclick="step()">Step</button>
+            <button class="btn btn-success" onclick="toggleAutoRun()">Auto Run</button>
+            <button class="btn btn-warning" onclick="reset()">Reset</button>
+        </div>
+
+        <div class="step-info" id="stepInfo">Click "Step" or "Auto Run" to begin visualization</div>
+        
+        <div class="visualization" id="viz">
+            <h3 class="text-center text-dark mb-20">Input Array: [1, 4, 3, 2]</h3>
+            <div class="array-container" id="arrayContainer"></div>
+            <div class="result-display" id="result"></div>
+    
+        <div class="code-section">
+            <h3>📄 Python Solution (10-3.py)</h3>
+            <pre><span class="keyword">from</span> typing <span class="keyword">import</span> List
+
+
+<span class="keyword">class</span> Solution:
+    <span class="keyword">def</span> <span class="function">arrayPairSum</span>(<span class="keyword">self</span>, nums: List[int]) -&gt; int:
+        <span class="keyword">return</span> <span class="function">sum</span>(<span class="function">sorted</span>(nums)[::<span class="number">2</span>])</pre>
+        </div>
+
+    </div>
+
+    <script>
+        const originalArray = [1, 4, 3, 2];
+        let sortedArray = [];
+        let currentStep = 0;
+        let autoRunning = false;
+        let autoRunInterval;
+        let sumSoFar = 0;
+
+        function renderArray(arr, highlightIndices = [], selectedIndices = []) {
+            const container = document.getElementById('arrayContainer');
+            container.innerHTML = '';
+            arr.forEach((num, idx) => {
+                const item = document.createElement('div');
+                item.className = 'array-item';
+                if (highlightIndices.includes(idx)) item.classList.add('highlight');
+                if (selectedIndices.includes(idx)) item.classList.add('selected');
+                item.textContent = num;
+                container.appendChild(item);
+            });
+        }
+
+        function step() {
+            const steps = [
+                { action: 'show_original', desc: 'Original array: [1, 4, 3, 2]' },
+                { action: 'sort', desc: 'Step 1: Sort the array → [1, 2, 3, 4]' },
+                { action: 'show_pairs', desc: 'Step 2: Pairs are (1,2) and (3,4). Min of each pair is at even index.' },
+                { action: 'select_0', desc: 'Step 3: Select index 0 → value 1. Sum = 1' },
+                { action: 'select_2', desc: 'Step 4: Select index 2 → value 3. Sum = 1 + 3 = 4' },
+                { action: 'done', desc: 'Result: sum(sorted(nums)[::2]) = 4 ✓' }
+            ];
+
+            if (currentStep >= steps.length) {
+                document.getElementById('status').textContent = 'Visualization complete! Click Reset to start over.';
+                return;
+            }
+
+            const s = steps[currentStep];
+            document.getElementById('stepInfo').textContent = s.desc;
+
+            switch(s.action) {
+                case 'show_original':
+                    renderArray(originalArray);
+                    break;
+                case 'sort':
+                    sortedArray = [...originalArray].sort((a, b) => a - b);
+                    renderArray(sortedArray);
+                    break;
+                case 'show_pairs':
+                    renderArray(sortedArray, [0, 1, 2, 3]);
+                    break;
+                case 'select_0':
+                    sumSoFar = sortedArray[0];
+                    renderArray(sortedArray, [], [0]);
+                    document.getElementById('result').innerHTML = `Sum so far: <strong>${sumSoFar}</strong>`;
+                    break;
+                case 'select_2':
+                    sumSoFar += sortedArray[2];
+                    renderArray(sortedArray, [], [0, 2]);
+                    document.getElementById('result').innerHTML = `Sum: 1 + 3 = <strong>${sumSoFar}</strong>`;
+                    break;
+                case 'done':
+                    renderArray(sortedArray, [], [0, 2]);
+                    document.getElementById('result').innerHTML = `<span class="text-green">Final Answer: <strong>4</strong></span>`;
+                    document.getElementById('status').textContent = 'One line: sum(sorted(nums)[::2]) does it all!';
+                    break;
+            }
+
+            currentStep++;
+        }
+
+        function toggleAutoRun() {
+            autoRunning = !autoRunning;
+            const btn = document.querySelector('.btn-success');
+            if (autoRunning) {
+                btn.textContent = 'Pause';
+                autoRunInterval = setInterval(() => {
+                    if (currentStep >= 6) {
+                        toggleAutoRun();
+                        return;
+                    }
+                    step();
+                }, 1200);
+            } else {
+                btn.textContent = 'Auto Run';
+                clearInterval(autoRunInterval);
+            }
+        }
+
+        function reset() {
+            currentStep = 0;
+            sumSoFar = 0;
+            sortedArray = [];
+            if (autoRunning) toggleAutoRun();
+            document.getElementById('stepInfo').textContent = 'Click "Step" or "Auto Run" to begin visualization';
+            document.getElementById('status').textContent = 'Ready to visualize the one-liner solution';
+            document.getElementById('result').innerHTML = '';
+            renderArray(originalArray);
+        }
+
+        // Initialize
+        renderArray(originalArray);
+    </script>
+</body>
+</html>

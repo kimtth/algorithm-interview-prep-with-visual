@@ -7,11 +7,13 @@
 ## 🚀 Quick Start
 [![Open Visualization Index](main.png)](index.html)
 
-**[👉 Open index.html](index.html)** to browse all problems with interactive visualizations.
+**👉 Open index.html** to browse all problems with interactive visualizations.
 
 ★ Errata: https://www.onlybook.co.kr/entry/algorithm-interview-errata  
 ★ Book Info: https://www.onlybook.co.kr/entry/algorithm-interview  
 ★ YouTube: https://www.youtube.com/watch?v=fNyGHpSWhTA
+
+<!-- > python -m http.server 8000 -->
 
 ## Problem Solutions
 | # | Title | Difficulty | Chapter | Solution Code |

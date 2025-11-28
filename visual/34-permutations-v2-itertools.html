@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Q34: Permutations - itertools</title>
+    <link rel="stylesheet" href="visual.css">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    
+</head>
+<body>
+    <div class="container">
+        <div class="problem-info">
+            <h1>Q34: Permutations - itertools</h1>
+            <p>Generate all permutations using Python's itertools.permutations() for elegant one-liner solution.</p>
+            <div class="problem-meta">
+                <span class="meta-tag">📁 itertools</span>
+                <span class="meta-tag">⏱️ O(n!)</span>
+                <span class="meta-tag">💡 Pythonic One-liner</span>
+            </div>
+        </div>
+        
+        
+        
+        <div class="visualization-section">
+            <h3>🎬 Visualization</h3>
+            
+            <div class="controls">
+                <button class="btn btn-primary" id="stepBtn" onclick="step()">Step</button>
+                <button class="btn btn-success" id="autoBtn" onclick="toggleAuto()">Auto Run</button>
+                <button class="btn btn-warning" onclick="reset()">Reset</button>
+            </div>
+            
+            <div class="step-indicator">
+                <div class="step-item" id="step1">1. Input</div>
+                <div class="step-item" id="step2">2. itertools.permutations()</div>
+                <div class="step-item" id="step3">3. Convert to list</div>
+            </div>
+            
+            <div class="status-message" id="statusMessage">
+                One-liner solution using itertools.permutations()
+            </div>
+            
+            <div class="input-display">
+                <div class="mb-10 text-gray-dark">Input: nums</div>
+                <div class="input-array" id="inputArray"></div>
+            </div>
+            
+            <div class="itertools-box" id="itertoolsBox" class="d-none">
+                <div class="itertools-label">itertools.permutations(nums)</div>
+                <div class="itertools-code">Returns iterator of all n! permutations</div>
+            </div>
+            
+            <div class="results-section" id="resultsSection" class="d-none">
+                <div class="results-label">list(itertools.permutations([1, 2, 3])) → 3! = 6 permutations</div>
+                <div class="results-grid" id="resultsGrid"></div>
+            </div>
+        </div>
+    </div>
+        
+        <div class="code-section">
+            <h3>📄 Python Solution (34-2.py)</h3>
+            <pre><span class="keyword">import</span> itertools
+<span class="keyword">from</span> typing <span class="keyword">import</span> List
+
+
+<span class="keyword">class</span> Solution:
+    <span class="keyword">def</span> <span class="function">permute</span>(<span class="keyword">self</span>, nums: List[int]) -&gt; List[List[int]]:
+        <span class="keyword">return</span> <span class="function">list</span>(itertools.<span class="function">permutations</span>(nums))</pre>
+        </div>
+
+    </div>
+
+    <script>
+        const nums = [1, 2, 3];
+        const allPerms = [
+            [1, 2, 3], [1, 3, 2], [2, 1, 3], [2, 3, 1], [3, 1, 2], [3, 2, 1]
+        ];
+        
+        let currentStep = 0;
+        let showIndex = 0;
+        let autoInterval = null;
+        
+        function init() {
+            currentStep = 0;
+            showIndex = 0;
+            
+            // Render input
+            const inputContainer = document.getElementById('inputArray');
+            inputContainer.innerHTML = '';
+            nums.forEach(n => {
+                const item = document.createElement('div');
+                item.className = 'input-item';
+                item.textContent = n;
+                inputContainer.appendChild(item);
+            });
+            
+            render();
+        }
+        
+        function render() {
+            // Step indicators
+            document.getElementById('step1').className = 'step-item' + (currentStep >= 1 ? ' done' : '');
+            document.getElementById('step2').className = 'step-item' + (currentStep >= 2 ? ' done' : '');
+            document.getElementById('step3').className = 'step-item' + (currentStep >= 3 ? ' done' : '');
+            
+            // Sections visibility
+            document.getElementById('itertoolsBox').style.display = currentStep >= 2 ? 'block' : 'none';
+            document.getElementById('resultsSection').style.display = currentStep >= 3 ? 'block' : 'none';
+            
+            // Results
+            if (currentStep >= 3) {
+                const resultsContainer = document.getElementById('resultsGrid');
+                resultsContainer.innerHTML = '';
+                allPerms.forEach((perm, i) => {
+                    const item = document.createElement('div');
+                    item.className = 'result-item' + (i < showIndex ? ' show' : '');
+                    item.textContent = `(${perm.join(', ')})`;
+                    resultsContainer.appendChild(item);
+                });
+            }
+        }
+        
+        function step() {
+            if (currentStep < 3) {
+                currentStep++;
+                if (currentStep === 1) {
+                    document.getElementById('statusMessage').textContent = 
+                        'Step 1: Input array [1, 2, 3]';
+                } else if (currentStep === 2) {
+                    document.getElementById('statusMessage').textContent = 
+                        'Step 2: itertools.permutations() generates all permutations lazily';
+                } else if (currentStep === 3) {
+                    document.getElementById('statusMessage').textContent = 
+                        'Step 3: Convert iterator to list, revealing all permutations';
+                }
+                render();
+            } else if (showIndex < allPerms.length) {
+                showIndex++;
+                document.getElementById('statusMessage').textContent = 
+                    `Showing permutation ${showIndex}/${allPerms.length}: (${allPerms[showIndex-1].join(', ')})`;
+                render();
+            } else {
+                document.getElementById('statusMessage').textContent = 
+                    `✅ Done! All ${allPerms.length} permutations generated.`;
+                document.getElementById('stepBtn').disabled = true;
+                stopAuto();
+            }
+        }
+        
+        function toggleAuto() {
+            if (autoInterval) { stopAuto(); }
+            else {
+                document.getElementById('autoBtn').textContent = 'Pause';
+                autoInterval = setInterval(step, 600);
+            }
+        }
+        
+        function stopAuto() {
+            if (autoInterval) { clearInterval(autoInterval); autoInterval = null; }
+            document.getElementById('autoBtn').textContent = 'Auto Run';
+        }
+        
+        function reset() {
+            stopAuto();
+            document.getElementById('stepBtn').disabled = false;
+            document.getElementById('statusMessage').textContent = 'One-liner solution using itertools.permutations()';
+            init();
+        }
+        
+        init();
+    </script>
+</body>
+</html>

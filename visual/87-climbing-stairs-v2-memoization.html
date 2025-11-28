@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Q87: Climbing Stairs - Memoization</title>
+    <link rel="stylesheet" href="visual.css">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🪜 Q87: Climbing Stairs - Memoization</h1>
+            <p>LeetCode #70 | File: 87-2.py | Approach: Recursion with Memoization</p>
+        </div>
+        
+        <div class="problem-info">
+            <h3>📋 Problem Description</h3>
+            <p>Count ways to climb n stairs (1 or 2 steps at a time).</p>
+            <p class="mt-10"><strong>Key Insight:</strong> f(n) = f(n-1) + f(n-2). 
+            Use memoization (defaultdict) to avoid redundant calculations.</p>
+        </div>
+
+        
+            
+            <div class="result-display" id="result"></div>
+        </div>
+
+        <div class="status" id="status">Ready to calculate climbing ways</div>
+    </div>
+
+        <div class="controls">
+            <button class="btn btn-primary" onclick="step()">Step</button>
+            <button class="btn btn-success" onclick="toggleAutoRun()">Auto Run</button>
+            <button class="btn btn-warning" onclick="reset()">Reset</button>
+        </div>
+
+        <div class="step-info" id="stepInfo">Click "Step" to compute ways for n=5</div>
+        
+        <div class="visualization">
+            <h4 class="text-center mb-10">Stair Steps (n=5)</h4>
+            <div class="stairs-container" id="stairsContainer"></div>
+            
+            <h4 class="text-center my-special">Memoization Table (dp)</h4>
+            <div class="memo-display" id="memoDisplay"></div>
+            
+            <div class="call-stack" id="callStack">
+                <h4>Computation Order:</h4>
+                <div id="callLog"></div>
+    
+        <div class="code-section">
+            <h3>📄 Python Solution (87-2.py)</h3>
+            <pre><span class="keyword">import</span> collections
+
+
+<span class="keyword">class</span> Solution:
+    dp = collections.<span class="function">defaultdict</span>(int)
+
+    <span class="keyword">def</span> <span class="function">climbStairs</span>(<span class="keyword">self</span>, n: int) -&gt; int:
+        <span class="keyword">if</span> n &lt;= <span class="number">2</span>:
+            <span class="keyword">return</span> n
+
+        <span class="keyword">if</span> <span class="keyword">self</span>.dp[n]:
+            <span class="keyword">return</span> <span class="keyword">self</span>.dp[n]
+        <span class="keyword">self</span>.dp[n] = <span class="keyword">self</span>.<span class="function">climbStairs</span>(n - <span class="number">1</span>) + <span class="keyword">self</span>.<span class="function">climbStairs</span>(n - <span class="number">2</span>)
+        <span class="keyword">return</span> <span class="keyword">self</span>.dp[n]</pre>
+        </div>
+
+    </div>
+
+    <script>
+        const n = 5;
+        const dp = {};
+        let steps = [];
+        let currentStepIdx = -1;
+        let autoRunning = false;
+        let autoRunInterval;
+        
+        // Pre-compute execution order (bottom-up for visualization)
+        const executionOrder = [
+            { n: 1, formula: 'Base case', result: 1 },
+            { n: 2, formula: 'Base case', result: 2 },
+            { n: 3, formula: 'dp[2] + dp[1] = 2 + 1', result: 3 },
+            { n: 4, formula: 'dp[3] + dp[2] = 3 + 2', result: 5 },
+            { n: 5, formula: 'dp[4] + dp[3] = 5 + 3', result: 8 }
+        ];
+
+        function renderStairs() {
+            const container = document.getElementById('stairsContainer');
+            container.innerHTML = '';
+            for (let i = 1; i <= n; i++) {
+                const stair = document.createElement('div');
+                stair.className = 'stair';
+                stair.style.height = `${40 + i * 35}px`;
+                
+                const step = document.createElement('div');
+                step.className = 'stair-step';
+                if (dp[i] !== undefined) step.classList.add('calculated');
+                if (currentStepIdx >= 0 && executionOrder[currentStepIdx].n === i) {
+                    step.classList.add('current');
+                }
+                step.textContent = dp[i] !== undefined ? dp[i] : '?';
+                
+                const label = document.createElement('div');
+                label.className = 'stair-label';
+                label.textContent = `n=${i}`;
+                
+                stair.appendChild(step);
+                stair.appendChild(label);
+                container.appendChild(stair);
+            }
+        }
+
+        function renderMemo() {
+            const container = document.getElementById('memoDisplay');
+            container.innerHTML = '';
+            for (let i = 1; i <= n; i++) {
+                const item = document.createElement('div');
+                item.className = 'memo-item';
+                if (dp[i] !== undefined) item.classList.add('filled');
+                item.innerHTML = `<div class="memo-key">dp[${i}]</div>
+                                  <div class="memo-value">${dp[i] !== undefined ? dp[i] : '-'}</div>`;
+                container.appendChild(item);
+            }
+        }
+
+        function step() {
+            currentStepIdx++;
+            
+            if (currentStepIdx >= executionOrder.length) {
+                document.getElementById('stepInfo').textContent = 
+                    `Done! ${n} stairs can be climbed in ${dp[n]} ways`;
+                document.getElementById('result').innerHTML = 
+                    `<span class="text-green">Ways to climb ${n} stairs: <strong>${dp[n]}</strong></span>`;
+                document.getElementById('status').textContent = 
+                    'Memoization avoids redundant recursive calls - O(n) time!';
+                return;
+            }
+
+            const exec = executionOrder[currentStepIdx];
+            dp[exec.n] = exec.result;
+
+            document.getElementById('stepInfo').textContent = 
+                `climbStairs(${exec.n}): ${exec.formula} = ${exec.result}`;
+            
+            const log = document.getElementById('callLog');
+            const entry = document.createElement('div');
+            entry.textContent = `dp[${exec.n}] = ${exec.formula} = ${exec.result}`;
+            entry.style.padding = '5px';
+            entry.style.borderLeft = '3px solid #4caf50';
+            entry.style.marginBottom = '5px';
+            entry.style.paddingLeft = '10px';
+            log.appendChild(entry);
+
+            renderStairs();
+            renderMemo();
+        }
+
+        function toggleAutoRun() {
+            autoRunning = !autoRunning;
+            const btn = document.querySelector('.btn-success');
+            if (autoRunning) {
+                btn.textContent = 'Pause';
+                autoRunInterval = setInterval(() => {
+                    if (currentStepIdx >= executionOrder.length - 1) {
+                        step(); toggleAutoRun(); return;
+                    }
+                    step();
+                }, 1000);
+            } else {
+                btn.textContent = 'Auto Run';
+                clearInterval(autoRunInterval);
+            }
+        }
+
+        function reset() {
+            currentStepIdx = -1;
+            Object.keys(dp).forEach(k => delete dp[k]);
+            if (autoRunning) toggleAutoRun();
+            document.getElementById('stepInfo').textContent = 'Click "Step" to compute ways for n=5';
+            document.getElementById('status').textContent = 'Ready to calculate climbing ways';
+            document.getElementById('result').innerHTML = '';
+            document.getElementById('callLog').innerHTML = '';
+            renderStairs();
+            renderMemo();
+        }
+
+        renderStairs();
+        renderMemo();
+    </script>
+</body>
+</html>

@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Q38: Reconstruct Itinerary - Iterative Stack</title>
+    <link rel="stylesheet" href="visual.css">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    
+</head>
+<body>
+    <div class="container">
+        <div class="problem-info">
+            <h1>Q38: Reconstruct Itinerary - Iterative Stack</h1>
+            <p>Non-recursive solution using explicit stack to avoid potential stack overflow.</p>
+            <div class="problem-meta">
+                <span class="meta-tag">📁 Graph / Iterative</span>
+                <span class="meta-tag">⏱️ O(E log E)</span>
+                <span class="meta-tag">💡 Explicit Stack</span>
+            </div>
+        </div>
+        
+        
+        
+        <div class="visualization-section">
+            <h3>🎬 Visualization</h3>
+            
+            <div class="controls">
+                <button class="btn btn-primary" id="stepBtn" onclick="step()">Step</button>
+                <button class="btn btn-success" id="autoBtn" onclick="toggleAuto()">Auto Run</button>
+                <button class="btn btn-warning" onclick="reset()">Reset</button>
+            </div>
+            
+            <div class="note-box">
+                <strong>Iterative Approach:</strong> Uses explicit stack instead of recursion. Same algorithm, no recursion depth limit issues.
+            </div>
+            
+            <div class="status-message" id="statusMessage">
+                Iterative DFS with explicit stack. Click Step to begin.
+            </div>
+            
+            <div class="graph-box">
+                <div class="graph-title">Graph (Adjacency List)</div>
+                <div id="graphDisplay"></div>
+            </div>
+            
+            <div class="stacks-section">
+                <div class="stack-box">
+                    <div class="stack-title">DFS Stack</div>
+                    <div class="stack-items" id="stackDisplay"></div>
+                </div>
+                <div class="stack-box">
+                    <div class="stack-title">Route (building)</div>
+                    <div class="stack-items" id="routeStackDisplay"></div>
+                </div>
+            </div>
+            
+            <div class="route-section">
+                <div class="route-label">Final Route (reversed):</div>
+                <div class="route-items" id="routeDisplay"></div>
+            </div>
+        </div>
+    </div>
+        
+        <div class="code-section">
+            <h3>📄 Python Solution (38-3.py)</h3>
+            <pre><span class="keyword">import</span> collections
+<span class="keyword">from</span> typing <span class="keyword">import</span> List
+
+
+<span class="keyword">class</span> Solution:
+    <span class="keyword">def</span> <span class="function">findItinerary</span>(<span class="keyword">self</span>, tickets: List[List[str]]) -&gt; List[str]:
+        graph = collections.<span class="function">defaultdict</span>(list)
+        <span class="comment"># 그래프 순서대로 구성</span>
+        <span class="keyword">for</span> a, b <span class="keyword">in</span> <span class="function">sorted</span>(tickets):
+            graph[a].<span class="function">append</span>(b)
+
+        route, stack = [], ['JFK']
+        <span class="keyword">while</span> stack:
+            <span class="comment"># 반복으로 스택을 구성하되 막히는 부분에서 풀어내는 처리</span>
+            <span class="keyword">while</span> graph[stack[-<span class="number">1</span>]]:
+                stack.<span class="function">append</span>(graph[stack[-<span class="number">1</span>]].<span class="function">pop</span>(<span class="number">0</span>))
+            route.<span class="function">append</span>(stack.<span class="function">pop</span>())
+
+        <span class="comment"># 다시 뒤집어 어휘순 결과로</span>
+        <span class="keyword">return</span> route[::-<span class="number">1</span>]</pre>
+        </div>
+
+    </div>
+
+    <script>
+        const tickets = [["JFK","SFO"],["JFK","ATL"],["SFO","ATL"],["ATL","JFK"],["ATL","SFO"]];
+        let graph = {};
+        let route = [];
+        let stack = [];
+        let autoInterval = null;
+        let phase = 'push'; // 'push' or 'pop'
+        
+        function init() {
+            graph = {};
+            tickets.slice().sort().forEach(([a, b]) => {
+                if (!graph[a]) graph[a] = [];
+                graph[a].push(b);
+            });
+            
+            route = [];
+            stack = ['JFK'];
+            phase = 'push';
+            render();
+        }
+        
+        function render() {
+            // Graph display
+            const graphContainer = document.getElementById('graphDisplay');
+            graphContainer.innerHTML = '';
+            Object.entries(graph).forEach(([node, neighbors]) => {
+                const item = document.createElement('span');
+                item.className = 'graph-item';
+                item.textContent = `${node} → [${neighbors.join(', ')}]`;
+                graphContainer.appendChild(item);
+            });
+            
+            // Stack display
+            const stackContainer = document.getElementById('stackDisplay');
+            stackContainer.innerHTML = '';
+            stack.forEach((node, i) => {
+                const item = document.createElement('div');
+                item.className = 'stack-item' + (i === stack.length - 1 ? ' top' : '');
+                item.textContent = node;
+                stackContainer.appendChild(item);
+            });
+            
+            // Route stack display
+            const routeStackContainer = document.getElementById('routeStackDisplay');
+            routeStackContainer.innerHTML = '';
+            route.forEach((node, i) => {
+                const item = document.createElement('div');
+                item.className = 'stack-item' + (i === route.length - 1 ? ' top' : '');
+                item.textContent = node;
+                routeStackContainer.appendChild(item);
+            });
+            
+            // Final route display
+            const routeContainer = document.getElementById('routeDisplay');
+            routeContainer.innerHTML = '';
+            const finalRoute = route.slice().reverse();
+            finalRoute.forEach((node, i) => {
+                if (i > 0) {
+                    const arrow = document.createElement('span');
+                    arrow.className = 'route-arrow';
+                    arrow.textContent = '→';
+                    routeContainer.appendChild(arrow);
+                }
+                const item = document.createElement('span');
+                item.className = 'route-item';
+                item.textContent = node;
+                routeContainer.appendChild(item);
+            });
+        }
+        
+        function step() {
+            if (stack.length === 0) {
+                document.getElementById('statusMessage').textContent = 
+                    `✅ Done! Itinerary: ${route.slice().reverse().join(' → ')}`;
+                document.getElementById('stepBtn').disabled = true;
+                stopAuto();
+                return;
+            }
+            
+            const current = stack[stack.length - 1];
+            
+            if (graph[current] && graph[current].length > 0) {
+                const next = graph[current].shift();
+                stack.push(next);
+                document.getElementById('statusMessage').textContent = 
+                    `graph[${current}] has edges → push ${next} to stack`;
+            } else {
+                const node = stack.pop();
+                route.push(node);
+                document.getElementById('statusMessage').textContent = 
+                    `No edges from ${node} → pop and add to route`;
+            }
+            
+            render();
+        }
+        
+        function toggleAuto() {
+            if (autoInterval) { stopAuto(); }
+            else {
+                document.getElementById('autoBtn').textContent = 'Pause';
+                autoInterval = setInterval(step, 600);
+            }
+        }
+        
+        function stopAuto() {
+            if (autoInterval) { clearInterval(autoInterval); autoInterval = null; }
+            document.getElementById('autoBtn').textContent = 'Auto Run';
+        }
+        
+        function reset() {
+            stopAuto();
+            document.getElementById('stepBtn').disabled = false;
+            document.getElementById('statusMessage').textContent = 'Iterative DFS with explicit stack. Click Step to begin.';
+            init();
+        }
+        
+        init();
+    </script>
+</body>
+</html>

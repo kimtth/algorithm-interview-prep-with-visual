@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Q21: Remove Duplicate Letters - Recursive</title>
+    <link rel="stylesheet" href="visual.css">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    
+</head>
+<body>
+    <div class="container">
+        <div class="problem-info">
+            <h1>Q21: Remove Duplicate Letters</h1>
+            <p>Remove duplicate letters so that every letter appears once and result is the smallest in lexicographical order.</p>
+            <div class="problem-meta">
+                <span class="meta-tag">📁 Stack / Recursion</span>
+                <span class="meta-tag">⏱️ O(n)</span>
+                <span class="meta-tag">💡 Version 1: Recursive</span>
+            </div>
+        </div>
+        
+        
+        
+        <div class="visualization-section">
+            <h3>🎬 Visualization</h3>
+            
+            <div class="controls">
+                <button class="btn btn-primary" id="stepBtn" onclick="step()">Step</button>
+                <button class="btn btn-success" id="autoBtn" onclick="toggleAuto()">Auto Run</button>
+                <button class="btn btn-warning" onclick="reset()">Reset</button>
+            </div>
+            
+            <div class="status-message" id="statusMessage">
+                Click "Step" or "Auto Run" to start. Input: "cbacdcbc"
+            </div>
+            
+            <div class="info-section">
+                <div class="info-box">
+                    <div class="info-label">Current String</div>
+                    <div class="info-value" id="currentStr">cbacdcbc</div>
+                </div>
+                <div class="info-box">
+                    <div class="info-label">Sorted Unique Chars</div>
+                    <div class="info-value" id="sortedChars">a, b, c, d</div>
+                </div>
+                <div class="info-box">
+                    <div class="info-label">Result Building</div>
+                    <div class="info-value" id="resultBuilding">-</div>
+                </div>
+            </div>
+            
+            <div class="call-stack" id="callStack">
+                <div class="call-stack-title">📚 Recursion Stack:</div>
+            </div>
+            
+            <div class="result-display" id="resultDisplay" class="d-none"></div>
+        </div>
+    </div>
+        
+        <div class="code-section">
+            <h3>📄 Python Solution (21-1.py)</h3>
+            <pre><span class="keyword">class</span> Solution:
+    <span class="keyword">def</span> <span class="function">removeDuplicateLetters</span>(<span class="keyword">self</span>, s: str) -&gt; str:
+        <span class="comment"># 집합으로 정렬</span>
+        <span class="keyword">for</span> char <span class="keyword">in</span> <span class="function">sorted</span>(<span class="function">set</span>(s)):
+            suffix = s[s.<span class="function">index</span>(char):]
+            <span class="comment"># 전체 집합과 접미사 집합이 일치할때 분리 진행</span>
+            <span class="keyword">if</span> <span class="function">set</span>(s) == <span class="function">set</span>(suffix):
+                <span class="keyword">return</span> char + <span class="keyword">self</span>.<span class="function">removeDuplicateLetters</span>(suffix.<span class="function">replace</span>(char, ''))
+        <span class="keyword">return</span> ''</pre>
+        </div>
+
+    </div>
+
+    <script>
+        // Pre-computed steps for "cbacdcbc"
+        // Sorted unique: a, b, c, d
+        // For 'a': suffix = "acdcbc", set(s)={a,b,c,d}, set(suffix)={a,b,c,d} ✓
+        // return 'a' + removeDuplicateLetters("cdcbc")
+        // For 'b': suffix = "bcbc", set={b,c,d}, set(suffix)={b,c} ✗
+        // For 'c': suffix = "cdcbc", set={b,c,d}, set(suffix)={b,c,d} ✓
+        // return 'c' + removeDuplicateLetters("dbb") -> "db" -> "bcdb" 
+        // Wait, let me recalculate...
+        
+        const steps = [
+            { action: 'init', s: 'cbacdcbc', sorted: 'a, b, c, d', msg: 'Start: s="cbacdcbc", sorted unique chars: a, b, c, d' },
+            { action: 'check', char: 'a', suffix: 'acdcbc', match: true, msg: 'Check "a": suffix="acdcbc", has all chars ✓' },
+            { action: 'recurse', char: 'a', newS: 'cdcbc', result: 'a', msg: 'Pick "a", recurse with "cdcbc" (removed all "a")' },
+            { action: 'check', char: 'b', suffix: 'bcbc', match: false, msg: 'Check "b": suffix="bcbc" missing "d" ✗' },
+            { action: 'check', char: 'c', suffix: 'cdcbc', match: true, msg: 'Check "c": suffix="cdcbc", has all chars ✓' },
+            { action: 'recurse', char: 'c', newS: 'dbb', result: 'ac', msg: 'Pick "c", recurse with "dbb" (removed all "c")' },
+            { action: 'check', char: 'b', suffix: 'bb', match: false, msg: 'Check "b": suffix="bb" missing "d" ✗' },
+            { action: 'check', char: 'd', suffix: 'dbb', match: true, msg: 'Check "d": suffix="dbb", has all chars ✓' },
+            { action: 'recurse', char: 'd', newS: 'bb', result: 'acd', msg: 'Pick "d", recurse with "bb" (removed all "d")' },
+            { action: 'check', char: 'b', suffix: 'bb', match: true, msg: 'Check "b": suffix="bb", has all chars ✓' },
+            { action: 'recurse', char: 'b', newS: '', result: 'acdb', msg: 'Pick "b", recurse with "" (removed all "b")' },
+            { action: 'base', msg: 'Base case: empty string, return ""' },
+            { action: 'done', result: 'acdb', msg: '✅ Final result: "acdb"' }
+        ];
+        
+        let stepIndex = 0;
+        let autoInterval = null;
+        let callStack = [];
+        
+        function init() {
+            stepIndex = 0;
+            callStack = [];
+            document.getElementById('currentStr').textContent = 'cbacdcbc';
+            document.getElementById('sortedChars').textContent = 'a, b, c, d';
+            document.getElementById('resultBuilding').textContent = '-';
+            document.getElementById('resultDisplay').style.display = 'none';
+            renderCallStack();
+        }
+        
+        function renderCallStack() {
+            const container = document.getElementById('callStack');
+            container.innerHTML = '<div class="call-stack-title">📚 Recursion Stack:</div>';
+            callStack.forEach((frame, i) => {
+                const div = document.createElement('div');
+                div.className = 'call-frame';
+                if (frame.active) div.classList.add('active');
+                if (frame.complete) div.classList.add('complete');
+                div.innerHTML = `
+                    <div class="frame-header">
+                        <span class="frame-depth">Depth ${frame.depth}</span>
+                        <span class="frame-input">s="${frame.s}"</span>
+                    </div>
+                    <div class="frame-details">${frame.details || ''}</div>
+                `;
+                container.appendChild(div);
+            });
+        }
+        
+        function step() {
+            if (stepIndex >= steps.length) return;
+            
+            const s = steps[stepIndex];
+            document.getElementById('statusMessage').textContent = s.msg;
+            
+            if (s.action === 'init') {
+                callStack.push({ depth: 0, s: 'cbacdcbc', active: true, details: 'Processing...' });
+            } else if (s.action === 'check') {
+                if (callStack.length > 0) {
+                    callStack[callStack.length - 1].details = `Checking char "${s.char}"`;
+                }
+            } else if (s.action === 'recurse') {
+                if (callStack.length > 0) {
+                    callStack[callStack.length - 1].active = false;
+                    callStack[callStack.length - 1].details = `Selected "${s.char}"`;
+                }
+                callStack.push({ depth: callStack.length, s: s.newS, active: true, details: 'Processing...' });
+                document.getElementById('currentStr').textContent = s.newS || '(empty)';
+                document.getElementById('resultBuilding').textContent = s.result;
+            } else if (s.action === 'base') {
+                if (callStack.length > 0) {
+                    callStack[callStack.length - 1].complete = true;
+                    callStack[callStack.length - 1].active = false;
+                    callStack[callStack.length - 1].details = 'Return ""';
+                }
+            } else if (s.action === 'done') {
+                callStack.forEach(f => { f.complete = true; f.active = false; });
+                document.getElementById('resultDisplay').style.display = 'block';
+                document.getElementById('resultDisplay').textContent = `Result: "${s.result}"`;
+                document.getElementById('stepBtn').disabled = true;
+                stopAuto();
+            }
+            
+            renderCallStack();
+            stepIndex++;
+        }
+        
+        function toggleAuto() {
+            if (autoInterval) { stopAuto(); }
+            else {
+                document.getElementById('autoBtn').textContent = 'Pause';
+                autoInterval = setInterval(() => {
+                    if (stepIndex >= steps.length) stopAuto();
+                    else step();
+                }, 1000);
+            }
+        }
+        
+        function stopAuto() {
+            if (autoInterval) { clearInterval(autoInterval); autoInterval = null; }
+            document.getElementById('autoBtn').textContent = 'Auto Run';
+        }
+        
+        function reset() {
+            stopAuto();
+            document.getElementById('stepBtn').disabled = false;
+            document.getElementById('statusMessage').textContent = 'Click "Step" or "Auto Run" to start. Input: "cbacdcbc"';
+            init();
+        }
+        
+        init();
+    </script>
+</body>
+</html>

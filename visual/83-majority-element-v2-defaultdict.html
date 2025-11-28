@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Q83: Majority Element - defaultdict</title>
+    <link rel="stylesheet" href="visual.css">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🗳️ Q83: Majority Element</h1>
+            <p>LeetCode #169 | File: 83-2.py | Approach: defaultdict Counter</p>
+        </div>
+        
+        <div class="problem-info">
+            <h3>📋 Problem Description</h3>
+            <p>Find the majority element (appears more than n/2 times).</p>
+            <p class="mt-10"><strong>Key Insight:</strong> Use defaultdict to count occurrences. 
+            Return element when count exceeds n/2.</p>
+        </div>
+
+        
+
+        <div class="status" id="status">Ready to find majority element</div>
+    </div>
+
+        <div class="controls">
+            <button class="btn btn-primary" onclick="step()">Step</button>
+            <button class="btn btn-success" onclick="toggleAutoRun()">Auto Run</button>
+            <button class="btn btn-warning" onclick="reset()">Reset</button>
+        </div>
+
+        <div class="step-info" id="stepInfo">Click "Step" to find the majority element</div>
+        
+        <div class="visualization">
+            <h4 class="text-center mb-10">Input Array (n=7, majority > 3)</h4>
+            <div class="array-display" id="arrayDisplay"></div>
+            
+            <h4 class="text-center my-special">Counter (defaultdict)</h4>
+            <div class="counter-display" id="counterDisplay"></div>
+            
+            <div class="result-display" id="result"></div>
+    
+        <div class="code-section">
+            <h3>📄 Python Solution (83-2.py)</h3>
+            <pre><span class="keyword">import</span> collections
+<span class="keyword">from</span> typing <span class="keyword">import</span> List
+
+
+<span class="keyword">class</span> Solution:
+    <span class="keyword">def</span> <span class="function">majorityElement</span>(<span class="keyword">self</span>, nums: List[int]) -&gt; int:
+        counts = collections.<span class="function">defaultdict</span>(int)
+        <span class="keyword">for</span> num <span class="keyword">in</span> nums:
+            <span class="keyword">if</span> counts[num] == <span class="number">0</span>:
+                counts[num] = nums.<span class="function">count</span>(num)
+
+            <span class="keyword">if</span> counts[num] &gt; <span class="function">len</span>(nums) // <span class="number">2</span>:
+                <span class="keyword">return</span> num</pre>
+        </div>
+
+    </div>
+
+    <script>
+        const nums = [2, 2, 1, 1, 1, 2, 2];
+        const counts = {};
+        let currentIdx = -1;
+        let majorityFound = null;
+        let autoRunning = false;
+        let autoRunInterval;
+
+        function renderArray() {
+            const container = document.getElementById('arrayDisplay');
+            container.innerHTML = '';
+            nums.forEach((num, i) => {
+                const item = document.createElement('div');
+                item.className = 'array-item';
+                if (i < currentIdx) item.classList.add('processed');
+                if (i === currentIdx) item.classList.add('current');
+                item.textContent = num;
+                container.appendChild(item);
+            });
+        }
+
+        function renderCounter() {
+            const container = document.getElementById('counterDisplay');
+            container.innerHTML = '';
+            const threshold = Math.floor(nums.length / 2);
+            Object.entries(counts).forEach(([key, value]) => {
+                const item = document.createElement('div');
+                item.className = 'counter-item';
+                if (value > threshold) item.classList.add('majority');
+                item.innerHTML = `<div class="counter-key">${key}</div>
+                                  <div class="counter-value">count: ${value}</div>`;
+                container.appendChild(item);
+            });
+        }
+
+        function step() {
+            if (majorityFound !== null) return;
+            
+            currentIdx++;
+            
+            if (currentIdx >= nums.length) {
+                document.getElementById('stepInfo').textContent = 'Array exhausted (should not happen with valid input)';
+                return;
+            }
+
+            const num = nums[currentIdx];
+            const threshold = Math.floor(nums.length / 2);
+
+            // First time seeing this number? Count all occurrences
+            if (!counts[num]) {
+                const count = nums.filter(x => x === num).length;
+                counts[num] = count;
+                
+                if (count > threshold) {
+                    majorityFound = num;
+                    document.getElementById('stepInfo').textContent = 
+                        `Found ${num}! Count ${count} > ${threshold} (n/2). Majority element!`;
+                    document.getElementById('result').innerHTML = 
+                        `<span class="text-green">Majority Element: <strong>${num}</strong></span>`;
+                    document.getElementById('status').textContent = 
+                        'defaultdict stores count on first encounter, early exit when majority found';
+                } else {
+                    document.getElementById('stepInfo').textContent = 
+                        `Counted ${num}: ${count} times. ${count} ≤ ${threshold}, continue searching...`;
+                }
+            } else {
+                document.getElementById('stepInfo').textContent = 
+                    `Seen ${num} before (count=${counts[num]}), skip counting`;
+            }
+
+            renderArray();
+            renderCounter();
+        }
+
+        function toggleAutoRun() {
+            autoRunning = !autoRunning;
+            const btn = document.querySelector('.btn-success');
+            if (autoRunning) {
+                btn.textContent = 'Pause';
+                autoRunInterval = setInterval(() => {
+                    if (majorityFound !== null || currentIdx >= nums.length - 1) {
+                        step(); toggleAutoRun(); return;
+                    }
+                    step();
+                }, 800);
+            } else {
+                btn.textContent = 'Auto Run';
+                clearInterval(autoRunInterval);
+            }
+        }
+
+        function reset() {
+            currentIdx = -1;
+            majorityFound = null;
+            Object.keys(counts).forEach(k => delete counts[k]);
+            if (autoRunning) toggleAutoRun();
+            document.getElementById('stepInfo').textContent = 'Click "Step" to find the majority element';
+            document.getElementById('status').textContent = 'Ready to find majority element';
+            document.getElementById('result').innerHTML = '';
+            renderArray();
+            renderCounter();
+        }
+
+        renderArray();
+        renderCounter();
+    </script>
+</body>
+</html>

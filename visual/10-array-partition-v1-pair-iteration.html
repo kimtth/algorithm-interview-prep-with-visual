@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Q10: Array Partition I - Pair Iteration</title>
+    <link rel="stylesheet" href="visual.css">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    
+</head>
+<body>
+    <div class="container">
+        <div class="problem-info">
+            <h1>Q10: Array Partition I</h1>
+            <p>Given an integer array nums of 2n integers, group these integers into n pairs (a₁, b₁), (a₂, b₂), ..., (aₙ, bₙ) such that the sum of min(aᵢ, bᵢ) for all i is maximized.</p>
+            <div class="problem-meta">
+                <span class="meta-tag">📁 Array</span>
+                <span class="meta-tag">🔢 Greedy</span>
+                <span class="meta-tag">⏱️ O(n log n)</span>
+                <span class="meta-tag">💡 Version 1: Pair Iteration</span>
+            </div>
+        </div>
+        
+        
+        
+        <div class="visualization-section">
+            <h3>🎬 Visualization</h3>
+            
+            <div class="controls">
+                <button class="btn btn-primary" id="stepBtn" onclick="step()">Step</button>
+                <button class="btn btn-success" id="autoBtn" onclick="toggleAuto()">Auto Run</button>
+                <button class="btn btn-warning" onclick="reset()">Reset</button>
+            </div>
+            
+            <div class="status-message" id="statusMessage">
+                Click "Step" or "Auto Run" to start visualization
+            </div>
+            
+            <div class="array-section">
+                <div class="array-label">Input Array:</div>
+                <div class="array-container" id="arrayContainer"></div>
+            </div>
+            
+            <div class="array-section">
+                <div class="array-label">Pairs:</div>
+                <div class="pairs-container" id="pairsContainer"></div>
+            </div>
+            
+            <div class="sum-display">
+                <div class="label">Sum of Minimum Values</div>
+                <div class="value" id="sumValue">0</div>
+                <div class="sum-formula" id="sumFormula"></div>
+            </div>
+        </div>
+    </div>
+        
+        <div class="code-section">
+            <h3>📄 Python Solution (10-1.py)</h3>
+            <pre><span class="keyword">from</span> typing <span class="keyword">import</span> List
+
+
+<span class="keyword">class</span> Solution:
+    <span class="keyword">def</span> <span class="function">arrayPairSum</span>(<span class="keyword">self</span>, nums: List[int]) -&gt; int:
+        sum = <span class="number">0</span>
+        pair = []
+        nums.<span class="function">sort</span>()
+
+        <span class="keyword">for</span> n <span class="keyword">in</span> nums:
+            <span class="comment"># 앞에서 부터 오름차순으로 페어를 만들어 합 계산</span>
+            pair.<span class="function">append</span>(n)
+            <span class="keyword">if</span> <span class="function">len</span>(pair) == <span class="number">2</span>:
+                sum += <span class="function">min</span>(pair)
+                pair = []
+
+        <span class="keyword">return</span> sum</pre>
+        </div>
+
+    </div>
+
+    <script>
+        const originalNums = [1, 4, 3, 2, 5, 6];
+        let nums = [];
+        let currentStep = 0;
+        let autoInterval = null;
+        let totalSum = 0;
+        let currentPair = [];
+        let pairIndex = 0;
+        let addedMins = [];
+        
+        // Steps: 0=init, 1=sort, 2+=pairing steps
+        const totalSteps = Math.floor(originalNums.length / 2) + 2;
+        
+        function init() {
+            nums = [...originalNums];
+            renderArray(nums, false);
+            document.getElementById('pairsContainer').innerHTML = '';
+            document.getElementById('sumValue').textContent = '0';
+            document.getElementById('sumFormula').textContent = '';
+        }
+        
+        function renderArray(arr, sorted) {
+            const container = document.getElementById('arrayContainer');
+            container.innerHTML = '';
+            arr.forEach((num, idx) => {
+                const box = document.createElement('div');
+                box.className = 'array-box' + (sorted ? ' sorted' : '');
+                box.textContent = num;
+                box.id = `box-${idx}`;
+                container.appendChild(box);
+            });
+        }
+        
+        function step() {
+            if (currentStep === 0) {
+                // Initial state
+                document.getElementById('statusMessage').textContent = 
+                    `Initial array: [${nums.join(', ')}]. We need to sort first.`;
+                currentStep++;
+            } else if (currentStep === 1) {
+                // Sort the array
+                nums.sort((a, b) => a - b);
+                renderArray(nums, true);
+                currentPair = [];
+                pairIndex = 0;
+                totalSum = 0;
+                addedMins = [];
+                document.getElementById('statusMessage').textContent = 
+                    `Sorted array: [${nums.join(', ')}]. Now pair adjacent elements.`;
+                document.getElementById('pairsContainer').innerHTML = '';
+                currentStep++;
+            } else if (currentStep < totalSteps) {
+                // Pair iteration steps
+                const i = (currentStep - 2) * 2;
+                if (i < nums.length) {
+                    const val1 = nums[i];
+                    const val2 = nums[i + 1];
+                    const minVal = Math.min(val1, val2);
+                    totalSum += minVal;
+                    addedMins.push(minVal);
+                    
+                    // Create pair in pairs container
+                    const pairGroup = document.createElement('div');
+                    pairGroup.className = 'pair-group completed';
+                    pairGroup.innerHTML = `
+                        <div class="array-box min-selected">${val1}</div>
+                        <div class="array-box skipped">${val2}</div>
+                    `;
+                    document.getElementById('pairsContainer').appendChild(pairGroup);
+                    
+                    // Highlight in original array
+                    document.getElementById(`box-${i}`).className = 'array-box min-selected';
+                    document.getElementById(`box-${i+1}`).className = 'array-box skipped';
+                    
+                    // Update sum display
+                    document.getElementById('sumValue').textContent = totalSum;
+                    document.getElementById('sumFormula').textContent = 
+                        `${addedMins.join(' + ')} = ${totalSum}`;
+                    
+                    document.getElementById('statusMessage').textContent = 
+                        `Pair (${val1}, ${val2}): min = ${minVal}. Running sum = ${totalSum}`;
+                    
+                    currentStep++;
+                }
+            }
+            
+            if (currentStep >= totalSteps) {
+                document.getElementById('statusMessage').textContent = 
+                    `✅ Done! Maximum sum of minimums = ${totalSum}`;
+                document.getElementById('stepBtn').disabled = true;
+                stopAuto();
+            }
+        }
+        
+        function toggleAuto() {
+            if (autoInterval) {
+                stopAuto();
+            } else {
+                document.getElementById('autoBtn').textContent = 'Pause';
+                autoInterval = setInterval(() => {
+                    if (currentStep >= totalSteps) {
+                        stopAuto();
+                    } else {
+                        step();
+                    }
+                }, 1200);
+            }
+        }
+        
+        function stopAuto() {
+            if (autoInterval) {
+                clearInterval(autoInterval);
+                autoInterval = null;
+            }
+            document.getElementById('autoBtn').textContent = 'Auto Run';
+        }
+        
+        function reset() {
+            stopAuto();
+            currentStep = 0;
+            totalSum = 0;
+            currentPair = [];
+            pairIndex = 0;
+            addedMins = [];
+            document.getElementById('stepBtn').disabled = false;
+            document.getElementById('statusMessage').textContent = 
+                'Click "Step" or "Auto Run" to start visualization';
+            init();
+        }
+        
+        // Initialize on load
+        init();
+    </script>
+</body>
+</html>

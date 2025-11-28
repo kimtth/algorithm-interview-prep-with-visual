@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Q19: Reverse Linked List II</title>
+    <link rel="stylesheet" href="visual.css">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    
+</head>
+<body>
+    <div class="container">
+        <div class="problem-info">
+            <h1>Q19: Reverse Linked List II</h1>
+            <p>Reverse a linked list from position m to n in one pass.</p>
+            <div class="problem-meta">
+                <span class="meta-tag">📁 Linked List</span>
+                <span class="meta-tag">⏱️ O(n)</span>
+                <span class="meta-tag">💾 O(1) space</span>
+            </div>
+        </div>
+        
+        
+        
+        <div class="visualization-section">
+            <h3>🎬 Visualization</h3>
+            
+            <div class="controls">
+                <button class="btn btn-primary" id="stepBtn" onclick="step()">Step</button>
+                <button class="btn btn-success" id="autoBtn" onclick="toggleAuto()">Auto Run</button>
+                <button class="btn btn-warning" onclick="reset()">Reset</button>
+            </div>
+            
+            <div class="params-display">
+                <div class="param-item">
+                    <div class="param-label">m (start)</div>
+                    <div class="param-value">2</div>
+                </div>
+                <div class="param-item">
+                    <div class="param-label">n (end)</div>
+                    <div class="param-value">4</div>
+                </div>
+            </div>
+            
+            <div class="pointer-display">
+                <div class="pointer-box start">
+                    <div class="pointer-label">start</div>
+                    <div class="pointer-value" id="startVal">root</div>
+                </div>
+                <div class="pointer-box end">
+                    <div class="pointer-label">end</div>
+                    <div class="pointer-value" id="endVal">-</div>
+                </div>
+            </div>
+            
+            <div class="status-message" id="statusMessage">
+                Click "Step" or "Auto Run" to start. Reverse positions 2 to 4.
+            </div>
+            
+            <div class="list-section">
+                <div class="list-label">Linked List (with dummy root):</div>
+                <div class="list-container" id="listContainer"></div>
+            </div>
+        </div>
+    </div>
+        
+        <div class="code-section">
+            <h3>📄 Python Solution (19-1.py)</h3>
+            <pre><span class="comment"># Definition for singly-linked list.</span>
+<span class="keyword">class</span> ListNode:
+    <span class="keyword">def</span> <span class="function">__init__</span>(<span class="keyword">self</span>, x):
+        <span class="keyword">self</span>.val = x
+        <span class="keyword">self</span>.next = <span class="keyword">None</span>
+
+
+<span class="keyword">class</span> Solution:
+    <span class="keyword">def</span> <span class="function">reverseBetween</span>(<span class="keyword">self</span>, head: ListNode, m: int, n: int) -&gt; ListNode:
+        <span class="comment"># 예외 처리</span>
+        <span class="keyword">if</span> <span class="keyword">not</span> head <span class="keyword">or</span> m == n:
+            <span class="keyword">return</span> head
+
+        root = start = <span class="function">ListNode</span>(<span class="keyword">None</span>)
+        root.next = head
+        <span class="comment"># start, end 지정</span>
+        <span class="keyword">for</span> _ <span class="keyword">in</span> <span class="function">range</span>(m - <span class="number">1</span>):
+            start = start.next
+        end = start.next
+
+        <span class="comment"># 반복하면서 노드 차례대로 뒤집기</span>
+        <span class="keyword">for</span> _ <span class="keyword">in</span> <span class="function">range</span>(n - m):
+            tmp, start.next, end.next = start.next, end.next, end.next.next
+            start.next.next = tmp
+        <span class="keyword">return</span> root.next</pre>
+        </div>
+
+    </div>
+
+    <script>
+        // m=2, n=4: reverse positions 2-4
+        // Original: 1 -> 2 -> 3 -> 4 -> 5
+        // Result:   1 -> 4 -> 3 -> 2 -> 5
+        
+        let nodes = ['root', 1, 2, 3, 4, 5];
+        const m = 2, n = 4;
+        let startIdx = 0;  // Will move to position m-1
+        let endIdx = -1;   // Will be start.next
+        let phase = 'findStart';
+        let reverseCount = 0;
+        let autoInterval = null;
+        
+        function init() {
+            nodes = ['root', 1, 2, 3, 4, 5];
+            startIdx = 0;
+            endIdx = -1;
+            phase = 'findStart';
+            reverseCount = 0;
+            renderList();
+            updatePointers();
+        }
+        
+        function updatePointers() {
+            document.getElementById('startVal').textContent = nodes[startIdx];
+            document.getElementById('endVal').textContent = endIdx >= 0 ? nodes[endIdx] : '-';
+        }
+        
+        function renderList() {
+            const container = document.getElementById('listContainer');
+            container.innerHTML = '';
+            nodes.forEach((val, i) => {
+                const node = document.createElement('div');
+                node.className = 'list-node';
+                if (i === 0) node.classList.add('dummy');
+                if (i === startIdx) {
+                    node.classList.add('start');
+                    const label = document.createElement('span');
+                    label.className = 'node-label start';
+                    label.textContent = 'start';
+                    node.appendChild(label);
+                }
+                if (i === endIdx) {
+                    node.classList.add('end');
+                    const label = document.createElement('span');
+                    label.className = 'node-label end';
+                    label.textContent = 'end';
+                    node.appendChild(label);
+                }
+                // Highlight range being reversed
+                if (phase === 'reverse' || phase === 'done') {
+                    if (i > startIdx && i <= startIdx + (n - m + 1)) {
+                        node.classList.add('reversed');
+                    }
+                }
+                node.innerHTML += val;
+                container.appendChild(node);
+                if (i < nodes.length - 1) {
+                    const arrow = document.createElement('div');
+                    arrow.className = 'list-arrow';
+                    container.appendChild(arrow);
+                }
+            });
+        }
+        
+        function step() {
+            if (phase === 'findStart') {
+                if (startIdx < m - 1) {
+                    startIdx++;
+                    document.getElementById('statusMessage').textContent = 
+                        `Moving start to position ${m-1}... current: ${nodes[startIdx]}`;
+                    renderList();
+                    updatePointers();
+                } else {
+                    endIdx = startIdx + 1;
+                    phase = 'setEnd';
+                    document.getElementById('statusMessage').textContent = 
+                        `start found at position ${m-1} (${nodes[startIdx]}). Set end = start.next (${nodes[endIdx]})`;
+                    renderList();
+                    updatePointers();
+                }
+            } else if (phase === 'setEnd') {
+                phase = 'reverse';
+                document.getElementById('statusMessage').textContent = 
+                    `Ready to reverse. Will do ${n-m} iterations.`;
+            } else if (phase === 'reverse') {
+                if (reverseCount < n - m) {
+                    // tmp = start.next
+                    // start.next = end.next
+                    // end.next = end.next.next
+                    // start.next.next = tmp
+                    
+                    // In array terms: move node at endIdx+1 to right after startIdx
+                    const nodeToMove = nodes[endIdx + 1];
+                    nodes.splice(endIdx + 1, 1);
+                    nodes.splice(startIdx + 1, 0, nodeToMove);
+                    
+                    reverseCount++;
+                    document.getElementById('statusMessage').textContent = 
+                        `Iteration ${reverseCount}: Moved ${nodeToMove} to after start. ` +
+                        `Current order: ${nodes.slice(1).join(' → ')}`;
+                    renderList();
+                    updatePointers();
+                    
+                    if (reverseCount >= n - m) {
+                        phase = 'done';
+                    }
+                }
+            } else if (phase === 'done') {
+                document.getElementById('statusMessage').textContent = 
+                    `✅ Done! Result: [${nodes.slice(1).join(' → ')}]`;
+                document.getElementById('stepBtn').disabled = true;
+                stopAuto();
+            }
+        }
+        
+        function toggleAuto() {
+            if (autoInterval) { stopAuto(); }
+            else {
+                document.getElementById('autoBtn').textContent = 'Pause';
+                autoInterval = setInterval(() => {
+                    if (phase === 'done' && document.getElementById('stepBtn').disabled) {
+                        stopAuto();
+                    } else {
+                        step();
+                    }
+                }, 1000);
+            }
+        }
+        
+        function stopAuto() {
+            if (autoInterval) { clearInterval(autoInterval); autoInterval = null; }
+            document.getElementById('autoBtn').textContent = 'Auto Run';
+        }
+        
+        function reset() {
+            stopAuto();
+            document.getElementById('stepBtn').disabled = false;
+            document.getElementById('statusMessage').textContent = 'Click "Step" or "Auto Run" to start. Reverse positions 2 to 4.';
+            init();
+        }
+        
+        init();
+    </script>
+</body>
+</html>

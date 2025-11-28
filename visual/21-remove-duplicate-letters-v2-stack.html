@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Q21: Remove Duplicate Letters - Stack</title>
+    <link rel="stylesheet" href="visual.css">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    
+</head>
+<body>
+    <div class="container">
+        <div class="problem-info">
+            <h1>Q21: Remove Duplicate Letters</h1>
+            <p>Remove duplicate letters maintaining lexicographically smallest order using a stack.</p>
+            <div class="problem-meta">
+                <span class="meta-tag">📁 Stack</span>
+                <span class="meta-tag">⏱️ O(n)</span>
+                <span class="meta-tag">💡 Version 2: Stack-based</span>
+            </div>
+        </div>
+        
+        
+        
+        <div class="visualization-section">
+            <h3>🎬 Visualization</h3>
+            
+            <div class="controls">
+                <button class="btn btn-primary" id="stepBtn" onclick="step()">Step</button>
+                <button class="btn btn-success" id="autoBtn" onclick="toggleAuto()">Auto Run</button>
+                <button class="btn btn-warning" onclick="reset()">Reset</button>
+            </div>
+            
+            <div class="status-message" id="statusMessage">
+                Click "Step" or "Auto Run" to start. Input: "cbacdcbc"
+            </div>
+            
+            <div class="input-display" id="inputDisplay"></div>
+            
+            <div class="main-section">
+                <div class="stack-container">
+                    <div class="stack-label">Stack:</div>
+                    <div class="stack-items" id="stackItems"></div>
+                </div>
+                
+                <div class="info-container">
+                    <div class="info-box">
+                        <div class="info-label">Remaining Count:</div>
+                        <div class="counter-grid" id="counterGrid"></div>
+                    </div>
+                    <div class="info-box">
+                        <div class="info-label">Seen Set:</div>
+                        <div class="info-value" id="seenSet">{}</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="result-display" id="resultDisplay" class="d-none"></div>
+        </div>
+    </div>
+        
+        <div class="code-section">
+            <h3>📄 Python Solution (21-2.py)</h3>
+            <pre><span class="keyword">import</span> collections
+
+
+<span class="keyword">class</span> Solution:
+    <span class="keyword">def</span> <span class="function">removeDuplicateLetters</span>(<span class="keyword">self</span>, s: str) -&gt; str:
+        counter, seen, stack = collections.<span class="function">Counter</span>(s), <span class="function">set</span>(), []
+
+        <span class="keyword">for</span> char <span class="keyword">in</span> s:
+            counter[char] -= <span class="number">1</span>
+            <span class="keyword">if</span> char <span class="keyword">in</span> seen:
+                <span class="keyword">continue</span>
+            <span class="comment"># 뒤에 붙일 문자가 남아 있다면 스택에서 제거</span>
+            <span class="keyword">while</span> stack <span class="keyword">and</span> char &lt; stack[-<span class="number">1</span>] <span class="keyword">and</span> counter[stack[-<span class="number">1</span>]] &gt; <span class="number">0</span>:
+                seen.<span class="function">remove</span>(stack.<span class="function">pop</span>())
+            stack.<span class="function">append</span>(char)
+            seen.<span class="function">add</span>(char)
+
+        <span class="keyword">return</span> ''.<span class="function">join</span>(stack)</pre>
+        </div>
+
+    </div>
+
+    <script>
+        const input = "cbacdcbc";
+        let counter = {};
+        let seen = new Set();
+        let stack = [];
+        let index = 0;
+        let autoInterval = null;
+        
+        function init() {
+            counter = {};
+            for (let c of input) counter[c] = (counter[c] || 0) + 1;
+            seen = new Set();
+            stack = [];
+            index = 0;
+            renderInput();
+            renderStack();
+            renderCounter();
+            renderSeen();
+            document.getElementById('resultDisplay').style.display = 'none';
+        }
+        
+        function renderInput() {
+            const container = document.getElementById('inputDisplay');
+            container.innerHTML = '';
+            input.split('').forEach((char, i) => {
+                const box = document.createElement('div');
+                box.className = 'char-box';
+                if (i === index) box.classList.add('current');
+                if (i < index) box.classList.add('processed');
+                box.textContent = char;
+                container.appendChild(box);
+            });
+        }
+        
+        function renderStack() {
+            const container = document.getElementById('stackItems');
+            container.innerHTML = '';
+            stack.forEach(item => {
+                const div = document.createElement('div');
+                div.className = 'stack-item';
+                div.textContent = item;
+                container.appendChild(div);
+            });
+        }
+        
+        function renderCounter() {
+            const container = document.getElementById('counterGrid');
+            container.innerHTML = '';
+            for (let char of ['a', 'b', 'c', 'd']) {
+                const div = document.createElement('div');
+                div.className = 'counter-item';
+                div.innerHTML = `<div class="counter-char">${char}</div><div class="counter-count">${counter[char] || 0}</div>`;
+                container.appendChild(div);
+            }
+        }
+        
+        function renderSeen() {
+            document.getElementById('seenSet').textContent = 
+                seen.size > 0 ? `{${[...seen].sort().join(', ')}}` : '{}';
+        }
+        
+        function step() {
+            if (index >= input.length) {
+                document.getElementById('resultDisplay').style.display = 'block';
+                document.getElementById('resultDisplay').textContent = `Result: "${stack.join('')}"`;
+                document.getElementById('statusMessage').textContent = `✅ Done! Result: "${stack.join('')}"`;
+                document.getElementById('stepBtn').disabled = true;
+                stopAuto();
+                return;
+            }
+            
+            const char = input[index];
+            counter[char]--;
+            
+            if (seen.has(char)) {
+                document.getElementById('statusMessage').textContent = 
+                    `'${char}' already in seen → Skip`;
+                index++;
+                renderInput();
+                renderCounter();
+                return;
+            }
+            
+            // Pop while conditions met
+            let popped = [];
+            while (stack.length > 0 && char < stack[stack.length - 1] && counter[stack[stack.length - 1]] > 0) {
+                const top = stack.pop();
+                seen.delete(top);
+                popped.push(top);
+            }
+            
+            stack.push(char);
+            seen.add(char);
+            
+            if (popped.length > 0) {
+                document.getElementById('statusMessage').textContent = 
+                    `'${char}' < '${popped.join(',')}' and they appear later → Pop, then push '${char}'`;
+            } else {
+                document.getElementById('statusMessage').textContent = 
+                    `Push '${char}' to stack`;
+            }
+            
+            index++;
+            renderInput();
+            renderStack();
+            renderCounter();
+            renderSeen();
+        }
+        
+        function toggleAuto() {
+            if (autoInterval) { stopAuto(); }
+            else {
+                document.getElementById('autoBtn').textContent = 'Pause';
+                autoInterval = setInterval(() => {
+                    if (index >= input.length || document.getElementById('stepBtn').disabled) stopAuto();
+                    else step();
+                }, 800);
+            }
+        }
+        
+        function stopAuto() {
+            if (autoInterval) { clearInterval(autoInterval); autoInterval = null; }
+            document.getElementById('autoBtn').textContent = 'Auto Run';
+        }
+        
+        function reset() {
+            stopAuto();
+            document.getElementById('stepBtn').disabled = false;
+            document.getElementById('statusMessage').textContent = 'Click "Step" or "Auto Run" to start. Input: "cbacdcbc"';
+            init();
+        }
+        
+        init();
+    </script>
+</body>
+</html>

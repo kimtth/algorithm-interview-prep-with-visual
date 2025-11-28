@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Search in Rotated Sorted Array</title>
+    <link rel="stylesheet" href="visual.css">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    
+</head>
+<body>
+    <div class="container">
+        <h1>🔄 Search in Rotated Sorted Array</h1>
+        <p class="subtitle">O(log n) - Find pivot first, then binary search with offset</p>
+
+        <div class="controls">
+            <button id="stepBtn">Step</button>
+            <button id="autoBtn">Auto Run</button>
+            <button id="resetBtn">Reset</button>
+            <div class="target-display">Target: <span id="target">0</span></div>
+        </div>
+
+        <div class="phase-indicator">
+            <div class="phase-item" id="phase1">Phase 1: Find Pivot</div>
+            <div class="phase-item" id="phase2">Phase 2: Binary Search</div>
+        </div>
+
+        <div class="panel">
+            <div class="panel-title">📊 Rotated Sorted Array</div>
+            <div class="array-container" id="array"></div>
+            <div class="vars-box" id="vars"></div>
+        </div>
+
+        <div class="panel">
+            <div class="panel-title">📊 Status</div>
+            <div class="status-box" id="status">Click "Step" or "Auto Run" to search in rotated array</div>
+        </div>
+
+        <div class="panel">
+            <div class="panel-title">💻 Algorithm</div>
+            <div class="code-box" id="code">
+<span id="line1"># Phase 1: Find pivot (minimum element)</span>
+<span id="line2">left, right = 0, len(nums) - 1</span>
+<span id="line3">while left < right:</span>
+<span id="line4">    mid = left + (right - left) // 2</span>
+<span id="line5">    if nums[mid] > nums[right]:</span>
+<span id="line6">        left = mid + 1</span>
+<span id="line7">    else:</span>
+<span id="line8">        right = mid</span>
+<span id="line9">pivot = left</span>
+<span id="line10"></span>
+<span id="line11"># Phase 2: Binary search with pivot offset</span>
+<span id="line12">left, right = 0, len(nums) - 1</span>
+<span id="line13">while left <= right:</span>
+<span id="line14">    mid = left + (right - left) // 2</span>
+<span id="line15">    mid_pivot = (mid + pivot) % len(nums)</span>
+<span id="line16">    if nums[mid_pivot] < target: left = mid + 1</span>
+<span id="line17">    elif nums[mid_pivot] > target: right = mid - 1</span>
+<span id="line18">    else: return mid_pivot</span>
+            </div>
+        </div>
+    
+        <div class="code-section">
+            <h3>📄 Python Solution (66-1.py)</h3>
+            <pre><span class="keyword">from</span> typing <span class="keyword">import</span> List
+
+
+<span class="keyword">class</span> Solution:
+    <span class="keyword">def</span> <span class="function">search</span>(<span class="keyword">self</span>, nums: List[int], target: int) -&gt; int:
+        <span class="comment"># 예외 처리</span>
+        <span class="keyword">if</span> <span class="keyword">not</span> nums:
+            <span class="keyword">return</span> -<span class="number">1</span>
+
+        <span class="comment"># 최소값 찾아 피벗 설정</span>
+        left, right = <span class="number">0</span>, <span class="function">len</span>(nums) - <span class="number">1</span>
+        <span class="keyword">while</span> left &lt; right:
+            mid = left + (right - left) // <span class="number">2</span>
+
+            <span class="keyword">if</span> nums[mid] &gt; nums[right]:
+                left = mid + <span class="number">1</span>
+            <span class="keyword">else</span>:
+                right = mid
+
+        pivot = left
+        <span class="comment"># 피벗 기준 이진 검색</span>
+        left, right = <span class="number">0</span>, <span class="function">len</span>(nums) - <span class="number">1</span>
+        <span class="keyword">while</span> left &lt;= right:
+            mid = left + (right - left) // <span class="number">2</span>
+            mid_pivot = (mid + pivot) % <span class="function">len</span>(nums)
+
+            <span class="keyword">if</span> nums[mid_pivot] &lt; target:
+                left = mid + <span class="number">1</span>
+            <span class="keyword">elif</span> nums[mid_pivot] &gt; target:
+                right = mid - <span class="number">1</span>
+            <span class="keyword">else</span>:
+                <span class="keyword">return</span> mid_pivot
+        <span class="keyword">return</span> -<span class="number">1</span></pre>
+        </div>
+
+    </div>
+
+
+    <script>
+        const nums = [4, 5, 6, 7, 0, 1, 2];
+        const target = 0;
+        let phase = 1; // 1: find pivot, 2: binary search
+        let left = 0, right = nums.length - 1;
+        let mid = -1;
+        let pivot = -1;
+        let midPivot = -1;
+        let found = -1;
+        let subPhase = 'loop'; // 'loop', 'calc', 'compare'
+        let autoInterval = null;
+
+        document.getElementById('target').textContent = target;
+
+        function renderArray() {
+            const container = document.getElementById('array');
+            
+            container.innerHTML = nums.map((val, i) => {
+                let cls = 'array-item';
+                let pointers = '';
+                
+                if (found === i) {
+                    cls += ' found';
+                } else if (phase === 1) {
+                    if (i >= left && i <= right) {
+                        cls += ' in-range';
+                        if (i === mid) cls = 'array-item mid';
+                    } else {
+                        cls += ' out-range';
+                    }
+                    if (pivot >= 0 && i === pivot) cls = 'array-item pivot';
+                } else {
+                    if (i === midPivot) cls = 'array-item mid';
+                    else if (i === pivot) cls += ' pivot';
+                    else cls += ' in-range';
+                }
+                
+                if (phase === 1) {
+                    if (i === left) pointers += '<span class="pointer left">L↓</span>';
+                    if (i === right) pointers += '<span class="pointer right">R↓</span>';
+                    if (i === mid && mid >= 0) pointers += '<span class="pointer mid">↑mid</span>';
+                } else {
+                    if (i === midPivot && midPivot >= 0) pointers += '<span class="pointer mid">↑mid_pivot</span>';
+                }
+                if (pivot >= 0 && i === pivot && phase === 2) {
+                    pointers += '<span class="pointer pivot-ptr text-purple">↑pivot</span>';
+                }
+                
+                return `<div class="${cls}">${pointers}<span class="value">${val}</span><span class="index">[${i}]</span></div>`;
+            }).join('');
+        }
+
+        function renderVars() {
+            const container = document.getElementById('vars');
+            let html = `<div class="var-item">left=${left}</div>
+                        <div class="var-item">right=${right}</div>`;
+            
+            if (mid >= 0) html += `<div class="var-item">mid=${mid}</div>`;
+            if (pivot >= 0) html += `<div class="var-item highlight">pivot=${pivot}</div>`;
+            if (phase === 2 && midPivot >= 0) {
+                html += `<div class="var-item">mid_pivot=${midPivot}</div>`;
+            }
+            
+            container.innerHTML = html;
+        }
+
+        function updatePhaseIndicator() {
+            document.getElementById('phase1').classList.remove('active', 'done');
+            document.getElementById('phase2').classList.remove('active', 'done');
+            
+            if (phase === 1) {
+                document.getElementById('phase1').classList.add('active');
+            } else {
+                document.getElementById('phase1').classList.add('done');
+                document.getElementById('phase2').classList.add('active');
+            }
+        }
+
+        function highlightCode(lineNum) {
+            document.querySelectorAll('.code-box span').forEach(span => {
+                span.classList.remove('highlight');
+            });
+            if (lineNum) {
+                const line = document.getElementById(`line${lineNum}`);
+                if (line) line.classList.add('highlight');
+            }
+        }
+
+        function executeStep() {
+            if (found >= 0) return;
+
+            if (phase === 1) {
+                // Find pivot
+                if (subPhase === 'loop') {
+                    highlightCode(3);
+                    if (left < right) {
+                        document.getElementById('status').innerHTML = 
+                            `Phase 1: left (${left}) < right (${right}). Continue searching for pivot.`;
+                        subPhase = 'calc';
+                    } else {
+                        pivot = left;
+                        highlightCode(9);
+                        document.getElementById('status').innerHTML = 
+                            `Phase 1 complete! Pivot found at index ${pivot}. Minimum value is ${nums[pivot]}.`;
+                        
+                        // Reset for phase 2
+                        phase = 2;
+                        left = 0;
+                        right = nums.length - 1;
+                        mid = -1;
+                        subPhase = 'loop';
+                        updatePhaseIndicator();
+                    }
+                } else if (subPhase === 'calc') {
+                    mid = left + Math.floor((right - left) / 2);
+                    highlightCode(4);
+                    document.getElementById('status').innerHTML = 
+                        `Calculate mid = ${left} + (${right} - ${left}) / 2 = ${mid}`;
+                    subPhase = 'compare';
+                } else if (subPhase === 'compare') {
+                    if (nums[mid] > nums[right]) {
+                        highlightCode(6);
+                        document.getElementById('status').innerHTML = 
+                            `nums[${mid}]=${nums[mid]} > nums[${right}]=${nums[right]}. Pivot is in right half. left = ${mid + 1}`;
+                        left = mid + 1;
+                    } else {
+                        highlightCode(8);
+                        document.getElementById('status').innerHTML = 
+                            `nums[${mid}]=${nums[mid]} <= nums[${right}]=${nums[right]}. Pivot is in left half. right = ${mid}`;
+                        right = mid;
+                    }
+                    subPhase = 'loop';
+                }
+            } else {
+                // Binary search with pivot
+                if (subPhase === 'loop') {
+                    highlightCode(13);
+                    if (left <= right) {
+                        document.getElementById('status').innerHTML = 
+                            `Phase 2: left (${left}) <= right (${right}). Continue binary search.`;
+                        subPhase = 'calc';
+                    } else {
+                        highlightCode(17);
+                        document.getElementById('status').innerHTML = 
+                            `❌ Target ${target} not found. Return -1`;
+                        document.getElementById('stepBtn').disabled = true;
+                        document.getElementById('autoBtn').disabled = true;
+                        stopAuto();
+                    }
+                } else if (subPhase === 'calc') {
+                    mid = left + Math.floor((right - left) / 2);
+                    midPivot = (mid + pivot) % nums.length;
+                    highlightCode(15);
+                    document.getElementById('status').innerHTML = 
+                        `mid=${mid}, mid_pivot = (${mid} + ${pivot}) % ${nums.length} = ${midPivot}. nums[${midPivot}] = ${nums[midPivot]}`;
+                    subPhase = 'compare';
+                } else if (subPhase === 'compare') {
+                    if (nums[midPivot] < target) {
+                        highlightCode(16);
+                        document.getElementById('status').innerHTML = 
+                            `nums[${midPivot}]=${nums[midPivot]} < ${target}. Search right: left = ${mid + 1}`;
+                        left = mid + 1;
+                        subPhase = 'loop';
+                    } else if (nums[midPivot] > target) {
+                        highlightCode(17);
+                        document.getElementById('status').innerHTML = 
+                            `nums[${midPivot}]=${nums[midPivot]} > ${target}. Search left: right = ${mid - 1}`;
+                        right = mid - 1;
+                        subPhase = 'loop';
+                    } else {
+                        highlightCode(18);
+                        found = midPivot;
+                        document.getElementById('status').innerHTML = 
+                            `✅ Found! nums[${midPivot}] = ${target}. Return ${midPivot}`;
+                        document.getElementById('stepBtn').disabled = true;
+                        document.getElementById('autoBtn').disabled = true;
+                        stopAuto();
+                    }
+                }
+            }
+
+            renderArray();
+            renderVars();
+        }
+
+        function reset() {
+            stopAuto();
+            phase = 1;
+            left = 0;
+            right = nums.length - 1;
+            mid = -1;
+            pivot = -1;
+            midPivot = -1;
+            found = -1;
+            subPhase = 'loop';
+            
+            document.getElementById('stepBtn').disabled = false;
+            document.getElementById('autoBtn').disabled = false;
+            document.getElementById('status').innerHTML = 'Click "Step" or "Auto Run" to search in rotated array';
+            highlightCode(null);
+            updatePhaseIndicator();
+            renderArray();
+            renderVars();
+        }
+
+        function stopAuto() {
+            if (autoInterval) {
+                clearInterval(autoInterval);
+                autoInterval = null;
+                document.getElementById('autoBtn').textContent = 'Auto Run';
+            }
+        }
+
+        document.getElementById('stepBtn').addEventListener('click', () => {
+            stopAuto();
+            executeStep();
+        });
+
+        document.getElementById('autoBtn').addEventListener('click', () => {
+            if (autoInterval) {
+                stopAuto();
+            } else {
+                autoInterval = setInterval(executeStep, 700);
+                document.getElementById('autoBtn').textContent = '⏸ Pause';
+            }
+        });
+
+        document.getElementById('resetBtn').addEventListener('click', reset);
+
+        // Initialize
+        updatePhaseIndicator();
+        renderArray();
+        renderVars();
+    </script>
+</body>
+</html>

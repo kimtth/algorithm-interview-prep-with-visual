@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Q52: Range Sum of BST (v2 - Pruning)</title>
+    <link rel="stylesheet" href="visual.css">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    
+</head>
+<body>
+    <div class="container">
+        <div class="problem-info">
+            <h1>Q52: Range Sum of BST (v2 - Pruning)</h1>
+            <p>Uses BST property to prune branches: if node < L, skip left subtree; if node > R, skip right subtree.</p>
+            <div class="problem-meta">
+                <span class="meta-tag">📁 BST</span>
+                <span class="meta-tag">⏱️ O(n) worst, better avg</span>
+                <span class="meta-tag">💡 Recursive with Pruning</span>
+            </div>
+        </div>
+        
+        
+        
+        <div class="visualization-section">
+            <h3>🎬 Visualization</h3>
+            
+            <div class="controls">
+                <button class="btn btn-primary" id="stepBtn" onclick="step()">Step</button>
+                <button class="btn btn-success" id="autoBtn" onclick="toggleAuto()">Auto Run</button>
+                <button class="btn btn-warning" onclick="reset()">Reset</button>
+            </div>
+            
+            <div class="legend">
+                <div class="legend-item"><div class="legend-circle bg-cyan"></div> Unvisited</div>
+                <div class="legend-item"><div class="legend-circle legend-color bg-orange"></div> Current</div>
+                <div class="legend-item"><div class="legend-circle legend-color bg-green"></div> In Range (Added)</div>
+                <div class="legend-item"><div class="legend-circle legend-color bg-gray"></div> Pruned</div>
+            </div>
+            
+            <div class="status-message" id="statusMessage">
+                BST root=10, L=7, R=15. Using BST property to prune unnecessary branches.
+            </div>
+            
+            <div class="info-section">
+                <div class="info-box">
+                    <div class="info-label">Range [L, R]</div>
+                    <div class="info-value">[7, 15]</div>
+                </div>
+                <div class="info-box highlight">
+                    <div class="info-label">Current Sum</div>
+                    <div class="info-value" id="currentSum">0</div>
+                </div>
+                <div class="info-box warning">
+                    <div class="info-label">Nodes Pruned</div>
+                    <div class="info-value" id="prunedCount">0</div>
+                </div>
+            </div>
+            
+            <div class="tree-container">
+                <svg id="tree" width="500" height="280"></svg>
+            </div>
+        </div>
+    </div>
+        
+        <div class="code-section">
+            <h3>📄 Python Solution (52-2.py)</h3>
+            <pre><span class="comment"># Definition for a binary tree node.</span>
+<span class="keyword">class</span> TreeNode:
+    <span class="keyword">def</span> <span class="function">__init__</span>(<span class="keyword">self</span>, x):
+        <span class="keyword">self</span>.val = x
+        <span class="keyword">self</span>.left = <span class="keyword">None</span>
+        <span class="keyword">self</span>.right = <span class="keyword">None</span>
+
+
+<span class="keyword">class</span> Solution:
+    <span class="keyword">def</span> <span class="function">rangeSumBST</span>(<span class="keyword">self</span>, root: TreeNode, L: int, R: int) -&gt; int:
+        <span class="keyword">def</span> <span class="function">dfs</span>(node: TreeNode):
+            <span class="keyword">if</span> <span class="keyword">not</span> node:
+                <span class="keyword">return</span> <span class="number">0</span>
+
+            <span class="keyword">if</span> node.val &lt; L:
+                <span class="keyword">return</span> <span class="function">dfs</span>(node.right)
+            <span class="keyword">elif</span> node.val &gt; R:
+                <span class="keyword">return</span> <span class="function">dfs</span>(node.left)
+            <span class="keyword">return</span> node.val + <span class="function">dfs</span>(node.left) + <span class="function">dfs</span>(node.right)
+
+        <span class="keyword">return</span> <span class="function">dfs</span>(root)</pre>
+        </div>
+
+    </div>
+
+    <script>
+        // BST:      10
+        //         /    \
+        //        5      15
+        //       / \       \
+        //      3   7       18
+        // L=7, R=15 → Node 3 is pruned (5 < L, but check anyway; 3 < L, prune left of 5)
+        // Node 18 is pruned (15 ∈ [7,15], but 18 > R)
+        
+        const nodes = [
+            { id: 10, val: 10, left: 5, right: 15, x: 250, y: 50 },
+            { id: 5, val: 5, left: 3, right: 7, x: 125, y: 130 },
+            { id: 15, val: 15, left: null, right: 18, x: 375, y: 130 },
+            { id: 3, val: 3, left: null, right: null, x: 60, y: 210 },
+            { id: 7, val: 7, left: null, right: null, x: 190, y: 210 },
+            { id: 18, val: 18, left: null, right: null, x: 440, y: 210 }
+        ];
+        
+        const L = 7, R = 15;
+        
+        // Pruning order: 10 (in range, check both) → 5 (< L, go right only) → 7 (in range) → 15 (in range) → 18 (> R, prune)
+        const steps = [
+            { node: 10, action: 'in_range', message: '10 ∈ [7,15]. Add 10. Check both children.' },
+            { node: 5, action: 'below_l', message: '5 < L=7. Skip left subtree (node 3). Go right only.' },
+            { node: 3, action: 'pruned', message: 'Node 3 pruned (parent 5 < L).' },
+            { node: 7, action: 'in_range', message: '7 ∈ [7,15]. Add 7. Leaf node.' },
+            { node: 15, action: 'in_range', message: '15 ∈ [7,15]. Add 15. Check right child.' },
+            { node: 18, action: 'above_r', message: '18 > R=15. Pruned.' }
+        ];
+        
+        let visited = {};
+        let currentNode = null;
+        let sum = 0;
+        let prunedCount = 0;
+        let stepIndex = 0;
+        let autoInterval = null;
+        
+        function getNode(id) {
+            return nodes.find(n => n.id === id);
+        }
+        
+        function init() {
+            visited = {};
+            currentNode = null;
+            sum = 0;
+            prunedCount = 0;
+            stepIndex = 0;
+            
+            document.getElementById('currentSum').textContent = '0';
+            document.getElementById('prunedCount').textContent = '0';
+            renderTree();
+        }
+        
+        function renderTree() {
+            const svg = d3.select("#tree");
+            svg.selectAll("*").remove();
+            
+            // Draw edges
+            nodes.forEach(node => {
+                if (node.left !== null) {
+                    const child = getNode(node.left);
+                    const isPruned = visited[child.id] === 'pruned';
+                    svg.append("line")
+                        .attr("x1", node.x).attr("y1", node.y)
+                        .attr("x2", child.x).attr("y2", child.y)
+                        .attr("stroke", isPruned ? "#ccc" : "#999")
+                        .attr("stroke-width", 2)
+                        .attr("stroke-dasharray", isPruned ? "5,5" : "none");
+                }
+                if (node.right !== null) {
+                    const child = getNode(node.right);
+                    const isPruned = visited[child.id] === 'pruned';
+                    svg.append("line")
+                        .attr("x1", node.x).attr("y1", node.y)
+                        .attr("x2", child.x).attr("y2", child.y)
+                        .attr("stroke", isPruned ? "#ccc" : "#999")
+                        .attr("stroke-width", 2)
+                        .attr("stroke-dasharray", isPruned ? "5,5" : "none");
+                }
+            });
+            
+            // Draw nodes
+            nodes.forEach(node => {
+                let fill = "#3498db";
+                if (visited[node.id] === 'in_range') fill = "#4caf50";
+                else if (visited[node.id] === 'pruned' || visited[node.id] === 'below_l' || visited[node.id] === 'above_r') fill = "#9e9e9e";
+                if (node.id === currentNode) fill = "#ff9800";
+                
+                const opacity = (visited[node.id] === 'pruned') ? 0.5 : 1;
+                
+                svg.append("circle")
+                    .attr("cx", node.x)
+                    .attr("cy", node.y)
+                    .attr("r", 25)
+                    .attr("fill", fill)
+                    .attr("stroke", "#333")
+                    .attr("stroke-width", 2)
+                    .attr("opacity", opacity);
+                
+                svg.append("text")
+                    .attr("x", node.x)
+                    .attr("y", node.y + 5)
+                    .attr("text-anchor", "middle")
+                    .attr("fill", "white")
+                    .attr("font-weight", "bold")
+                    .attr("font-size", "14px")
+                    .attr("opacity", opacity)
+                    .text(node.val);
+            });
+        }
+        
+        function step() {
+            if (stepIndex >= steps.length) {
+                document.getElementById('statusMessage').textContent = `✅ Complete! Sum = ${sum}. Pruned ${prunedCount} nodes.`;
+                document.getElementById('stepBtn').disabled = true;
+                stopAuto();
+                currentNode = null;
+                renderTree();
+                return;
+            }
+            
+            const s = steps[stepIndex];
+            currentNode = s.node;
+            visited[s.node] = s.action;
+            
+            if (s.action === 'in_range') {
+                const node = getNode(s.node);
+                sum += node.val;
+            } else if (s.action === 'pruned' || s.action === 'above_r') {
+                prunedCount++;
+            }
+            
+            document.getElementById('currentSum').textContent = sum;
+            document.getElementById('prunedCount').textContent = prunedCount;
+            document.getElementById('statusMessage').textContent = s.message + ` Sum = ${sum}`;
+            
+            renderTree();
+            
+            stepIndex++;
+            
+            if (stepIndex >= steps.length) {
+                setTimeout(() => {
+                    document.getElementById('statusMessage').textContent = `✅ Complete! Sum = ${sum}. Pruned ${prunedCount} nodes.`;
+                    document.getElementById('stepBtn').disabled = true;
+                    stopAuto();
+                    currentNode = null;
+                    renderTree();
+                }, 300);
+            }
+        }
+        
+        function toggleAuto() {
+            if (autoInterval) { stopAuto(); }
+            else {
+                document.getElementById('autoBtn').textContent = 'Pause';
+                autoInterval = setInterval(step, 900);
+            }
+        }
+        
+        function stopAuto() {
+            if (autoInterval) { clearInterval(autoInterval); autoInterval = null; }
+            document.getElementById('autoBtn').textContent = 'Auto Run';
+        }
+        
+        function reset() {
+            stopAuto();
+            document.getElementById('stepBtn').disabled = false;
+            document.getElementById('statusMessage').textContent = 
+                'BST root=10, L=7, R=15. Using BST property to prune unnecessary branches.';
+            init();
+        }
+        
+        init();
+    </script>
+</body>
+</html>

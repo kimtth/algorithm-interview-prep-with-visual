@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Q52: Range Sum of BST (v1 - Brute Force)</title>
+    <link rel="stylesheet" href="visual.css">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    
+</head>
+<body>
+    <div class="container">
+        <div class="problem-info">
+            <h1>Q52: Range Sum of BST (v1 - Brute Force)</h1>
+            <p>Sum all node values in range [L, R]. This version visits ALL nodes recursively without BST-based pruning.</p>
+            <div class="problem-meta">
+                <span class="meta-tag">📁 BST</span>
+                <span class="meta-tag">⏱️ O(n)</span>
+                <span class="meta-tag">💡 Recursive DFS</span>
+            </div>
+        </div>
+        
+        
+        
+        <div class="visualization-section">
+            <h3>🎬 Visualization</h3>
+            
+            <div class="controls">
+                <button class="btn btn-primary" id="stepBtn" onclick="step()">Step</button>
+                <button class="btn btn-success" id="autoBtn" onclick="toggleAuto()">Auto Run</button>
+                <button class="btn btn-warning" onclick="reset()">Reset</button>
+            </div>
+            
+            <div class="legend">
+                <div class="legend-item"><div class="legend-circle bg-cyan"></div> Unvisited</div>
+                <div class="legend-item"><div class="legend-circle legend-color bg-orange"></div> Current</div>
+                <div class="legend-item"><div class="legend-circle legend-color bg-green"></div> In Range</div>
+                <div class="legend-item"><div class="legend-circle legend-color bg-red-light"></div> Out of Range</div>
+            </div>
+            
+            <div class="status-message" id="statusMessage">
+                BST root=10, L=7, R=15. Sum all values in [7, 15].
+            </div>
+            
+            <div class="info-section">
+                <div class="info-box">
+                    <div class="info-label">Range [L, R]</div>
+                    <div class="info-value">[7, 15]</div>
+                </div>
+                <div class="info-box highlight">
+                    <div class="info-label">Current Sum</div>
+                    <div class="info-value" id="currentSum">0</div>
+                </div>
+            </div>
+            
+            <div class="tree-container">
+                <svg id="tree" width="500" height="280"></svg>
+            </div>
+        </div>
+    </div>
+        
+        <div class="code-section">
+            <h3>📄 Python Solution (52-1.py)</h3>
+            <pre><span class="comment"># Definition for a binary tree node.</span>
+<span class="keyword">class</span> TreeNode:
+    <span class="keyword">def</span> <span class="function">__init__</span>(<span class="keyword">self</span>, x):
+        <span class="keyword">self</span>.val = x
+        <span class="keyword">self</span>.left = <span class="keyword">None</span>
+        <span class="keyword">self</span>.right = <span class="keyword">None</span>
+
+
+<span class="keyword">class</span> Solution:
+    <span class="keyword">def</span> <span class="function">rangeSumBST</span>(<span class="keyword">self</span>, root: TreeNode, L: int, R: int) -&gt; int:
+        <span class="keyword">if</span> <span class="keyword">not</span> root:
+            <span class="keyword">return</span> <span class="number">0</span>
+
+        <span class="keyword">return</span> (root.val <span class="keyword">if</span> L &lt;= root.val &lt;= R <span class="keyword">else</span> <span class="number">0</span>) + \
+               <span class="keyword">self</span>.<span class="function">rangeSumBST</span>(root.left, L, R) + \
+               <span class="keyword">self</span>.<span class="function">rangeSumBST</span>(root.right, L, R)</pre>
+        </div>
+
+    </div>
+
+    <script>
+        // BST:      10
+        //         /    \
+        //        5      15
+        //       / \       \
+        //      3   7       18
+        // L=7, R=15 → sum = 10 + 7 + 15 = 32
+        
+        const nodes = [
+            { id: 10, val: 10, left: 5, right: 15, x: 250, y: 50 },
+            { id: 5, val: 5, left: 3, right: 7, x: 125, y: 130 },
+            { id: 15, val: 15, left: null, right: 18, x: 375, y: 130 },
+            { id: 3, val: 3, left: null, right: null, x: 60, y: 210 },
+            { id: 7, val: 7, left: null, right: null, x: 190, y: 210 },
+            { id: 18, val: 18, left: null, right: null, x: 440, y: 210 }
+        ];
+        
+        const L = 7, R = 15;
+        
+        // DFS preorder traversal
+        const traversalOrder = [10, 5, 3, 7, 15, 18];
+        
+        let visited = {};
+        let currentNode = null;
+        let sum = 0;
+        let stepIndex = 0;
+        let autoInterval = null;
+        
+        function getNode(id) {
+            return nodes.find(n => n.id === id);
+        }
+        
+        function init() {
+            visited = {};
+            currentNode = null;
+            sum = 0;
+            stepIndex = 0;
+            
+            document.getElementById('currentSum').textContent = '0';
+            renderTree();
+        }
+        
+        function renderTree() {
+            const svg = d3.select("#tree");
+            svg.selectAll("*").remove();
+            
+            // Draw edges
+            nodes.forEach(node => {
+                if (node.left !== null) {
+                    const child = getNode(node.left);
+                    svg.append("line")
+                        .attr("x1", node.x).attr("y1", node.y)
+                        .attr("x2", child.x).attr("y2", child.y)
+                        .attr("stroke", "#999")
+                        .attr("stroke-width", 2);
+                }
+                if (node.right !== null) {
+                    const child = getNode(node.right);
+                    svg.append("line")
+                        .attr("x1", node.x).attr("y1", node.y)
+                        .attr("x2", child.x).attr("y2", child.y)
+                        .attr("stroke", "#999")
+                        .attr("stroke-width", 2);
+                }
+            });
+            
+            // Draw nodes
+            nodes.forEach(node => {
+                let fill = "#3498db";
+                if (visited[node.id] === 'in') fill = "#4caf50";
+                else if (visited[node.id] === 'out') fill = "#e57373";
+                if (node.id === currentNode) fill = "#ff9800";
+                
+                svg.append("circle")
+                    .attr("cx", node.x)
+                    .attr("cy", node.y)
+                    .attr("r", 25)
+                    .attr("fill", fill)
+                    .attr("stroke", "#333")
+                    .attr("stroke-width", 2);
+                
+                svg.append("text")
+                    .attr("x", node.x)
+                    .attr("y", node.y + 5)
+                    .attr("text-anchor", "middle")
+                    .attr("fill", "white")
+                    .attr("font-weight", "bold")
+                    .attr("font-size", "14px")
+                    .text(node.val);
+            });
+        }
+        
+        function step() {
+            if (stepIndex >= traversalOrder.length) {
+                document.getElementById('statusMessage').textContent = `✅ Complete! Sum of [${L}, ${R}] = ${sum}`;
+                document.getElementById('stepBtn').disabled = true;
+                stopAuto();
+                currentNode = null;
+                renderTree();
+                return;
+            }
+            
+            currentNode = traversalOrder[stepIndex];
+            const node = getNode(currentNode);
+            const inRange = node.val >= L && node.val <= R;
+            
+            if (inRange) {
+                sum += node.val;
+                visited[node.id] = 'in';
+                document.getElementById('statusMessage').textContent = 
+                    `Node ${node.val} ∈ [${L}, ${R}]. Add to sum: ${sum - node.val} + ${node.val} = ${sum}`;
+            } else {
+                visited[node.id] = 'out';
+                document.getElementById('statusMessage').textContent = 
+                    `Node ${node.val} ∉ [${L}, ${R}]. Skip. Sum = ${sum}`;
+            }
+            
+            document.getElementById('currentSum').textContent = sum;
+            renderTree();
+            
+            stepIndex++;
+            
+            if (stepIndex >= traversalOrder.length) {
+                setTimeout(() => {
+                    document.getElementById('statusMessage').textContent = `✅ Complete! Sum of [${L}, ${R}] = ${sum}`;
+                    document.getElementById('stepBtn').disabled = true;
+                    stopAuto();
+                    currentNode = null;
+                    renderTree();
+                }, 300);
+            }
+        }
+        
+        function toggleAuto() {
+            if (autoInterval) { stopAuto(); }
+            else {
+                document.getElementById('autoBtn').textContent = 'Pause';
+                autoInterval = setInterval(step, 800);
+            }
+        }
+        
+        function stopAuto() {
+            if (autoInterval) { clearInterval(autoInterval); autoInterval = null; }
+            document.getElementById('autoBtn').textContent = 'Auto Run';
+        }
+        
+        function reset() {
+            stopAuto();
+            document.getElementById('stepBtn').disabled = false;
+            document.getElementById('statusMessage').textContent = 
+                'BST root=10, L=7, R=15. Sum all values in [7, 15].';
+            init();
+        }
+        
+        init();
+    </script>
+</body>
+</html>

@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Q28: Design HashMap</title>
+    <link rel="stylesheet" href="visual.css">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    
+</head>
+<body>
+    <div class="container">
+        <div class="problem-info">
+            <h1>Q28: Design HashMap</h1>
+            <p>Design a HashMap without using built-in hash table libraries. Handle collisions with chaining.</p>
+            <div class="problem-meta">
+                <span class="meta-tag">📁 Hash Table</span>
+                <span class="meta-tag">⏱️ O(1) average</span>
+                <span class="meta-tag">💡 Separate Chaining</span>
+            </div>
+        </div>
+        
+        
+        
+        <div class="visualization-section">
+            <h3>🎬 Visualization (size = 5)</h3>
+            
+            <div class="controls">
+                <button class="btn btn-primary" id="stepBtn" onclick="step()">Step</button>
+                <button class="btn btn-success" id="autoBtn" onclick="toggleAuto()">Auto Run</button>
+                <button class="btn btn-warning" onclick="reset()">Reset</button>
+            </div>
+            
+            <div class="status-message" id="statusMessage">
+                Operations: put(1,1), put(6,6), put(2,2), get(1), remove(6)
+            </div>
+            
+            <div class="hash-table" id="hashTable"></div>
+        </div>
+    </div>
+        
+        <div class="code-section">
+            <h3>📄 Python Solution (28-1.py)</h3>
+            <pre><span class="keyword">import</span> collections
+
+
+<span class="comment"># Definition for singly-linked list.</span>
+<span class="keyword">class</span> ListNode:
+    <span class="keyword">def</span> <span class="function">__init__</span>(<span class="keyword">self</span>, key=<span class="keyword">None</span>, value=<span class="keyword">None</span>):
+        <span class="keyword">self</span>.key = key
+        <span class="keyword">self</span>.value = value
+        <span class="keyword">self</span>.next = <span class="keyword">None</span>
+
+
+<span class="keyword">class</span> MyHashMap:
+    <span class="comment"># 초기화</span>
+    <span class="keyword">def</span> <span class="function">__init__</span>(<span class="keyword">self</span>):
+        <span class="keyword">self</span>.size = <span class="number">1000</span>
+        <span class="keyword">self</span>.table = collections.<span class="function">defaultdict</span>(ListNode)
+
+    <span class="comment"># 삽입</span>
+    <span class="keyword">def</span> <span class="function">put</span>(<span class="keyword">self</span>, key: int, value: int) -&gt; <span class="keyword">None</span>:
+        index = key % <span class="keyword">self</span>.size
+        <span class="comment"># 인덱스에 노드가 없다면 삽입 후 종료</span>
+        <span class="keyword">if</span> <span class="keyword">self</span>.table[index].value is <span class="keyword">None</span>:
+            <span class="keyword">self</span>.table[index] = <span class="function">ListNode</span>(key, value)
+            <span class="keyword">return</span>
+
+        <span class="comment"># 인덱스에 노드가 존재하는 경우 연결 리스트 처리</span>
+        p = <span class="keyword">self</span>.table[index]
+        <span class="keyword">while</span> p:
+            <span class="keyword">if</span> p.key == key:
+                p.value = value
+                <span class="keyword">return</span>
+            <span class="keyword">if</span> p.next is <span class="keyword">None</span>:
+                <span class="keyword">break</span>
+            p = p.next
+        p.next = <span class="function">ListNode</span>(key, value)
+
+    <span class="comment"># 조회</span>
+    <span class="keyword">def</span> <span class="function">get</span>(<span class="keyword">self</span>, key: int) -&gt; int:
+        index = key % <span class="keyword">self</span>.size
+        <span class="keyword">if</span> <span class="keyword">self</span>.table[index].value is <span class="keyword">None</span>:
+            <span class="keyword">return</span> -<span class="number">1</span>
+
+        <span class="comment"># 노드가 존재할때 일치하는 키 탐색</span>
+        p = <span class="keyword">self</span>.table[index]
+        <span class="keyword">while</span> p:
+            <span class="keyword">if</span> p.key == key:
+                <span class="keyword">return</span> p.value
+            p = p.next
+        <span class="keyword">return</span> -<span class="number">1</span>
+
+    <span class="comment"># 삭제</span>
+    <span class="keyword">def</span> <span class="function">remove</span>(<span class="keyword">self</span>, key: int) -&gt; <span class="keyword">None</span>:
+        index = key % <span class="keyword">self</span>.size
+        <span class="keyword">if</span> <span class="keyword">self</span>.table[index].value is <span class="keyword">None</span>:
+            <span class="keyword">return</span>
+
+        <span class="comment"># 인덱스의 첫 번째 노드일때 삭제 처리</span>
+        p = <span class="keyword">self</span>.table[index]
+        <span class="keyword">if</span> p.key == key:
+            <span class="keyword">self</span>.table[index] = <span class="function">ListNode</span>() <span class="keyword">if</span> p.next is <span class="keyword">None</span> <span class="keyword">else</span> p.next
+            <span class="keyword">return</span>
+
+        <span class="comment"># 연결 리스트 노드 삭제</span>
+        prev = p
+        <span class="keyword">while</span> p:
+            <span class="keyword">if</span> p.key == key:
+                prev.next = p.next
+                <span class="keyword">return</span>
+            prev, p = p, p.next</pre>
+        </div>
+
+    </div>
+
+    <script>
+        const SIZE = 5;
+        let table = {};
+        let stepIndex = 0;
+        let autoInterval = null;
+        let newNode = null;
+        
+        const operations = [
+            { op: 'put', key: 1, val: 1, msg: 'put(1,1): hash(1)=1%5=1, insert at bucket 1' },
+            { op: 'put', key: 6, val: 6, msg: 'put(6,6): hash(6)=6%5=1, collision! Chain at bucket 1' },
+            { op: 'put', key: 2, val: 2, msg: 'put(2,2): hash(2)=2%5=2, insert at bucket 2' },
+            { op: 'get', key: 1, msg: 'get(1): hash(1)=1, search bucket 1, found value 1' },
+            { op: 'remove', key: 6, msg: 'remove(6): hash(6)=1, remove from bucket 1 chain' },
+            { op: 'done', msg: '✅ Done! HashMap operations demonstrated.' }
+        ];
+        
+        function init() {
+            table = {};
+            for (let i = 0; i < SIZE; i++) table[i] = [];
+            stepIndex = 0;
+            newNode = null;
+            renderTable();
+        }
+        
+        function renderTable() {
+            const container = document.getElementById('hashTable');
+            container.innerHTML = '';
+            
+            for (let i = 0; i < SIZE; i++) {
+                const row = document.createElement('div');
+                row.className = 'bucket-row';
+                row.innerHTML = `<span class="bucket-index">[${i}]</span>`;
+                
+                const content = document.createElement('div');
+                content.className = 'bucket-content';
+                
+                if (table[i].length === 0) {
+                    content.innerHTML = '<span class="text-gray">empty</span>';
+                } else {
+                    table[i].forEach((item, j) => {
+                        if (j > 0) {
+                            const arrow = document.createElement('span');
+                            arrow.className = 'bucket-arrow';
+                            arrow.textContent = '→';
+                            content.appendChild(arrow);
+                        }
+                        const node = document.createElement('div');
+                        node.className = 'hash-node';
+                        if (newNode && newNode.bucket === i && newNode.key === item.key) {
+                            node.classList.add('new');
+                        }
+                        node.textContent = `(${item.key}:${item.val})`;
+                        content.appendChild(node);
+                    });
+                }
+                
+                row.appendChild(content);
+                container.appendChild(row);
+            }
+        }
+        
+        function step() {
+            if (stepIndex >= operations.length) return;
+            
+            const op = operations[stepIndex];
+            document.getElementById('statusMessage').textContent = op.msg;
+            newNode = null;
+            
+            if (op.op === 'put') {
+                const bucket = op.key % SIZE;
+                const existing = table[bucket].findIndex(n => n.key === op.key);
+                if (existing >= 0) {
+                    table[bucket][existing].val = op.val;
+                } else {
+                    table[bucket].push({ key: op.key, val: op.val });
+                    newNode = { bucket, key: op.key };
+                }
+            } else if (op.op === 'remove') {
+                const bucket = op.key % SIZE;
+                table[bucket] = table[bucket].filter(n => n.key !== op.key);
+            } else if (op.op === 'done') {
+                document.getElementById('stepBtn').disabled = true;
+                stopAuto();
+            }
+            
+            renderTable();
+            stepIndex++;
+        }
+        
+        function toggleAuto() {
+            if (autoInterval) { stopAuto(); }
+            else {
+                document.getElementById('autoBtn').textContent = 'Pause';
+                autoInterval = setInterval(() => {
+                    if (stepIndex >= operations.length) stopAuto();
+                    else step();
+                }, 1000);
+            }
+        }
+        
+        function stopAuto() {
+            if (autoInterval) { clearInterval(autoInterval); autoInterval = null; }
+            document.getElementById('autoBtn').textContent = 'Auto Run';
+        }
+        
+        function reset() {
+            stopAuto();
+            document.getElementById('stepBtn').disabled = false;
+            document.getElementById('statusMessage').textContent = 'Operations: put(1,1), put(6,6), put(2,2), get(1), remove(6)';
+            init();
+        }
+        
+        init();
+    </script>
+</body>
+</html>

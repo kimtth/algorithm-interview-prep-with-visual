@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Q13: Palindrome Linked List - Runner</title>
+    <link rel="stylesheet" href="visual.css">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    
+</head>
+<body>
+    <div class="container">
+        <div class="problem-info">
+            <h1>Q13: Palindrome Linked List</h1>
+            <p>Given the head of a singly linked list, determine if it is a palindrome.</p>
+            <div class="problem-meta">
+                <span class="meta-tag">📁 Linked List</span>
+                <span class="meta-tag">⏱️ O(n)</span>
+                <span class="meta-tag">💾 O(1) space!</span>
+                <span class="meta-tag">💡 Version 3: Runner Technique</span>
+            </div>
+        </div>
+        
+        <div class="code-section">
+            <h3>💻 Python Solution - Runner (Fast/Slow Pointer)</h3>
+            <div class="code-block">
+                <pre><span class="keyword">def</span> <span class="function">isPalindrome</span>(self, head: ListNode) -> <span class="class-name">bool</span>:
+    rev = <span class="keyword">None</span>
+    slow = fast = head
+    <span class="comment"># Build reverse list while finding middle</span>
+    <span class="keyword">while</span> fast <span class="keyword">and</span> fast.next:
+        fast = fast.next.next
+        rev, rev.next, slow = slow, rev, slow.next
+    <span class="keyword">if</span> fast:  <span class="comment"># Odd length, skip middle</span>
+        slow = slow.next
+    
+    <span class="comment"># Compare reversed first half with second half</span>
+    <span class="keyword">while</span> rev <span class="keyword">and</span> rev.val == slow.val:
+        slow, rev = slow.next, rev.next
+    <span class="keyword">return not</span> rev</pre>
+            </div>
+        </div>
+        
+        <div class="visualization-section">
+            <h3>🎬 Visualization</h3>
+            
+            <div class="controls">
+                <button class="btn btn-primary" id="stepBtn" onclick="step()">Step</button>
+                <button class="btn btn-success" id="autoBtn" onclick="toggleAuto()">Auto Run</button>
+                <button class="btn btn-warning" onclick="reset()">Reset</button>
+            </div>
+            
+            <div class="pointer-legend">
+                <div class="legend-item legend-fast">🐇 fast (2x speed)</div>
+                <div class="legend-item legend-slow">🐢 slow (1x speed)</div>
+                <div class="legend-item legend-rev">↩️ rev (reversed)</div>
+            </div>
+            
+            <div class="status-message" id="statusMessage">
+                Click "Step" or "Auto Run" to start visualization
+            </div>
+            
+            <div class="list-section">
+                <div class="list-label">Original List:</div>
+                <div class="list-container" id="originalList"></div>
+            </div>
+            
+            <div class="list-section">
+                <div class="list-label">Reversed First Half:</div>
+                <div class="list-container" id="reversedList"></div>
+            </div>
+            
+            <div class="list-section">
+                <div class="list-label">Second Half (from slow):</div>
+                <div class="list-container" id="secondHalf"></div>
+            </div>
+            
+            <div id="resultDisplay"></div>
+        </div>
+    </div>
+
+    <script>
+        const values = [1, 2, 2, 1];
+        let slowIdx = 0, fastIdx = 0;
+        let revList = [];
+        let phase = 'init'; // init, finding, compare, done
+        let autoInterval = null;
+        let compareIdx = 0;
+        
+        function init() {
+            renderOriginal();
+            document.getElementById('reversedList').innerHTML = '';
+            document.getElementById('secondHalf').innerHTML = '';
+            document.getElementById('resultDisplay').innerHTML = '';
+        }
+        
+        function renderOriginal() {
+            const container = document.getElementById('originalList');
+            container.innerHTML = '';
+            values.forEach((val, i) => {
+                const node = document.createElement('div');
+                node.className = 'list-node';
+                node.id = `orig-${i}`;
+                node.textContent = val;
+                container.appendChild(node);
+                
+                if (i < values.length - 1) {
+                    const arrow = document.createElement('div');
+                    arrow.className = 'list-arrow';
+                    container.appendChild(arrow);
+                }
+            });
+        }
+        
+        function renderReversed() {
+            const container = document.getElementById('reversedList');
+            container.innerHTML = '';
+            revList.forEach((val, i) => {
+                const node = document.createElement('div');
+                node.className = 'list-node rev';
+                node.id = `rev-${i}`;
+                node.textContent = val;
+                container.appendChild(node);
+                
+                if (i < revList.length - 1) {
+                    const arrow = document.createElement('div');
+                    arrow.className = 'list-arrow rev';
+                    container.appendChild(arrow);
+                }
+            });
+        }
+        
+        function renderSecondHalf(startIdx) {
+            const container = document.getElementById('secondHalf');
+            container.innerHTML = '';
+            for (let i = startIdx; i < values.length; i++) {
+                const node = document.createElement('div');
+                node.className = 'list-node';
+                node.id = `second-${i - startIdx}`;
+                node.textContent = values[i];
+                container.appendChild(node);
+                
+                if (i < values.length - 1) {
+                    const arrow = document.createElement('div');
+                    arrow.className = 'list-arrow';
+                    container.appendChild(arrow);
+                }
+            }
+        }
+        
+        function step() {
+            // Clear previous highlights
+            document.querySelectorAll('.list-node').forEach(n => {
+                n.classList.remove('slow', 'fast');
+                const label = n.querySelector('.pointer-label');
+                if (label) label.remove();
+            });
+            
+            if (phase === 'init') {
+                phase = 'finding';
+                slowIdx = 0;
+                fastIdx = 0;
+                revList = [];
+                document.getElementById('statusMessage').textContent = 
+                    'Phase 1: Find middle using fast/slow pointers while reversing first half';
+            } else if (phase === 'finding') {
+                // Check if fast can move
+                if (fastIdx < values.length && fastIdx + 1 < values.length) {
+                    // Add to reversed list
+                    revList.unshift(values[slowIdx]);
+                    renderReversed();
+                    
+                    // Move pointers
+                    slowIdx++;
+                    fastIdx += 2;
+                    
+                    // Highlight positions
+                    if (slowIdx < values.length) {
+                        const slowNode = document.getElementById(`orig-${slowIdx}`);
+                        slowNode.classList.add('slow');
+                        const slowLabel = document.createElement('span');
+                        slowLabel.className = 'pointer-label slow';
+                        slowLabel.textContent = 'slow';
+                        slowNode.appendChild(slowLabel);
+                    }
+                    if (fastIdx < values.length) {
+                        const fastNode = document.getElementById(`orig-${fastIdx}`);
+                        fastNode.classList.add('fast');
+                        const fastLabel = document.createElement('span');
+                        fastLabel.className = 'pointer-label fast';
+                        fastLabel.textContent = 'fast';
+                        fastNode.appendChild(fastLabel);
+                    }
+                    
+                    document.getElementById('statusMessage').textContent = 
+                        `slow at index ${slowIdx}, fast at index ${fastIdx}. Reversed: [${revList.join(', ')}]`;
+                } else {
+                    // If odd length, skip middle
+                    let secondStart = slowIdx;
+                    if (values.length % 2 === 1) {
+                        secondStart = slowIdx + 1;
+                        document.getElementById('statusMessage').textContent = 
+                            'Odd length: skip middle element. Now comparing halves.';
+                    } else {
+                        document.getElementById('statusMessage').textContent = 
+                            'Even length. Now comparing halves.';
+                    }
+                    renderSecondHalf(secondStart);
+                    phase = 'compare';
+                    compareIdx = 0;
+                }
+            } else if (phase === 'compare') {
+                if (compareIdx >= revList.length) {
+                    phase = 'done';
+                    document.getElementById('resultDisplay').innerHTML = 
+                        '<div class="result-display success">✅ It\'s a Palindrome!</div>';
+                    document.getElementById('statusMessage').textContent = 
+                        'All comparisons matched!';
+                    document.getElementById('stepBtn').disabled = true;
+                    stopAuto();
+                } else {
+                    const revVal = revList[compareIdx];
+                    const secondVal = values[slowIdx + compareIdx + (values.length % 2 === 1 ? 1 : 0)];
+                    
+                    const revNode = document.getElementById(`rev-${compareIdx}`);
+                    const secondNode = document.getElementById(`second-${compareIdx}`);
+                    
+                    if (revVal === secondVal) {
+                        revNode.classList.add('match');
+                        secondNode.classList.add('match');
+                        document.getElementById('statusMessage').textContent = 
+                            `Compare: ${revVal} == ${secondVal} → Match!`;
+                        compareIdx++;
+                    } else {
+                        revNode.classList.add('mismatch');
+                        secondNode.classList.add('mismatch');
+                        phase = 'done';
+                        document.getElementById('resultDisplay').innerHTML = 
+                            '<div class="result-display failure">❌ Not a Palindrome!</div>';
+                        document.getElementById('statusMessage').textContent = 
+                            `Compare: ${revVal} != ${secondVal} → Mismatch!`;
+                        document.getElementById('stepBtn').disabled = true;
+                        stopAuto();
+                    }
+                }
+            }
+        }
+        
+        function toggleAuto() {
+            if (autoInterval) {
+                stopAuto();
+            } else {
+                document.getElementById('autoBtn').textContent = 'Pause';
+                autoInterval = setInterval(() => {
+                    if (phase === 'done') {
+                        stopAuto();
+                    } else {
+                        step();
+                    }
+                }, 1000);
+            }
+        }
+        
+        function stopAuto() {
+            if (autoInterval) {
+                clearInterval(autoInterval);
+                autoInterval = null;
+            }
+            document.getElementById('autoBtn').textContent = 'Auto Run';
+        }
+        
+        function reset() {
+            stopAuto();
+            phase = 'init';
+            slowIdx = 0;
+            fastIdx = 0;
+            revList = [];
+            compareIdx = 0;
+            document.getElementById('stepBtn').disabled = false;
+            document.getElementById('statusMessage').textContent = 
+                'Click "Step" or "Auto Run" to start visualization';
+            init();
+        }
+        
+        init();
+    </script>
+</body>
+</html>

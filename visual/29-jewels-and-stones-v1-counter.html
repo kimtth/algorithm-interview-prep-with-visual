@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Q29: Jewels and Stones - Hash Counter</title>
+    <link rel="stylesheet" href="visual.css">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    
+</head>
+<body>
+    <div class="container">
+        <div class="problem-info">
+            <h1>Q29: Jewels and Stones</h1>
+            <p>Count how many stones you have that are also jewels.</p>
+            <div class="problem-meta">
+                <span class="meta-tag">📁 Hash Table</span>
+                <span class="meta-tag">⏱️ O(J + S)</span>
+                <span class="meta-tag">💡 Version 1: Hash Counter</span>
+            </div>
+        </div>
+        
+        
+        
+        <div class="visualization-section">
+            <h3>🎬 Visualization</h3>
+            
+            <div class="controls">
+                <button class="btn btn-primary" id="stepBtn" onclick="step()">Step</button>
+                <button class="btn btn-success" id="autoBtn" onclick="toggleAuto()">Auto Run</button>
+                <button class="btn btn-warning" onclick="reset()">Reset</button>
+            </div>
+            
+            <div class="status-message" id="statusMessage">
+                J (jewels) = "aA", S (stones) = "aAAbbbb". Find jewel stones.
+            </div>
+            
+            <div class="input-section">
+                <div class="input-box">
+                    <div class="input-label">💎 Jewels (J):</div>
+                    <div class="input-chars" id="jewelsDisplay"></div>
+                </div>
+                <div class="input-box">
+                    <div class="input-label">🪨 Stones (S):</div>
+                    <div class="input-chars" id="stonesDisplay"></div>
+                </div>
+            </div>
+            
+            <div class="counter-section">
+                <div class="counter-label">Stone Frequency Counter:</div>
+                <div class="counter-grid" id="counterGrid"></div>
+            </div>
+            
+            <div class="result-box" id="resultBox">Count: 0</div>
+        </div>
+    </div>
+        
+        <div class="code-section">
+            <h3>📄 Python Solution (29-1.py)</h3>
+            <pre><span class="keyword">class</span> Solution:
+    <span class="keyword">def</span> <span class="function">numJewelsInStones</span>(<span class="keyword">self</span>, J: str, S: str) -&gt; int:
+        freqs = {}
+        count = <span class="number">0</span>
+
+        <span class="comment"># 돌(S)의 빈도 수 계산</span>
+        <span class="keyword">for</span> char <span class="keyword">in</span> S:
+            <span class="keyword">if</span> char <span class="keyword">not</span> <span class="keyword">in</span> freqs:
+                freqs[char] = <span class="number">1</span>
+            <span class="keyword">else</span>:
+                freqs[char] += <span class="number">1</span>
+
+        <span class="comment"># 보석(J)의 빈도 수 합산</span>
+        <span class="keyword">for</span> char <span class="keyword">in</span> J:
+            <span class="keyword">if</span> char <span class="keyword">in</span> freqs:
+                count += freqs[char]
+
+        <span class="keyword">return</span> count</pre>
+        </div>
+
+    </div>
+
+    <script>
+        const jewels = "aA";
+        const stones = "aAAbbbb";
+        let counter = {};
+        let count = 0;
+        let phase = 'count';
+        let sIndex = 0;
+        let jIndex = 0;
+        let autoInterval = null;
+        
+        function init() {
+            counter = {};
+            count = 0;
+            phase = 'count';
+            sIndex = 0;
+            jIndex = 0;
+            renderJewels();
+            renderStones();
+            renderCounter();
+            document.getElementById('resultBox').textContent = 'Count: 0';
+        }
+        
+        function renderJewels(currentIdx = -1) {
+            const container = document.getElementById('jewelsDisplay');
+            container.innerHTML = '';
+            jewels.split('').forEach((c, i) => {
+                const box = document.createElement('div');
+                box.className = 'char-box jewel';
+                if (i === currentIdx) box.classList.add('current');
+                box.textContent = c;
+                container.appendChild(box);
+            });
+        }
+        
+        function renderStones(currentIdx = -1, matched = []) {
+            const container = document.getElementById('stonesDisplay');
+            container.innerHTML = '';
+            stones.split('').forEach((c, i) => {
+                const box = document.createElement('div');
+                box.className = 'char-box stone';
+                if (i === currentIdx) box.classList.add('current');
+                if (matched.includes(i)) box.classList.add('matched');
+                box.textContent = c;
+                container.appendChild(box);
+            });
+        }
+        
+        function renderCounter() {
+            const container = document.getElementById('counterGrid');
+            container.innerHTML = '';
+            Object.entries(counter).forEach(([char, cnt]) => {
+                const item = document.createElement('div');
+                item.className = 'counter-item';
+                item.innerHTML = `<div class="counter-char">${char}</div><div class="counter-count">${cnt}</div>`;
+                container.appendChild(item);
+            });
+        }
+        
+        function step() {
+            if (phase === 'count') {
+                if (sIndex < stones.length) {
+                    const c = stones[sIndex];
+                    counter[c] = (counter[c] || 0) + 1;
+                    document.getElementById('statusMessage').textContent = 
+                        `Counting stones: '${c}' → counter[${c}] = ${counter[c]}`;
+                    renderStones(sIndex);
+                    renderCounter();
+                    sIndex++;
+                } else {
+                    phase = 'sum';
+                    document.getElementById('statusMessage').textContent = 
+                        'Stone counting complete. Now sum jewel frequencies.';
+                }
+            } else if (phase === 'sum') {
+                if (jIndex < jewels.length) {
+                    const c = jewels[jIndex];
+                    const add = counter[c] || 0;
+                    count += add;
+                    document.getElementById('statusMessage').textContent = 
+                        `Jewel '${c}': counter[${c}] = ${add}, total = ${count}`;
+                    renderJewels(jIndex);
+                    document.getElementById('resultBox').textContent = `Count: ${count}`;
+                    jIndex++;
+                } else {
+                    phase = 'done';
+                    document.getElementById('statusMessage').textContent = 
+                        `✅ Done! ${count} stones are jewels.`;
+                    document.getElementById('stepBtn').disabled = true;
+                    stopAuto();
+                }
+            }
+        }
+        
+        function toggleAuto() {
+            if (autoInterval) { stopAuto(); }
+            else {
+                document.getElementById('autoBtn').textContent = 'Pause';
+                autoInterval = setInterval(() => {
+                    if (phase === 'done') stopAuto();
+                    else step();
+                }, 500);
+            }
+        }
+        
+        function stopAuto() {
+            if (autoInterval) { clearInterval(autoInterval); autoInterval = null; }
+            document.getElementById('autoBtn').textContent = 'Auto Run';
+        }
+        
+        function reset() {
+            stopAuto();
+            document.getElementById('stepBtn').disabled = false;
+            document.getElementById('statusMessage').textContent = 'J (jewels) = "aA", S (stones) = "aAAbbbb". Find jewel stones.';
+            init();
+        }
+        
+        init();
+    </script>
+</body>
+</html>

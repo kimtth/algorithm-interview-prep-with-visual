@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Q88: House Robber - OrderedDict DP</title>
+    <link rel="stylesheet" href="visual.css">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🏠 Q88: House Robber - OrderedDict DP</h1>
+            <p>LeetCode #198 | File: 88-2.py | Approach: OrderedDict with popitem()</p>
+        </div>
+        
+        <div class="problem-info">
+            <h3>📋 Problem Description</h3>
+            <p>Maximize loot without robbing adjacent houses.</p>
+            <p class="mt-10"><strong>Key Insight:</strong> Use OrderedDict to maintain only the last 2 DP values. 
+            dp[i] = max(dp[i-1], dp[i-2] + nums[i]). Pop oldest entry to save space.</p>
+        </div>
+
+        
+            
+            <div class="formula-box" id="formulaBox">
+                dp[i] = max(dp[i-1], dp[i-2] + nums[i])
+            </div>
+            
+            <div class="result-display" id="result"></div>
+        </div>
+
+        <div class="status" id="status">Ready to plan the heist</div>
+    </div>
+
+        <div class="controls">
+            <button class="btn btn-primary" onclick="step()">Step</button>
+            <button class="btn btn-success" onclick="toggleAutoRun()">Auto Run</button>
+            <button class="btn btn-warning" onclick="reset()">Reset</button>
+        </div>
+
+        <div class="step-info" id="stepInfo">Click "Step" to maximize robbery loot</div>
+        
+        <div class="visualization">
+            <h4 class="text-center mb-10">Houses</h4>
+            <div class="houses-row" id="housesRow"></div>
+            
+            <div class="dict-section">
+                <h4>OrderedDict (sliding window of 2)</h4>
+                <div class="dict-items" id="dictItems"></div>
+    
+        <div class="code-section">
+            <h3>📄 Python Solution (88-2.py)</h3>
+            <pre><span class="keyword">import</span> collections
+<span class="keyword">from</span> typing <span class="keyword">import</span> List
+
+
+<span class="keyword">class</span> Solution:
+    <span class="keyword">def</span> <span class="function">rob</span>(<span class="keyword">self</span>, nums: List[int]) -&gt; int:
+        <span class="keyword">if</span> <span class="keyword">not</span> nums:
+            <span class="keyword">return</span> <span class="number">0</span>
+        <span class="keyword">if</span> <span class="function">len</span>(nums) &lt;= <span class="number">2</span>:
+            <span class="keyword">return</span> <span class="function">max</span>(nums)
+
+        dp = collections.<span class="function">OrderedDict</span>()
+        dp[<span class="number">0</span>], dp[<span class="number">1</span>] = nums[<span class="number">0</span>], <span class="function">max</span>(nums[<span class="number">0</span>], nums[<span class="number">1</span>])
+        <span class="keyword">for</span> i <span class="keyword">in</span> <span class="function">range</span>(<span class="number">2</span>, <span class="function">len</span>(nums)):
+            dp[i] = <span class="function">max</span>(dp[i - <span class="number">1</span>], dp[i - <span class="number">2</span>] + nums[i])
+
+        <span class="keyword">return</span> dp.<span class="function">popitem</span>()[<span class="number">1</span>]</pre>
+        </div>
+
+    </div>
+
+    <script>
+        const nums = [2, 7, 9, 3, 1];
+        const dp = new Map(); // Simulating OrderedDict
+        let currentIdx = -1;
+        let autoRunning = false;
+        let autoRunInterval;
+
+        function renderHouses() {
+            const container = document.getElementById('housesRow');
+            container.innerHTML = '';
+            nums.forEach((value, i) => {
+                const house = document.createElement('div');
+                house.className = 'house';
+                if (i === currentIdx) house.classList.add('current');
+                house.innerHTML = `<div class="house-icon">🏠</div>
+                                   <div class="house-value">$${value}</div>
+                                   <div class="text-sm text-gray-dark">House ${i}</div>`;
+                container.appendChild(house);
+            });
+        }
+
+        function renderDict() {
+            const container = document.getElementById('dictItems');
+            container.innerHTML = '';
+            dp.forEach((value, key) => {
+                const item = document.createElement('div');
+                item.className = 'dict-item';
+                if (key === currentIdx) item.classList.add('current');
+                item.innerHTML = `<div class="dict-key">dp[${key}]</div>
+                                  <div class="dict-value">$${value}</div>`;
+                container.appendChild(item);
+            });
+        }
+
+        function step() {
+            currentIdx++;
+            
+            if (currentIdx === 0) {
+                dp.set(0, nums[0]);
+                document.getElementById('stepInfo').textContent = 
+                    `Initialize: dp[0] = nums[0] = $${nums[0]}`;
+                document.getElementById('formulaBox').textContent = `dp[0] = nums[0] = ${nums[0]}`;
+            } else if (currentIdx === 1) {
+                dp.set(1, Math.max(nums[0], nums[1]));
+                document.getElementById('stepInfo').textContent = 
+                    `Initialize: dp[1] = max(${nums[0]}, ${nums[1]}) = $${dp.get(1)}`;
+                document.getElementById('formulaBox').textContent = 
+                    `dp[1] = max(nums[0], nums[1]) = max(${nums[0]}, ${nums[1]}) = ${dp.get(1)}`;
+            } else if (currentIdx < nums.length) {
+                const prev1 = dp.get(currentIdx - 1);
+                const prev2 = dp.get(currentIdx - 2);
+                const newVal = Math.max(prev1, prev2 + nums[currentIdx]);
+                
+                // Remove oldest (simulating popitem(last=False))
+                const oldestKey = dp.keys().next().value;
+                dp.delete(oldestKey);
+                dp.set(currentIdx, newVal);
+                
+                const option1 = `dp[${currentIdx-1}] = ${prev1}`;
+                const option2 = `dp[${currentIdx-2}] + nums[${currentIdx}] = ${prev2} + ${nums[currentIdx]} = ${prev2 + nums[currentIdx]}`;
+                
+                document.getElementById('stepInfo').textContent = 
+                    `House ${currentIdx}: max(${prev1}, ${prev2}+${nums[currentIdx]}) = $${newVal}. Popped dp[${oldestKey}]`;
+                document.getElementById('formulaBox').innerHTML = 
+                    `max(${option1}, ${option2}) = ${newVal}`;
+            } else {
+                const lastValue = Array.from(dp.values()).pop();
+                document.getElementById('stepInfo').textContent = 
+                    `Done! Maximum loot: $${lastValue}`;
+                document.getElementById('result').innerHTML = 
+                    `<span class="text-green">Maximum Loot: <strong>$${lastValue}</strong></span>`;
+                document.getElementById('status').textContent = 
+                    'OrderedDict keeps only 2 values - O(1) space optimization!';
+                return;
+            }
+
+            renderHouses();
+            renderDict();
+        }
+
+        function toggleAutoRun() {
+            autoRunning = !autoRunning;
+            const btn = document.querySelector('.btn-success');
+            if (autoRunning) {
+                btn.textContent = 'Pause';
+                autoRunInterval = setInterval(() => {
+                    if (currentIdx >= nums.length) {
+                        toggleAutoRun(); return;
+                    }
+                    step();
+                }, 1200);
+            } else {
+                btn.textContent = 'Auto Run';
+                clearInterval(autoRunInterval);
+            }
+        }
+
+        function reset() {
+            currentIdx = -1;
+            dp.clear();
+            if (autoRunning) toggleAutoRun();
+            document.getElementById('stepInfo').textContent = 'Click "Step" to maximize robbery loot';
+            document.getElementById('status').textContent = 'Ready to plan the heist';
+            document.getElementById('result').innerHTML = '';
+            document.getElementById('formulaBox').textContent = 'dp[i] = max(dp[i-1], dp[i-2] + nums[i])';
+            renderHouses();
+            renderDict();
+        }
+
+        renderHouses();
+        renderDict();
+    </script>
+</body>
+</html>

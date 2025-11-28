@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Q55: Kth Largest Element (v3 - nlargest)</title>
+    <link rel="stylesheet" href="visual.css">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    
+</head>
+<body>
+    <div class="container">
+        <div class="problem-info">
+            <h1>Q55: Kth Largest Element (v3 - nlargest)</h1>
+            <p>Use Python's heapq.nlargest() to get k largest elements, then return the last one (kth largest).</p>
+            <div class="problem-meta">
+                <span class="meta-tag">📁 Heap</span>
+                <span class="meta-tag">⏱️ O(n log k)</span>
+                <span class="meta-tag">💡 Built-in Function</span>
+            </div>
+        </div>
+        
+        
+        
+        <div class="visualization-section">
+            <h3>🎬 Visualization</h3>
+            
+            <div class="controls">
+                <button class="btn btn-primary" id="stepBtn" onclick="step()">Step</button>
+                <button class="btn btn-success" id="autoBtn" onclick="toggleAuto()">Auto Run</button>
+                <button class="btn btn-warning" onclick="reset()">Reset</button>
+            </div>
+            
+            <div class="status-message" id="statusMessage">
+                nums = [3, 2, 1, 5, 6, 4], k = 2. Use heapq.nlargest(2, nums).
+            </div>
+            
+            <div class="array-section">
+                <div class="array-title">📊 Input Array</div>
+                <div class="array-container" id="inputArray"></div>
+            </div>
+            
+            <div class="array-section">
+                <div class="array-title">🏆 nlargest(k=2) Result - Top k Elements</div>
+                <div class="array-container" id="resultArray">
+                    <span class="text-gray-sm">Run to see result</span>
+                </div>
+            </div>
+            
+            <div class="result-box" id="resultBox" class="d-none">
+                <div class="result-label">kth Largest (last element of nlargest)</div>
+                <div class="result-value" id="finalResult">-</div>
+            </div>
+        </div>
+    </div>
+        
+        <div class="code-section">
+            <h3>📄 Python Solution (55-3.py)</h3>
+            <pre><span class="keyword">import</span> heapq
+<span class="keyword">from</span> typing <span class="keyword">import</span> List
+
+
+<span class="keyword">class</span> Solution:
+    <span class="keyword">def</span> <span class="function">findKthLargest</span>(<span class="keyword">self</span>, nums: List[int], k: int) -&gt; int:
+        <span class="keyword">return</span> heapq.<span class="function">nlargest</span>(k, nums)[-<span class="number">1</span>]</pre>
+        </div>
+
+    </div>
+
+    <script>
+        const nums = [3, 2, 1, 5, 6, 4];
+        const k = 2;
+        const sorted = [...nums].sort((a, b) => b - a);
+        const nlargest = sorted.slice(0, k); // [6, 5]
+        
+        let stepIndex = 0;
+        let autoInterval = null;
+        
+        function init() {
+            stepIndex = 0;
+            renderInputArray([]);
+            document.getElementById('resultArray').innerHTML = '<span class="text-gray-sm">Run to see result</span>';
+            document.getElementById('resultBox').style.display = 'none';
+        }
+        
+        function renderInputArray(selected) {
+            const container = document.getElementById('inputArray');
+            container.innerHTML = nums.map(val => {
+                let cls = 'array-item';
+                if (selected.includes(val)) cls += ' selected';
+                return `<div class="${cls}">${val}</div>`;
+            }).join('');
+        }
+        
+        function step() {
+            if (stepIndex === 0) {
+                // Show finding largest elements
+                renderInputArray(nlargest);
+                document.getElementById('statusMessage').textContent = 
+                    `heapq.nlargest(2, nums) finds the 2 largest: [6, 5]`;
+                stepIndex++;
+            } else if (stepIndex === 1) {
+                // Show result array
+                document.getElementById('resultArray').innerHTML = nlargest.map((val, i) => {
+                    let cls = 'array-item selected';
+                    if (i === k - 1) cls = 'array-item answer';
+                    return `<div class="${cls}">${val}</div>`;
+                }).join('');
+                document.getElementById('statusMessage').textContent = 
+                    `Result: [6, 5]. The last element (index k-1) is the kth largest.`;
+                stepIndex++;
+            } else if (stepIndex === 2) {
+                // Show final answer
+                document.getElementById('resultBox').style.display = 'block';
+                document.getElementById('finalResult').textContent = nlargest[k - 1];
+                document.getElementById('statusMessage').textContent = 
+                    `✅ nlargest(2, nums)[-1] = ${nlargest[k - 1]}. The 2nd largest element!`;
+                document.getElementById('stepBtn').disabled = true;
+                stopAuto();
+            }
+        }
+        
+        function toggleAuto() {
+            if (autoInterval) { stopAuto(); }
+            else {
+                document.getElementById('autoBtn').textContent = 'Pause';
+                autoInterval = setInterval(step, 1000);
+            }
+        }
+        
+        function stopAuto() {
+            if (autoInterval) { clearInterval(autoInterval); autoInterval = null; }
+            document.getElementById('autoBtn').textContent = 'Auto Run';
+        }
+        
+        function reset() {
+            stopAuto();
+            document.getElementById('stepBtn').disabled = false;
+            document.getElementById('statusMessage').textContent = 
+                'nums = [3, 2, 1, 5, 6, 4], k = 2. Use heapq.nlargest(2, nums).';
+            init();
+        }
+        
+        init();
+    </script>
+</body>
+</html>

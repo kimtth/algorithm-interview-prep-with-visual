@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Single Number - XOR</title>
+    <link rel="stylesheet" href="visual.css">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    
+</head>
+<body>
+    <div class="container">
+        <h1>🔢 Single Number</h1>
+        <p class="subtitle">XOR All Elements - O(n) Time, O(1) Space</p>
+
+        <div class="controls">
+            <button id="stepBtn">Step</button>
+            <button id="autoBtn">Auto Run</button>
+            <button id="resetBtn">Reset</button>
+        </div>
+
+        <div class="panel">
+            <div class="panel-title">📊 Array (Each number appears twice except one)</div>
+            <div class="array-container" id="array"></div>
+        </div>
+
+        <div class="panel">
+            <div class="panel-title">⊕ XOR Operation</div>
+            <div class="xor-display">
+                <div class="xor-formula" id="formula">result = 0</div>
+                <div class="binary-row">
+                    <span class="binary-label">result:</span>
+                    <span class="binary-value" id="bin-result">00000000</span>
+                </div>
+                <div class="binary-row" id="bin-current-row" class="d-none">
+                    <span class="binary-label">current:</span>
+                    <span class="binary-value" id="bin-current">00000000</span>
+                </div>
+                <div class="xor-result">Result: <span id="result-val">0</span></div>
+            </div>
+        </div>
+
+        <div class="panel">
+            <div class="panel-title">📋 Status</div>
+            <div class="status-box" id="status">Key insight: a ⊕ a = 0 and a ⊕ 0 = a. Pairs cancel out!</div>
+        </div>
+    
+        <div class="code-section">
+            <h3>📄 Python Solution (70-1.py)</h3>
+            <pre><span class="keyword">from</span> typing <span class="keyword">import</span> List
+
+
+<span class="keyword">class</span> Solution:
+    <span class="keyword">def</span> <span class="function">singleNumber</span>(<span class="keyword">self</span>, nums: List[int]) -&gt; int:
+        result = <span class="number">0</span>
+        <span class="keyword">for</span> num <span class="keyword">in</span> nums:
+            result ^= num
+
+        <span class="keyword">return</span> result</pre>
+        </div>
+
+    </div>
+
+
+    <script>
+        const nums = [4, 1, 2, 1, 2];
+        let idx = 0;
+        let result = 0;
+        let done = false;
+        let autoInterval = null;
+
+        function toBinary(n) {
+            return (n >>> 0).toString(2).padStart(8, '0');
+        }
+
+        function render() {
+            document.getElementById('array').innerHTML = nums.map((v, i) => {
+                let cls = 'array-item default';
+                if (done && v === result) cls = 'array-item result';
+                else if (i === idx - 1) cls = 'array-item current';
+                else if (i < idx - 1) cls = 'array-item processed';
+                return `<div class="${cls}">${v}</div>`;
+            }).join('');
+
+            document.getElementById('result-val').textContent = result;
+            document.getElementById('bin-result').textContent = toBinary(result);
+        }
+
+        function step() {
+            if (done) return;
+
+            if (idx >= nums.length) {
+                done = true;
+                document.getElementById('formula').textContent = `Final result = ${result}`;
+                document.getElementById('status').innerHTML = 
+                    `✅ Single number is ${result}! All pairs cancelled out via XOR.`;
+                document.getElementById('stepBtn').disabled = true;
+                document.getElementById('autoBtn').disabled = true;
+                document.getElementById('bin-current-row').style.display = 'none';
+                stopAuto();
+                render();
+                return;
+            }
+
+            const cur = nums[idx];
+            const prev = result;
+            result ^= cur;
+
+            document.getElementById('formula').textContent = `${prev} ⊕ ${cur} = ${result}`;
+            document.getElementById('bin-current-row').style.display = 'flex';
+            document.getElementById('bin-current').textContent = toBinary(cur);
+            document.getElementById('status').innerHTML = 
+                `Step ${idx + 1}: result = ${prev} XOR ${cur} = ${result}`;
+
+            idx++;
+            render();
+        }
+
+        function reset() {
+            stopAuto();
+            idx = 0;
+            result = 0;
+            done = false;
+            document.getElementById('formula').textContent = 'result = 0';
+            document.getElementById('bin-current-row').style.display = 'none';
+            document.getElementById('stepBtn').disabled = false;
+            document.getElementById('autoBtn').disabled = false;
+            document.getElementById('status').innerHTML = 'Key insight: a ⊕ a = 0 and a ⊕ 0 = a. Pairs cancel out!';
+            render();
+        }
+
+        function stopAuto() {
+            if (autoInterval) { clearInterval(autoInterval); autoInterval = null; }
+            document.getElementById('autoBtn').textContent = 'Auto Run';
+        }
+
+        document.getElementById('stepBtn').onclick = () => { stopAuto(); step(); };
+        document.getElementById('autoBtn').onclick = () => {
+            if (autoInterval) { stopAuto(); }
+            else { autoInterval = setInterval(step, 800); document.getElementById('autoBtn').textContent = '⏸ Pause'; }
+        };
+        document.getElementById('resetBtn').onclick = reset;
+
+        render();
+    </script>
+</body>
+</html>

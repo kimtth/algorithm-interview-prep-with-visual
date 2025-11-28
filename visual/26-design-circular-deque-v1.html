@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Q26: Design Circular Deque</title>
+    <link rel="stylesheet" href="visual.css">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    
+</head>
+<body>
+    <div class="container">
+        <div class="problem-info">
+            <h1>Q26: Design Circular Deque</h1>
+            <p>Design a circular double-ended queue supporting front/rear insertions and deletions.</p>
+            <div class="problem-meta">
+                <span class="meta-tag">📁 Deque</span>
+                <span class="meta-tag">⏱️ O(1) operations</span>
+                <span class="meta-tag">💡 Doubly Linked List</span>
+            </div>
+        </div>
+        
+        
+        
+        <div class="visualization-section">
+            <h3>🎬 Visualization (capacity = 4)</h3>
+            
+            <div class="controls">
+                <button class="btn btn-primary" id="stepBtn" onclick="step()">Step</button>
+                <button class="btn btn-success" id="autoBtn" onclick="toggleAuto()">Auto Run</button>
+                <button class="btn btn-warning" onclick="reset()">Reset</button>
+            </div>
+            
+            <div class="info-display">
+                <div class="info-box">
+                    <div class="info-label">Current Length</div>
+                    <div class="info-value" id="lenValue">0</div>
+                </div>
+                <div class="info-box">
+                    <div class="info-label">Capacity</div>
+                    <div class="info-value">4</div>
+                </div>
+            </div>
+            
+            <div class="status-message" id="statusMessage">
+                Operations: insertFront(1), insertLast(2), insertFront(3), deleteLast(), insertLast(4)
+            </div>
+            
+            <div class="deque-container" id="dequeContainer"></div>
+        </div>
+    </div>
+        
+        <div class="code-section">
+            <h3>📄 Python Solution (26-1.py)</h3>
+            <pre><span class="comment"># Definition for doubly-linked-list.</span>
+<span class="keyword">class</span> ListNode:
+    <span class="keyword">def</span> <span class="function">__init__</span>(<span class="keyword">self</span>, x):
+        <span class="keyword">self</span>.val = x
+        <span class="keyword">self</span>.right = <span class="keyword">None</span>
+        <span class="keyword">self</span>.left = <span class="keyword">None</span>
+
+<span class="keyword">class</span> MyCircularDeque:
+    <span class="keyword">def</span> <span class="function">__init__</span>(<span class="keyword">self</span>, k: int):
+        <span class="keyword">self</span>.head, <span class="keyword">self</span>.tail = <span class="function">ListNode</span>(<span class="keyword">None</span>), <span class="function">ListNode</span>(<span class="keyword">None</span>)
+        <span class="keyword">self</span>.k, <span class="keyword">self</span>.len = k, <span class="number">0</span>
+        <span class="keyword">self</span>.head.right, <span class="keyword">self</span>.tail.left = <span class="keyword">self</span>.tail, <span class="keyword">self</span>.head
+
+    <span class="comment"># 이중 연결 리스트에 신규 노드 삽입</span>
+    <span class="keyword">def</span> <span class="function">_add</span>(<span class="keyword">self</span>, node: ListNode, new: ListNode):
+        n = node.right
+        node.right = new
+        new.left, new.right = node, n
+        n.left = new
+
+    <span class="keyword">def</span> <span class="function">_del</span>(<span class="keyword">self</span>, node: ListNode):
+        n = node.right.right
+        node.right = n
+        n.left = node
+
+    <span class="keyword">def</span> <span class="function">insertFront</span>(<span class="keyword">self</span>, value: int) -&gt; bool:
+        <span class="keyword">if</span> <span class="keyword">self</span>.len == <span class="keyword">self</span>.k:
+            <span class="keyword">return</span> <span class="keyword">False</span>
+        <span class="keyword">self</span>.len += <span class="number">1</span>
+        <span class="keyword">self</span>.<span class="function">_add</span>(<span class="keyword">self</span>.head, <span class="function">ListNode</span>(value))
+        <span class="keyword">return</span> <span class="keyword">True</span>
+
+    <span class="keyword">def</span> <span class="function">insertLast</span>(<span class="keyword">self</span>, value: int) -&gt; bool:
+        <span class="keyword">if</span> <span class="keyword">self</span>.len == <span class="keyword">self</span>.k:
+            <span class="keyword">return</span> <span class="keyword">False</span>
+        <span class="keyword">self</span>.len += <span class="number">1</span>
+        <span class="keyword">self</span>.<span class="function">_add</span>(<span class="keyword">self</span>.tail.left, <span class="function">ListNode</span>(value))
+        <span class="keyword">return</span> <span class="keyword">True</span>
+
+    <span class="keyword">def</span> <span class="function">deleteFront</span>(<span class="keyword">self</span>) -&gt; bool:
+        <span class="keyword">if</span> <span class="keyword">self</span>.len == <span class="number">0</span>:
+            <span class="keyword">return</span> <span class="keyword">False</span>
+        <span class="keyword">self</span>.len -= <span class="number">1</span>
+        <span class="keyword">self</span>.<span class="function">_del</span>(<span class="keyword">self</span>.head)
+        <span class="keyword">return</span> <span class="keyword">True</span>
+
+    <span class="keyword">def</span> <span class="function">deleteLast</span>(<span class="keyword">self</span>) -&gt; bool:
+        <span class="keyword">if</span> <span class="keyword">self</span>.len == <span class="number">0</span>:
+            <span class="keyword">return</span> <span class="keyword">False</span>
+        <span class="keyword">self</span>.len -= <span class="number">1</span>
+        <span class="keyword">self</span>.<span class="function">_del</span>(<span class="keyword">self</span>.tail.left.left)
+        <span class="keyword">return</span> <span class="keyword">True</span>
+
+    <span class="keyword">def</span> <span class="function">getFront</span>(<span class="keyword">self</span>) -&gt; int:
+        <span class="keyword">return</span> <span class="keyword">self</span>.head.right.val <span class="keyword">if</span> <span class="keyword">self</span>.len <span class="keyword">else</span> -<span class="number">1</span>
+
+    <span class="keyword">def</span> <span class="function">getRear</span>(<span class="keyword">self</span>) -&gt; int:
+        <span class="keyword">return</span> <span class="keyword">self</span>.tail.left.val <span class="keyword">if</span> <span class="keyword">self</span>.len <span class="keyword">else</span> -<span class="number">1</span>
+
+    <span class="keyword">def</span> <span class="function">isEmpty</span>(<span class="keyword">self</span>) -&gt; bool:
+        <span class="keyword">return</span> <span class="keyword">self</span>.len == <span class="number">0</span>
+
+    <span class="keyword">def</span> <span class="function">isFull</span>(<span class="keyword">self</span>) -&gt; bool:
+        <span class="keyword">return</span> <span class="keyword">self</span>.len == <span class="keyword">self</span>.k</pre>
+        </div>
+
+    </div>
+
+    <script>
+        const CAPACITY = 4;
+        let deque = [];
+        let stepIndex = 0;
+        let autoInterval = null;
+        
+        const operations = [
+            { op: 'insertFront', val: 1, msg: 'insertFront(1): Add 1 after head sentinel' },
+            { op: 'insertLast', val: 2, msg: 'insertLast(2): Add 2 before tail sentinel' },
+            { op: 'insertFront', val: 3, msg: 'insertFront(3): Add 3 after head sentinel' },
+            { op: 'deleteLast', msg: 'deleteLast(): Remove node before tail' },
+            { op: 'insertLast', val: 4, msg: 'insertLast(4): Add 4 before tail sentinel' },
+            { op: 'done', msg: '✅ Done! Deque: [3, 1, 4]' }
+        ];
+        
+        function init() {
+            deque = [];
+            stepIndex = 0;
+            renderDeque();
+            document.getElementById('lenValue').textContent = '0';
+        }
+        
+        function renderDeque(newIndex = -1) {
+            const container = document.getElementById('dequeContainer');
+            container.innerHTML = '';
+            
+            // Head sentinel
+            addNode(container, 'head', 'sentinel');
+            addArrow(container);
+            
+            // Data nodes
+            deque.forEach((val, i) => {
+                addNode(container, val, i === newIndex ? 'data new' : 'data');
+                addArrow(container);
+            });
+            
+            // Tail sentinel
+            addNode(container, 'tail', 'sentinel');
+        }
+        
+        function addNode(container, val, className) {
+            const nodeDiv = document.createElement('div');
+            nodeDiv.className = 'deque-node';
+            const box = document.createElement('div');
+            box.className = 'node-box ' + className;
+            box.textContent = val;
+            nodeDiv.appendChild(box);
+            container.appendChild(nodeDiv);
+        }
+        
+        function addArrow(container) {
+            const arrow = document.createElement('span');
+            arrow.className = 'deque-arrow';
+            arrow.textContent = '⇄';
+            container.appendChild(arrow);
+        }
+        
+        function step() {
+            if (stepIndex >= operations.length) return;
+            
+            const op = operations[stepIndex];
+            document.getElementById('statusMessage').textContent = op.msg;
+            
+            if (op.op === 'insertFront') {
+                deque.unshift(op.val);
+                renderDeque(0);
+            } else if (op.op === 'insertLast') {
+                deque.push(op.val);
+                renderDeque(deque.length - 1);
+            } else if (op.op === 'deleteFront') {
+                deque.shift();
+                renderDeque();
+            } else if (op.op === 'deleteLast') {
+                deque.pop();
+                renderDeque();
+            } else if (op.op === 'done') {
+                document.getElementById('stepBtn').disabled = true;
+                stopAuto();
+            }
+            
+            document.getElementById('lenValue').textContent = deque.length;
+            stepIndex++;
+        }
+        
+        function toggleAuto() {
+            if (autoInterval) { stopAuto(); }
+            else {
+                document.getElementById('autoBtn').textContent = 'Pause';
+                autoInterval = setInterval(() => {
+                    if (stepIndex >= operations.length) stopAuto();
+                    else step();
+                }, 1000);
+            }
+        }
+        
+        function stopAuto() {
+            if (autoInterval) { clearInterval(autoInterval); autoInterval = null; }
+            document.getElementById('autoBtn').textContent = 'Auto Run';
+        }
+        
+        function reset() {
+            stopAuto();
+            document.getElementById('stepBtn').disabled = false;
+            document.getElementById('statusMessage').textContent = 'Operations: insertFront(1), insertLast(2), insertFront(3), deleteLast(), insertLast(4)';
+            init();
+        }
+        
+        init();
+    </script>
+</body>
+</html>

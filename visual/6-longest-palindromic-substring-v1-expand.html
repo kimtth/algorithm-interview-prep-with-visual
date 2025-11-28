@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Q6: Longest Palindromic Substring</title>
+    <link rel="stylesheet" href="visual.css">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    
+</head>
+<body>
+    <div class="container">
+        <h1>Q6: Longest Palindromic Substring</h1>
+        <p class="subtitle">Expand Around Center (Two Pointers)</p>
+
+        <div class="problem-info">
+            <h3>📋 Problem Description</h3>
+            <p>Given a string s, return the longest palindromic substring in s.</p>
+            <p><strong>Example:</strong> "babad" → "bab" or "aba" (both valid)</p>
+            <div class="complexity">
+                <span><strong>Time:</strong> O(n²)</span>
+                <span><strong>Space:</strong> O(1)</span>
+            </div>
+        </div>
+
+        <div class="main-content">
+            
+            </div>
+        </div>
+    </div>
+
+            <div class="visualization-section">
+                <h3>🎬 Visualization</h3>
+                <div class="input-group">
+                    <label for="inputString">Input String:</label>
+                    <input type="text" id="inputString" value="babad">
+                </div>
+                <div class="controls">
+                    <button class="btn btn-primary" id="stepBtn" onclick="step()">Step</button>
+                    <button class="btn btn-success" id="autoBtn" onclick="toggleAuto()">Auto Run</button>
+                    <button class="btn btn-warning" onclick="reset()">Reset</button>
+                </div>
+                <div class="status-message" id="message">Enter a string and click Step or Auto Run to begin</div>
+                <div id="visualization"></div>
+                
+                <div class="legend">
+                    <div class="legend-item">
+                        <div class="legend-color bg-blue-transparent-border-blue"></div>
+                        <span>Current Window</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color bg-green-transparent-border-green"></div>
+                        <span>Palindrome Found</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="triangle-pointer triangle-red"></div>
+                        <span>Center</span>
+                    </div>
+    
+        <div class="code-section">
+            <h3>📄 Python Solution (6-1.py)</h3>
+            <pre><span class="keyword">class</span> Solution:
+    <span class="keyword">def</span> <span class="function">longestPalindrome</span>(<span class="keyword">self</span>, s: str) -&gt; str:
+        <span class="comment"># 팰린드롬 판별 및 투 포인터 확장</span>
+        <span class="keyword">def</span> <span class="function">expand</span>(left: int, right: int) -&gt; str:
+            <span class="keyword">while</span> left &gt;= <span class="number">0</span> <span class="keyword">and</span> right &lt; <span class="function">len</span>(s) <span class="keyword">and</span> s[left] == s[right]:
+                left -= <span class="number">1</span>
+                right += <span class="number">1</span>
+            <span class="keyword">return</span> s[left + <span class="number">1</span>:right]
+
+        <span class="comment"># 해당 사항이 없을때 빠르게 리턴</span>
+        <span class="keyword">if</span> <span class="function">len</span>(s) &lt; <span class="number">2</span> <span class="keyword">or</span> s == s[::-<span class="number">1</span>]:
+            <span class="keyword">return</span> s
+
+        result = ''
+        <span class="comment"># 슬라이딩 윈도우 우측으로 이동</span>
+        <span class="keyword">for</span> i <span class="keyword">in</span> <span class="function">range</span>(<span class="function">len</span>(s) - <span class="number">1</span>):
+            result = <span class="function">max</span>(result,
+                         <span class="function">expand</span>(i, i + <span class="number">1</span>),
+                         <span class="function">expand</span>(i, i + <span class="number">2</span>),
+                         key=len)
+        <span class="keyword">return</span> result</pre>
+        </div>
+
+    </div>
+
+    <script>
+        let s = "";
+        let i = 0;
+        let type = 0; // 0: odd (i,i+1), 1: even (i,i+2)
+        let left = 0, right = 0;
+        let maxStr = "";
+        let subStep = 0;
+        let phase = 0;
+        let isFinished = false;
+        let autoInterval = null;
+        let isAutoRunning = false;
+        const boxWidth = 36;
+
+        function init() {
+            s = document.getElementById('inputString').value;
+            if (!s) return;
+            i = 0;
+            type = 0;
+            maxStr = "";
+            subStep = 0;
+            phase = 1;
+            isFinished = false;
+            render();
+        }
+
+        function render() {
+            const vis = d3.select("#visualization");
+            vis.selectAll("*").remove();
+            
+            const container = vis.append("div").attr("class", "string-container");
+            
+            s.split('').forEach((char, idx) => {
+                container.append("div")
+                    .attr("class", "char-box")
+                    .text(char);
+            });
+            
+            container.append("div")
+                .attr("class", "highlight-window")
+                .style("opacity", 0);
+            
+            container.append("div")
+                .attr("class", "center-marker")
+                .style("opacity", 0);
+            
+            vis.append("div")
+                .attr("class", "max-display")
+                .html(`<strong>Max Palindrome:</strong> ${maxStr ? '"' + maxStr + '"' : '-'}`);
+        }
+
+        function step() {
+            if (phase === 0) {
+                init();
+                document.getElementById('message').innerText = `Input: "${s}"`;
+                return;
+            }
+
+            if (isFinished) {
+                reset();
+                return;
+            }
+
+            if (i >= s.length - 1) {
+                document.getElementById('message').innerText = `✓ Done! Longest palindrome: "${maxStr}"`;
+                d3.select(".highlight-window").style("opacity", 0);
+                d3.select(".center-marker").style("opacity", 0);
+                isFinished = true;
+                stopAuto();
+                document.getElementById('stepBtn').innerText = "Restart";
+                return;
+            }
+
+            const windowDiv = d3.select(".highlight-window");
+            const markerDiv = d3.select(".center-marker");
+
+            if (subStep === 0) {
+                // Set center
+                left = i;
+                right = (type === 0) ? i + 1 : i + 2;
+                
+                markerDiv.style("opacity", 1);
+                const centerPos = (type === 0) 
+                    ? (i * boxWidth + boxWidth - 8) 
+                    : (i * boxWidth + boxWidth + boxWidth/2 - 8);
+                markerDiv.style("left", centerPos + "px");
+                
+                windowDiv.style("opacity", 1)
+                    .classed("found", false)
+                    .style("left", (left * boxWidth) + "px")
+                    .style("width", ((right - left) * boxWidth) + "px");
+                
+                const typeStr = type === 0 ? "odd (i, i+1)" : "even (i, i+2)";
+                document.getElementById('message').innerText = `expand(${left}, ${right-1}) - ${typeStr} center`;
+                subStep = 1;
+            } else if (subStep === 1) {
+                // Expand
+                if (left >= 0 && right <= s.length && s[left] === s[right-1]) {
+                    windowDiv.classed("found", true);
+                    const currentPal = s.substring(left, right);
+                    document.getElementById('message').innerText = `Found: "${currentPal}"`;
+                    
+                    // Try expand
+                    if (left - 1 >= 0 && right < s.length && s[left-1] === s[right]) {
+                        left--;
+                        right++;
+                        windowDiv.transition().duration(300)
+                            .style("left", (left * boxWidth) + "px")
+                            .style("width", ((right - left) * boxWidth) + "px");
+                    } else {
+                        // Can't expand further
+                        subStep = 2;
+                    }
+                } else {
+                    document.getElementById('message').innerText = "No palindrome at this center";
+                    subStep = 2;
+                }
+            } else if (subStep === 2) {
+                // Update max
+                if (left >= 0 && right <= s.length && s[left] === s[right-1]) {
+                    const currentPal = s.substring(left, right);
+                    if (currentPal.length > maxStr.length) {
+                        maxStr = currentPal;
+                        d3.select(".max-display")
+                            .html(`<strong>Max Palindrome:</strong> "${maxStr}" (len=${maxStr.length})`);
+                    }
+                }
+                
+                // Move to next
+                if (type === 0) {
+                    type = 1;
+                } else {
+                    type = 0;
+                    i++;
+                }
+                subStep = 0;
+            }
+        }
+
+        function toggleAuto() {
+            if (isAutoRunning) {
+                stopAuto();
+            } else {
+                startAuto();
+            }
+        }
+
+        function startAuto() {
+            if (phase === 0) init();
+            isAutoRunning = true;
+            document.getElementById('autoBtn').innerText = "Pause";
+            document.getElementById('autoBtn').classList.add("running");
+            autoInterval = setInterval(() => {
+                if (isFinished) {
+                    stopAuto();
+                } else {
+                    step();
+                }
+            }, 600);
+        }
+
+        function stopAuto() {
+            isAutoRunning = false;
+            document.getElementById('autoBtn').innerText = "Auto Run";
+            document.getElementById('autoBtn').classList.remove("running");
+            if (autoInterval) {
+                clearInterval(autoInterval);
+                autoInterval = null;
+            }
+        }
+
+        function reset() {
+            stopAuto();
+            phase = 0;
+            isFinished = false;
+            d3.select("#visualization").selectAll("*").remove();
+            document.getElementById('message').innerText = "Enter a string and click Step or Auto Run to begin";
+            document.getElementById('stepBtn').innerText = "Step";
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('inputString').addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    reset();
+                    init();
+                }
+            });
+        });
+    </script>
+</body>
+</html>

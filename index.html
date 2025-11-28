@@ -3,935 +3,414 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Python Algorithm Interview - Visualization Index</title>
+    <title>Algorithm Visualizations</title>
     <style>
-        :root {
-            --bg-primary: #f8f9fa;
-            --bg-secondary: #ffffff;
-            --bg-card: #ffffff;
-            --text-primary: #212529;
-            --text-secondary: #6c757d;
-            --accent: #0d6efd;
-            --accent-hover: #0b5ed7;
-            --success: #198754;
-            --border: #dee2e6;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, sans-serif; display: flex; height: 100vh; background: #f8f9fa; }
         
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: var(--bg-primary);
-            color: var(--text-primary);
-            min-height: 100vh;
-            padding: 2rem;
-        }
-        
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
-        }
-        
-        header {
-            text-align: center;
-            margin-bottom: 1rem;
-            padding: 0.75rem 1rem;
-            background: var(--bg-card);
-            border-radius: 12px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-            border: 1px solid var(--border);
+        /* Sidebar */
+        .sidebar {
+            width: 320px;
+            background: #ffffff;
             display: flex;
-            align-items: center;
+            flex-direction: column;
+            border-right: 1px solid #e0e0e0;
+            box-shadow: 2px 0 5px rgba(0,0,0,0.05);
+        }
+        .header {
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .header h1 { font-size: 1.3em; margin-bottom: 5px; }
+        .header p { font-size: 0.85em; opacity: 0.9; }
+        
+        /* Search */
+        .search-box {
+            padding: 15px;
+            border-bottom: 1px solid #e0e0e0;
+            background: #fafafa;
+        }
+        .search-box input {
+            width: 100%;
+            padding: 10px 15px;
+            border: 1px solid #ddd;
+            border-radius: 20px;
+            background: #fff;
+            color: #333;
+            font-size: 14px;
+        }
+        .search-box input::placeholder { color: #999; }
+        .search-box input:focus { outline: none; border-color: #667eea; box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1); }
+        
+        /* List */
+        .list-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 10px;
+            background: #fff;
+        }
+        .list-container::-webkit-scrollbar { width: 8px; }
+        .list-container::-webkit-scrollbar-track { background: #f1f1f1; }
+        .list-container::-webkit-scrollbar-thumb { background: #ccc; border-radius: 4px; }
+        .list-container::-webkit-scrollbar-thumb:hover { background: #aaa; }
+        
+        .question-group {
+            margin-bottom: 5px;
+        }
+        .question-title {
+            padding: 10px 15px;
+            background: #f5f7fa;
+            color: #444;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.9em;
+            display: flex;
             justify-content: space-between;
-            flex-wrap: wrap;
-            gap: 0.5rem;
-        }
-        
-        h1 {
-            font-size: 1.4rem;
-            margin: 0;
-            color: var(--text-primary);
-        }
-        
-        .subtitle {
-            color: var(--text-secondary);
-            font-size: 0.9rem;
-            margin-left: 0.5rem;
-        }
-        
-        .header-left {
-            display: flex;
             align-items: center;
-            flex-wrap: wrap;
+            border: 1px solid #eee;
+        }
+        .question-title:hover { background: #eef1f6; border-color: #ddd; }
+        .question-title .badge {
+            background: #667eea;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 0.75em;
         }
         
-        .controls {
+        .solutions {
+            display: none;
+            padding: 5px 0 5px 15px;
+        }
+        .solutions.open { display: block; }
+        
+        .solution-link {
+            display: block;
+            padding: 8px 15px;
+            color: #666;
+            text-decoration: none;
+            font-size: 0.85em;
+            border-radius: 6px;
+            margin: 2px 0;
+            transition: all 0.2s;
+        }
+        .solution-link:hover {
+            background: #f0f4ff;
+            color: #444;
+        }
+        .solution-link.active {
+            background: #667eea;
+            color: white;
+        }
+        
+        /* Main content */
+        .main {
+            flex: 1;
             display: flex;
-            gap: 1rem;
-            margin-bottom: 1.5rem;
-            flex-wrap: wrap;
+            flex-direction: column;
+            background: #f5f5f5;
+        }
+        .main iframe {
+            flex: 1;
+            border: none;
+            background: white;
+        }
+        .welcome {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
+            color: #888;
+            background: #fff;
         }
+        .welcome h2 { font-size: 2em; margin-bottom: 10px; color: #444; }
+        .welcome p { font-size: 1.1em; }
         
-        .filters {
-            display: flex;
-            gap: 0.5rem;
-            flex-wrap: wrap;
-        }
-        
-        .filter-btn {
-            padding: 0.5rem 1rem;
-            border: 2px solid var(--border);
-            background: var(--bg-secondary);
-            color: var(--text-primary);
-            border-radius: 20px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-        
-        .filter-btn:hover, .filter-btn.active {
-            background: var(--accent);
-            border-color: var(--accent);
-            color: #fff;
-        }
-        
-        .search-box {
-            width: 300px;
-            padding: 0.5rem 1rem;
-            border: 2px solid var(--border);
-            background: var(--bg-secondary);
-            color: var(--text-primary);
-            border-radius: 20px;
-            font-size: 0.95rem;
-        }
-        
-        .search-box:focus {
-            outline: none;
-            border-color: var(--accent);
-        }
-        
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            background: var(--bg-card);
-            border-radius: 12px;
-            overflow: hidden;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-            border: 1px solid var(--border);
-        }
-        
-        th, td {
-            padding: 1rem;
-            text-align: left;
-            border-bottom: 1px solid var(--border);
-        }
-        
-        th {
-            background: var(--bg-primary);
-            font-weight: 600;
-            text-transform: uppercase;
-            font-size: 0.85rem;
-            letter-spacing: 0.5px;
-            color: var(--text-secondary);
-        }
-        
-        tr:hover {
-            background: rgba(13, 110, 253, 0.05);
-        }
-        
-        .problem-num {
-            font-weight: bold;
-            color: var(--accent);
-            font-size: 1.1rem;
-        }
-        
-        .problem-title a {
-            color: var(--text-primary);
-            text-decoration: none;
-            transition: color 0.3s;
-        }
-        
-        .problem-title a:hover {
-            color: var(--accent);
-        }
-        
-        .difficulty {
-            color: #f59e0b;
-        }
-        
-        .chapter {
-            color: var(--text-secondary);
-            font-size: 0.9rem;
-        }
-        
-        .viz-links {
-            display: flex;
-            gap: 0.5rem;
-            flex-wrap: wrap;
-        }
-        
-        .viz-link {
-            display: inline-block;
-            padding: 0.4rem 0.8rem;
-            background: var(--success);
-            color: #fff;
-            text-decoration: none;
-            border-radius: 4px;
-            font-size: 0.85rem;
-            font-weight: 500;
-            transition: all 0.3s ease;
-        }
-        
-        .viz-link:hover {
-            background: var(--accent);
-            transform: translateY(-2px);
-        }
-        
-        .no-viz {
-            color: var(--text-secondary);
-            font-style: italic;
-        }
-        
+        /* Stats bar */
         .stats {
-            display: flex;
-            gap: 1.5rem;
-            flex-wrap: wrap;
-        }
-        
-        .stat {
-            text-align: center;
-        }
-        
-        .stat-value {
-            font-size: 1.2rem;
-            font-weight: bold;
-            color: var(--accent);
-        }
-        
-        .stat-label {
-            color: var(--text-secondary);
-            font-size: 0.75rem;
-        }
-        
-        @media (max-width: 768px) {
-            body {
-                padding: 1rem;
-            }
-            
-            h1 {
-                font-size: 1.8rem;
-            }
-            
-            th, td {
-                padding: 0.5rem;
-                font-size: 0.85rem;
-            }
-            
-            .viz-link {
-                padding: 0.3rem 0.6rem;
-                font-size: 0.75rem;
-            }
+            padding: 10px 20px;
+            background: #f8f9fa;
+            color: #666;
+            font-size: 0.85em;
+            border-top: 1px solid #e0e0e0;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <header>
-            <div class="header-left">
-                <h1>🐍 Python Algorithm Interview</h1>
-                <span class="subtitle">Interactive Visualizations for 95 Algorithm Problems</span>
-            </div>
-            <div class="stats">
-                <div class="stat">
-                    <div class="stat-value" id="total-problems">88</div>
-                    <div class="stat-label">Problems</div>
-                </div>
-                <div class="stat">
-                    <div class="stat-value" id="total-viz">0</div>
-                    <div class="stat-label">Visualizations</div>
-                </div>
-                <div class="stat">
-                    <div class="stat-value">23</div>
-                    <div class="stat-label">Chapters</div>
-                </div>
-            </div>
-        </header>
-        
-        <div class="controls">
-            <input type="text" class="search-box" id="search" placeholder="🔍 Search problems...">
-            <div class="filters">
-                <button class="filter-btn active" data-filter="all">All</button>
-                <button class="filter-btn" data-filter="★">Easy ★</button>
-                <button class="filter-btn" data-filter="★★">Medium ★★</button>
-                <button class="filter-btn" data-filter="★★★">Hard ★★★</button>
-            </div>
+    <div class="sidebar">
+        <div class="header">
+            <h1>📚 Algorithm Visualizations</h1>
+            <p>Interactive LeetCode Solutions</p>
         </div>
-        
-        <table id="problem-table">
-            <thead>
-                <tr>
-                    <th>#</th>
-                    <th>Title</th>
-                    <th>Difficulty</th>
-                    <th>Chapter</th>
-                    <th>Visualization</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr data-difficulty="★">
-                    <td class="problem-num">1</td>
-                    <td class="problem-title"><a href="https://leetcode.com/problems/valid-palindrome/" target="_blank">Valid Palindrome</a></td>
-                    <td class="difficulty">★</td>
-                    <td class="chapter">Ch6. String Manipulation</td>
-                    <td class="viz-links"><a href="2-python/ch06/visual/1-valid-palindrome-v1-list.html" class="viz-link" target="_blank">View 1</a> <a href="2-python/ch06/visual/1-valid-palindrome-v2-deque.html" class="viz-link" target="_blank">View 2</a> <a href="2-python/ch06/visual/1-valid-palindrome-v3-slicing.html" class="viz-link" target="_blank">View 3</a></td>
-                </tr>
-                <tr data-difficulty="★">
-                    <td class="problem-num">2</td>
-                    <td class="problem-title"><a href="https://leetcode.com/problems/reverse-string/" target="_blank">Reverse String</a></td>
-                    <td class="difficulty">★</td>
-                    <td class="chapter">Ch6. String Manipulation</td>
-                    <td class="viz-links"><a href="2-python/ch06/visual/2-reverse-string-v1-two-pointers.html" class="viz-link" target="_blank">View 1</a> <a href="2-python/ch06/visual/2-reverse-string-v2-pythonic.html" class="viz-link" target="_blank">View 2</a></td>
-                </tr>
-                <tr data-difficulty="★">
-                    <td class="problem-num">3</td>
-                    <td class="problem-title"><a href="https://leetcode.com/problems/reorder-data-in-log-files/" target="_blank">Reorder Data in Log Files</a></td>
-                    <td class="difficulty">★</td>
-                    <td class="chapter">Ch6. String Manipulation</td>
-                    <td class="viz-links"><a href="2-python/ch06/visual/3-reorder-log-files-v1-lambda-sort.html" class="viz-link" target="_blank">View 1</a></td>
-                </tr>
-                <tr data-difficulty="★">
-                    <td class="problem-num">4</td>
-                    <td class="problem-title"><a href="https://leetcode.com/problems/most-common-word/" target="_blank">Most Common Word</a></td>
-                    <td class="difficulty">★</td>
-                    <td class="chapter">Ch6. String Manipulation</td>
-                    <td class="viz-links"><a href="2-python/ch06/visual/4-most-common-word-v1-counter.html" class="viz-link" target="_blank">View 1</a></td>
-                </tr>
-                <tr data-difficulty="★★">
-                    <td class="problem-num">5</td>
-                    <td class="problem-title"><a href="https://leetcode.com/problems/group-anagrams/" target="_blank">Group Anagrams</a></td>
-                    <td class="difficulty">★★</td>
-                    <td class="chapter">Ch6. String Manipulation</td>
-                    <td class="viz-links"><a href="2-python/ch06/visual/5-group-anagrams-v1-sorted-key.html" class="viz-link" target="_blank">View 1</a></td>
-                </tr>
-                <tr data-difficulty="★★">
-                    <td class="problem-num">6</td>
-                    <td class="problem-title"><a href="https://leetcode.com/problems/longest-palindromic-substring/" target="_blank">Longest Palindromic Substring</a></td>
-                    <td class="difficulty">★★</td>
-                    <td class="chapter">Ch6. String Manipulation</td>
-                    <td class="viz-links"><a href="2-python/ch06/visual/6-longest-palindromic-substring-v1-expand.html" class="viz-link" target="_blank">View 1</a></td>
-                </tr>
-                <tr data-difficulty="★">
-                    <td class="problem-num">7</td>
-                    <td class="problem-title"><a href="https://leetcode.com/problems/two-sum/" target="_blank">Two Sum</a></td>
-                    <td class="difficulty">★</td>
-                    <td class="chapter">Ch7. Arrays</td>
-                    <td class="viz-links"><a href="3-linear-data-structures/ch07/visual/7-two-sum-v1-brute-force.html" class="viz-link" target="_blank">View 1</a> <a href="3-linear-data-structures/ch07/visual/7-two-sum-v2-in-list.html" class="viz-link" target="_blank">View 2</a> <a href="3-linear-data-structures/ch07/visual/7-two-sum-v3-two-pass-hash.html" class="viz-link" target="_blank">View 3</a> <a href="3-linear-data-structures/ch07/visual/7-two-sum-v4-hash-one-pass.html" class="viz-link" target="_blank">View 4</a> <a href="3-linear-data-structures/ch07/visual/7-two-sum-v5-two-pointer.html" class="viz-link" target="_blank">View 5</a></td>
-                </tr>
-                <tr data-difficulty="★★★">
-                    <td class="problem-num">8</td>
-                    <td class="problem-title"><a href="https://leetcode.com/problems/trapping-rain-water/" target="_blank">Trapping Rain Water</a></td>
-                    <td class="difficulty">★★★</td>
-                    <td class="chapter">Ch7. Arrays</td>
-                    <td class="viz-links"><a href="3-linear-data-structures/ch07/visual/8-trapping-rain-water-v1-two-pointers.html" class="viz-link" target="_blank">View 1</a> <a href="3-linear-data-structures/ch07/visual/8-trapping-rain-water-v2-stack.html" class="viz-link" target="_blank">View 2</a></td>
-                </tr>
-                <tr data-difficulty="★★">
-                    <td class="problem-num">9</td>
-                    <td class="problem-title"><a href="https://leetcode.com/problems/3sum/" target="_blank">3Sum</a></td>
-                    <td class="difficulty">★★</td>
-                    <td class="chapter">Ch7. Arrays</td>
-                    <td class="viz-links"><a href="3-linear-data-structures/ch07/visual/9-3sum-v1-brute-force.html" class="viz-link" target="_blank">View 1</a> <a href="3-linear-data-structures/ch07/visual/9-3sum-v2-two-pointers.html" class="viz-link" target="_blank">View 2</a></td>
-                </tr>
-                <tr data-difficulty="★">
-                    <td class="problem-num">10</td>
-                    <td class="problem-title"><a href="https://leetcode.com/problems/array-partition/" target="_blank">Array Partition I</a></td>
-                    <td class="difficulty">★</td>
-                    <td class="chapter">Ch7. Arrays</td>
-                    <td class="viz-links"><a href="3-linear-data-structures/ch07/visual/10-array-partition-v1-pair-iteration.html" class="viz-link" target="_blank">View 1</a> <a href="3-linear-data-structures/ch07/visual/10-array-partition-v2-pythonic-slicing.html" class="viz-link" target="_blank">View 2</a> <a href="3-linear-data-structures/ch07/visual/10-array-partition-v3-sum-slicing.html" class="viz-link" target="_blank">View 3</a></td>
-                </tr>
-                <tr data-difficulty="★★">
-                    <td class="problem-num">11</td>
-                    <td class="problem-title"><a href="https://leetcode.com/problems/product-of-array-except-self/" target="_blank">Product of Array Except Self</a></td>
-                    <td class="difficulty">★★</td>
-                    <td class="chapter">Ch7. Arrays</td>
-                    <td class="viz-links"><a href="3-linear-data-structures/ch07/visual/11-product-except-self-v1-two-pass.html" class="viz-link" target="_blank">View 1</a></td>
-                </tr>
-                <tr data-difficulty="★">
-                    <td class="problem-num">12</td>
-                    <td class="problem-title"><a href="https://leetcode.com/problems/best-time-to-buy-and-sell-stock/" target="_blank">Best Time to Buy and Sell Stock</a></td>
-                    <td class="difficulty">★</td>
-                    <td class="chapter">Ch7. Arrays</td>
-                    <td class="viz-links"><a href="3-linear-data-structures/ch07/visual/12-best-time-to-buy-sell-v1-brute-force.html" class="viz-link" target="_blank">View 1</a> <a href="3-linear-data-structures/ch07/visual/12-best-time-to-buy-sell-v2-one-pass.html" class="viz-link" target="_blank">View 2</a></td>
-                </tr>
-                <tr data-difficulty="★">
-                    <td class="problem-num">13</td>
-                    <td class="problem-title"><a href="https://leetcode.com/problems/palindrome-linked-list/" target="_blank">Palindrome Linked List</a></td>
-                    <td class="difficulty">★</td>
-                    <td class="chapter">Ch8. Linked Lists</td>
-                    <td class="viz-links"><a href="3-linear-data-structures/ch08/visual/13-palindrome-linked-list-v1-list.html" class="viz-link" target="_blank">View 1</a> <a href="3-linear-data-structures/ch08/visual/13-palindrome-linked-list-v2-deque.html" class="viz-link" target="_blank">View 2</a> <a href="3-linear-data-structures/ch08/visual/13-palindrome-linked-list-v3-runner.html" class="viz-link" target="_blank">View 3</a></td>
-                </tr>
-                <tr data-difficulty="★">
-                    <td class="problem-num">14</td>
-                    <td class="problem-title"><a href="https://leetcode.com/problems/merge-two-sorted-lists/" target="_blank">Merge Two Sorted Lists</a></td>
-                    <td class="difficulty">★</td>
-                    <td class="chapter">Ch8. Linked Lists</td>
-                    <td class="viz-links"><a href="3-linear-data-structures/ch08/visual/14-merge-two-sorted-lists-v1-recursive.html" class="viz-link" target="_blank">View 1</a></td>
-                </tr>
-                <tr data-difficulty="★">
-                    <td class="problem-num">15</td>
-                    <td class="problem-title"><a href="https://leetcode.com/problems/reverse-linked-list/" target="_blank">Reverse Linked List</a></td>
-                    <td class="difficulty">★</td>
-                    <td class="chapter">Ch8. Linked Lists</td>
-                    <td class="viz-links"><a href="3-linear-data-structures/ch08/visual/15-reverse-linked-list-v1-recursive.html" class="viz-link" target="_blank">View 1</a> <a href="3-linear-data-structures/ch08/visual/15-reverse-linked-list-v2-iterative.html" class="viz-link" target="_blank">View 2</a></td>
-                </tr>
-                <tr data-difficulty="★★">
-                    <td class="problem-num">16</td>
-                    <td class="problem-title"><a href="https://leetcode.com/problems/add-two-numbers/" target="_blank">Add Two Numbers</a></td>
-                    <td class="difficulty">★★</td>
-                    <td class="chapter">Ch8. Linked Lists</td>
-                    <td class="viz-links"><a href="3-linear-data-structures/ch08/visual/16-add-two-numbers-v1-full-adder.html" class="viz-link" target="_blank">View 1</a> <a href="3-linear-data-structures/ch08/visual/16-add-two-numbers-v2-reverse-convert.html" class="viz-link" target="_blank">View 2</a></td>
-                </tr>
-                <tr data-difficulty="★★">
-                    <td class="problem-num">17</td>
-                    <td class="problem-title"><a href="https://leetcode.com/problems/swap-nodes-in-pairs/" target="_blank">Swap Nodes in Pairs</a></td>
-                    <td class="difficulty">★★</td>
-                    <td class="chapter">Ch8. Linked Lists</td>
-                    <td class="viz-links"><a href="3-linear-data-structures/ch08/visual/17-swap-nodes-in-pairs-v1-value-swap.html" class="viz-link" target="_blank">View 1</a> <a href="3-linear-data-structures/ch08/visual/17-swap-nodes-in-pairs-v2-node-swap.html" class="viz-link" target="_blank">View 2</a> <a href="3-linear-data-structures/ch08/visual/17-swap-nodes-in-pairs-v3-recursive.html" class="viz-link" target="_blank">View 3</a></td>
-                </tr>
-                <tr data-difficulty="★★">
-                    <td class="problem-num">18</td>
-                    <td class="problem-title"><a href="https://leetcode.com/problems/odd-even-linked-list/" target="_blank">Odd Even Linked List</a></td>
-                    <td class="difficulty">★★</td>
-                    <td class="chapter">Ch8. Linked Lists</td>
-                    <td class="viz-links"><a href="3-linear-data-structures/ch08/visual/18-odd-even-linked-list-v1.html" class="viz-link" target="_blank">View 1</a></td>
-                </tr>
-                <tr data-difficulty="★★">
-                    <td class="problem-num">19</td>
-                    <td class="problem-title"><a href="https://leetcode.com/problems/reverse-linked-list-ii/" target="_blank">Reverse Linked List II</a></td>
-                    <td class="difficulty">★★</td>
-                    <td class="chapter">Ch8. Linked Lists</td>
-                    <td class="viz-links"><a href="3-linear-data-structures/ch08/visual/19-reverse-linked-list-ii-v1.html" class="viz-link" target="_blank">View 1</a></td>
-                </tr>
-                <tr data-difficulty="★">
-                    <td class="problem-num">20</td>
-                    <td class="problem-title"><a href="https://leetcode.com/problems/valid-parentheses/" target="_blank">Valid Parentheses</a></td>
-                    <td class="difficulty">★</td>
-                    <td class="chapter">Ch9. Stack, Queue</td>
-                    <td class="viz-links"><a href="3-linear-data-structures/ch09/visual/20-valid-parentheses-v1.html" class="viz-link" target="_blank">View 1</a></td>
-                </tr>
-                <tr data-difficulty="★★★">
-                    <td class="problem-num">21</td>
-                    <td class="problem-title"><a href="https://leetcode.com/problems/remove-duplicate-letters/" target="_blank">Remove Duplicate Letters</a></td>
-                    <td class="difficulty">★★★</td>
-                    <td class="chapter">Ch9. Stack, Queue</td>
-                    <td class="viz-links"><a href="3-linear-data-structures/ch09/visual/21-remove-duplicate-letters-v1-recursive.html" class="viz-link" target="_blank">View 1</a> <a href="3-linear-data-structures/ch09/visual/21-remove-duplicate-letters-v2-stack.html" class="viz-link" target="_blank">View 2</a></td>
-                </tr>
-                <tr data-difficulty="★★">
-                    <td class="problem-num">22</td>
-                    <td class="problem-title"><a href="https://leetcode.com/problems/daily-temperatures/" target="_blank">Daily Temperatures</a></td>
-                    <td class="difficulty">★★</td>
-                    <td class="chapter">Ch9. Stack, Queue</td>
-                    <td class="viz-links"><a href="3-linear-data-structures/ch09/visual/22-daily-temperatures-v1.html" class="viz-link" target="_blank">View 1</a></td>
-                </tr>
-                <tr data-difficulty="★">
-                    <td class="problem-num">23</td>
-                    <td class="problem-title"><a href="https://leetcode.com/problems/implement-stack-using-queues/" target="_blank">Implement Stack using Queues</a></td>
-                    <td class="difficulty">★</td>
-                    <td class="chapter">Ch9. Stack, Queue</td>
-                    <td class="viz-links"><a href="3-linear-data-structures/ch09/visual/23-implement-stack-using-queues-v1.html" class="viz-link" target="_blank">View 1</a></td>
-                </tr>
-                <tr data-difficulty="★">
-                    <td class="problem-num">24</td>
-                    <td class="problem-title"><a href="https://leetcode.com/problems/implement-queue-using-stacks/" target="_blank">Implement Queue using Stacks</a></td>
-                    <td class="difficulty">★</td>
-                    <td class="chapter">Ch9. Stack, Queue</td>
-                    <td class="viz-links"><a href="3-linear-data-structures/ch09/visual/24-implement-queue-using-stacks-v1.html" class="viz-link" target="_blank">View 1</a></td>
-                </tr>
-                <tr data-difficulty="★★">
-                    <td class="problem-num">25</td>
-                    <td class="problem-title"><a href="https://leetcode.com/problems/design-circular-queue/" target="_blank">Design Circular Queue</a></td>
-                    <td class="difficulty">★★</td>
-                    <td class="chapter">Ch9. Stack, Queue</td>
-                    <td class="viz-links"><a href="3-linear-data-structures/ch09/visual/25-design-circular-queue-v1.html" class="viz-link" target="_blank">View 1</a></td>
-                </tr>
-                <tr data-difficulty="★★">
-                    <td class="problem-num">26</td>
-                    <td class="problem-title"><a href="https://leetcode.com/problems/design-circular-deque/" target="_blank">Design Circular Deque</a></td>
-                    <td class="difficulty">★★</td>
-                    <td class="chapter">Ch10. Deque, Priority Queue</td>
-                    <td class="viz-links"><a href="3-linear-data-structures/ch10/visual/26-design-circular-deque-v1.html" class="viz-link" target="_blank">View 1</a></td>
-                </tr>
-                <tr data-difficulty="★">
-                    <td class="problem-num">27</td>
-                    <td class="problem-title"><a href="https://leetcode.com/problems/merge-k-sorted-lists/" target="_blank">Merge k Sorted Lists</a></td>
-                    <td class="difficulty">★</td>
-                    <td class="chapter">Ch10. Deque, Priority Queue</td>
-                    <td class="viz-links"><a href="3-linear-data-structures/ch10/visual/27-merge-k-sorted-lists-v1-heap.html" class="viz-link" target="_blank">View 1</a></td>
-                </tr>
-                <tr data-difficulty="★">
-                    <td class="problem-num">28</td>
-                    <td class="problem-title"><a href="https://leetcode.com/problems/design-hashmap/" target="_blank">Design HashMap</a></td>
-                    <td class="difficulty">★</td>
-                    <td class="chapter">Ch11. Hash Table</td>
-                    <td class="viz-links"><a href="3-linear-data-structures/ch11/visual/28-design-hashmap-v1.html" class="viz-link" target="_blank">View 1</a></td>
-                </tr>
-                <tr data-difficulty="★">
-                    <td class="problem-num">29</td>
-                    <td class="problem-title"><a href="https://leetcode.com/problems/jewels-and-stones/" target="_blank">Jewels and Stones</a></td>
-                    <td class="difficulty">★</td>
-                    <td class="chapter">Ch11. Hash Table</td>
-                    <td class="viz-links"><a href="3-linear-data-structures/ch11/visual/29-jewels-and-stones-v1-counter.html" class="viz-link" target="_blank">View 1</a> <a href="3-linear-data-structures/ch11/visual/29-jewels-and-stones-v2-pythonic.html" class="viz-link" target="_blank">View 2</a> <a href="3-linear-data-structures/ch11/visual/29-jewels-and-stones-v3-counter-lookup.html" class="viz-link" target="_blank">View 3</a> <a href="3-linear-data-structures/ch11/visual/29-jewels-and-stones-v4-sum-comprehension.html" class="viz-link" target="_blank">View 4</a></td>
-                </tr>
-                <tr data-difficulty="★★">
-                    <td class="problem-num">30</td>
-                    <td class="problem-title"><a href="https://leetcode.com/problems/longest-substring-without-repeating-characters/" target="_blank">Longest Substring Without Repeating Characters</a></td>
-                    <td class="difficulty">★★</td>
-                    <td class="chapter">Ch11. Hash Table</td>
-                    <td class="viz-links"><a href="3-linear-data-structures/ch11/visual/30-longest-substring-without-repeating-v1.html" class="viz-link" target="_blank">View 1</a></td>
-                </tr>
-                <tr data-difficulty="★★">
-                    <td class="problem-num">31</td>
-                    <td class="problem-title"><a href="https://leetcode.com/problems/top-k-frequent-elements/" target="_blank">Top K Frequent Elements</a></td>
-                    <td class="difficulty">★★</td>
-                    <td class="chapter">Ch11. Hash Table</td>
-                    <td class="viz-links"><a href="3-linear-data-structures/ch11/visual/31-top-k-frequent-elements-v1-heap.html" class="viz-link" target="_blank">View 1</a> <a href="3-linear-data-structures/ch11/visual/31-top-k-frequent-elements-v2-pythonic.html" class="viz-link" target="_blank">View 2</a></td>
-                </tr>
-                <tr data-difficulty="★★">
-                    <td class="problem-num">32</td>
-                    <td class="problem-title"><a href="https://leetcode.com/problems/number-of-islands/" target="_blank">Number of Islands</a></td>
-                    <td class="difficulty">★★</td>
-                    <td class="chapter">Ch12. Graph</td>
-                    <td class="viz-links"><a href="4-non-linear-data-structures/ch12/visual/32-number-of-islands-v1.html" class="viz-link" target="_blank">View 1</a></td>
-                </tr>
-                <tr data-difficulty="★★">
-                    <td class="problem-num">33</td>
-                    <td class="problem-title"><a href="https://leetcode.com/problems/letter-combinations-of-a-phone-number/" target="_blank">Letter Combinations of a Phone Number</a></td>
-                    <td class="difficulty">★★</td>
-                    <td class="chapter">Ch12. Graph</td>
-                    <td class="viz-links"><a href="4-non-linear-data-structures/ch12/visual/33-letter-combinations-v1.html" class="viz-link" target="_blank">View 1</a></td>
-                </tr>
-                <tr data-difficulty="★★">
-                    <td class="problem-num">34</td>
-                    <td class="problem-title"><a href="https://leetcode.com/problems/permutations/" target="_blank">Permutations</a></td>
-                    <td class="difficulty">★★</td>
-                    <td class="chapter">Ch12. Graph</td>
-                    <td class="viz-links"><a href="4-non-linear-data-structures/ch12/visual/34-permutations-v1-dfs.html" class="viz-link" target="_blank">View 1</a> <a href="4-non-linear-data-structures/ch12/visual/34-permutations-v2-itertools.html" class="viz-link" target="_blank">View 2</a></td>
-                </tr>
-                <tr data-difficulty="★★">
-                    <td class="problem-num">35</td>
-                    <td class="problem-title"><a href="https://leetcode.com/problems/combinations/" target="_blank">Combinations</a></td>
-                    <td class="difficulty">★★</td>
-                    <td class="chapter">Ch12. Graph</td>
-                    <td class="viz-links"><a href="4-non-linear-data-structures/ch12/visual/35-combinations-v1-dfs.html" class="viz-link" target="_blank">View 1</a> <a href="4-non-linear-data-structures/ch12/visual/35-combinations-v2-itertools.html" class="viz-link" target="_blank">View 2</a></td>
-                </tr>
-                <tr data-difficulty="★★">
-                    <td class="problem-num">36</td>
-                    <td class="problem-title"><a href="https://leetcode.com/problems/combination-sum/" target="_blank">Combination Sum</a></td>
-                    <td class="difficulty">★★</td>
-                    <td class="chapter">Ch12. Graph</td>
-                    <td class="viz-links"><a href="4-non-linear-data-structures/ch12/visual/36-combination-sum-v1.html" class="viz-link" target="_blank">View 1</a></td>
-                </tr>
-                <tr data-difficulty="★★">
-                    <td class="problem-num">37</td>
-                    <td class="problem-title"><a href="https://leetcode.com/problems/subsets/" target="_blank">Subsets</a></td>
-                    <td class="difficulty">★★</td>
-                    <td class="chapter">Ch12. Graph</td>
-                    <td class="viz-links"><a href="4-non-linear-data-structures/ch12/visual/37-subsets-v1.html" class="viz-link" target="_blank">View 1</a></td>
-                </tr>
-                <tr data-difficulty="★★">
-                    <td class="problem-num">38</td>
-                    <td class="problem-title"><a href="https://leetcode.com/problems/reconstruct-itinerary/" target="_blank">Reconstruct Itinerary</a></td>
-                    <td class="difficulty">★★</td>
-                    <td class="chapter">Ch12. Graph</td>
-                    <td class="viz-links"><a href="4-non-linear-data-structures/ch12/visual/38-reconstruct-itinerary-v1-pop0.html" class="viz-link" target="_blank">View 1</a> <a href="4-non-linear-data-structures/ch12/visual/38-reconstruct-itinerary-v2-pop.html" class="viz-link" target="_blank">View 2</a> <a href="4-non-linear-data-structures/ch12/visual/38-reconstruct-itinerary-v3-iterative.html" class="viz-link" target="_blank">View 3</a></td>
-                </tr>
-                <tr data-difficulty="★★">
-                    <td class="problem-num">39</td>
-                    <td class="problem-title"><a href="https://leetcode.com/problems/course-schedule/" target="_blank">Course Schedule</a></td>
-                    <td class="difficulty">★★</td>
-                    <td class="chapter">Ch12. Graph</td>
-                    <td class="viz-links"><a href="4-non-linear-data-structures/ch12/visual/39-course-schedule-v1-basic.html" class="viz-link" target="_blank">View 1</a> <a href="4-non-linear-data-structures/ch12/visual/39-course-schedule-v2-optimized.html" class="viz-link" target="_blank">View 2</a></td>
-                </tr>
-                <tr data-difficulty="★★">
-                    <td class="problem-num">40</td>
-                    <td class="problem-title"><a href="https://leetcode.com/problems/network-delay-time/" target="_blank">Network Delay Time</a></td>
-                    <td class="difficulty">★★</td>
-                    <td class="chapter">Ch13. Shortest Path</td>
-                    <td class="viz-links"><a href="4-non-linear-data-structures/ch13/visual/40-network-delay-time-v1.html" class="viz-link" target="_blank">View 1</a></td>
-                </tr>
-                <tr data-difficulty="★★">
-                    <td class="problem-num">41</td>
-                    <td class="problem-title"><a href="https://leetcode.com/problems/cheapest-flights-within-k-stops/" target="_blank">Cheapest Flights Within K Stops</a></td>
-                    <td class="difficulty">★★</td>
-                    <td class="chapter">Ch13. Shortest Path</td>
-                    <td class="viz-links"><a href="4-non-linear-data-structures/ch13/visual/41-cheapest-flights-v1.html" class="viz-link" target="_blank">View 1</a></td>
-                </tr>
-                <tr data-difficulty="★">
-                    <td class="problem-num">42</td>
-                    <td class="problem-title"><a href="https://leetcode.com/problems/maximum-depth-of-binary-tree/" target="_blank">Maximum Depth of Binary Tree</a></td>
-                    <td class="difficulty">★</td>
-                    <td class="chapter">Ch14. Tree</td>
-                    <td class="viz-links"><a href="4-non-linear-data-structures/ch14/visual/42-maximum-depth-v1.html" class="viz-link" target="_blank">View 1</a></td>
-                </tr>
-                <tr data-difficulty="★">
-                    <td class="problem-num">43</td>
-                    <td class="problem-title"><a href="https://leetcode.com/problems/diameter-of-binary-tree/" target="_blank">Diameter of Binary Tree</a></td>
-                    <td class="difficulty">★</td>
-                    <td class="chapter">Ch14. Tree</td>
-                    <td class="viz-links"><a href="4-non-linear-data-structures/ch14/visual/43-diameter-of-binary-tree-v1.html" class="viz-link" target="_blank">View 1</a></td>
-                </tr>
-                <tr data-difficulty="★">
-                    <td class="problem-num">44</td>
-                    <td class="problem-title"><a href="https://leetcode.com/problems/longest-univalue-path/" target="_blank">Longest Univalue Path</a></td>
-                    <td class="difficulty">★</td>
-                    <td class="chapter">Ch14. Tree</td>
-                    <td class="viz-links"><a href="4-non-linear-data-structures/ch14/visual/44-longest-univalue-path-v1.html" class="viz-link" target="_blank">View 1</a></td>
-                </tr>
-                <tr data-difficulty="★">
-                    <td class="problem-num">45</td>
-                    <td class="problem-title"><a href="https://leetcode.com/problems/invert-binary-tree/" target="_blank">Invert Binary Tree</a></td>
-                    <td class="difficulty">★</td>
-                    <td class="chapter">Ch14. Tree</td>
-                    <td class="viz-links"><a href="4-non-linear-data-structures/ch14/visual/45-invert-binary-tree-v1-recursive.html" class="viz-link" target="_blank">View 1</a> <a href="4-non-linear-data-structures/ch14/visual/45-invert-binary-tree-v2-bfs.html" class="viz-link" target="_blank">View 2</a> <a href="4-non-linear-data-structures/ch14/visual/45-invert-binary-tree-v3-dfs-preorder.html" class="viz-link" target="_blank">View 3</a> <a href="4-non-linear-data-structures/ch14/visual/45-invert-binary-tree-v3-dfs-stack.html" class="viz-link" target="_blank">View 4</a> <a href="4-non-linear-data-structures/ch14/visual/45-invert-binary-tree-v4-dfs-postorder.html" class="viz-link" target="_blank">View 5</a></td>
-                </tr>
-                <tr data-difficulty="★">
-                    <td class="problem-num">46</td>
-                    <td class="problem-title"><a href="https://leetcode.com/problems/merge-two-binary-trees/" target="_blank">Merge Two Binary Trees</a></td>
-                    <td class="difficulty">★</td>
-                    <td class="chapter">Ch14. Tree</td>
-                    <td class="viz-links"><a href="4-non-linear-data-structures/ch14/visual/46-merge-two-binary-trees-v1.html" class="viz-link" target="_blank">View 1</a></td>
-                </tr>
-                <tr data-difficulty="★★★">
-                    <td class="problem-num">47</td>
-                    <td class="problem-title"><a href="https://leetcode.com/problems/serialize-and-deserialize-binary-tree/" target="_blank">Serialize and Deserialize Binary Tree</a></td>
-                    <td class="difficulty">★★★</td>
-                    <td class="chapter">Ch14. Tree</td>
-                    <td class="viz-links"><a href="4-non-linear-data-structures/ch14/visual/47-serialize-deserialize-v1.html" class="viz-link" target="_blank">View 1</a></td>
-                </tr>
-                <tr data-difficulty="★">
-                    <td class="problem-num">48</td>
-                    <td class="problem-title"><a href="https://leetcode.com/problems/balanced-binary-tree/" target="_blank">Balanced Binary Tree</a></td>
-                    <td class="difficulty">★</td>
-                    <td class="chapter">Ch14. Tree</td>
-                    <td class="viz-links"><a href="4-non-linear-data-structures/ch14/visual/48-balanced-binary-tree-v1.html" class="viz-link" target="_blank">View 1</a></td>
-                </tr>
-                <tr data-difficulty="★★">
-                    <td class="problem-num">49</td>
-                    <td class="problem-title"><a href="https://leetcode.com/problems/minimum-height-trees/" target="_blank">Minimum Height Trees</a></td>
-                    <td class="difficulty">★★</td>
-                    <td class="chapter">Ch14. Tree</td>
-                    <td class="viz-links"><a href="4-non-linear-data-structures/ch14/visual/49-minimum-height-trees-v1.html" class="viz-link" target="_blank">View 1</a></td>
-                </tr>
-                <tr data-difficulty="★">
-                    <td class="problem-num">50</td>
-                    <td class="problem-title"><a href="https://leetcode.com/problems/convert-sorted-array-to-binary-search-tree/" target="_blank">Convert Sorted Array to Binary Search Tree</a></td>
-                    <td class="difficulty">★</td>
-                    <td class="chapter">Ch14. Tree</td>
-                    <td class="viz-links"><a href="4-non-linear-data-structures/ch14/visual/50-sorted-array-to-bst-v1.html" class="viz-link" target="_blank">View 1</a></td>
-                </tr>
-                <tr data-difficulty="★★">
-                    <td class="problem-num">51</td>
-                    <td class="problem-title"><a href="https://leetcode.com/problems/binary-search-tree-to-greater-sum-tree/" target="_blank">Binary Search Tree to Greater Sum Tree</a></td>
-                    <td class="difficulty">★★</td>
-                    <td class="chapter">Ch14. Tree</td>
-                    <td class="viz-links"><a href="4-non-linear-data-structures/ch14/visual/51-bst-to-gst-v1.html" class="viz-link" target="_blank">View 1</a></td>
-                </tr>
-                <tr data-difficulty="★">
-                    <td class="problem-num">52</td>
-                    <td class="problem-title"><a href="https://leetcode.com/problems/range-sum-of-bst/" target="_blank">Range Sum of BST</a></td>
-                    <td class="difficulty">★</td>
-                    <td class="chapter">Ch14. Tree</td>
-                    <td class="viz-links"><a href="4-non-linear-data-structures/ch14/visual/52-range-sum-bst-v1-brute-force.html" class="viz-link" target="_blank">View 1</a> <a href="4-non-linear-data-structures/ch14/visual/52-range-sum-bst-v2-pruning.html" class="viz-link" target="_blank">View 2</a> <a href="4-non-linear-data-structures/ch14/visual/52-range-sum-bst-v3-dfs-stack.html" class="viz-link" target="_blank">View 3</a> <a href="4-non-linear-data-structures/ch14/visual/52-range-sum-bst-v4-bfs-queue.html" class="viz-link" target="_blank">View 4</a></td>
-                </tr>
-                <tr data-difficulty="★">
-                    <td class="problem-num">53</td>
-                    <td class="problem-title"><a href="https://leetcode.com/problems/minimum-distance-between-bst-nodes/" target="_blank">Minimum Distance Between BST Nodes</a></td>
-                    <td class="difficulty">★</td>
-                    <td class="chapter">Ch14. Tree</td>
-                    <td class="viz-links"><a href="4-non-linear-data-structures/ch14/visual/53-min-distance-bst-v1-recursive.html" class="viz-link" target="_blank">View 1</a> <a href="4-non-linear-data-structures/ch14/visual/53-min-distance-bst-v2-iterative.html" class="viz-link" target="_blank">View 2</a></td>
-                </tr>
-                <tr data-difficulty="★★">
-                    <td class="problem-num">54</td>
-                    <td class="problem-title"><a href="https://leetcode.com/problems/construct-binary-tree-from-preorder-and-inorder-traversal/" target="_blank">Construct Binary Tree from Preorder and Inorder Traversal</a></td>
-                    <td class="difficulty">★★</td>
-                    <td class="chapter">Ch14. Tree</td>
-                    <td class="viz-links"><a href="4-non-linear-data-structures/ch14/visual/54-construct-tree-v1.html" class="viz-link" target="_blank">View 1</a></td>
-                </tr>
-                <tr data-difficulty="★★">
-                    <td class="problem-num">55</td>
-                    <td class="problem-title"><a href="https://leetcode.com/problems/kth-largest-element-in-an-array/" target="_blank">Kth Largest Element in an Array</a></td>
-                    <td class="difficulty">★★</td>
-                    <td class="chapter">Ch15. Heap</td>
-                    <td class="viz-links"><a href="4-non-linear-data-structures/ch15/visual/55-kth-largest-v1-max-heap.html" class="viz-link" target="_blank">View 1</a> <a href="4-non-linear-data-structures/ch15/visual/55-kth-largest-v2-heapify.html" class="viz-link" target="_blank">View 2</a> <a href="4-non-linear-data-structures/ch15/visual/55-kth-largest-v3-nlargest.html" class="viz-link" target="_blank">View 3</a> <a href="4-non-linear-data-structures/ch15/visual/55-kth-largest-v4-sort.html" class="viz-link" target="_blank">View 4</a></td>
-                </tr>
-                <tr data-difficulty="★★">
-                    <td class="problem-num">56</td>
-                    <td class="problem-title"><a href="https://leetcode.com/problems/implement-trie-prefix-tree/" target="_blank">Implement Trie (Prefix Tree)</a></td>
-                    <td class="difficulty">★★</td>
-                    <td class="chapter">Ch16. Trie</td>
-                    <td class="viz-links"><a href="4-non-linear-data-structures/ch16/visual/56-implement-trie-v1.html" class="viz-link" target="_blank">View 1</a></td>
-                </tr>
-                <tr data-difficulty="★★★">
-                    <td class="problem-num">57</td>
-                    <td class="problem-title"><a href="https://leetcode.com/problems/palindrome-pairs/" target="_blank">Palindrome Pairs</a></td>
-                    <td class="difficulty">★★★</td>
-                    <td class="chapter">Ch16. Trie</td>
-                    <td class="viz-links"><a href="4-non-linear-data-structures/ch16/visual/57-palindrome-pairs-v1-brute-force.html" class="viz-link" target="_blank">View 1</a> <a href="4-non-linear-data-structures/ch16/visual/57-palindrome-pairs-v2-trie.html" class="viz-link" target="_blank">View 2</a></td>
-                </tr>
-                <tr data-difficulty="★★">
-                    <td class="problem-num">58</td>
-                    <td class="problem-title"><a href="https://leetcode.com/problems/sort-list/" target="_blank">Sort List</a></td>
-                    <td class="difficulty">★★</td>
-                    <td class="chapter">Ch17. Sorting</td>
-                    <td class="viz-links"><a href="5-algorithms/ch17/visual/58-sort-list-v1-merge-sort.html" class="viz-link" target="_blank">View 1</a> <a href="5-algorithms/ch17/visual/58-sort-list-v2-builtin-sort.html" class="viz-link" target="_blank">View 2</a></td>
-                </tr>
-                <tr data-difficulty="★★">
-                    <td class="problem-num">59</td>
-                    <td class="problem-title"><a href="https://leetcode.com/problems/merge-intervals/" target="_blank">Merge Intervals</a></td>
-                    <td class="difficulty">★★</td>
-                    <td class="chapter">Ch17. Sorting</td>
-                    <td class="viz-links"><a href="5-algorithms/ch17/visual/59-merge-intervals-v1.html" class="viz-link" target="_blank">View 1</a></td>
-                </tr>
-                <tr data-difficulty="★★">
-                    <td class="problem-num">60</td>
-                    <td class="problem-title"><a href="https://leetcode.com/problems/insertion-sort-list/" target="_blank">Insertion Sort List</a></td>
-                    <td class="difficulty">★★</td>
-                    <td class="chapter">Ch17. Sorting</td>
-                    <td class="viz-links"><a href="5-algorithms/ch17/visual/60-insertion-sort-list-v1.html" class="viz-link" target="_blank">View 1</a> <a href="5-algorithms/ch17/visual/60-insertion-sort-list-v2-optimized.html" class="viz-link" target="_blank">View 2</a></td>
-                </tr>
-                <tr data-difficulty="★★">
-                    <td class="problem-num">61</td>
-                    <td class="problem-title"><a href="https://leetcode.com/problems/largest-number/" target="_blank">Largest Number</a></td>
-                    <td class="difficulty">★★</td>
-                    <td class="chapter">Ch17. Sorting</td>
-                    <td class="viz-links"><a href="5-algorithms/ch17/visual/61-largest-number-v1.html" class="viz-link" target="_blank">View 1</a></td>
-                </tr>
-                <tr data-difficulty="★">
-                    <td class="problem-num">62</td>
-                    <td class="problem-title"><a href="https://leetcode.com/problems/valid-anagram/" target="_blank">Valid Anagram</a></td>
-                    <td class="difficulty">★</td>
-                    <td class="chapter">Ch17. Sorting</td>
-                    <td class="viz-links"><a href="5-algorithms/ch17/visual/62-valid-anagram-v1.html" class="viz-link" target="_blank">View 1</a></td>
-                </tr>
-                <tr data-difficulty="★★">
-                    <td class="problem-num">63</td>
-                    <td class="problem-title"><a href="https://leetcode.com/problems/sort-colors/" target="_blank">Sort Colors</a></td>
-                    <td class="difficulty">★★</td>
-                    <td class="chapter">Ch17. Sorting</td>
-                    <td class="viz-links"><a href="5-algorithms/ch17/visual/63-sort-colors-v1.html" class="viz-link" target="_blank">View 1</a></td>
-                </tr>
-                <tr data-difficulty="★★">
-                    <td class="problem-num">64</td>
-                    <td class="problem-title"><a href="https://leetcode.com/problems/k-closest-points-to-origin/" target="_blank">K Closest Points to Origin</a></td>
-                    <td class="difficulty">★★</td>
-                    <td class="chapter">Ch17. Sorting</td>
-                    <td class="viz-links"><a href="5-algorithms/ch17/visual/64-k-closest-points-v1.html" class="viz-link" target="_blank">View 1</a></td>
-                </tr>
-                <tr data-difficulty="★">
-                    <td class="problem-num">65</td>
-                    <td class="problem-title"><a href="https://leetcode.com/problems/binary-search/" target="_blank">Binary Search</a></td>
-                    <td class="difficulty">★</td>
-                    <td class="chapter">Ch18. Binary Search</td>
-                    <td class="viz-links"><a href="5-algorithms/ch18/visual/65-binary-search-v1-recursive.html" class="viz-link" target="_blank">View 1</a> <a href="5-algorithms/ch18/visual/65-binary-search-v2-iterative.html" class="viz-link" target="_blank">View 2</a> <a href="5-algorithms/ch18/visual/65-binary-search-v3-bisect.html" class="viz-link" target="_blank">View 3</a> <a href="5-algorithms/ch18/visual/65-binary-search-v4-index.html" class="viz-link" target="_blank">View 4</a></td>
-                </tr>
-                <tr data-difficulty="★★">
-                    <td class="problem-num">66</td>
-                    <td class="problem-title"><a href="https://leetcode.com/problems/search-in-rotated-sorted-array/" target="_blank">Search in Rotated Sorted Array</a></td>
-                    <td class="difficulty">★★</td>
-                    <td class="chapter">Ch18. Binary Search</td>
-                    <td class="viz-links"><a href="5-algorithms/ch18/visual/66-search-rotated-array-v1.html" class="viz-link" target="_blank">View 1</a></td>
-                </tr>
-                <tr data-difficulty="★">
-                    <td class="problem-num">67</td>
-                    <td class="problem-title"><a href="https://leetcode.com/problems/intersection-of-two-arrays/" target="_blank">Intersection of Two Arrays</a></td>
-                    <td class="difficulty">★</td>
-                    <td class="chapter">Ch18. Binary Search</td>
-                    <td class="viz-links"><a href="5-algorithms/ch18/visual/67-intersection-v1-brute-force.html" class="viz-link" target="_blank">View 1</a> <a href="5-algorithms/ch18/visual/67-intersection-v2-two-pointers.html" class="viz-link" target="_blank">View 2</a> <a href="5-algorithms/ch18/visual/67-intersection-v3-two-pointers-set.html" class="viz-link" target="_blank">View 3</a></td>
-                </tr>
-                <tr data-difficulty="★">
-                    <td class="problem-num">68</td>
-                    <td class="problem-title"><a href="https://leetcode.com/problems/two-sum-ii-input-array-is-sorted/" target="_blank">Two Sum II - Input Array Is Sorted</a></td>
-                    <td class="difficulty">★</td>
-                    <td class="chapter">Ch18. Binary Search</td>
-                    <td class="viz-links"><a href="5-algorithms/ch18/visual/68-two-sum-ii-v1-two-pointers.html" class="viz-link" target="_blank">View 1</a> <a href="5-algorithms/ch18/visual/68-two-sum-ii-v2-binary-search.html" class="viz-link" target="_blank">View 2</a> <a href="5-algorithms/ch18/visual/68-two-sum-ii-v3-bisect-slice.html" class="viz-link" target="_blank">View 3</a> <a href="5-algorithms/ch18/visual/68-two-sum-ii-v4-bisect-variable.html" class="viz-link" target="_blank">View 4</a> <a href="5-algorithms/ch18/visual/68-two-sum-ii-v5-bisect-lo.html" class="viz-link" target="_blank">View 5</a></td>
-                </tr>
-                <tr data-difficulty="★★">
-                    <td class="problem-num">69</td>
-                    <td class="problem-title"><a href="https://leetcode.com/problems/search-a-2d-matrix-ii/" target="_blank">Search a 2D Matrix II</a></td>
-                    <td class="difficulty">★★</td>
-                    <td class="chapter">Ch18. Binary Search</td>
-                    <td class="viz-links"><a href="5-algorithms/ch18/visual/69-search-2d-matrix-v1-staircase.html" class="viz-link" target="_blank">View 1</a> <a href="5-algorithms/ch18/visual/69-search-2d-matrix-v2-any.html" class="viz-link" target="_blank">View 2</a></td>
-                </tr>
-                <tr data-difficulty="★">
-                    <td class="problem-num">70</td>
-                    <td class="problem-title"><a href="https://leetcode.com/problems/single-number/" target="_blank">Single Number</a></td>
-                    <td class="difficulty">★</td>
-                    <td class="chapter">Ch19. Bit Manipulation</td>
-                    <td class="viz-links"><a href="5-algorithms/ch19/visual/70-single-number-v1-xor.html" class="viz-link" target="_blank">View 1</a></td>
-                </tr>
-                <tr data-difficulty="★">
-                    <td class="problem-num">71</td>
-                    <td class="problem-title"><a href="https://leetcode.com/problems/hamming-distance/" target="_blank">Hamming Distance</a></td>
-                    <td class="difficulty">★</td>
-                    <td class="chapter">Ch19. Bit Manipulation</td>
-                    <td class="viz-links"><a href="5-algorithms/ch19/visual/71-hamming-distance-v1-xor.html" class="viz-link" target="_blank">View 1</a></td>
-                </tr>
-                <tr data-difficulty="★★★">
-                    <td class="problem-num">72</td>
-                    <td class="problem-title"><a href="https://leetcode.com/problems/sum-of-two-integers/" target="_blank">Sum of Two Integers</a></td>
-                    <td class="difficulty">★★★</td>
-                    <td class="chapter">Ch19. Bit Manipulation</td>
-                    <td class="viz-links"><a href="5-algorithms/ch19/visual/72-sum-two-integers-v1-bit.html" class="viz-link" target="_blank">View 1</a> <a href="5-algorithms/ch19/visual/72-sum-two-integers-v2-masked.html" class="viz-link" target="_blank">View 2</a></td>
-                </tr>
-                <tr data-difficulty="★★">
-                    <td class="problem-num">73</td>
-                    <td class="problem-title"><a href="https://leetcode.com/problems/utf-8-validation/" target="_blank">UTF-8 Validation</a></td>
-                    <td class="difficulty">★★</td>
-                    <td class="chapter">Ch19. Bit Manipulation</td>
-                    <td class="viz-links"><a href="5-algorithms/ch19/visual/73-utf8-validation-v1.html" class="viz-link" target="_blank">View 1</a></td>
-                </tr>
-                <tr data-difficulty="★">
-                    <td class="problem-num">74</td>
-                    <td class="problem-title"><a href="https://leetcode.com/problems/number-of-1-bits/" target="_blank">Number of 1 Bits</a></td>
-                    <td class="difficulty">★</td>
-                    <td class="chapter">Ch19. Bit Manipulation</td>
-                    <td class="viz-links"><a href="5-algorithms/ch19/visual/74-number-of-1-bits-v1-kernighan.html" class="viz-link" target="_blank">View 1</a> <a href="5-algorithms/ch19/visual/74-number-of-1-bits-v2-kernighan.html" class="viz-link" target="_blank">View 2</a></td>
-                </tr>
-                <tr data-difficulty="★★★">
-                    <td class="problem-num">75</td>
-                    <td class="problem-title"><a href="https://leetcode.com/problems/sliding-window-maximum/" target="_blank">Sliding Window Maximum</a></td>
-                    <td class="difficulty">★★★</td>
-                    <td class="chapter">Ch20. Sliding Window</td>
-                    <td class="viz-links"><a href="5-algorithms/ch20/visual/75-sliding-window-max-v1-deque.html" class="viz-link" target="_blank">View 1</a> <a href="5-algorithms/ch20/visual/75-sliding-window-max-v2-optimized.html" class="viz-link" target="_blank">View 2</a></td>
-                </tr>
-                <tr data-difficulty="★★★">
-                    <td class="problem-num">76</td>
-                    <td class="problem-title"><a href="https://leetcode.com/problems/minimum-window-substring/" target="_blank">Minimum Window Substring</a></td>
-                    <td class="difficulty">★★★</td>
-                    <td class="chapter">Ch20. Sliding Window</td>
-                    <td class="viz-links"><a href="5-algorithms/ch20/visual/76-min-window-substring-v1-two-pointers.html" class="viz-link" target="_blank">View 1</a> <a href="5-algorithms/ch20/visual/76-min-window-substring-v2-missing-counter.html" class="viz-link" target="_blank">View 2</a> <a href="5-algorithms/ch20/visual/76-min-window-substring-v3-counter-and.html" class="viz-link" target="_blank">View 3</a></td>
-                </tr>
-                <tr data-difficulty="★★">
-                    <td class="problem-num">77</td>
-                    <td class="problem-title"><a href="https://leetcode.com/problems/longest-repeating-character-replacement/" target="_blank">Longest Repeating Character Replacement</a></td>
-                    <td class="difficulty">★★</td>
-                    <td class="chapter">Ch20. Sliding Window</td>
-                    <td class="viz-links"><a href="5-algorithms/ch20/visual/77-longest-repeating-char-v1.html" class="viz-link" target="_blank">View 1</a></td>
-                </tr>
-                <tr data-difficulty="★">
-                    <td class="problem-num">78</td>
-                    <td class="problem-title"><a href="https://leetcode.com/problems/best-time-to-buy-and-sell-stock-ii/" target="_blank">Best Time to Buy and Sell Stock II</a></td>
-                    <td class="difficulty">★</td>
-                    <td class="chapter">Ch21. Greedy Algorithm</td>
-                    <td class="viz-links"><a href="5-algorithms/ch21/visual/78-stock-ii-v1-greedy.html" class="viz-link" target="_blank">View 1</a> <a href="5-algorithms/ch21/visual/78-stock-ii-v2-pythonic.html" class="viz-link" target="_blank">View 2</a></td>
-                </tr>
-                <tr data-difficulty="★★">
-                    <td class="problem-num">79</td>
-                    <td class="problem-title"><a href="https://leetcode.com/problems/queue-reconstruction-by-height/" target="_blank">Queue Reconstruction by Height</a></td>
-                    <td class="difficulty">★★</td>
-                    <td class="chapter">Ch21. Greedy Algorithm</td>
-                    <td class="viz-links"><a href="5-algorithms/ch21/visual/79-queue-reconstruction-v1-greedy.html" class="viz-link" target="_blank">View 1</a></td>
-                </tr>
-                <tr data-difficulty="★★">
-                    <td class="problem-num">80</td>
-                    <td class="problem-title"><a href="https://leetcode.com/problems/task-scheduler/" target="_blank">Task Scheduler</a></td>
-                    <td class="difficulty">★★</td>
-                    <td class="chapter">Ch21. Greedy Algorithm</td>
-                    <td class="viz-links"><a href="5-algorithms/ch21/visual/80-task-scheduler-v1-greedy.html" class="viz-link" target="_blank">View 1</a></td>
-                </tr>
-                <tr data-difficulty="★★">
-                    <td class="problem-num">81</td>
-                    <td class="problem-title"><a href="https://leetcode.com/problems/gas-station/" target="_blank">Gas Station</a></td>
-                    <td class="difficulty">★★</td>
-                    <td class="chapter">Ch21. Greedy Algorithm</td>
-                    <td class="viz-links"><a href="5-algorithms/ch21/visual/81-gas-station-v1-single-pass.html" class="viz-link" target="_blank">View 1</a> <a href="5-algorithms/ch21/visual/81-gas-station-v2-greedy.html" class="viz-link" target="_blank">View 2</a></td>
-                </tr>
-                <tr data-difficulty="★">
-                    <td class="problem-num">82</td>
-                    <td class="problem-title"><a href="https://leetcode.com/problems/assign-cookies/" target="_blank">Assign Cookies</a></td>
-                    <td class="difficulty">★</td>
-                    <td class="chapter">Ch21. Greedy Algorithm</td>
-                    <td class="viz-links"><a href="5-algorithms/ch21/visual/82-assign-cookies-v1-greedy.html" class="viz-link" target="_blank">View 1</a> <a href="5-algorithms/ch21/visual/82-assign-cookies-v2-bisect.html" class="viz-link" target="_blank">View 2</a></td>
-                </tr>
-                <tr data-difficulty="★">
-                    <td class="problem-num">83</td>
-                    <td class="problem-title"><a href="https://leetcode.com/problems/majority-element/" target="_blank">Majority Element</a></td>
-                    <td class="difficulty">★</td>
-                    <td class="chapter">Ch22. Divide and Conquer</td>
-                    <td class="viz-links"><a href="5-algorithms/ch22/visual/83-majority-element-v1-divide-conquer.html" class="viz-link" target="_blank">View 1</a> <a href="5-algorithms/ch22/visual/83-majority-element-v2-defaultdict.html" class="viz-link" target="_blank">View 2</a> <a href="5-algorithms/ch22/visual/83-majority-element-v3-recursive.html" class="viz-link" target="_blank">View 3</a> <a href="5-algorithms/ch22/visual/83-majority-element-v4-sorted.html" class="viz-link" target="_blank">View 4</a></td>
-                </tr>
-                <tr data-difficulty="★★">
-                    <td class="problem-num">84</td>
-                    <td class="problem-title"><a href="https://leetcode.com/problems/different-ways-to-add-parentheses/" target="_blank">Different Ways to Add Parentheses</a></td>
-                    <td class="difficulty">★★</td>
-                    <td class="chapter">Ch22. Divide and Conquer</td>
-                    <td class="viz-links"><a href="5-algorithms/ch22/visual/84-different-ways-v1-divide-conquer.html" class="viz-link" target="_blank">View 1</a></td>
-                </tr>
-                <tr data-difficulty="★">
-                    <td class="problem-num">85</td>
-                    <td class="problem-title"><a href="https://leetcode.com/problems/fibonacci-number/" target="_blank">Fibonacci Number</a></td>
-                    <td class="difficulty">★</td>
-                    <td class="chapter">Ch23. Dynamic Programming</td>
-                    <td class="viz-links"><a href="5-algorithms/ch23/visual/85-fibonacci-v1-all-approaches.html" class="viz-link" target="_blank">View 1</a></td>
-                </tr>
-                <tr data-difficulty="★">
-                    <td class="problem-num">86</td>
-                    <td class="problem-title"><a href="https://leetcode.com/problems/maximum-subarray/" target="_blank">Maximum Subarray</a></td>
-                    <td class="difficulty">★</td>
-                    <td class="chapter">Ch23. Dynamic Programming</td>
-                    <td class="viz-links"><a href="5-algorithms/ch23/visual/86-max-subarray-v1-kadane.html" class="viz-link" target="_blank">View 1</a> <a href="5-algorithms/ch23/visual/86-max-subarray-v2-kadane.html" class="viz-link" target="_blank">View 2</a></td>
-                </tr>
-                <tr data-difficulty="★">
-                    <td class="problem-num">87</td>
-                    <td class="problem-title"><a href="https://leetcode.com/problems/climbing-stairs/" target="_blank">Climbing Stairs</a></td>
-                    <td class="difficulty">★</td>
-                    <td class="chapter">Ch23. Dynamic Programming</td>
-                    <td class="viz-links"><a href="5-algorithms/ch23/visual/87-climbing-stairs-v1-dp.html" class="viz-link" target="_blank">View 1</a> <a href="5-algorithms/ch23/visual/87-climbing-stairs-v2-memoization.html" class="viz-link" target="_blank">View 2</a></td>
-                </tr>
-                <tr data-difficulty="★">
-                    <td class="problem-num">88</td>
-                    <td class="problem-title"><a href="https://leetcode.com/problems/house-robber/" target="_blank">House Robber</a></td>
-                    <td class="difficulty">★</td>
-                    <td class="chapter">Ch23. Dynamic Programming</td>
-                    <td class="viz-links"><a href="5-algorithms/ch23/visual/88-house-robber-v1-dp.html" class="viz-link" target="_blank">View 1</a> <a href="5-algorithms/ch23/visual/88-house-robber-v2-ordereddict.html" class="viz-link" target="_blank">View 2</a></td>
-                </tr>
-            </tbody>
-        </table>
+        <div class="search-box">
+            <input type="text" id="search" placeholder="🔍 Search problems..." autocomplete="off">
+        </div>
+        <div class="list-container" id="list"></div>
+        <div class="stats" id="stats"></div>
     </div>
-    
+    <div class="main">
+        <div class="welcome" id="welcome">
+            <h2>👈 Select a problem</h2>
+            <p>Choose from 154 visualizations</p>
+        </div>
+        <iframe id="viewer" style="display:none;"></iframe>
+    </div>
+
     <script>
-        // Update visualization count
-        document.getElementById('total-viz').textContent = document.querySelectorAll('.viz-link').length;
-        
-        // Search functionality
-        document.getElementById('search').addEventListener('input', function(e) {
-            const searchTerm = e.target.value.toLowerCase();
-            document.querySelectorAll('#problem-table tbody tr').forEach(row => {
-                const text = row.textContent.toLowerCase();
-                row.style.display = text.includes(searchTerm) ? '' : 'none';
-            });
+        const files = [
+            "1-valid-palindrome-v1-list.html",
+            "1-valid-palindrome-v2-deque.html",
+            "1-valid-palindrome-v3-slicing.html",
+            "2-reverse-string-v1-two-pointers.html",
+            "2-reverse-string-v2-pythonic.html",
+            "3-reorder-log-files-v1-lambda-sort.html",
+            "4-most-common-word-v1-counter.html",
+            "5-group-anagrams-v1-sorted-key.html",
+            "6-longest-palindromic-substring-v1-expand.html",
+            "7-two-sum-v1-brute-force.html",
+            "7-two-sum-v2-in-list.html",
+            "7-two-sum-v3-two-pass-hash.html",
+            "7-two-sum-v4-hash-one-pass.html",
+            "7-two-sum-v5-two-pointer.html",
+            "8-trapping-rain-water-v1-two-pointers.html",
+            "8-trapping-rain-water-v2-stack.html",
+            "9-3sum-v1-brute-force.html",
+            "9-3sum-v2-two-pointers.html",
+            "10-array-partition-v1-pair-iteration.html",
+            "10-array-partition-v2-pythonic-slicing.html",
+            "10-array-partition-v3-sum-slicing.html",
+            "11-product-except-self-v1-two-pass.html",
+            "12-best-time-to-buy-sell-v1-brute-force.html",
+            "12-best-time-to-buy-sell-v2-one-pass.html",
+            "13-palindrome-linked-list-v1-list.html",
+            "13-palindrome-linked-list-v2-deque.html",
+            "13-palindrome-linked-list-v3-runner.html",
+            "14-merge-two-sorted-lists-v1-recursive.html",
+            "15-reverse-linked-list-v1-recursive.html",
+            "15-reverse-linked-list-v2-iterative.html",
+            "16-add-two-numbers-v1-full-adder.html",
+            "16-add-two-numbers-v2-reverse-convert.html",
+            "17-swap-nodes-in-pairs-v1-value-swap.html",
+            "17-swap-nodes-in-pairs-v2-node-swap.html",
+            "17-swap-nodes-in-pairs-v3-recursive.html",
+            "18-odd-even-linked-list-v1.html",
+            "19-reverse-linked-list-ii-v1.html",
+            "20-valid-parentheses-v1.html",
+            "21-remove-duplicate-letters-v1-recursive.html",
+            "21-remove-duplicate-letters-v2-stack.html",
+            "22-daily-temperatures-v1.html",
+            "23-implement-stack-using-queues-v1.html",
+            "24-implement-queue-using-stacks-v1.html",
+            "25-design-circular-queue-v1.html",
+            "26-design-circular-deque-v1.html",
+            "27-merge-k-sorted-lists-v1-heap.html",
+            "28-design-hashmap-v1.html",
+            "29-jewels-and-stones-v1-counter.html",
+            "29-jewels-and-stones-v2-pythonic.html",
+            "29-jewels-and-stones-v3-counter-lookup.html",
+            "29-jewels-and-stones-v4-sum-comprehension.html",
+            "30-longest-substring-without-repeating-v1.html",
+            "31-top-k-frequent-elements-v1-heap.html",
+            "31-top-k-frequent-elements-v2-pythonic.html",
+            "32-number-of-islands-v1.html",
+            "33-letter-combinations-v1.html",
+            "34-permutations-v1-dfs.html",
+            "34-permutations-v2-itertools.html",
+            "35-combinations-v1-dfs.html",
+            "35-combinations-v2-itertools.html",
+            "36-combination-sum-v1.html",
+            "37-subsets-v1.html",
+            "38-reconstruct-itinerary-v1-pop0.html",
+            "38-reconstruct-itinerary-v2-pop.html",
+            "38-reconstruct-itinerary-v3-iterative.html",
+            "39-course-schedule-v1-basic.html",
+            "39-course-schedule-v2-optimized.html",
+            "40-network-delay-time-v1.html",
+            "41-cheapest-flights-v1.html",
+            "42-maximum-depth-v1.html",
+            "43-diameter-of-binary-tree-v1.html",
+            "44-longest-univalue-path-v1.html",
+            "45-invert-binary-tree-v1-recursive.html",
+            "45-invert-binary-tree-v2-bfs.html",
+            "45-invert-binary-tree-v3-dfs-preorder.html",
+            "45-invert-binary-tree-v3-dfs-stack.html",
+            "45-invert-binary-tree-v4-dfs-postorder.html",
+            "46-merge-two-binary-trees-v1.html",
+            "47-serialize-deserialize-v1.html",
+            "48-balanced-binary-tree-v1.html",
+            "49-minimum-height-trees-v1.html",
+            "50-sorted-array-to-bst-v1.html",
+            "51-bst-to-gst-v1.html",
+            "52-range-sum-bst-v1-brute-force.html",
+            "52-range-sum-bst-v2-pruning.html",
+            "52-range-sum-bst-v3-dfs-stack.html",
+            "52-range-sum-bst-v4-bfs-queue.html",
+            "53-min-distance-bst-v1-recursive.html",
+            "53-min-distance-bst-v2-iterative.html",
+            "54-construct-tree-v1.html",
+            "55-kth-largest-v1-max-heap.html",
+            "55-kth-largest-v2-heapify.html",
+            "55-kth-largest-v3-nlargest.html",
+            "55-kth-largest-v4-sort.html",
+            "56-implement-trie-v1.html",
+            "57-palindrome-pairs-v1-brute-force.html",
+            "57-palindrome-pairs-v2-trie.html",
+            "58-sort-list-v1-merge-sort.html",
+            "58-sort-list-v2-builtin-sort.html",
+            "59-merge-intervals-v1.html",
+            "60-insertion-sort-list-v1.html",
+            "60-insertion-sort-list-v2-optimized.html",
+            "61-largest-number-v1.html",
+            "62-valid-anagram-v1.html",
+            "63-sort-colors-v1.html",
+            "64-k-closest-points-v1.html",
+            "65-binary-search-v1-recursive.html",
+            "65-binary-search-v2-iterative.html",
+            "65-binary-search-v3-bisect.html",
+            "65-binary-search-v4-index.html",
+            "66-search-rotated-array-v1.html",
+            "67-intersection-v1-brute-force.html",
+            "67-intersection-v2-two-pointers.html",
+            "67-intersection-v3-two-pointers-set.html",
+            "68-two-sum-ii-v1-two-pointers.html",
+            "68-two-sum-ii-v2-binary-search.html",
+            "68-two-sum-ii-v3-bisect-slice.html",
+            "68-two-sum-ii-v4-bisect-variable.html",
+            "68-two-sum-ii-v5-bisect-lo.html",
+            "69-search-2d-matrix-v1-staircase.html",
+            "69-search-2d-matrix-v2-any.html",
+            "70-single-number-v1-xor.html",
+            "71-hamming-distance-v1-xor.html",
+            "72-sum-two-integers-v1-bit.html",
+            "72-sum-two-integers-v2-masked.html",
+            "73-utf8-validation-v1.html",
+            "74-number-of-1-bits-v1-kernighan.html",
+            "74-number-of-1-bits-v2-kernighan.html",
+            "75-sliding-window-max-v1-deque.html",
+            "75-sliding-window-max-v2-optimized.html",
+            "76-min-window-substring-v1-two-pointers.html",
+            "76-min-window-substring-v2-missing-counter.html",
+            "76-min-window-substring-v3-counter-and.html",
+            "77-longest-repeating-char-v1.html",
+            "78-stock-ii-v1-greedy.html",
+            "78-stock-ii-v2-pythonic.html",
+            "79-queue-reconstruction-v1-greedy.html",
+            "80-task-scheduler-v1-greedy.html",
+            "81-gas-station-v1-single-pass.html",
+            "81-gas-station-v2-greedy.html",
+            "82-assign-cookies-v1-greedy.html",
+            "82-assign-cookies-v2-bisect.html",
+            "83-majority-element-v1-divide-conquer.html",
+            "83-majority-element-v2-defaultdict.html",
+            "83-majority-element-v3-recursive.html",
+            "83-majority-element-v4-sorted.html",
+            "84-different-ways-v1-divide-conquer.html",
+            "85-fibonacci-v1-all-approaches.html",
+            "86-max-subarray-v1-kadane.html",
+            "86-max-subarray-v2-kadane.html",
+            "87-climbing-stairs-v1-dp.html",
+            "87-climbing-stairs-v2-memoization.html",
+            "88-house-robber-v1-dp.html",
+            "88-house-robber-v2-ordereddict.html"
+        ];
+
+        // Group by question number
+        const groups = {};
+        files.forEach(f => {
+            const match = f.match(/^(\d+)-(.+?)-v\d+/);
+            if (match) {
+                const num = match[1];
+                const name = match[2].replace(/-/g, ' ');
+                if (!groups[num]) {
+                    groups[num] = { name, files: [] };
+                }
+                groups[num].files.push(f);
+            }
         });
-        
-        // Filter functionality
-        document.querySelectorAll('.filter-btn').forEach(btn => {
-            btn.addEventListener('click', function() {
-                document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-                this.classList.add('active');
+
+        // Render list
+        function renderList(filter = '') {
+            const listEl = document.getElementById('list');
+            listEl.innerHTML = '';
+            const filterLower = filter.toLowerCase();
+            let visibleCount = 0;
+            
+            Object.keys(groups).sort((a, b) => parseInt(a) - parseInt(b)).forEach(num => {
+                const g = groups[num];
+                const matchesFilter = !filter || 
+                    g.name.toLowerCase().includes(filterLower) ||
+                    num.includes(filter) ||
+                    g.files.some(f => f.toLowerCase().includes(filterLower));
                 
-                const filter = this.dataset.filter;
-                document.querySelectorAll('#problem-table tbody tr').forEach(row => {
-                    if (filter === 'all') {
-                        row.style.display = '';
-                    } else {
-                        row.style.display = row.dataset.difficulty === filter ? '' : 'none';
-                    }
+                if (!matchesFilter) return;
+                
+                const groupEl = document.createElement('div');
+                groupEl.className = 'question-group';
+                
+                const titleEl = document.createElement('div');
+                titleEl.className = 'question-title';
+                titleEl.innerHTML = `Q${num}: ${g.name} <span class="badge">${g.files.length}</span>`;
+                titleEl.onclick = () => {
+                    const sols = groupEl.querySelector('.solutions');
+                    sols.classList.toggle('open');
+                };
+                
+                const solsEl = document.createElement('div');
+                solsEl.className = 'solutions open';
+                
+                g.files.forEach(f => {
+                    const link = document.createElement('a');
+                    link.className = 'solution-link';
+                    link.href = '#';
+                    const vMatch = f.match(/-v(\d+)-(.+)\.html$/);
+                    link.textContent = vMatch ? `v${vMatch[1]}: ${vMatch[2].replace(/-/g, ' ')}` : f;
+                    link.onclick = (e) => {
+                        e.preventDefault();
+                        loadVisualization(f);
+                        document.querySelectorAll('.solution-link').forEach(l => l.classList.remove('active'));
+                        link.classList.add('active');
+                    };
+                    solsEl.appendChild(link);
+                    visibleCount++;
                 });
+                
+                groupEl.appendChild(titleEl);
+                groupEl.appendChild(solsEl);
+                listEl.appendChild(groupEl);
             });
+            
+            document.getElementById('stats').textContent = `${visibleCount} visualizations in ${Object.keys(groups).length} problems`;
+        }
+
+        function loadVisualization(file) {
+            document.getElementById('welcome').style.display = 'none';
+            const iframe = document.getElementById('viewer');
+            iframe.style.display = 'block';
+            iframe.src = 'visual/' + file;
+        }
+
+        // Search
+        document.getElementById('search').addEventListener('input', (e) => {
+            renderList(e.target.value);
         });
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            if (e.key === '/' && document.activeElement.tagName !== 'INPUT') {
+                e.preventDefault();
+                document.getElementById('search').focus();
+            }
+            if (e.key === 'Escape') {
+                document.getElementById('search').value = '';
+                document.getElementById('search').blur();
+                renderList();
+            }
+        });
+
+        renderList();
     </script>
 </body>
 </html>

@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sliding Window Maximum - Deque</title>
+    <link rel="stylesheet" href="visual.css">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    
+</head>
+<body>
+    <div class="container">
+        <h1>📊 Sliding Window Maximum</h1>
+        <p class="subtitle">Monotonic Deque O(n) - Keep indices of potential maximums</p>
+
+        <div class="controls">
+            <button id="stepBtn">Step</button>
+            <button id="autoBtn">Auto Run</button>
+            <button id="resetBtn">Reset</button>
+            <div class="window-size">Window Size k = 3</div>
+        </div>
+
+        <div class="panel">
+            <div class="panel-title">📊 Array</div>
+            <div class="array-container" id="array"></div>
+        </div>
+
+        <div class="panel">
+            <div class="panel-title">📥 Deque (Indices of Decreasing Values)</div>
+            <div class="deque-container" id="deque">
+                <span class="text-gray">Empty</span>
+            </div>
+        </div>
+
+        <div class="panel">
+            <div class="panel-title">✅ Result (Window Maximums)</div>
+            <div class="result-container" id="result"></div>
+        </div>
+
+        <div class="panel">
+            <div class="panel-title">📋 Status</div>
+            <div class="status-box" id="status">Maintain deque with indices of decreasing values. Front is always the max.</div>
+        </div>
+    
+        <div class="code-section">
+            <h3>📄 Python Solution (75-1.py)</h3>
+            <pre><span class="keyword">from</span> typing <span class="keyword">import</span> List
+
+
+<span class="keyword">class</span> Solution:
+    <span class="keyword">def</span> <span class="function">maxSlidingWindow</span>(<span class="keyword">self</span>, nums: List[int], k: int) -&gt; List[int]:
+        <span class="keyword">if</span> <span class="keyword">not</span> nums:
+            <span class="keyword">return</span> nums
+
+        r = []
+        <span class="keyword">for</span> i <span class="keyword">in</span> <span class="function">range</span>(<span class="function">len</span>(nums) - k + <span class="number">1</span>):
+            r.<span class="function">append</span>(<span class="function">max</span>(nums[i:i + k]))
+
+        <span class="keyword">return</span> r</pre>
+        </div>
+
+    </div>
+
+
+    <script>
+        const nums = [1, 3, -1, -3, 5, 3, 6, 7];
+        const k = 3;
+        let idx = 0;
+        let deque = [];
+        let result = [];
+        let done = false;
+        let autoInterval = null;
+
+        function render() {
+            const windowStart = Math.max(0, idx - k + 1);
+            
+            document.getElementById('array').innerHTML = nums.map((v, i) => {
+                let cls = 'array-item default';
+                if (i >= windowStart && i <= idx && idx < nums.length) {
+                    if (deque.length > 0 && i === deque[0]) cls = 'array-item max';
+                    else if (deque.includes(i)) cls = 'array-item in-deque';
+                    else cls = 'array-item in-window';
+                }
+                return `<div class="${cls}"><span class="value">${v}</span><span class="index">[${i}]</span></div>`;
+            }).join('');
+
+            document.getElementById('deque').innerHTML = deque.length > 0 
+                ? deque.map(i => `<div class="deque-item">[${i}]=${nums[i]}</div>`).join('')
+                : '<span class="text-gray">Empty</span>';
+
+            document.getElementById('result').innerHTML = result.length > 0
+                ? result.map(v => `<div class="result-item">${v}</div>`).join('')
+                : '<span class="text-gray">Empty</span>';
+        }
+
+        function step() {
+            if (done) return;
+
+            if (idx >= nums.length) {
+                done = true;
+                document.getElementById('status').innerHTML = 
+                    `✅ Complete! Window maximums: [${result.join(', ')}]`;
+                document.getElementById('stepBtn').disabled = true;
+                document.getElementById('autoBtn').disabled = true;
+                stopAuto();
+                return;
+            }
+
+            // Remove indices outside window
+            while (deque.length > 0 && deque[0] < idx - k + 1) {
+                deque.shift();
+            }
+
+            // Remove smaller elements from back
+            while (deque.length > 0 && nums[deque[deque.length - 1]] < nums[idx]) {
+                deque.pop();
+            }
+
+            deque.push(idx);
+
+            let msg = `Process index ${idx} (value ${nums[idx]}). `;
+            
+            if (idx >= k - 1) {
+                result.push(nums[deque[0]]);
+                msg += `Window [${idx-k+1}..${idx}] max = ${nums[deque[0]]}`;
+            } else {
+                msg += `Building window... (need ${k - idx - 1} more elements)`;
+            }
+
+            document.getElementById('status').innerHTML = msg;
+            idx++;
+            render();
+        }
+
+        function reset() {
+            stopAuto();
+            idx = 0;
+            deque = [];
+            result = [];
+            done = false;
+            document.getElementById('stepBtn').disabled = false;
+            document.getElementById('autoBtn').disabled = false;
+            document.getElementById('status').innerHTML = 'Maintain deque with indices of decreasing values. Front is always the max.';
+            render();
+        }
+
+        function stopAuto() {
+            if (autoInterval) { clearInterval(autoInterval); autoInterval = null; }
+            document.getElementById('autoBtn').textContent = 'Auto Run';
+        }
+
+        document.getElementById('stepBtn').onclick = () => { stopAuto(); step(); };
+        document.getElementById('autoBtn').onclick = () => {
+            if (autoInterval) { stopAuto(); }
+            else { autoInterval = setInterval(step, 800); document.getElementById('autoBtn').textContent = '⏸ Pause'; }
+        };
+        document.getElementById('resetBtn').onclick = reset;
+
+        render();
+    </script>
+</body>
+</html>
