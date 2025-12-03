@@ -110,7 +110,11 @@
                     if (c === maxChar) cls = 'char most-freq';
                     else cls = 'char to-replace';
                 }
-                return `<div class="${cls}"><span class="letter">${c}</span><span class="idx">${i}</span></div>`;
+                let pointer = '';
+                if (i === left && i === right - 1) pointer = ' data-pointer="L,R"';
+                else if (i === left) pointer = ' data-pointer="L"';
+                else if (i === right - 1) pointer = ' data-pointer="R"';
+                return `<div class="${cls}"${pointer}><span class="letter">${c}</span><span class="idx">${i}</span></div>`;
             }).join('');
 
             const winSize = right - left;

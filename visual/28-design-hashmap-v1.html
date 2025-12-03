@@ -140,52 +140,76 @@
         
         function renderTable() {
             const container = document.getElementById('hashTable');
-            container.innerHTML = '';
-            
+            // Use D3 for transitions
+            // Clear only if not already present
+            if (!container.hasChildNodes()) {
+                for (let i = 0; i < SIZE; i++) {
+                    const row = document.createElement('div');
+                    row.className = 'bucket-row';
+                    row.style.display = 'flex';
+                    row.style.alignItems = 'center';
+                    row.style.marginBottom = '10px';
+                    row.innerHTML = `<span class="bucket-index">[${i}]</span>`;
+                    const content = document.createElement('div');
+                    content.className = 'bucket-content';
+                    content.style.display = 'flex';
+                    content.style.alignItems = 'center';
+                    content.style.gap = '5px';
+                    row.appendChild(content);
+                    container.appendChild(row);
+                }
+            }
+            // Animate changes per bucket
             for (let i = 0; i < SIZE; i++) {
-                const row = document.createElement('div');
-                row.className = 'bucket-row';
-                row.innerHTML = `<span class="bucket-index">[${i}]</span>`;
-                
-                const content = document.createElement('div');
-                content.className = 'bucket-content';
-                
-                if (table[i].length === 0) {
-                    content.innerHTML = '<span class="text-gray">empty</span>';
+                const row = container.children[i];
+                const content = row.querySelector('.bucket-content');
+                // D3 selection for nodes
+                const nodesData = table[i].map((item, j) => ({...item, idx: j}));
+                // Remove all arrows and nodes
+                while (content.firstChild) content.removeChild(content.firstChild);
+                if (nodesData.length === 0) {
+                    const emptySpan = document.createElement('span');
+                    emptySpan.className = 'text-gray';
+                    emptySpan.textContent = 'empty';
+                    content.appendChild(emptySpan);
                 } else {
-                    table[i].forEach((item, j) => {
+                    content.style.display = 'flex';
+                    content.style.alignItems = 'center';
+                    content.style.gap = '5px';
+                    nodesData.forEach((item, j) => {
                         if (j > 0) {
                             const arrow = document.createElement('span');
                             arrow.className = 'bucket-arrow';
                             arrow.textContent = '→';
+                            arrow.style.opacity = 0;
                             content.appendChild(arrow);
+                            setTimeout(() => { arrow.style.transition = 'opacity 0.4s'; arrow.style.opacity = 1; }, 10);
                         }
                         const node = document.createElement('div');
                         node.className = 'hash-node';
+                        node.style.display = 'inline-block';
+                        node.textContent = `(${item.key}:${item.val})`;
+                        node.style.opacity = 0;
                         if (newNode && newNode.bucket === i && newNode.key === item.key) {
                             node.classList.add('new');
                         }
-                        node.textContent = `(${item.key}:${item.val})`;
                         content.appendChild(node);
+                        setTimeout(() => { node.style.transition = 'opacity 0.5s, background 0.5s'; node.style.opacity = 1; }, 10);
                     });
                 }
-                
-                row.appendChild(content);
-                container.appendChild(row);
             }
         }
         
         function step() {
             if (stepIndex >= operations.length) return;
-            
             const op = operations[stepIndex];
             document.getElementById('statusMessage').textContent = op.msg;
             newNode = null;
-            
             if (op.op === 'put') {
                 const bucket = op.key % SIZE;
                 const existing = table[bucket].findIndex(n => n.key === op.key);
                 if (existing >= 0) {
+                    // Animate update
                     table[bucket][existing].val = op.val;
                 } else {
                     table[bucket].push({ key: op.key, val: op.val });
@@ -193,12 +217,12 @@
                 }
             } else if (op.op === 'remove') {
                 const bucket = op.key % SIZE;
+                // Animate removal
                 table[bucket] = table[bucket].filter(n => n.key !== op.key);
             } else if (op.op === 'done') {
                 document.getElementById('stepBtn').disabled = true;
                 stopAuto();
             }
-            
             renderTable();
             stepIndex++;
         }
@@ -226,6 +250,24 @@
             init();
         }
         
+        // Add CSS for transitions if not present
+        if (!document.getElementById('hashmap-transition-style')) {
+            const style = document.createElement('style');
+            style.id = 'hashmap-transition-style';
+            style.textContent = `
+                .hash-node {
+                    transition: opacity 0.5s, background 0.5s;
+                }
+                .hash-node.new {
+                    background: #ffe066;
+                    transition: background 0.5s;
+                }
+                .bucket-arrow {
+                    transition: opacity 0.4s;
+                }
+            `;
+            document.head.appendChild(style);
+        }
         init();
     </script>
 </body>
