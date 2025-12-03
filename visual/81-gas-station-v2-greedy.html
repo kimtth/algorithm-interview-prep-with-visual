@@ -22,27 +22,34 @@
             When fuel goes negative at station i, start must be after i.</p>
         </div>
 
-        
-            <div class="result-display" id="result"></div>
-        </div>
-
-        <div class="status" id="status">Ready to find the starting station</div>
-    </div>
-
         <div class="controls">
             <button class="btn btn-primary" onclick="step()">Step</button>
             <button class="btn btn-success" onclick="toggleAutoRun()">Auto Run</button>
             <button class="btn btn-warning" onclick="reset()">Reset</button>
         </div>
 
+        <div class="status" id="status">Ready to find the starting station</div>
+        
         <div class="step-info" id="stepInfo">Click "Step" to begin</div>
         
-        <div class="visualization" id="viz">
+        <div class="panel">
+            <div class="panel-title">⛽ Gas Stations</div>
             <div class="stations-container" id="stationsContainer"></div>
+        </div>
+
+        <div class="panel">
+            <div class="panel-title">📊 Current State</div>
             <div class="info-panel">
                 <div class="info-item" id="startInfo">Start: <strong>0</strong></div>
                 <div class="info-item" id="fuelInfo">Fuel: <strong>0</strong></div>
                 <div class="info-item" id="totalInfo">Total gas: 15, Total cost: 15 ✓</div>
+            </div>
+        </div>
+
+        <div class="panel">
+            <div class="panel-title">🏁 Result</div>
+            <div class="result-display" id="result"></div>
+        </div>
     
         <div class="code-section">
             <h3>📄 Python Solution (81-2.py)</h3>

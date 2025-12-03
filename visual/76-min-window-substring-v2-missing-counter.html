@@ -22,13 +22,6 @@
             When missing=0, we have a valid window. Shrink from left while valid.</p>
         </div>
 
-        
-            <div class="result-display" id="result"></div>
-        </div>
-
-        <div class="status" id="status">Ready</div>
-    </div>
-
         <div class="controls">
             <button class="btn btn-primary" onclick="step()">Step</button>
             <button class="btn btn-success" onclick="toggleAutoRun()">Auto Run</button>
@@ -40,10 +33,24 @@
         <div class="visualization" id="viz">
             <p class="text-center"><strong>s = "ADOBECODEBANC", t = "ABC"</strong></p>
             <div class="string-display" id="stringDisplay"></div>
-            <div class="info-row">
-                <div class="info-item" id="missingInfo">missing: 3</div>
-                <div class="info-item" id="windowInfo">window: [0, 0)</div>
-                <div class="info-item" id="bestInfo">best: none</div>
+            
+            <div class="info-section">
+                <div class="info-box">
+                    <div class="info-label">Missing Characters</div>
+                    <div class="info-value" id="missingInfo">3</div>
+                </div>
+                <div class="info-box">
+                    <div class="info-label">Current Window</div>
+                    <div class="info-value" id="windowInfo">[0, 0)</div>
+                </div>
+                <div class="info-box">
+                    <div class="info-label">Best Window</div>
+                    <div class="info-value" id="bestInfo">none</div>
+                </div>
+            </div>
+            
+            <div class="result-display" id="result"></div>
+        </div>
     
         <div class="code-section">
             <h3>📄 Python Solution (76-2.py)</h3>
@@ -143,9 +150,9 @@
             }
 
             document.getElementById('stepInfo').textContent = desc;
-            document.getElementById('missingInfo').textContent = `missing: ${missing}`;
-            document.getElementById('windowInfo').textContent = `window: [${left}, ${right})`;
-            document.getElementById('bestInfo').textContent = end > 0 ? `best: "${s.slice(start, end)}"` : 'best: none';
+            document.getElementById('missingInfo').textContent = missing;
+            document.getElementById('windowInfo').textContent = `[${left}, ${right})`;
+            document.getElementById('bestInfo').textContent = end > 0 ? `"${s.slice(start, end)}"` : 'none';
             renderString();
             currentStep++;
         }
@@ -173,11 +180,10 @@
             currentStep = 0;
             if (autoRunning) toggleAutoRun();
             document.getElementById('stepInfo').textContent = 'Click "Step" to begin';
-            document.getElementById('status').textContent = 'Ready';
             document.getElementById('result').innerHTML = '';
-            document.getElementById('missingInfo').textContent = 'missing: 3';
-            document.getElementById('windowInfo').textContent = 'window: [0, 0)';
-            document.getElementById('bestInfo').textContent = 'best: none';
+            document.getElementById('missingInfo').textContent = '3';
+            document.getElementById('windowInfo').textContent = '[0, 0)';
+            document.getElementById('bestInfo').textContent = 'none';
             renderString();
         }
 
