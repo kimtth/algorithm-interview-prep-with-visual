@@ -26,7 +26,7 @@ Result: [[2,2,3], [7]]
 
 ## Visualization
 
-👉 [Interactive Visualization (HTML)](./36-combination-sum.html)
+[Open Visualization](./36-combination-sum-v1.html)
 
 ## Core Code Logic
 

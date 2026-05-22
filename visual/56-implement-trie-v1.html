@@ -32,6 +32,7 @@
                     <button class="btn btn-info" onclick="searchWord()">Search</button>
                     <button class="btn btn-success" onclick="prefixSearch()">StartsWith</button>
                 </div>
+                <button class="btn btn-primary" id="stepBtn" onclick="step()">Step</button>
                 <button class="btn btn-warning" onclick="reset()">Reset</button>
             </div>
             
@@ -42,7 +43,7 @@
             </div>
             
             <div class="status-message" id="statusMessage">
-                Type a word and click Insert, Search, or StartsWith.
+                Click Step to walk through insert, search, and startsWith operations.
             </div>
             
             <div class="trie-container">
@@ -113,6 +114,15 @@
         let root = new TrieNode();
         let words = [];
         let highlightPath = [];
+        let demoIndex = 0;
+        const demoSteps = [
+            { op: 'insert', word: 'apple', message: 'insert("apple"): create/follow a -> p -> p -> l -> e, then mark word end.' },
+            { op: 'insert', word: 'app', message: 'insert("app"): reuse a -> p -> p, then mark that node as word end.' },
+            { op: 'insert', word: 'apply', message: 'insert("apply"): reuse a -> p -> p -> l, create/follow y, then mark word end.' },
+            { op: 'search', word: 'app', message: 'search("app"): follow a -> p -> p and return True because this node is a word end.' },
+            { op: 'startsWith', word: 'appl', message: 'startsWith("appl"): follow a -> p -> p -> l and return True for the prefix.' },
+            { op: 'search', word: 'appl', message: 'search("appl"): the path exists, but this node is not a word end, so return False.' }
+        ];
         
         function insert(word) {
             let node = root;
@@ -322,19 +332,44 @@
             }
             renderTrie();
         }
+
+        function step() {
+            if (demoIndex >= demoSteps.length) {
+                document.getElementById('statusMessage').textContent = 'Done! Trie operations match insert, search, and startsWith.';
+                document.getElementById('stepBtn').disabled = true;
+                return;
+            }
+
+            const action = demoSteps[demoIndex];
+            document.getElementById('wordInput').value = action.word;
+
+            if (action.op === 'insert') {
+                insert(action.word);
+                highlightPath = [...action.word];
+            } else if (action.op === 'search') {
+                search(action.word);
+            } else {
+                startsWith(action.word);
+            }
+
+            document.getElementById('statusMessage').textContent = action.message;
+            demoIndex++;
+            renderTrie();
+        }
         
         function reset() {
             root = new TrieNode();
             words = [];
             highlightPath = [];
+            demoIndex = 0;
+            document.getElementById('stepBtn').disabled = false;
             document.getElementById('wordInput').value = '';
             document.getElementById('statusMessage').textContent = 
-                'Type a word and click Insert, Search, or StartsWith.';
+                'Click Step to walk through insert, search, and startsWith operations.';
             renderTrie();
         }
         
-        // Initialize with some words
-        ['apple', 'app', 'apply'].forEach(w => insert(w));
+        // Initialize empty trie
         renderTrie();
     </script>
 </body>

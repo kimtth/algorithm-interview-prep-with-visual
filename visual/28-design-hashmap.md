@@ -24,7 +24,7 @@ remove(1):     bucket 1 → [(1001,20)]
 
 ## Visualization
 
-👉 [Interactive Visualization (HTML)](./28-design-hashmap.html)
+[Open Visualization](./28-design-hashmap-v1.html)
 
 ## Core Code Logic
 

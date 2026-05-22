@@ -25,7 +25,7 @@ Start with 3 → add 4 → [3,4] ✓
 
 ## Visualization
 
-👉 [Interactive Visualization (HTML)](./35-combinations.html)
+[View v1: dfs](./35-combinations-v1-dfs.html) | [View v2: itertools](./35-combinations-v2-itertools.html)
 
 ## Core Code Logic
 

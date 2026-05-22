@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Q83: Majority Element - Brute Force</title>
+    <link rel="stylesheet" href="visual.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Q83: Majority Element</h1>
+        <p class="subtitle">Solution 83-1.py - count each candidate until one appears more than n / 2 times</p>
+
+        <div class="controls">
+            <button id="stepBtn">Step</button>
+            <button id="autoBtn">Auto Run</button>
+            <button id="resetBtn">Reset</button>
+        </div>
+
+        <div class="panel">
+            <div class="panel-title">Array</div>
+            <div class="array-container" id="array"></div>
+        </div>
+
+        <div class="panel">
+            <div class="panel-title">Current Count</div>
+            <div class="info-grid">
+                <div class="info-item">
+                    <div class="info-label">Candidate</div>
+                    <div class="info-value" id="candidate">-</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Count</div>
+                    <div class="info-value" id="count">0</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Threshold</div>
+                    <div class="info-value" id="threshold">0</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="panel">
+            <div class="panel-title">Result</div>
+            <div class="result-box">
+                <div class="result-value" id="result">?</div>
+            </div>
+        </div>
+
+        <div class="panel">
+            <div class="panel-title">Status</div>
+            <div class="status-box" id="status">Check each number with nums.count(num).</div>
+        </div>
+
+        <div class="code-section">
+            <h3>Python Solution (83-1.py)</h3>
+            <pre><span class="keyword">from</span> typing <span class="keyword">import</span> List
+
+
+<span class="keyword">class</span> Solution:
+    <span class="keyword">def</span> <span class="function">majorityElement</span>(<span class="keyword">self</span>, nums: List[int]) -&gt; int:
+        <span class="keyword">for</span> num <span class="keyword">in</span> nums:
+            <span class="keyword">if</span> nums.<span class="function">count</span>(num) &gt; <span class="function">len</span>(nums) // <span class="number">2</span>:
+                <span class="keyword">return</span> num</pre>
+        </div>
+    </div>
+
+    <script>
+        const nums = [2, 2, 1, 1, 1, 2, 2];
+        const threshold = Math.floor(nums.length / 2);
+        let index = 0;
+        let candidate = null;
+        let candidateCount = 0;
+        let result = null;
+        let done = false;
+        let autoInterval = null;
+
+        function render() {
+            document.getElementById('array').innerHTML = nums.map((value, i) => {
+                let cls = 'array-item default';
+                if (candidate !== null && value === candidate) cls = 'array-item majority';
+                if (!done && i === index) cls += ' current';
+                return `<div class="${cls}"><span class="value">${value}</span><span class="index">[${i}]</span></div>`;
+            }).join('');
+
+            document.getElementById('candidate').textContent = candidate ?? '-';
+            document.getElementById('count').textContent = candidateCount;
+            document.getElementById('threshold').textContent = `> ${threshold}`;
+            document.getElementById('result').textContent = result ?? '?';
+        }
+
+        function step() {
+            if (done) return;
+
+            if (index >= nums.length) {
+                done = true;
+                document.getElementById('status').textContent = 'No majority found in this pass.';
+                stopAuto();
+                render();
+                return;
+            }
+
+            candidate = nums[index];
+            candidateCount = nums.filter(value => value === candidate).length;
+
+            if (candidateCount > threshold) {
+                result = candidate;
+                done = true;
+                document.getElementById('status').textContent =
+                    `nums.count(${candidate}) = ${candidateCount}, which is more than ${threshold}. Return ${candidate}.`;
+                document.getElementById('stepBtn').disabled = true;
+                document.getElementById('autoBtn').disabled = true;
+                stopAuto();
+            } else {
+                document.getElementById('status').textContent =
+                    `nums.count(${candidate}) = ${candidateCount}, not enough. Move to the next number.`;
+                index++;
+            }
+
+            render();
+        }
+
+        function reset() {
+            stopAuto();
+            index = 0;
+            candidate = null;
+            candidateCount = 0;
+            result = null;
+            done = false;
+            document.getElementById('stepBtn').disabled = false;
+            document.getElementById('autoBtn').disabled = false;
+            document.getElementById('status').textContent = 'Check each number with nums.count(num).';
+            render();
+        }
+
+        function stopAuto() {
+            if (autoInterval) { clearInterval(autoInterval); autoInterval = null; }
+            document.getElementById('autoBtn').textContent = 'Auto Run';
+        }
+
+        document.getElementById('stepBtn').onclick = () => { stopAuto(); step(); };
+        document.getElementById('autoBtn').onclick = () => {
+            if (autoInterval) { stopAuto(); }
+            else { autoInterval = setInterval(step, 800); document.getElementById('autoBtn').textContent = 'Pause'; }
+        };
+        document.getElementById('resetBtn').onclick = reset;
+
+        render();
+    </script>
+</body>
+</html>

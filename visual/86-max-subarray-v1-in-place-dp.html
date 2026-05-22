@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Maximum Subarray - Kadane's Algorithm</title>
+    <title>Maximum Subarray - In-place DP</title>
     <link rel="stylesheet" href="visual.css">
     <script src="https://d3js.org/d3.v7.min.js"></script>
     
@@ -11,7 +11,7 @@
 <body>
     <div class="container">
         <h1>📈 Maximum Subarray</h1>
-        <p class="subtitle">Kadane's Algorithm O(n) - Track current sum and max sum</p>
+        <p class="subtitle">Solution 86-1.py - overwrite each element with the best sum ending there</p>
 
         <div class="controls">
             <button id="stepBtn">Step</button>
@@ -22,7 +22,7 @@
         <div class="panel">
             <div class="panel-title">📊 Array</div>
             <div class="array-container" id="array"></div>
-            <div class="formula" id="formula">currentSum = max(nums[i], currentSum + nums[i])</div>
+            <div class="formula" id="formula">nums[i] += nums[i - 1] if nums[i - 1] &gt; 0 else 0</div>
         </div>
 
         <div class="panel">
@@ -33,7 +33,7 @@
                     <div class="info-value" id="idx-val">0</div>
                 </div>
                 <div class="info-item">
-                    <div class="info-label">Current Sum</div>
+                    <div class="info-label">Updated Value</div>
                     <div class="info-value" id="cur-sum">0</div>
                 </div>
                 <div class="info-item">
@@ -52,7 +52,7 @@
 
         <div class="panel">
             <div class="panel-title">📋 Status</div>
-            <div class="status-box" id="status">At each position: extend current subarray or start new one. Track maximum.</div>
+            <div class="status-box" id="status">Start at index 1 and update nums[i] using the previous best ending sum.</div>
         </div>
     
         <div class="code-section">
@@ -71,20 +71,19 @@
 
 
     <script>
-        const nums = [-2, 1, -3, 4, -1, 2, 1, -5, 4];
-        let idx = 0;
-        let currentSum = 0;
-        let maxSum = -Infinity;
-        let maxStart = 0, maxEnd = 0;
-        let curStart = 0;
+        const initialNums = [-2, 1, -3, 4, -1, 2, 1, -5, 4];
+        let nums = [...initialNums];
+        let idx = 1;
+        let currentSum = nums[0];
+        let maxSum = nums[0];
         let done = false;
         let autoInterval = null;
 
         function render() {
             document.getElementById('array').innerHTML = nums.map((v, i) => {
                 let cls = 'array-item default';
-                if (i >= maxStart && i <= maxEnd && done) cls = 'array-item in-max';
-                else if (i === idx && !done) cls = 'array-item current';
+                if (i < idx || done) cls = 'array-item processed';
+                if (i === idx && !done) cls = 'array-item current';
                 return `<div class="${cls}"><span class="value">${v}</span><span class="index">[${i}]</span></div>`;
             }).join('');
 
@@ -100,9 +99,10 @@
 
             if (idx >= nums.length) {
                 done = true;
+                maxSum = Math.max(...nums);
                 document.getElementById('status').innerHTML = 
-                    `✅ Maximum subarray sum: ${maxSum} (indices ${maxStart} to ${maxEnd})`;
-                document.getElementById('formula').textContent = `Max subarray: [${nums.slice(maxStart, maxEnd + 1).join(', ')}]`;
+                    `✅ Maximum subarray sum: ${maxSum}`;
+                document.getElementById('formula').textContent = `max(nums) = max([${nums.join(', ')}]) = ${maxSum}`;
                 document.getElementById('stepBtn').disabled = true;
                 document.getElementById('autoBtn').disabled = true;
                 stopAuto();
@@ -110,30 +110,17 @@
                 return;
             }
 
-            const val = nums[idx];
-            const extend = currentSum + val;
-            const startNew = val;
+            const original = nums[idx];
+            const previous = nums[idx - 1];
+            const addition = previous > 0 ? previous : 0;
+            nums[idx] = original + addition;
+            currentSum = nums[idx];
+            maxSum = Math.max(maxSum, currentSum);
 
-            if (startNew > extend) {
-                currentSum = startNew;
-                curStart = idx;
-                document.getElementById('status').innerHTML = 
-                    `Index ${idx}: ${val} > ${extend}. Start new subarray at ${idx}. currentSum = ${currentSum}`;
-            } else {
-                currentSum = extend;
-                document.getElementById('status').innerHTML = 
-                    `Index ${idx}: ${extend} ≥ ${val}. Extend subarray. currentSum = ${currentSum}`;
-            }
-
-            if (currentSum > maxSum) {
-                maxSum = currentSum;
-                maxStart = curStart;
-                maxEnd = idx;
-                document.getElementById('status').innerHTML += ` New max: ${maxSum}!`;
-            }
-
+            document.getElementById('status').innerHTML = 
+                `Index ${idx}: previous value is ${previous}. Add ${addition} to ${original}, so nums[${idx}] becomes ${currentSum}.`;
             document.getElementById('formula').textContent = 
-                `max(${val}, ${extend > val ? extend - val : currentSum - val} + ${val}) = ${currentSum}`;
+                `nums[${idx}] = ${original} + (${previous} > 0 ? ${previous} : 0) = ${currentSum}`;
 
             idx++;
             render();
@@ -141,16 +128,15 @@
 
         function reset() {
             stopAuto();
-            idx = 0;
-            currentSum = 0;
-            maxSum = -Infinity;
-            maxStart = 0; maxEnd = 0;
-            curStart = 0;
+            nums = [...initialNums];
+            idx = 1;
+            currentSum = nums[0];
+            maxSum = nums[0];
             done = false;
-            document.getElementById('formula').textContent = 'currentSum = max(nums[i], currentSum + nums[i])';
+            document.getElementById('formula').textContent = 'nums[i] += nums[i - 1] if nums[i - 1] > 0 else 0';
             document.getElementById('stepBtn').disabled = false;
             document.getElementById('autoBtn').disabled = false;
-            document.getElementById('status').innerHTML = 'At each position: extend current subarray or start new one. Track maximum.';
+            document.getElementById('status').innerHTML = 'Start at index 1 and update nums[i] using the previous best ending sum.';
             render();
         }
 

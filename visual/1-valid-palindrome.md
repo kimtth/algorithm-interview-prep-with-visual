@@ -20,6 +20,6 @@ A **palindrome** is a word, phrase, number, or other sequence of characters that
 ## Visualization
 I have created an interactive visualization to help you see this process in action.
 
-[Open Visualization (1-valid-palindrome.html)](./1-valid-palindrome.html)
+[View v1: list](./1-valid-palindrome-v1-list.html) | [View v2: deque](./1-valid-palindrome-v2-deque.html) | [View v3: slicing](./1-valid-palindrome-v3-slicing.html)
 
 *(Open the HTML file in your browser to interact with the visualization)*

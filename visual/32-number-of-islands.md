@@ -24,7 +24,7 @@ Example:
 
 ## Visualization
 
-👉 [Interactive Visualization (HTML)](./32-number-of-islands.html)
+[Open Visualization](./32-number-of-islands-v1.html)
 
 ## Core Code Logic
 

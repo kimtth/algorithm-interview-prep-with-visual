@@ -17,6 +17,6 @@ Imagine standing at a specific number in the line. The product of "everything el
 ## Visualization
 I have created an interactive visualization to help you see these two sweeps.
 
-[Open Visualization (11-product-except-self.html)](./11-product-except-self.html)
+[View v1: two pass](./11-product-except-self-v1-two-pass.html)
 
 *(Open the HTML file in your browser to interact with the visualization)*

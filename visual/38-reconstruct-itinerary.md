@@ -26,7 +26,7 @@ Result: ["JFK","ATL","JFK","SFO","ATL","SFO"]
 
 ## Visualization
 
-👉 [Interactive Visualization (HTML)](./38-reconstruct-itinerary.html)
+[View v1: pop0](./38-reconstruct-itinerary-v1-pop0.html) | [View v2: pop](./38-reconstruct-itinerary-v2-pop.html) | [View v3: iterative](./38-reconstruct-itinerary-v3-iterative.html)
 
 ## Core Code Logic
 

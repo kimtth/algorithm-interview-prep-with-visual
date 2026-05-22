@@ -20,6 +20,6 @@ To save the large numbers, we should pair them with other large numbers.
 ## Visualization
 I have created an interactive visualization to help you see why sorting helps maximize the sum.
 
-[Open Visualization (10-array-partition-i.html)](./10-array-partition-i.html)
+[View v1: pair iteration](./10-array-partition-v1-pair-iteration.html) | [View v2: pythonic slicing](./10-array-partition-v2-pythonic-slicing.html) | [View v3: sum slicing](./10-array-partition-v3-sum-slicing.html)
 
 *(Open the HTML file in your browser to interact with the visualization)*

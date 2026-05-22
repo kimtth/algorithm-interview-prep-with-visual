@@ -22,7 +22,7 @@ Now pop returns 3, then 2, then 1 - Stack behavior!
 
 ## Visualization
 
-👉 [Interactive Visualization (HTML)](./23-implement-stack-using-queues.html)
+[Open Visualization](./23-implement-stack-using-queues-v1.html)
 
 ## Core Code Logic
 

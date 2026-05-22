@@ -20,6 +20,6 @@ So, we turn this 3-number problem into a series of 2-number problems.
 ## Visualization
 I have created an interactive visualization to help you see how we fix one number and search for the other two.
 
-[Open Visualization (9-3sum.html)](./9-3sum.html)
+[View v1: brute force](./9-3sum-v1-brute-force.html) | [View v2: two pointers](./9-3sum-v2-two-pointers.html)
 
 *(Open the HTML file in your browser to interact with the visualization)*

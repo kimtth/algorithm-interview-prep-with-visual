@@ -1,7 +1,7 @@
 # Problem 54: Construct Binary Tree from Preorder and Inorder Traversal
 
 ## Visualization
-[View Interactive Visualization](./54-construct-tree.html)
+[Open Visualization](./54-construct-tree-v1.html)
 
 ## Problem Statement
 Given two integer arrays preorder and inorder where preorder is the preorder traversal and inorder is the inorder traversal of the same tree, construct and return the binary tree.

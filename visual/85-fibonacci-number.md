@@ -35,6 +35,8 @@ def fib(self, N: int) -> int:
 
 ## Approach 2: Memoization (Fast)
 ```python
+import collections
+
 dp = collections.defaultdict(int)
 
 def fib(self, N: int) -> int:
@@ -73,17 +75,24 @@ F(3) → already cached! Return immediately
 
 ## Approach 3: Bottom-up (Iterative)
 ```python
-def fib(self, n: int) -> int:
-    if n <= 1:
-        return n
-    
-    dp = [0] * (n + 1)
-    dp[1] = 1
-    
-    for i in range(2, n + 1):
-        dp[i] = dp[i-1] + dp[i-2]
-    
-    return dp[n]
+dp = collections.defaultdict(int)
+
+def fib(self, N: int) -> int:
+    self.dp[0] = 0
+    self.dp[1] = 1
+
+    for i in range(2, N + 1):
+        self.dp[i] = self.dp[i - 1] + self.dp[i - 2]
+    return self.dp[N]
+```
+
+## Approach 4: Two Variables (Space Optimized)
+```python
+def fib(self, N: int) -> int:
+    x, y = 0, 1
+    for i in range(0, N):
+        x, y = y, x + y
+    return x
 ```
 
 ## Complexity Analysis
@@ -92,7 +101,8 @@ def fib(self, n: int) -> int:
 |----------|------|-------|
 | Recursion | O(2^n) | O(n) stack |
 | Memoization | O(n) | O(n) |
-| Iterative | O(n) | O(n) or O(1) |
+| Bottom-up table | O(n) | O(n) |
+| Two variables | O(n) | O(1) |
 
 ## Key Insights
 1. **Overlapping subproblems:** Same F(k) is needed multiple times

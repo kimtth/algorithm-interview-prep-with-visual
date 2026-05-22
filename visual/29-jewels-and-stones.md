@@ -27,7 +27,7 @@ Example: jewels = "aA", stones = "aAAbbbb"
 
 ## Visualization
 
-👉 [Interactive Visualization (HTML)](./29-jewels-and-stones.html)
+[View v1: counter](./29-jewels-and-stones-v1-counter.html) | [View v2: pythonic](./29-jewels-and-stones-v2-pythonic.html) | [View v3: counter lookup](./29-jewels-and-stones-v3-counter-lookup.html) | [View v4: sum comprehension](./29-jewels-and-stones-v4-sum-comprehension.html)
 
 ## Core Code Logic
 

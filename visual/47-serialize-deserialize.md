@@ -1,7 +1,7 @@
 # Problem 47: Serialize and Deserialize Binary Tree
 
 ## Visualization
-[View Interactive Visualization](./47-serialize-deserialize.html)
+[Open Visualization](./47-serialize-deserialize-v1.html)
 
 ## Problem Statement
 Design an algorithm to serialize a binary tree to a string, and deserialize the string back to the original tree structure.
