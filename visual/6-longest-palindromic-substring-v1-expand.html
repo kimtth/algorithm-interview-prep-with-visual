@@ -187,13 +187,12 @@
 
         <div class="main-content">
             <div class="code-section">
-                <h3>💻 Python Code (6-1.py)</h3>
+                <h3>💻 Python Solution (6-1.py)</h3>
                 <pre><code><span class="keyword">class</span> <span class="class-name">Solution</span>:
     <span class="keyword">def</span> <span class="function">longestPalindrome</span>(<span class="keyword">self</span>, s: <span class="class-name">str</span>) -> <span class="class-name">str</span>:
         <span class="comment"># 팰린드롬 판별 및 투 포인터 확장</span>
         <span class="keyword">def</span> <span class="function">expand</span>(left: <span class="class-name">int</span>, right: <span class="class-name">int</span>) -> <span class="class-name">str</span>:
-            <span class="keyword">while</span> left >= <span class="string">0</span> <span class="keyword">and</span> right < len(s) \
-                    <span class="keyword">and</span> s[left] == s[right]:
+                <span class="keyword">while</span> left >= <span class="string">0</span> <span class="keyword">and</span> right < len(s) <span class="keyword">and</span> s[left] == s[right]:
                 left -= <span class="string">1</span>
                 right += <span class="string">1</span>
             <span class="keyword">return</span> s[left + <span class="string">1</span>:right]

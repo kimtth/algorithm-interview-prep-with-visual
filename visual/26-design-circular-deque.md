@@ -24,7 +24,7 @@ insertLast(4):   [3, 1, 4]
 
 ## Visualization
 
-👉 [Interactive Visualization (HTML)](./26-design-circular-deque.html)
+[Open Visualization](./26-design-circular-deque-v1.html)
 
 ## Core Code Logic
 

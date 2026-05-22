@@ -20,7 +20,7 @@ Example: "23"
 
 ## Visualization
 
-👉 [Interactive Visualization (HTML)](./33-letter-combinations.html)
+[Open Visualization](./33-letter-combinations-v1.html)
 
 ## Core Code Logic
 

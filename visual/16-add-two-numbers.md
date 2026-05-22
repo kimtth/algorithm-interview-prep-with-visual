@@ -15,6 +15,6 @@ We want to add them and return the result as a linked list (also in reverse orde
 ## Visualization
 I have created an interactive visualization to help you see how the addition works digit by digit.
 
-[Open Visualization (16-add-two-numbers.html)](./16-add-two-numbers.html)
+[View v1: full adder](./16-add-two-numbers-v1-full-adder.html) | [View v2: reverse convert](./16-add-two-numbers-v2-reverse-convert.html)
 
 *(Open the HTML file in your browser to interact with the visualization)*

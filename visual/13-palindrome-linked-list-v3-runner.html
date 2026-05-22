@@ -22,22 +22,30 @@
         </div>
         
         <div class="code-section">
-            <h3>💻 Python Solution - Runner (Fast/Slow Pointer)</h3>
+            <h3>💻 Python Solution (13-4.py)</h3>
             <div class="code-block">
-                <pre><span class="keyword">def</span> <span class="function">isPalindrome</span>(self, head: ListNode) -> <span class="class-name">bool</span>:
-    rev = <span class="keyword">None</span>
-    slow = fast = head
-    <span class="comment"># Build reverse list while finding middle</span>
-    <span class="keyword">while</span> fast <span class="keyword">and</span> fast.next:
-        fast = fast.next.next
-        rev, rev.next, slow = slow, rev, slow.next
-    <span class="keyword">if</span> fast:  <span class="comment"># Odd length, skip middle</span>
-        slow = slow.next
+                <pre><span class="comment"># Definition for singly-linked list.</span>
+<span class="keyword">class</span> ListNode:
+    <span class="keyword">def</span> <span class="function">__init__</span>(self, x):
+        self.val = x
+        self.next = <span class="keyword">None</span>
+
+
+<span class="keyword">class</span> Solution:
+    <span class="keyword">def</span> <span class="function">isPalindrome</span>(self, head: ListNode) -> <span class="class-name">bool</span>:
+        rev = <span class="keyword">None</span>
+        slow = fast = head
+        <span class="comment"># 런너를 이용해 역순 연결 리스트 구성</span>
+        <span class="keyword">while</span> fast <span class="keyword">and</span> fast.next:
+            fast = fast.next.next
+            rev, rev.next, slow = slow, rev, slow.next
+        <span class="keyword">if</span> fast:
+            slow = slow.next
     
-    <span class="comment"># Compare reversed first half with second half</span>
-    <span class="keyword">while</span> rev <span class="keyword">and</span> rev.val == slow.val:
-        slow, rev = slow.next, rev.next
-    <span class="keyword">return not</span> rev</pre>
+        <span class="comment"># 팰린드롬 여부 확인</span>
+        <span class="keyword">while</span> rev <span class="keyword">and</span> rev.val == slow.val:
+            slow, rev = slow.next, rev.next
+        <span class="keyword">return not</span> rev</pre>
             </div>
         </div>
         

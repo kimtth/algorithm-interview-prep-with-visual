@@ -1,7 +1,7 @@
 # Problem 57: Palindrome Pairs
 
 ## Visualization
-[View Interactive Visualization](./57-palindrome-pairs.html)
+[View v1: brute force](./57-palindrome-pairs-v1-brute-force.html) | [View v2: trie](./57-palindrome-pairs-v2-trie.html)
 
 ## Problem Statement
 Given a list of unique words, return all pairs of distinct indices (i, j) such that the concatenation of words[i] + words[j] is a palindrome.

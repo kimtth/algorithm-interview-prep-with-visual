@@ -25,7 +25,7 @@ enQueue(4): [4, 2, 3] front=1, rear=1 (inserted at position 0)
 
 ## Visualization
 
-👉 [Interactive Visualization (HTML)](./25-design-circular-queue.html)
+[Open Visualization](./25-design-circular-queue-v1.html)
 
 ## Core Code Logic
 

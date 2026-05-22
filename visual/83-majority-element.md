@@ -23,50 +23,30 @@ for num in nums:
 ```
 Time: O(n²), Space: O(1)
 
-### Approach 2: Hash Map
-Use a dictionary to count occurrences.
-Time: O(n), Space: O(n)
+### Approach 2: Hash Map Cache
+Cache each distinct element's `nums.count(num)` result in a dictionary.
+Time: O(n²) worst case because each new value can trigger a full count, Space: O(n)
 
-### Approach 3: Sorting
-Sort the array, the middle element is always the majority.
-```
-[2, 2, 1, 1, 1, 2, 2] → sorted → [1, 1, 1, 2, 2, 2, 2]
-                                          ↑
-                                        middle
-```
-Time: O(n log n), Space: O(1)
-
-### Approach 4: Boyer-Moore Voting Algorithm
-The clever O(n) time, O(1) space solution!
-
-**Intuition:** If we had one +1 vote for the majority and -1 for everyone else, majority wins.
-
-```
-nums = [2, 2, 1, 1, 1, 2, 2]
-
-candidate = None, count = 0
-
-2: count=0 → candidate=2, count=1
-2: candidate=2 → count=2
-1: candidate≠1 → count=1
-1: candidate≠1 → count=0
-1: count=0 → candidate=1, count=1
-2: candidate≠2 → count=0
-2: count=0 → candidate=2, count=1
-
-Result: 2
-```
-
-### Approach 5: Divide and Conquer
+### Approach 3: Divide and Conquer
 Split array in half, find majority in each half, the true majority is one of them.
 
 ```
 [2,2,1,1,1,2,2]
-     /        \
+      /        \
 [2,2,1]    [1,1,2,2]
-   2           ?
+    2           ?
 ```
-Recursively find majority in subarrays, verify winner.
+Recursively find majority in subarrays, then verify the winner.
+Time: O(n log n), Space: O(log n)
+
+### Approach 4: Sorting
+Sort the array, the middle element is always the majority.
+```
+[2, 2, 1, 1, 1, 2, 2] → sorted → [1, 1, 1, 2, 2, 2, 2]
+                                                        ↑
+                                                     middle
+```
+Time: O(n log n), Space: O(1)
 
 ## Code Explanation
 
@@ -78,31 +58,50 @@ def majorityElement(self, nums: List[int]) -> int:
             return num
 ```
 
-### Boyer-Moore
+### Hash Map Cache
 ```python
 def majorityElement(self, nums: List[int]) -> int:
-    count = 0
-    candidate = None
-    
+    counts = collections.defaultdict(int)
     for num in nums:
-        if count == 0:
-            candidate = num
-        count += 1 if num == candidate else -1
-    
-    return candidate
+        if counts[num] == 0:
+            counts[num] = nums.count(num)
+
+        if counts[num] > len(nums) // 2:
+            return num
+```
+
+### Divide and Conquer
+```python
+def majorityElement(self, nums: List[int]) -> int:
+    if not nums:
+        return None
+    if len(nums) == 1:
+        return nums[0]
+
+    half = len(nums) // 2
+    a = self.majorityElement(nums[:half])
+    b = self.majorityElement(nums[half:])
+
+    return [b, a][nums.count(a) > half]
+```
+
+### Sorting
+```python
+def majorityElement(self, nums: List[int]) -> int:
+    return sorted(nums)[len(nums) // 2]
 ```
 
 ## Complexity Analysis
 | Approach | Time | Space |
 |----------|------|-------|
 | Brute Force | O(n²) | O(1) |
-| Hash Map | O(n) | O(n) |
-| Sorting | O(n log n) | O(1) |
-| Boyer-Moore | O(n) | O(1) |
+| Hash Map Cache | O(n²) worst case | O(n) |
 | Divide & Conquer | O(n log n) | O(log n) |
+| Sorting | O(n log n) | O(1) |
 
 ## Key Insights
-1. **Boyer-Moore:** Treats array like an election; majority cancels out minority
-2. **Sorting:** Majority must occupy middle position
+1. **Brute force:** Directly checks the problem definition with `nums.count`
+2. **Hash map cache:** Avoids repeated counts for values already seen
 3. **Divide & Conquer:** True majority is majority in at least one half
-4. **Guaranteed existence:** Problem guarantees majority exists (simplifies solution)
+4. **Sorting:** Majority must occupy middle position
+5. **Guaranteed existence:** Problem guarantees majority exists (simplifies solution)

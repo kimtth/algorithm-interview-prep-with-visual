@@ -1,7 +1,7 @@
 # Problem 45: Invert Binary Tree
 
 ## Visualization
-[View Interactive Visualization](./45-invert-binary-tree.html)
+[View v1: recursive](./45-invert-binary-tree-v1-recursive.html) | [View v2: bfs](./45-invert-binary-tree-v2-bfs.html) | [View v3: dfs preorder](./45-invert-binary-tree-v3-dfs-preorder.html) | [View v4: dfs postorder](./45-invert-binary-tree-v4-dfs-postorder.html)
 
 ## Problem Statement
 Given the root of a binary tree, invert the tree, and return its root. Inverting means swapping left and right children at every node.

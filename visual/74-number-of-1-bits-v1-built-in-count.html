@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Number of 1 Bits - Brian Kernighan</title>
+    <title>Number of 1 Bits - Built-in Count</title>
     <link rel="stylesheet" href="visual.css">
     <script src="https://d3js.org/d3.v7.min.js"></script>
     
@@ -11,7 +11,7 @@
 <body>
     <div class="container">
         <h1>🔢 Number of 1 Bits (Hamming Weight)</h1>
-        <p class="subtitle">Brian Kernighan's Algorithm - n & (n-1) removes rightmost 1</p>
+        <p class="subtitle">Built-in binary string count - bin(n).count('1')</p>
 
         <div class="controls">
             <button id="stepBtn">Step</button>
@@ -27,13 +27,8 @@
                     <div class="bits-container" id="bits-n"></div>
                     <span class="decimal" id="decimal-n">= 11</span>
                 </div>
-                <div class="binary-row" id="row-n1" class="d-none">
-                    <span class="binary-label">n - 1:</span>
-                    <div class="bits-container" id="bits-n1"></div>
-                    <span class="decimal" id="decimal-n1"></span>
-                </div>
             </div>
-            <div class="formula" id="formula">n & (n-1) removes the rightmost set bit</div>
+            <div class="formula" id="formula">bin(n).count('1') counts every 1 in the binary string</div>
         </div>
 
         <div class="panel">
@@ -46,7 +41,7 @@
 
         <div class="panel">
             <div class="panel-title">📋 Status</div>
-            <div class="status-box" id="status">Each iteration removes the rightmost 1 bit. Count iterations until n = 0.</div>
+            <div class="status-box" id="status">Scan the binary representation and count each 1 bit.</div>
         </div>
     
         <div class="code-section">
@@ -62,9 +57,9 @@
     <script>
         const INIT_N = 11;  // 00001011 - has 3 ones
         const BITS = 8;
-        let n = INIT_N;
+        const bits = toBits(INIT_N);
+        let currentIndex = 0;
         let count = 0;
-        let showN1 = false;
         let done = false;
         let autoInterval = null;
 
@@ -73,69 +68,51 @@
         }
 
         function render() {
-            const nBits = toBits(n);
-            document.getElementById('bits-n').innerHTML = nBits.map(b => 
-                `<div class="bit bit-${b}">${b}</div>`
+            document.getElementById('bits-n').innerHTML = bits.map((b, i) => 
+                `<div class="bit bit-${b} ${i === currentIndex && !done ? 'active' : ''}">${b}</div>`
             ).join('');
-            document.getElementById('decimal-n').textContent = `= ${n}`;
-
-            if (showN1 && n > 0) {
-                const n1 = n - 1;
-                const n1Bits = toBits(n1);
-                document.getElementById('row-n1').style.display = 'flex';
-                document.getElementById('bits-n1').innerHTML = n1Bits.map(b => 
-                    `<div class="bit bit-${b}">${b}</div>`
-                ).join('');
-                document.getElementById('decimal-n1').textContent = `= ${n1}`;
-            } else {
-                document.getElementById('row-n1').style.display = 'none';
-            }
-
+            document.getElementById('decimal-n').textContent = `= ${INIT_N}`;
             document.getElementById('count').textContent = count;
         }
 
         function step() {
             if (done) return;
 
-            if (n === 0) {
+            if (currentIndex >= bits.length) {
                 done = true;
-                document.getElementById('formula').textContent = `n = 0, done!`;
+                document.getElementById('formula').textContent = `bin(${INIT_N}).count('1') = ${count}`;
                 document.getElementById('status').innerHTML = 
                     `✅ Hamming Weight of ${INIT_N} is ${count}`;
                 document.getElementById('stepBtn').disabled = true;
                 document.getElementById('autoBtn').disabled = true;
-                showN1 = false;
                 stopAuto();
                 render();
                 return;
             }
 
-            if (!showN1) {
-                showN1 = true;
-                document.getElementById('status').innerHTML = 
-                    `n = ${n}, n-1 = ${n-1}. n & (n-1) will remove rightmost 1.`;
-            } else {
-                const oldN = n;
-                n = n & (n - 1);
+            const bit = bits[currentIndex];
+            if (bit === '1') {
                 count++;
-                showN1 = false;
                 document.getElementById('status').innerHTML = 
-                    `${oldN} & ${oldN - 1} = ${n}. Removed one 1-bit. Count = ${count}`;
+                    `Bit ${currentIndex} is 1, so count becomes ${count}.`;
+            } else {
+                document.getElementById('status').innerHTML = 
+                    `Bit ${currentIndex} is 0, so count stays ${count}.`;
             }
+            currentIndex++;
 
             render();
         }
 
         function reset() {
             stopAuto();
-            n = INIT_N;
+            currentIndex = 0;
             count = 0;
-            showN1 = false;
             done = false;
-            document.getElementById('formula').textContent = 'n & (n-1) removes the rightmost set bit';
+            document.getElementById('formula').textContent = "bin(n).count('1') counts every 1 in the binary string";
             document.getElementById('stepBtn').disabled = false;
             document.getElementById('autoBtn').disabled = false;
-            document.getElementById('status').innerHTML = 'Each iteration removes the rightmost 1 bit. Count iterations until n = 0.';
+            document.getElementById('status').innerHTML = 'Scan the binary representation and count each 1 bit.';
             render();
         }
 

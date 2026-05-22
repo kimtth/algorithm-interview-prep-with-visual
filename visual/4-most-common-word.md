@@ -18,6 +18,6 @@ The goal is to find the most frequently used word in a paragraph, but with a few
 ## Visualization
 I have created an interactive visualization to help you see this process.
 
-[Open Visualization (4-most-common-word.html)](./4-most-common-word.html)
+[View v1: counter](./4-most-common-word-v1-counter.html)
 
 *(Open the HTML file in your browser to interact with the visualization)*

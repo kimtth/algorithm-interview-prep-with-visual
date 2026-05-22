@@ -13,6 +13,6 @@ This uses **recursion** - the function calls itself to solve smaller parts of th
 ## Visualization
 I have created an interactive visualization to help you see how two lists merge step by step.
 
-[Open Visualization (14-merge-two-sorted-lists.html)](./14-merge-two-sorted-lists.html)
+[View v1: recursive](./14-merge-two-sorted-lists-v1-recursive.html)
 
 *(Open the HTML file in your browser to interact with the visualization)*

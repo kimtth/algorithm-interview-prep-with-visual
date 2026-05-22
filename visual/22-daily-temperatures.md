@@ -26,7 +26,7 @@ Result: `[1, 1, 4, 2, 1, 1, 0, 0]`
 
 ## Visualization
 
-👉 [Interactive Visualization (HTML)](./22-daily-temperatures.html)
+[Open Visualization](./22-daily-temperatures-v1.html)
 
 ## Core Code Logic
 

@@ -14,6 +14,6 @@ Imagine you are walking through time, day by day.
 ## Visualization
 I have created an interactive visualization to help you see how we track the minimum price and calculate profit.
 
-[Open Visualization (12-best-time-to-buy-and-sell-stock.html)](./12-best-time-to-buy-and-sell-stock.html)
+[View v1: brute force](./12-best-time-to-buy-sell-v1-brute-force.html) | [View v2: one pass](./12-best-time-to-buy-sell-v2-one-pass.html)
 
 *(Open the HTML file in your browser to interact with the visualization)*

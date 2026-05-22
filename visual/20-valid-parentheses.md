@@ -22,7 +22,7 @@ Example: `"([])`"
 
 ## Visualization
 
-👉 [Interactive Visualization (HTML)](./20-valid-parentheses.html)
+[Open Visualization](./20-valid-parentheses-v1.html)
 
 ## Core Code Logic
 

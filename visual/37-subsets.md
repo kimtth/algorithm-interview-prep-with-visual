@@ -27,7 +27,7 @@ Include 1? Yes → Include 2? Yes → Include 3? Yes → [1,2,3]
 
 ## Visualization
 
-👉 [Interactive Visualization (HTML)](./37-subsets.html)
+[Open Visualization](./37-subsets-v1.html)
 
 ## Core Code Logic
 

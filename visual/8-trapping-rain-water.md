@@ -17,6 +17,6 @@ Think of this as two walls moving towards each other from the far left and far r
 ## Visualization
 I have created an interactive visualization to help you see the walls moving and water filling up.
 
-[Open Visualization (8-trapping-rain-water.html)](./8-trapping-rain-water.html)
+[View v1: two pointers](./8-trapping-rain-water-v1-two-pointers.html) | [View v2: stack](./8-trapping-rain-water-v2-stack.html)
 
 *(Open the HTML file in your browser to interact with the visualization)*

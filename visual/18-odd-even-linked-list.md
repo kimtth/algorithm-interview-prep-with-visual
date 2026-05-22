@@ -13,6 +13,6 @@ For example: `1 -> 2 -> 3 -> 4 -> 5` becomes `1 -> 3 -> 5 -> 2 -> 4`
 ## Visualization
 I have created an interactive visualization to help you see how odd and even nodes separate and reconnect.
 
-[Open Visualization (18-odd-even-linked-list.html)](./18-odd-even-linked-list.html)
+[Open Visualization](./18-odd-even-linked-list-v1.html)
 
 *(Open the HTML file in your browser to interact with the visualization)*

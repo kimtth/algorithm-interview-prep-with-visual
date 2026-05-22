@@ -51,12 +51,55 @@
         </div>
     
         <div class="code-section">
-            <h3>📄 Python Solution (85-1.py)</h3>
-            <pre><span class="keyword">class</span> Solution:
+            <h3>📄 Python Solutions (85-1.py, 85-2.py, 85-3.py, 85-4.py)</h3>
+            <pre><span class="comment"># 85-1.py: recursion</span>
+<span class="keyword">class</span> Solution:
     <span class="keyword">def</span> <span class="function">fib</span>(<span class="keyword">self</span>, N: int) -&gt; int:
         <span class="keyword">if</span> N &lt;= <span class="number">1</span>:
             <span class="keyword">return</span> N
-        <span class="keyword">return</span> <span class="keyword">self</span>.<span class="function">fib</span>(N - <span class="number">1</span>) + <span class="keyword">self</span>.<span class="function">fib</span>(N - <span class="number">2</span>)</pre>
+        <span class="keyword">return</span> <span class="keyword">self</span>.<span class="function">fib</span>(N - <span class="number">1</span>) + <span class="keyword">self</span>.<span class="function">fib</span>(N - <span class="number">2</span>)
+
+
+<span class="comment"># 85-2.py: memoization</span>
+<span class="keyword">import</span> collections
+
+
+<span class="keyword">class</span> Solution:
+    dp = collections.<span class="function">defaultdict</span>(int)
+
+    <span class="keyword">def</span> <span class="function">fib</span>(<span class="keyword">self</span>, N: int) -&gt; int:
+        <span class="keyword">if</span> N &lt;= <span class="number">1</span>:
+            <span class="keyword">return</span> N
+
+        <span class="keyword">if</span> <span class="keyword">self</span>.dp[N]:
+            <span class="keyword">return</span> <span class="keyword">self</span>.dp[N]
+        <span class="keyword">self</span>.dp[N] = <span class="keyword">self</span>.<span class="function">fib</span>(N - <span class="number">1</span>) + <span class="keyword">self</span>.<span class="function">fib</span>(N - <span class="number">2</span>)
+        <span class="keyword">return</span> <span class="keyword">self</span>.dp[N]
+
+
+<span class="comment"># 85-3.py: bottom-up table</span>
+<span class="keyword">import</span> collections
+
+
+<span class="keyword">class</span> Solution:
+    dp = collections.<span class="function">defaultdict</span>(int)
+
+    <span class="keyword">def</span> <span class="function">fib</span>(<span class="keyword">self</span>, N: int) -&gt; int:
+        <span class="keyword">self</span>.dp[<span class="number">0</span>] = <span class="number">0</span>
+        <span class="keyword">self</span>.dp[<span class="number">1</span>] = <span class="number">1</span>
+
+        <span class="keyword">for</span> i <span class="keyword">in</span> <span class="function">range</span>(<span class="number">2</span>, N + <span class="number">1</span>):
+            <span class="keyword">self</span>.dp[i] = <span class="keyword">self</span>.dp[i - <span class="number">1</span>] + <span class="keyword">self</span>.dp[i - <span class="number">2</span>]
+        <span class="keyword">return</span> <span class="keyword">self</span>.dp[N]
+
+
+<span class="comment"># 85-4.py: two variables</span>
+<span class="keyword">class</span> Solution:
+    <span class="keyword">def</span> <span class="function">fib</span>(<span class="keyword">self</span>, N: int) -&gt; int:
+        x, y = <span class="number">0</span>, <span class="number">1</span>
+        <span class="keyword">for</span> i <span class="keyword">in</span> <span class="function">range</span>(<span class="number">0</span>, N):
+            x, y = y, x + y
+        <span class="keyword">return</span> x</pre>
         </div>
 
     </div>

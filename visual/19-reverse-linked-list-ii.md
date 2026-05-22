@@ -14,6 +14,6 @@ Result: `1 -> 4 -> 3 -> 2 -> 5`
 ## Visualization
 I have created an interactive visualization to help you see how a portion of the list is reversed.
 
-[Open Visualization (19-reverse-linked-list-ii.html)](./19-reverse-linked-list-ii.html)
+[Open Visualization](./19-reverse-linked-list-ii-v1.html)
 
 *(Open the HTML file in your browser to interact with the visualization)*

@@ -12,6 +12,6 @@ We use recursion to "unwind" the chain:
 ## Visualization
 I have created an interactive visualization to help you see how arrows flip one by one.
 
-[Open Visualization (15-reverse-linked-list.html)](./15-reverse-linked-list.html)
+[View v1: recursive](./15-reverse-linked-list-v1-recursive.html) | [View v2: iterative](./15-reverse-linked-list-v2-iterative.html)
 
 *(Open the HTML file in your browser to interact with the visualization)*

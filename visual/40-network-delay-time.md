@@ -25,7 +25,7 @@ Maximum distance = 2
 
 ## Visualization
 
-👉 [Interactive Visualization (HTML)](./40-network-delay-time.html)
+[Open Visualization](./40-network-delay-time-v1.html)
 
 ## Core Code Logic
 

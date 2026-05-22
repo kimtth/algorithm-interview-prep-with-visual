@@ -1,7 +1,7 @@
 # Problem 50: Convert Sorted Array to Binary Search Tree
 
 ## Visualization
-[View Interactive Visualization](./50-sorted-array-to-bst.html)
+[Open Visualization](./50-sorted-array-to-bst-v1.html)
 
 ## Problem Statement
 Given an integer array nums where the elements are sorted in ascending order, convert it to a height-balanced binary search tree.

@@ -10,6 +10,6 @@ A **linked list** is like a chain of boxes, where each box contains a value and 
 ## Visualization
 I have created an interactive visualization to help you see how the linked list is converted and checked.
 
-[Open Visualization (13-palindrome-linked-list.html)](./13-palindrome-linked-list.html)
+[View v1: list](./13-palindrome-linked-list-v1-list.html) | [View v2: deque](./13-palindrome-linked-list-v2-deque.html) | [View v3: runner](./13-palindrome-linked-list-v3-runner.html)
 
 *(Open the HTML file in your browser to interact with the visualization)*

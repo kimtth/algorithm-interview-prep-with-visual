@@ -1,7 +1,7 @@
 # Problem 49: Minimum Height Trees
 
 ## Visualization
-[View Interactive Visualization](./49-minimum-height-trees.html)
+[Open Visualization](./49-minimum-height-trees-v1.html)
 
 ## Problem Statement
 Given a tree with n nodes labeled 0 to n-1, find all roots that minimize the tree's height. Return a list of their labels.

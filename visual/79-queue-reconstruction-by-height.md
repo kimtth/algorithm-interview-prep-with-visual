@@ -20,15 +20,17 @@ The line got shuffled, and we need to reconstruct the original order!
 - Tallest people only see other tall people, so their `k` value directly tells us their position
 - Insert shorter people later - they don't affect tall people's counts
 
+[View visual: heap greedy](./79-queue-reconstruction-v1-heap.html)
+
 ## Algorithm Walkthrough
 Given: `[[7,0], [4,4], [7,1], [5,0], [6,1], [5,2]]`
 
-**Step 1: Sort by height (descending), then by k (ascending)**
+**Step 1: Push every person into a heap as `(-height, k)`**
 ```
-Sorted: [[7,0], [7,1], [6,1], [5,0], [5,2], [4,4]]
+heapq order: (-7,0), (-7,1), (-6,1), (-5,0), (-5,2), (-4,4)
 ```
 
-**Step 2: Insert each person at index k**
+**Step 2: Pop from the heap and insert each person at index k**
 
 | Person | Insert at k | Queue State |
 |--------|-------------|-------------|
@@ -63,7 +65,7 @@ def reconstructQueue(self, people: List[List[int]]) -> List[List[int]]:
     return result
 ```
 
-**Using heap for sorting:**
+**Using heap for greedy order:**
 - `-person[0]`: negative for max-heap (tallest first)
 - `person[1]`: breaks ties by k (lower k first)
 

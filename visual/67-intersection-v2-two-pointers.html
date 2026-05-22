@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Intersection of Two Arrays - Two Pointers</title>
+    <title>Intersection of Two Arrays - Binary Search</title>
     <link rel="stylesheet" href="visual.css">
     <script src="https://d3js.org/d3.v7.min.js"></script>
     
@@ -11,7 +11,7 @@
 <body>
     <div class="container">
         <h1>🔍 Intersection of Two Arrays</h1>
-        <p class="subtitle">Two Pointers O(n log n) - Sort both, then compare</p>
+        <p class="subtitle">Binary Search O(n log m) - Sort nums2, then bisect each nums1 value</p>
 
         <div class="controls">
             <button id="stepBtn">Step</button>
@@ -38,7 +38,7 @@
 
         <div class="panel">
             <div class="panel-title">📋 Status</div>
-            <div class="status-box" id="status">Click "Step" to start. Arrays will be sorted first.</div>
+            <div class="status-box" id="status">Click "Step" to start. nums2 will be sorted first.</div>
         </div>
     
         <div class="code-section">
@@ -68,7 +68,9 @@
         const original2 = [9, 4, 9, 8, 4];
         let nums1 = [], nums2 = [];
         const result = new Set();
-        let i = 0, j = 0;
+        let currentIndex = 0;
+        let left = 0, right = 0, mid = null;
+        let target = null;
         let phase = 'init';
         let autoInterval = null;
 
@@ -76,9 +78,9 @@
             document.getElementById('nums1').innerHTML = nums1.map((val, idx) => {
                 let cls = 'array-item default';
                 let ptr = '';
-                if (phase === 'compare' && idx === i) { 
+                if (phase !== 'init' && phase !== 'done' && idx === currentIndex) { 
                     cls = 'array-item pointer-i'; 
-                    ptr = '<span class="ptr">i↓</span>';
+                    ptr = '<span class="ptr">n1↓</span>';
                 }
                 return `<div class="${cls}">${ptr}${val}</div>`;
             }).join('');
@@ -86,9 +88,16 @@
             document.getElementById('nums2').innerHTML = nums2.map((val, idx) => {
                 let cls = 'array-item default';
                 let ptr = '';
-                if (phase === 'compare' && idx === j) {
+                if (phase === 'binary' && idx >= left && idx < right) {
+                    cls = 'array-item pointer-i';
+                }
+                if (phase === 'binary' && idx === mid) {
                     cls = 'array-item pointer-j';
-                    ptr = '<span class="ptr">j↓</span>';
+                    ptr = '<span class="ptr">mid↓</span>';
+                }
+                if (phase === 'check' && idx === left && val === target) {
+                    cls = 'array-item added';
+                    ptr = '<span class="ptr">i2↓</span>';
                 }
                 return `<div class="${cls}">${ptr}${val}</div>`;
             }).join('');
@@ -100,18 +109,78 @@
 
         function step() {
             if (phase === 'init') {
-                nums1 = [...original1].sort((a, b) => a - b);
+                nums1 = [...original1];
                 nums2 = [...original2].sort((a, b) => a - b);
-                phase = 'compare';
+                phase = 'startSearch';
                 document.getElementById('status').innerHTML = 
-                    `Sorted: nums1=[${nums1.join(',')}], nums2=[${nums2.join(',')}]`;
+                    `Sort nums2 only: nums2=[${nums2.join(',')}]. Iterate original nums1=[${nums1.join(',')}].`;
                 render();
                 return;
             }
 
             if (phase === 'done') return;
 
-            if (i >= nums1.length || j >= nums2.length) {
+            if (phase === 'startSearch') {
+                if (currentIndex >= nums1.length) {
+                    phase = 'done';
+                    document.getElementById('status').innerHTML = 
+                        `✅ Complete! Intersection: [${[...result].join(', ')}]`;
+                    document.getElementById('stepBtn').disabled = true;
+                    document.getElementById('autoBtn').disabled = true;
+                    stopAuto();
+                    render();
+                    return;
+                }
+
+                target = nums1[currentIndex];
+                left = 0;
+                right = nums2.length;
+                mid = null;
+                phase = 'binary';
+                document.getElementById('status').innerHTML = 
+                    `For nums1[${currentIndex}]=${target}, run bisect_left(nums2, ${target}).`;
+                render();
+                return;
+            }
+
+            if (phase === 'binary') {
+                if (left < right) {
+                    mid = Math.floor((left + right) / 2);
+                    if (nums2[mid] < target) {
+                        document.getElementById('status').innerHTML = 
+                            `nums2[${mid}]=${nums2[mid]} < ${target}; move left to ${mid + 1}.`;
+                        left = mid + 1;
+                    } else {
+                        document.getElementById('status').innerHTML = 
+                            `nums2[${mid}]=${nums2[mid]} >= ${target}; move right to ${mid}.`;
+                        right = mid;
+                    }
+                    render();
+                    return;
+                }
+
+                phase = 'check';
+            }
+
+            if (phase === 'check') {
+                const found = nums2.length > 0 && left < nums2.length && nums2[left] === target;
+                if (found) {
+                    result.add(target);
+                    document.getElementById('status').innerHTML = 
+                        `bisect_left returned ${left}; nums2[${left}]=${target}. Add ${target} to result.`;
+                } else {
+                    document.getElementById('status').innerHTML = 
+                        `bisect_left returned ${left}; ${target} is not present in nums2.`;
+                }
+
+                currentIndex++;
+                mid = null;
+                phase = 'startSearch';
+                render();
+                return;
+            }
+
+            if (currentIndex >= nums1.length) {
                 phase = 'done';
                 document.getElementById('status').innerHTML = 
                     `✅ Complete! Intersection: [${[...result].join(', ')}]`;
@@ -121,41 +190,19 @@
                 render();
                 return;
             }
-
-            const v1 = nums1[i], v2 = nums2[j];
-            
-            if (v1 === v2) {
-                if (!result.has(v1)) {
-                    result.add(v1);
-                    document.getElementById('status').innerHTML = 
-                        `Match! nums1[${i}]=${v1} == nums2[${j}]=${v2}. Add ${v1}. Move both pointers.`;
-                } else {
-                    document.getElementById('status').innerHTML = 
-                        `Match! ${v1} already in result. Move both pointers.`;
-                }
-                i++; j++;
-            } else if (v1 < v2) {
-                document.getElementById('status').innerHTML = 
-                    `nums1[${i}]=${v1} < nums2[${j}]=${v2}. Move i forward.`;
-                i++;
-            } else {
-                document.getElementById('status').innerHTML = 
-                    `nums1[${i}]=${v1} > nums2[${j}]=${v2}. Move j forward.`;
-                j++;
-            }
-
-            render();
         }
 
         function reset() {
             stopAuto();
             nums1 = []; nums2 = [];
-            i = 0; j = 0;
+            currentIndex = 0;
+            left = 0; right = 0; mid = null;
+            target = null;
             result.clear();
             phase = 'init';
             document.getElementById('stepBtn').disabled = false;
             document.getElementById('autoBtn').disabled = false;
-            document.getElementById('status').innerHTML = 'Click "Step" to start. Arrays will be sorted first.';
+            document.getElementById('status').innerHTML = 'Click "Step" to start. nums2 will be sorted first.';
             document.getElementById('nums1').innerHTML = original1.map(v => `<div class="array-item default">${v}</div>`).join('');
             document.getElementById('nums2').innerHTML = original2.map(v => `<div class="array-item default">${v}</div>`).join('');
             document.getElementById('result').innerHTML = '<span class="text-gray">Empty</span>';

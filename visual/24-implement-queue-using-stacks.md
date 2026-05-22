@@ -22,7 +22,7 @@ Example: push(1), push(2), pop(), push(3), pop()
 
 ## Visualization
 
-👉 [Interactive Visualization (HTML)](./24-implement-queue-using-stacks.html)
+[Open Visualization](./24-implement-queue-using-stacks-v1.html)
 
 ## Core Code Logic
 

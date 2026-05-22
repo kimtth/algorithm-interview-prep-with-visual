@@ -23,7 +23,7 @@ Result: [1,1,2,3,4,4,5,6]
 
 ## Visualization
 
-👉 [Interactive Visualization (HTML)](./27-merge-k-sorted-lists.html)
+[View v1: heap](./27-merge-k-sorted-lists-v1-heap.html)
 
 ## Core Code Logic
 

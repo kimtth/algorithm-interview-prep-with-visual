@@ -1,7 +1,7 @@
 # Problem 59: Merge Intervals
 
 ## Visualization
-[View Interactive Visualization](./59-merge-intervals.html)
+[Open Visualization](./59-merge-intervals-v1.html)
 
 ## Problem Statement
 Given an array of intervals where intervals[i] = [start, end], merge all overlapping intervals and return an array of non-overlapping intervals.

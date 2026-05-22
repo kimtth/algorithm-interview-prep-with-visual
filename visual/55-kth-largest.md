@@ -1,7 +1,7 @@
 # Problem 55: Kth Largest Element in an Array
 
 ## Visualization
-[View Interactive Visualization](./55-kth-largest.html)
+[View v1: max heap](./55-kth-largest-v1-max-heap.html) | [View v2: heapify](./55-kth-largest-v2-heapify.html) | [View v3: nlargest](./55-kth-largest-v3-nlargest.html) | [View v4: sort](./55-kth-largest-v4-sort.html)
 
 ## Problem Statement
 Given an integer array nums and an integer k, return the kth largest element in the array. Note that it is the kth largest element in sorted order, not the kth distinct element.

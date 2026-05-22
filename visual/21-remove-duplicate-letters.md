@@ -26,7 +26,7 @@ Example: `"cbacdcbc"` → Result: `"acdb"`
 
 ## Visualization
 
-👉 [Interactive Visualization (HTML)](./21-remove-duplicate-letters.html)
+[View v1: recursive](./21-remove-duplicate-letters-v1-recursive.html) | [View v2: stack](./21-remove-duplicate-letters-v2-stack.html)
 
 ## Core Code Logic
 

@@ -19,14 +19,7 @@ bin(11) = '0b1011'
 bin(11).count('1') = 3
 ```
 
-**Bit manipulation approach:** Use `n & 1` to check last bit, then right-shift
-```
-1011 & 1 = 1  (count = 1)
- 101 & 1 = 1  (count = 2)
-  10 & 1 = 0  (count = 2)
-   1 & 1 = 1  (count = 3)
-   0      → done!
-```
+**Bit manipulation approach:** Use `n & (n - 1)` to clear the rightmost 1-bit each time.
 
 ## Algorithm Walkthrough
 Given: `n = 11` (binary: `1011`)
@@ -38,18 +31,7 @@ bin(11) = '0b1011'
 ```
 Done! Simple and readable.
 
-### Method 2: Bit Manipulation
-| Step | n (binary) | n & 1 | Count |
-|------|------------|-------|-------|
-| 1    | `1011`     | 1     | 1     |
-| 2    | `0101`     | 1     | 2     |
-| 3    | `0010`     | 0     | 2     |
-| 4    | `0001`     | 1     | 3     |
-| 5    | `0000`     | -     | done! |
-
-**Result:** 3
-
-### Method 3: Brian Kernighan's Algorithm
+### Method 2: Brian Kernighan's Algorithm
 This clever trick clears the rightmost 1-bit in each iteration:
 ```
 n = n & (n - 1)
@@ -73,17 +55,7 @@ def hammingWeight(self, n: int) -> int:
     return bin(n).count('1')
 ```
 
-### Solution 2: Bit-by-bit
-```python
-def hammingWeight(self, n: int) -> int:
-    count = 0
-    while n:
-        count += n & 1  # Add 1 if last bit is 1
-        n >>= 1         # Shift right
-    return count
-```
-
-### Solution 3: Brian Kernighan
+### Solution 2: Brian Kernighan
 ```python
 def hammingWeight(self, n: int) -> int:
     count = 0
@@ -95,13 +67,12 @@ def hammingWeight(self, n: int) -> int:
 
 ## Complexity Analysis
 - **Time Complexity:** 
-  - Method 1 & 2: O(log n) or O(32) for 32-bit integers
-  - Method 3: O(k) where k is the number of 1-bits
+    - Method 1: O(log n) or O(32) for 32-bit integers
+    - Method 2: O(k) where k is the number of 1-bits
 - **Space Complexity:** O(1)
 
 ## Key Insights
-1. **n & 1:** Extracts the least significant bit (0 or 1)
-2. **n >> 1:** Right shift divides by 2, moves to next bit
-3. **n & (n-1):** Clears the rightmost 1-bit (Brian Kernighan's trick)
-4. **Trade-offs:** Built-in is cleanest; Kernighan is fastest for sparse bits
-5. **Applications:** Error detection, cryptography, data compression
+1. **Built-in count:** `bin(n).count('1')` is the direct solution in 74-1.py
+2. **n & (n-1):** Clears the rightmost 1-bit in 74-2.py
+3. **Trade-offs:** Built-in is cleanest; Kernighan is fastest for sparse bits
+4. **Applications:** Error detection, cryptography, data compression

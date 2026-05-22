@@ -13,6 +13,6 @@ The goal is to reverse a list of characters (like a word) in place. This means w
 ## Visualization
 I have created an interactive visualization to help you see this process in action.
 
-[Open Visualization (2-reverse-string.html)](./2-reverse-string.html)
+[View v1: two pointers](./2-reverse-string-v1-two-pointers.html) | [View v2: pythonic](./2-reverse-string-v2-pythonic.html)
 
 *(Open the HTML file in your browser to interact with the visualization)*

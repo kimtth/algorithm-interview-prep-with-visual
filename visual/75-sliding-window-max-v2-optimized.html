@@ -82,7 +82,7 @@
     <script>
         const nums = [1, 3, -1, -3, 5, 3, 6, 7];
         const k = 3;
-        let window = [];
+        let slidingWindow = [];
         let currentMax = -Infinity;
         let results = [];
         let currentIdx = 0;
@@ -128,14 +128,14 @@
             }
 
             const v = nums[currentIdx];
-            window.push(v);
+            slidingWindow.push(v);
             
             let stepDesc = `i=${currentIdx}, add ${v} to window. `;
 
             if (currentIdx >= k - 1) {
                 // Update max
                 if (currentMax === -Infinity) {
-                    currentMax = Math.max(...window);
+                    currentMax = Math.max(...slidingWindow);
                     stepDesc += `Compute max(window) = ${currentMax}. `;
                 } else if (v > currentMax) {
                     currentMax = v;
@@ -148,7 +148,7 @@
                 stepDesc += `Add ${currentMax} to results. `;
                 
                 // Remove leftmost
-                const removed = window.shift();
+                const removed = slidingWindow.shift();
                 if (removed === currentMax) {
                     currentMax = -Infinity;
                     stepDesc += `Max ${removed} left window, reset max.`;
@@ -161,7 +161,7 @@
             document.getElementById('currentMax').innerHTML = 
                 `Current Max: <strong>${currentMax === -Infinity ? '-∞' : currentMax}</strong>`;
             document.getElementById('windowContent').innerHTML = 
-                `Window: <strong>[${window.join(', ')}]</strong>`;
+                `Window: <strong>[${slidingWindow.join(', ')}]</strong>`;
             
             renderArray();
             renderResults();
@@ -189,7 +189,7 @@
         }
 
         function reset() {
-            window = [];
+            slidingWindow = [];
             currentMax = -Infinity;
             results = [];
             currentIdx = 0;
