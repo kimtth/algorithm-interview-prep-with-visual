@@ -1,7 +1,7 @@
 # Problem 53: Minimum Distance Between BST Nodes
 
 ## Visualization
-[View Interactive Visualization](./53-min-distance-bst.html)
+[View v1: recursive](./53-min-distance-bst-v1-recursive.html) | [View v2: iterative](./53-min-distance-bst-v2-iterative.html)
 
 ## Problem Statement
 Given the root of a Binary Search Tree, return the minimum difference between the values of any two different nodes in the tree.

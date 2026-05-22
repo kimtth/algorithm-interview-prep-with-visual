@@ -17,6 +17,6 @@ The "Expand Around Center" approach is like planting a seed and watching it grow
 ## Visualization
 I have created an interactive visualization to help you see this expansion process.
 
-[Open Visualization (6-longest-palindromic-substring.html)](./6-longest-palindromic-substring.html)
+[View v1: expand](./6-longest-palindromic-substring-v1-expand.html)
 
 *(Open the HTML file in your browser to interact with the visualization)*

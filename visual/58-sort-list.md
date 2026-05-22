@@ -1,7 +1,7 @@
 # Problem 58: Sort List
 
 ## Visualization
-[View Interactive Visualization](./58-sort-list.html)
+[View v1: merge sort](./58-sort-list-v1-merge-sort.html) | [View v2: builtin sort](./58-sort-list-v2-builtin-sort.html)
 
 ## Problem Statement
 Given the head of a linked list, return the list sorted in ascending order using O(n log n) time complexity.

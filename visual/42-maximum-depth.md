@@ -29,7 +29,7 @@ Example:
 
 ## Visualization
 
-👉 [Interactive Visualization (HTML)](./42-maximum-depth.html)
+[Open Visualization](./42-maximum-depth-v1.html)
 
 ## Core Code Logic
 

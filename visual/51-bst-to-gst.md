@@ -1,7 +1,7 @@
 # Problem 51: Binary Search Tree to Greater Sum Tree
 
 ## Visualization
-[View Interactive Visualization](./51-bst-to-gst.html)
+[Open Visualization](./51-bst-to-gst-v1.html)
 
 ## Problem Statement
 Given the root of a Binary Search Tree, convert it to a Greater Sum Tree where every node's new value equals the original value plus the sum of all values greater than it in the BST.

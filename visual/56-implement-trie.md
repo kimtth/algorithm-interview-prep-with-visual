@@ -1,7 +1,7 @@
 # Problem 56: Implement Trie (Prefix Tree)
 
 ## Visualization
-[View Interactive Visualization](./56-implement-trie.html)
+[Open Visualization](./56-implement-trie-v1.html)
 
 ## Problem Statement
 Implement a trie (prefix tree) with insert, search, and startsWith methods.

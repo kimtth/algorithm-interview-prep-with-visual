@@ -230,7 +230,7 @@
                     treeNodes.push({
                         id: nodeId,
                         path: nodeId,
-                        parent: JSON.stringify(state.elements) || 'root'
+                        parent: state.elements.length ? JSON.stringify(state.elements) : 'root'
                     });
                 }
             }

@@ -13,6 +13,6 @@ This solution takes a shortcut: instead of swapping the actual node connections 
 ## Visualization
 I have created an interactive visualization to help you see the pairwise swapping.
 
-[Open Visualization (17-swap-nodes-in-pairs.html)](./17-swap-nodes-in-pairs.html)
+[View v1: value swap](./17-swap-nodes-in-pairs-v1-value-swap.html) | [View v2: node swap](./17-swap-nodes-in-pairs-v2-node-swap.html) | [View v3: recursive](./17-swap-nodes-in-pairs-v3-recursive.html)
 
 *(Open the HTML file in your browser to interact with the visualization)*

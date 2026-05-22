@@ -25,7 +25,7 @@ Position 1: choose 2 → ...
 
 ## Visualization
 
-👉 [Interactive Visualization (HTML)](./34-permutations.html)
+[View v1: dfs](./34-permutations-v1-dfs.html) | [View v2: itertools](./34-permutations-v2-itertools.html)
 
 ## Core Code Logic
 

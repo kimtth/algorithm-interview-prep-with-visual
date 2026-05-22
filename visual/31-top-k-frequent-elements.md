@@ -26,7 +26,7 @@ Example: nums = [1,1,1,2,2,3], k = 2
 
 ## Visualization
 
-👉 [Interactive Visualization (HTML)](./31-top-k-frequent-elements.html)
+[View v1: heap](./31-top-k-frequent-elements-v1-heap.html) | [View v2: pythonic](./31-top-k-frequent-elements-v2-pythonic.html)
 
 ## Core Code Logic
 

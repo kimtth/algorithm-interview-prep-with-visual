@@ -23,6 +23,6 @@ The task is to organize them with specific rules:
 ## Visualization
 I have created an interactive visualization to help you see this sorting process.
 
-[Open Visualization (3-reorder-log-files.html)](./3-reorder-log-files.html)
+[View v1: lambda sort](./3-reorder-log-files-v1-lambda-sort.html)
 
 *(Open the HTML file in your browser to interact with the visualization)*

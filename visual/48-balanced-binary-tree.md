@@ -1,7 +1,7 @@
 # Problem 48: Balanced Binary Tree
 
 ## Visualization
-[View Interactive Visualization](./48-balanced-binary-tree.html)
+[Open Visualization](./48-balanced-binary-tree-v1.html)
 
 ## Problem Statement
 Given a binary tree, determine if it is height-balanced. A height-balanced tree is one where the left and right subtrees of every node differ in height by no more than 1.

@@ -23,7 +23,7 @@ With k=1, we can use 1 stop, so answer = 200
 
 ## Visualization
 
-👉 [Interactive Visualization (HTML)](./41-cheapest-flights.html)
+[Open Visualization](./41-cheapest-flights-v1.html)
 
 ## Core Code Logic
 

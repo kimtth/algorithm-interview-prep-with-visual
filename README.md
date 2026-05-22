@@ -1,13 +1,12 @@
 # Python Algorithm Interview
 
 > [!IMPORTANT]  
-> Translated version from the [Korean version](https://github.com/onlybooks/python-algorithm-interview)
- into English with D3.js visualization — master coding tests with 95 algorithm problems.
+> Translated version from the [Korean version](https://github.com/onlybooks/python-algorithm-interview) into English with D3.js visualizations for the 88 main LeetCode problems, plus Appendix B solutions for 95 total algorithm problems.
 
 ## 🚀 Quick Start
 [![Open Visualization Index](main.png)](index.html)
 
-**👉 Open index.html** to browse all problems with interactive visualizations.
+**👉 Open index.html** to browse the interactive visualizations for problems 1-88.
 
 ★ Errata: https://www.onlybook.co.kr/entry/algorithm-interview-errata  
 ★ Book Info: https://www.onlybook.co.kr/entry/algorithm-interview  
@@ -106,6 +105,13 @@
 | 86 | [Maximum Subarray](https://leetcode.com/problems/maximum-subarray/) | ★ | Ch23. Dynamic Programming | [86-1.py](5-algorithms/ch23/86-1.py)<br>[86-2.py](5-algorithms/ch23/86-2.py) |
 | 87 | [Climbing Stairs](https://leetcode.com/problems/climbing-stairs/) | ★ | Ch23. Dynamic Programming | [87-1.py](5-algorithms/ch23/87-1.py)<br>[87-2.py](5-algorithms/ch23/87-2.py) |
 | 88 | [House Robber](https://leetcode.com/problems/house-robber/) | ★ | Ch23. Dynamic Programming | [88-1.py](5-algorithms/ch23/88-1.py)<br>[88-2.py](5-algorithms/ch23/88-2.py) |
+| 89 (Problem 1) | [Secret Map](https://programmers.co.kr/learn/courses/30/lessons/17681) | ★ | Appendix B. Kakao Blind Recruitment Problems | [1.py](appendix-B/1.py) |
+| 90 (Problem 2) | [Dart Game](https://programmers.co.kr/learn/courses/30/lessons/17682) | ★ | Appendix B. Kakao Blind Recruitment Problems | [2.py](appendix-B/2.py) |
+| 91 (Problem 3) | [Cache](https://programmers.co.kr/learn/courses/30/lessons/17680) | ★ | Appendix B. Kakao Blind Recruitment Problems | [3.py](appendix-B/3.py) |
+| 92 (Problem 4) | [Shuttle Bus](https://programmers.co.kr/learn/courses/30/lessons/17678) | ★★ | Appendix B. Kakao Blind Recruitment Problems | [4.py](appendix-B/4.py) |
+| 93 (Problem 5) | [News Clustering](https://programmers.co.kr/learn/courses/30/lessons/17677) | ★★ | Appendix B. Kakao Blind Recruitment Problems | [5.py](appendix-B/5.py) |
+| 94 (Problem 6) | [Friends 4 Block](https://programmers.co.kr/learn/courses/30/lessons/17679) | ★★★ | Appendix B. Kakao Blind Recruitment Problems | [6.py](appendix-B/6.py) |
+| 95 (Problem 7) | [Chuseok Traffic](https://programmers.co.kr/learn/courses/30/lessons/17676) | ★★★ | Appendix B. Kakao Blind Recruitment Problems | [7.py](appendix-B/7.py) |
 
 ## Additional Code (miscellaneous)
 - Ch4 [Performance Comparison](miscellaneous/4-performance.py)

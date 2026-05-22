@@ -23,7 +23,7 @@ Example: "abcabcbb"
 
 ## Visualization
 
-👉 [Interactive Visualization (HTML)](./30-longest-substring-without-repeating.html)
+[Open Visualization](./30-longest-substring-without-repeating-v1.html)
 
 ## Core Code Logic
 

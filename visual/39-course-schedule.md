@@ -23,7 +23,7 @@ Example: numCourses=2, prerequisites=[[1,0],[0,1]]
 
 ## Visualization
 
-👉 [Interactive Visualization (HTML)](./39-course-schedule.html)
+[View v1: basic](./39-course-schedule-v1-basic.html) | [View v2: optimized](./39-course-schedule-v2-optimized.html)
 
 ## Core Code Logic
 

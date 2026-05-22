@@ -1,7 +1,7 @@
 # Problem 43: Diameter of Binary Tree
 
 ## Visualization
-[View Interactive Visualization](./43-diameter-of-binary-tree.html)
+[Open Visualization](./43-diameter-of-binary-tree-v1.html)
 
 ## Problem Statement
 Given the root of a binary tree, return the length of the diameter of the tree. The diameter is the length of the longest path between any two nodes in the tree. This path may or may not pass through the root.

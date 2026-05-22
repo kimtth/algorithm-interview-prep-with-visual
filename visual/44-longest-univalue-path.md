@@ -1,7 +1,7 @@
 # Problem 44: Longest Univalue Path
 
 ## Visualization
-[View Interactive Visualization](./44-longest-univalue-path.html)
+[Open Visualization](./44-longest-univalue-path-v1.html)
 
 ## Problem Statement
 Given the root of a binary tree, return the length of the longest path where each node in the path has the same value. This path may or may not pass through the root.

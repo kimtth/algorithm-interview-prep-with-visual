@@ -23,6 +23,6 @@ The goal is to group these words together.
 ## Visualization
 I have created an interactive visualization to help you see how words are sorted and dropped into their respective buckets.
 
-[Open Visualization (5-group-anagrams.html)](./5-group-anagrams.html)
+[View v1: sorted key](./5-group-anagrams-v1-sorted-key.html)
 
 *(Open the HTML file in your browser to interact with the visualization)*

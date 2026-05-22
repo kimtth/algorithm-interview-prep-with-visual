@@ -1,7 +1,7 @@
 # Problem 46: Merge Two Binary Trees
 
 ## Visualization
-[View Interactive Visualization](./46-merge-two-binary-trees.html)
+[Open Visualization](./46-merge-two-binary-trees-v1.html)
 
 ## Problem Statement
 Given two binary trees, merge them into a new binary tree. The merge rule is: if two nodes overlap, sum their values; otherwise, use the non-null node.
