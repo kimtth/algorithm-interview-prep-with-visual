@@ -34,23 +34,6 @@ body > .subtitle:first-of-type {
     box-shadow: 0 20px 60px rgba(0,0,0,0.3);
 }
 
-/* Header */
-.header {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    padding: 30px;
-    color: white;
-}
-
-.header h1 {
-    font-size: 1.8em;
-    margin-bottom: 10px;
-}
-
-.header p {
-    opacity: 0.9;
-    font-size: 0.95em;
-}
-
 h1 {
     text-align: center;
     color: #2c3e50;
@@ -162,7 +145,6 @@ h1 {
 .text-blue { color: #2196f3; }
 .text-red { color: #e74c3c; }
 .text-green { color: #2ecc71; }
-.text-gray { color: #777; }
 .text-xl { font-size: 20px; }
 .text-2xl { font-size: 24px; }
 .font-bold { font-weight: 700; }
@@ -1414,10 +1396,70 @@ strong {
     margin-bottom: 5px;
 }
 
+.pointer-box .pointer-label {
+    position: static;
+    padding: 0;
+}
+
+.pointer-box.node {
+    width: auto;
+    height: auto;
+    display: block;
+    background: #c8e6c9;
+    border: 2px solid #4caf50;
+    border-radius: 8px;
+}
+
+.pointer-box.front,
+.pointer-box.rear {
+    font-size: 1em;
+    background: #fff;
+}
+
+.pointer-box.front {
+    border: 2px solid #4caf50;
+}
+
+.pointer-box.rear {
+    border: 2px solid #ff9800;
+}
+
 .pointer-value {
     font-size: 1.2em;
     font-weight: bold;
     color: #333;
+}
+
+/* Circular queue cells (Q25) */
+.array-cell {
+    min-width: 50px;
+    padding: 8px;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    background: #fff;
+    text-align: center;
+    font-size: 1em;
+}
+
+.array-cell.front {
+    border-color: #4caf50;
+}
+
+.array-cell.rear {
+    border-color: #ff9800;
+}
+
+.array-cell.front.rear {
+    border-color: #4caf50 #ff9800 #ff9800 #4caf50;
+}
+
+.array-cell.filled .cell-index {
+    color: rgba(255, 255, 255, 0.8);
+}
+
+#circularView {
+    display: block;
+    margin: 20px auto;
 }
 
 /* Call Stack Visualization */
@@ -2019,9 +2061,9 @@ strong {
 .bit-display { display: flex; gap: 2px; }
 .bit-section, .bit-row { display: flex; gap: 2px; align-items: center; }
 .bit-label { font-size: 0.8em; color: #666; margin-right: 8px; }
-.bit-0, .bit-1, [class*="bit-"] { width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; border: 1px solid #ccc; border-radius: 3px; font-family: 'Consolas', monospace; }
+.bit-0, .bit-1 { width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; border: 1px solid #ccc; border-radius: 3px; font-family: 'Consolas', monospace; }
 .bit-0 { background: #f5f5f5; }
-.bit-1, [class*="bit-"].active { background: #4caf50; color: white; }
+.bit-1, .bit-0.active { background: #4caf50; color: white; }
 
 /* Byte displays */
 .bytes-container { display: flex; gap: 10px; flex-wrap: wrap; }
@@ -2598,6 +2640,8 @@ strong {
 
 /* Day displays */
 .day-label { font-size: 0.75em; color: #888; }
+.price-box { display: flex; flex-direction: column; align-items: center; min-width: 56px; padding: 8px 12px; border: 2px solid #e0e0e0; border-radius: 8px; background: #fff; font-weight: 600; }
+.matrix-cell.col-header { font-weight: 600; }
 
 /* Decision displays */
 .decision { padding: 10px; background: #fff3e0; border-radius: 6px; }
@@ -2649,7 +2693,9 @@ strong {
 .itertools-label { font-size: 0.85em; color: #7b1fa2; }
 
 /* Colors container */
-.colors-container { display: flex; gap: 6px; }
+.colors-container { display: flex; gap: 6px; padding-bottom: 24px; }
+.color-box { position: relative; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; border: 2px solid #e0e0e0; border-radius: 6px; background: #fff; font-weight: 700; }
+.color-box.swapping { border-color: #ff9800; box-shadow: 0 0 8px rgba(255, 152, 0, 0.5); }
 .color-dot { width: 20px; height: 20px; border-radius: 50%; }
 
 /* Timeline */
@@ -2869,7 +2915,6 @@ strong {
         padding: 10px;
     }
 
-    .header h1,
     h1 {
         font-size: 1.5em;
     }
@@ -3142,11 +3187,22 @@ strong {
     background: #fff;
 }
 
+.bit.bit-1 {
+    background: #4caf50;
+    color: white;
+}
+
+.bit.bit-diff,
+.bit.bit-carry {
+    background: #ff9800;
+    color: white;
+}
+
 .bits-container {
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
     align-items: center;
-    gap: 8px;
+    gap: 4px;
 }
 
 /* Stat components */
@@ -3563,8 +3619,18 @@ button#resetBtn:hover {
     border-color: #ff9100 !important;
 }
 
+/* The state backgrounds above are forced light, so text on them must stay dark */
+.current,
+.active,
+.running,
+.prev,
+.next {
+    color: #333 !important;
+}
+
 /* Bit display variations */
-[class*="bit-"] {
+.bit-0,
+.bit-1 {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -4283,4 +4349,155 @@ button#resetBtn:hover {
 
 .panel svg {
     min-width: 100%;
+}
+
+/* Q6 longest palindromic substring */
+.pal-string {
+    display: flex;
+    justify-content: center;
+    position: relative;
+    margin: 40px 0 20px;
+    min-height: 60px;
+}
+.pal-box {
+    width: 40px;
+    height: 50px;
+    border: 2px solid #ddd;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    font-size: 1.3em;
+    font-weight: bold;
+    background: white;
+    position: relative;
+}
+.pal-box.highlighted {
+    background: rgba(255, 152, 0, 0.3);
+    border-color: #ff9800;
+    border-width: 3px;
+}
+.pal-box.found {
+    background: rgba(76, 175, 80, 0.3);
+    border-color: #4caf50;
+    border-width: 3px;
+}
+.pal-index {
+    font-size: 0.6em;
+    color: #999;
+    margin-top: 2px;
+}
+.pal-window {
+    position: absolute;
+    height: 56px;
+    top: -3px;
+    background: transparent;
+    border: 5px solid #ff9800;
+    border-radius: 8px;
+    pointer-events: none;
+    z-index: 3;
+    box-shadow: 0 0 20px rgba(255, 152, 0, 0.8), inset 0 0 20px rgba(255, 152, 0, 0.3);
+}
+.pal-window.found {
+    border-color: #4caf50;
+    box-shadow: 0 0 20px rgba(76, 175, 80, 0.8), inset 0 0 20px rgba(76, 175, 80, 0.3);
+}
+.pal-center {
+    position: absolute;
+    width: 0;
+    height: 0;
+    border-left: 12px solid transparent;
+    border-right: 12px solid transparent;
+    border-bottom: 16px solid #f44336;
+    top: -25px;
+    z-index: 3;
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+}
+.pal-max {
+    background: #e8f5e9;
+    border: 1px solid #a5d6a7;
+    border-radius: 4px;
+    padding: 10px 15px;
+    text-align: center;
+    margin-top: 10px;
+}
+
+/* Q22 daily temperatures */
+#tempDisplay,
+#answerDisplay {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+    padding: 0;
+    background: none;
+    border: none;
+    margin-bottom: 15px;
+}
+.temp-item,
+.answer-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+}
+.temp-box,
+.answer-box {
+    min-width: 44px;
+    padding: 8px 10px;
+    border: 2px solid #e0e0e0;
+    border-radius: 6px;
+    background: #fff;
+    font-weight: 600;
+    text-align: center;
+}
+.temp-box.in-stack {
+    border-color: #2196f3;
+}
+.temp-box.resolved {
+    background: #c8e6c9;
+    border-color: #4caf50;
+}
+.temp-index {
+    font-size: 0.7em;
+    color: #888;
+}
+
+/* State classes set by page scripts */
+.picked,
+.min-day {
+    border-color: #4caf50;
+    background: #e8f5e9;
+}
+.current-day {
+    border-color: #2196f3;
+}
+.processed-odd {
+    border-color: #2196f3;
+    background: #e3f2fd;
+}
+.processed-even {
+    border-color: #ff9800;
+    background: #fff3e0;
+}
+
+/* Climbing stairs DP table (Q87) */
+.stair-step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 44px;
+    padding: 6px 8px;
+    border: 2px solid #e0e0e0;
+    border-radius: 6px;
+    background: #fff;
+}
+.stair-step.calculated {
+    background: #e8f5e9;
+    border-color: #4caf50;
+}
+.answer-box.filled {
+    background: #667eea;
+    border-color: #667eea;
+    color: #fff;
 }

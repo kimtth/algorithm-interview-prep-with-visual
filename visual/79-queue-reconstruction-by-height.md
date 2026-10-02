@@ -1,4 +1,4 @@
-# 79. Queue Reconstruction by Height
+# Q79: Queue Reconstruction by Height
 
 ## Problem Description
 People are described by a pair `[h, k]` where:

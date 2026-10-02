@@ -1,4 +1,7 @@
-# 64. K Closest Points to Origin
+# Q64: K Closest Points to Origin
+
+## Visualization
+[Open Visualization](./64-k-closest-points-v1.html)
 
 ## Problem Description
 Given an array of points where `points[i] = [xi, yi]` represents a point on the X-Y plane and an integer `k`, return the `k` closest points to the origin (0, 0).

@@ -1,4 +1,4 @@
-# Question 5: Group Anagrams
+# Q5: Group Anagrams
 
 ## Layman's Explanation
 An **anagram** is a word formed by rearranging the letters of another word. For example, "eat", "tea", and "ate" are all anagrams of each other because they all contain exactly one 'a', one 'e', and one 't'.

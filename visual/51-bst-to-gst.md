@@ -1,4 +1,4 @@
-# Problem 51: Binary Search Tree to Greater Sum Tree
+# Q51: Binary Search Tree to Greater Sum Tree
 
 ## Visualization
 [Open Visualization](./51-bst-to-gst-v1.html)

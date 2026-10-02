@@ -1,4 +1,7 @@
-# 84. Different Ways to Add Parentheses
+# Q84: Different Ways to Add Parentheses
+
+## Visualization
+[Open Visualization](./84-different-ways-v1-divide-conquer.html)
 
 ## Problem Description
 Given a string expression with numbers and operators (+, -, *), compute all possible results from different ways to group the expression with parentheses.

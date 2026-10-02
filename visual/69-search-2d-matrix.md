@@ -1,4 +1,7 @@
-# 69. Search a 2D Matrix II
+# Q69: Search a 2D Matrix II
+
+## Visualization
+[View v1: staircase](./69-search-2d-matrix-v1-staircase.html) | [View v2: any](./69-search-2d-matrix-v2-any.html)
 
 ## Problem Description
 Search for a target value in an m x n matrix where:

@@ -60,7 +60,6 @@
                 <div class="popped-items" id="poppedItems"><span class="text-gray">None yet</span></div>
             </div>
         </div>
-    </div>
         
         <div class="code-section">
             <h3>📄 Python Solution (55-2.py)</h3>
@@ -229,7 +228,7 @@
             
             if (poppedCount === toPop) {
                 document.getElementById('statusMessage').textContent = 
-                    `✅ Done! Root ${heap[0]} is the ${k}th largest element.`;
+                    `✅ Done! Root ${heap[0]} is the k=${k} largest element.`;
                 document.getElementById('stepBtn').disabled = true;
                 stopAuto();
                 renderHeap();

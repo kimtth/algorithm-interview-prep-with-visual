@@ -1,4 +1,4 @@
-# Problem 57: Palindrome Pairs
+# Q57: Palindrome Pairs
 
 ## Visualization
 [View v1: brute force](./57-palindrome-pairs-v1-brute-force.html) | [View v2: trie](./57-palindrome-pairs-v2-trie.html)

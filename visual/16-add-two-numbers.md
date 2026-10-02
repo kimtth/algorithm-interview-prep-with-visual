@@ -1,4 +1,4 @@
-# Question 16: Add Two Numbers
+# Q16: Add Two Numbers
 
 ## Layman's Explanation
 We have two numbers represented as linked lists, but **in reverse order**. For example:

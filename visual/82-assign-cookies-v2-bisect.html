@@ -10,10 +10,8 @@
 </head>
 <body>
     <div class="container">
-        <div class="header">
-            <h1>🍪 Q82: Assign Cookies</h1>
-            <p>LeetCode #455 | File: 82-2.py | Approach: Binary Search (bisect_right)</p>
-        </div>
+        <h1>Q82: Assign Cookies</h1>
+        <p class="subtitle">Solution 82-2.py - Binary Search (bisect_right) (LeetCode #455)</p>
         
         <div class="problem-info">
             <h3>📋 Problem Description</h3>
@@ -31,10 +29,10 @@
                 <span class="text-lg">Content children: <strong id="resultCount">0</strong></span>
             </div>
             <div class="result-display" id="result"></div>
-        </div>
+        
 
         <div class="status" id="status">Ready to assign cookies</div>
-    </div>
+    
 
         <div class="controls">
             <button class="btn btn-primary" onclick="step()">Step</button>
@@ -49,6 +47,8 @@
                 <h4>👶 Children (greed factors, sorted): [1, 2, 3]</h4>
                 <div class="items-row" id="childrenRow"></div>
     
+        </div>
+        </div>
         <div class="code-section">
             <h3>📄 Python Solution (82-2.py)</h3>
             <pre><span class="keyword">import</span> bisect
@@ -68,7 +68,6 @@
                 result += <span class="number">1</span>
         <span class="keyword">return</span> result</pre>
         </div>
-
     </div>
 
     <script>

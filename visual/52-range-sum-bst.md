@@ -1,4 +1,4 @@
-# Problem 52: Range Sum of BST
+# Q52: Range Sum of BST
 
 ## Visualization
 [View v1: brute force](./52-range-sum-bst-v1-brute-force.html) | [View v2: pruning](./52-range-sum-bst-v2-pruning.html) | [View v3: dfs stack](./52-range-sum-bst-v3-dfs-stack.html) | [View v4: bfs queue](./52-range-sum-bst-v4-bfs-queue.html)

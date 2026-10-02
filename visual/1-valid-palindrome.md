@@ -1,4 +1,4 @@
-# Question 1: Valid Palindrome
+# Q1: Valid Palindrome
 
 ## Layman's Explanation
 A **palindrome** is a word, phrase, number, or other sequence of characters that reads the same forward and backward (ignoring spaces, punctuation, and capitalization).

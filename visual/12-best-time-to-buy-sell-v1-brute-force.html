@@ -60,7 +60,6 @@
                 <div class="matrix-container" id="matrixContainer"></div>
             </div>
         </div>
-    </div>
         
         <div class="code-section">
             <h3>📄 Python Solution (12-1.py)</h3>
@@ -112,9 +111,9 @@
             // Header row
             const headerRow = document.createElement('div');
             headerRow.className = 'matrix-row';
-            headerRow.innerHTML = '<div class="matrix-cell header">Sell↓ Buy→</div>';
+            headerRow.innerHTML = '<div class="matrix-cell row-header">Sell↓ Buy→</div>';
             prices.forEach((_, idx) => {
-                headerRow.innerHTML += `<div class="matrix-cell header">Day ${idx}</div>`;
+                headerRow.innerHTML += `<div class="matrix-cell col-header">D${idx}</div>`;
             });
             container.appendChild(headerRow);
             
@@ -153,9 +152,18 @@
                 document.getElementById('stepBtn').disabled = true;
                 
                 // Highlight best cells
+                document.querySelectorAll('.price-box').forEach(box => {
+                    box.classList.remove('current', 'buy-day', 'sell-day');
+                });
+                document.querySelectorAll('.matrix-cell').forEach(cell => {
+                    cell.classList.remove('current');
+                });
                 if (bestBuy >= 0 && bestSell >= 0) {
+                    document.getElementById('buyDay').textContent = `Day ${bestBuy} ($${prices[bestBuy]})`;
+                    document.getElementById('sellDay').textContent = `Day ${bestSell} ($${prices[bestSell]})`;
                     document.getElementById(`price-${bestBuy}`).classList.add('buy-day');
                     document.getElementById(`price-${bestSell}`).classList.add('sell-day');
+                    document.getElementById(`cell-${bestSell}-${bestBuy}`).classList.remove('checked');
                     document.getElementById(`cell-${bestSell}-${bestBuy}`).classList.add('best');
                 }
                 

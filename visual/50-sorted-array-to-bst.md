@@ -1,4 +1,4 @@
-# Problem 50: Convert Sorted Array to Binary Search Tree
+# Q50: Convert Sorted Array to Binary Search Tree
 
 ## Visualization
 [Open Visualization](./50-sorted-array-to-bst-v1.html)

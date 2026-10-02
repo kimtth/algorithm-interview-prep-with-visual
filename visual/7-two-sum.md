@@ -1,4 +1,4 @@
-# Question 7: Two Sum
+# Q7: Two Sum
 
 ## Layman's Explanation
 We have a list of numbers and a specific "target" number. We need to find two numbers in the list that add up exactly to the target.

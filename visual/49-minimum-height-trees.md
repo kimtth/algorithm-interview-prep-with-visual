@@ -1,4 +1,4 @@
-# Problem 49: Minimum Height Trees
+# Q49: Minimum Height Trees
 
 ## Visualization
 [Open Visualization](./49-minimum-height-trees-v1.html)

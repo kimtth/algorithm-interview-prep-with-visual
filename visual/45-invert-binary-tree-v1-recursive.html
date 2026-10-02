@@ -53,7 +53,6 @@
                 <div class="stack-items" id="stackDisplay"><span class="text-gray">Empty</span></div>
             </div>
         </div>
-    </div>
         
         <div class="code-section">
             <h3>📄 Python Solution (45-1.py)</h3>
@@ -213,14 +212,9 @@
                 
                 // Update positions for visualization
                 if (node.left !== undefined && node.right !== undefined) {
-                    const leftNode = nodes[node.left];
-                    const rightNode = nodes[node.right];
-                    const tempX = leftNode.x;
-                    leftNode.x = rightNode.x;
-                    rightNode.x = tempX;
-                    
-                    // Also swap children's subtrees positions
-                    swapSubtreePositions(node.left, node.right);
+                    const d = nodes[node.right].x - nodes[node.left].x;
+                    shiftSubtree(node.left, d);
+                    shiftSubtree(node.right, -d);
                 }
                 
                 document.getElementById('statusMessage').textContent = 
@@ -234,19 +228,9 @@
             renderStack();
         }
         
-        function swapSubtreePositions(leftId, rightId) {
-            if (leftId === undefined || rightId === undefined) return;
-            const leftChildren = getChildren(leftId);
-            const rightChildren = getChildren(rightId);
-            
-            // Simple recursive swap of x positions
-            function collectNodes(id) {
-                if (id === undefined) return [];
-                const result = [id];
-                const children = getChildren(id);
-                children.forEach(c => result.push(...collectNodes(c)));
-                return result;
-            }
+        function shiftSubtree(id, dx) {
+            nodes[id].x += dx;
+            getChildren(id).forEach(c => shiftSubtree(c, dx));
         }
         
         function toggleAuto() {

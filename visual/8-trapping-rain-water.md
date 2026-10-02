@@ -1,4 +1,4 @@
-# Question 8: Trapping Rain Water
+# Q8: Trapping Rain Water
 
 ## Layman's Explanation
 Imagine a landscape made of bars of different heights. When it rains, water gets trapped in the "valleys" between the bars. We want to calculate exactly how much water is trapped.

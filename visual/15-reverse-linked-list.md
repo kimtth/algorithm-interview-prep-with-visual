@@ -1,4 +1,4 @@
-# Question 15: Reverse Linked List
+# Q15: Reverse Linked List
 
 ## Layman's Explanation
 We have a linked list pointing in one direction: `A -> B -> C -> D`. We want to reverse all the arrows so it becomes `D -> C -> B -> A`.

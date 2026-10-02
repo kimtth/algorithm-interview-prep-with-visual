@@ -48,7 +48,6 @@
                 </div>
             </div>
         </div>
-    </div>
         
         <div class="code-section">
             <h3>📄 Python Solution (23-1.py)</h3>
@@ -84,12 +83,11 @@
         
         const operations = [
             { op: 'push', val: 1 },
-            { op: 'rotate', from: [1], step: 0 },
             { op: 'push', val: 2 },
-            { op: 'rotate', from: [1, 2], step: 1 },
+            { op: 'rotate', from: [2, 1], step: 0 },
             { op: 'push', val: 3 },
-            { op: 'rotate', from: [2, 1, 3], step: 1 },
-            { op: 'rotate', from: [1, 3, 2], step: 2 },
+            { op: 'rotate', from: [1, 3, 2], step: 0 },
+            { op: 'rotate', from: [3, 2, 1], step: 1 },
             { op: 'pop' },
             { op: 'done' }
         ];

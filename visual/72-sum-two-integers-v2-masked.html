@@ -10,10 +10,8 @@
 </head>
 <body>
     <div class="container">
-        <div class="header">
-            <h1>➕ Q72: Sum of Two Integers</h1>
-            <p>LeetCode #371 | File: 72-2.py | Approach: Masked XOR with Negative Handling</p>
-        </div>
+        <h1>Q72: Sum of Two Integers</h1>
+        <p class="subtitle">Solution 72-2.py - Masked XOR with Negative Handling (LeetCode #371)</p>
         
         <div class="problem-info">
             <h3>📋 Problem Description</h3>
@@ -24,10 +22,10 @@
 
         
             <div class="result-display" id="result"></div>
-        </div>
+        
 
         <div class="status" id="status">Ready to visualize masked bit manipulation</div>
-    </div>
+    
 
         <div class="controls">
             <button class="btn btn-primary" onclick="step()">Step</button>
@@ -46,6 +44,8 @@
                 <h4>Computing: a=5, b=3 → 8</h4>
                 <div id="bitDisplay"></div>
     
+        </div>
+        </div>
         <div class="code-section">
             <h3>📄 Python Solution (72-2.py)</h3>
             <pre><span class="keyword">class</span> Solution:
@@ -61,7 +61,6 @@
             a = ~(a ^ MASK)
         <span class="keyword">return</span> a</pre>
         </div>
-
     </div>
 
     <script>

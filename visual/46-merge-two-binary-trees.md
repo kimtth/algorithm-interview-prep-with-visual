@@ -1,4 +1,4 @@
-# Problem 46: Merge Two Binary Trees
+# Q46: Merge Two Binary Trees
 
 ## Visualization
 [Open Visualization](./46-merge-two-binary-trees-v1.html)

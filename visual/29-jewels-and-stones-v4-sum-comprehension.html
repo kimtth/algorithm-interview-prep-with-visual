@@ -10,10 +10,8 @@
 </head>
 <body>
     <div class="container">
-        <div class="header">
-            <h1>💎 Q29: Jewels and Stones</h1>
-            <p>LeetCode #771 | File: 29-4.py | Approach: Pythonic Sum Comprehension</p>
-        </div>
+        <h1>Q29: Jewels and Stones</h1>
+        <p class="subtitle">Solution 29-4.py - Pythonic Sum Comprehension (LeetCode #771)</p>
         
         <div class="problem-info">
             <h3>📋 Problem Description</h3>
@@ -33,10 +31,9 @@
                 <div class="bool-display" id="boolDisplay"></div>
             </div>
             <div class="result-display" id="result"></div>
-        </div>
+        
 
         <div class="status" id="status">Ready to visualize the one-liner solution</div>
-    </div>
 
         <div class="controls">
             <button class="btn btn-primary" onclick="step()">Step</button>
@@ -51,13 +48,14 @@
                 <h4>💎 Jewels (J = "aA")</h4>
                 <div id="jewelsContainer"></div>
     
+        </div>
+        </div>
         <div class="code-section">
             <h3>📄 Python Solution (29-4.py)</h3>
             <pre><span class="keyword">class</span> Solution:
     <span class="keyword">def</span> <span class="function">numJewelsInStones</span>(<span class="keyword">self</span>, J: str, S: str) -&gt; int:
         <span class="keyword">return</span> <span class="function">sum</span>(s <span class="keyword">in</span> J <span class="keyword">for</span> s <span class="keyword">in</span> S)</pre>
         </div>
-
     </div>
 
     <script>

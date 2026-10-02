@@ -1,4 +1,7 @@
-# 86. Maximum Subarray
+# Q86: Maximum Subarray
+
+## Visualization
+[View v1: in place dp](./86-max-subarray-v1-in-place-dp.html) | [View v2: kadane](./86-max-subarray-v2-kadane.html)
 
 ## Problem Description
 Given an integer array `nums`, find the contiguous subarray with the largest sum and return that sum.

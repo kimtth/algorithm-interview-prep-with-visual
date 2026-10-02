@@ -1,4 +1,7 @@
-# 80. Task Scheduler
+# Q80: Task Scheduler
+
+## Visualization
+[Open Visualization](./80-task-scheduler-v1-greedy.html)
 
 ## Problem Description
 Given tasks (represented by letters) and a cooling time `n`, find the minimum time to complete all tasks. The same task must have at least `n` intervals between executions.

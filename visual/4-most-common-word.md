@@ -1,4 +1,4 @@
-# Question 4: Most Common Word
+# Q4: Most Common Word
 
 ## Layman's Explanation
 The goal is to find the most frequently used word in a paragraph, but with a few catches:

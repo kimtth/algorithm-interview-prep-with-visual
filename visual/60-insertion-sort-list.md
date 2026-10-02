@@ -1,4 +1,7 @@
-# 60. Insertion Sort List
+# Q60: Insertion Sort List
+
+## Visualization
+[View v1](./60-insertion-sort-list-v1.html) | [View v2: optimized](./60-insertion-sort-list-v2-optimized.html)
 
 ## Problem Description
 Sort a linked list using insertion sort algorithm. Unlike array insertion sort where we shift elements, in a linked list we manipulate pointers to insert each node in its correct sorted position.

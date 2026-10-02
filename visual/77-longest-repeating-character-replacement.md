@@ -1,4 +1,7 @@
-# 77. Longest Repeating Character Replacement
+# Q77: Longest Repeating Character Replacement
+
+## Visualization
+[Open Visualization](./77-longest-repeating-char-v1.html)
 
 ## Problem Description
 Given a string `s` and an integer `k`, you can replace at most `k` characters. Find the length of the longest substring containing the same letter after replacements.

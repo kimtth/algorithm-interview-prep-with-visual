@@ -1,4 +1,7 @@
-# 68. Two Sum II - Input Array Is Sorted
+# Q68: Two Sum II - Input Array Is Sorted
+
+## Visualization
+[View v1: two pointers](./68-two-sum-ii-v1-two-pointers.html) | [View v2: binary search](./68-two-sum-ii-v2-binary-search.html) | [View v3: bisect slice](./68-two-sum-ii-v3-bisect-slice.html) | [View v4: bisect variable](./68-two-sum-ii-v4-bisect-variable.html) | [View v5: bisect lo](./68-two-sum-ii-v5-bisect-lo.html)
 
 ## Problem Description
 Given a **sorted** array of integers `numbers` and a `target`, find two numbers such that they add up to the target. Return their **1-indexed** positions.

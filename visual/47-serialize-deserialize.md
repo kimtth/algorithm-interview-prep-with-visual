@@ -1,4 +1,4 @@
-# Problem 47: Serialize and Deserialize Binary Tree
+# Q47: Serialize and Deserialize Binary Tree
 
 ## Visualization
 [Open Visualization](./47-serialize-deserialize-v1.html)

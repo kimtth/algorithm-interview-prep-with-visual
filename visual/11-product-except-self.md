@@ -1,4 +1,4 @@
-# Question 11: Product of Array Except Self
+# Q11: Product of Array Except Self
 
 ## Layman's Explanation
 We have a list of numbers. For each number, we want to calculate the product of **all other numbers** in the list, *except* the one we are currently looking at.

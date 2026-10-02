@@ -1,4 +1,4 @@
-# Question 2: Reverse String
+# Q2: Reverse String
 
 ## Layman's Explanation
 The goal is to reverse a list of characters (like a word) in place. This means we modify the original list directly without creating a new one.

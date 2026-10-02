@@ -1,4 +1,7 @@
-# 83. Majority Element
+# Q83: Majority Element
+
+## Visualization
+[View v1: brute force](./83-majority-element-v1-brute-force.html) | [View v2: defaultdict](./83-majority-element-v2-defaultdict.html) | [View v3: recursive](./83-majority-element-v3-recursive.html) | [View v4: sorted](./83-majority-element-v4-sorted.html)
 
 ## Problem Description
 Given an array `nums` of size n, find the majority element (appears more than n/2 times). The majority element always exists.

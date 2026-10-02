@@ -1,4 +1,4 @@
-# Question 18: Odd Even Linked List
+# Q18: Odd Even Linked List
 
 ## Layman's Explanation
 We want to rearrange a linked list so that all the nodes at **odd positions** (1st, 3rd, 5th...) come first, followed by all the nodes at **even positions** (2nd, 4th, 6th...).

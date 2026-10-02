@@ -50,7 +50,6 @@
                 <div class="stack-items" id="stackDisplay"><span class="text-gray">Empty</span></div>
             </div>
         </div>
-    </div>
         
         <div class="code-section">
             <h3>📄 Python Solution (45-4.py)</h3>
@@ -98,6 +97,13 @@
                 if (node.left !== undefined) links.push({ source: node.id, target: node.left });
                 if (node.right !== undefined) links.push({ source: node.id, target: node.right });
             });
+        }
+        
+        function shiftSubtree(id, dx) {
+            if (id === undefined) return;
+            tree[id].x += dx;
+            shiftSubtree(tree[id].left, dx);
+            shiftSubtree(tree[id].right, dx);
         }
         
         function init() {
@@ -174,7 +180,7 @@
                 done = true;
                 currentNode = null;
                 document.getElementById('statusMessage').textContent = 
-                    '✅ Complete! Tree has been inverted using post-order DFS.';
+                    '✅ Complete! Tree inverted (children were pushed before the swap, as in 45-4.py).';
                 document.getElementById('stepBtn').disabled = true;
                 stopAuto();
                 renderTree();
@@ -194,13 +200,11 @@
             node.left = node.right;
             node.right = temp;
             
-            // Swap visual positions
+            // Swap visual positions (move whole subtrees)
             if (node.left !== undefined && node.right !== undefined) {
-                const leftNode = tree[node.left];
-                const rightNode = tree[node.right];
-                const tempX = leftNode.x;
-                leftNode.x = rightNode.x;
-                rightNode.x = tempX;
+                const d = tree[node.right].x - tree[node.left].x;
+                shiftSubtree(node.left, d);
+                shiftSubtree(node.right, -d);
             }
             
             buildLinks();

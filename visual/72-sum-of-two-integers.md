@@ -1,4 +1,7 @@
-# 72. Sum of Two Integers (Without + or -)
+# Q72: Sum of Two Integers (Without + or -)
+
+## Visualization
+[View v1: bit](./72-sum-two-integers-v1-bit.html) | [View v2: masked](./72-sum-two-integers-v2-masked.html)
 
 ## Problem Description
 Given two integers `a` and `b`, return the sum of them without using the `+` and `-` operators.

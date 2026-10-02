@@ -1,4 +1,7 @@
-# 82. Assign Cookies
+# Q82: Assign Cookies
+
+## Visualization
+[View v1: greedy](./82-assign-cookies-v1-greedy.html) | [View v2: bisect](./82-assign-cookies-v2-bisect.html)
 
 ## Problem Description
 You have children with greed factors `g` and cookies with sizes `s`. A child is content if cookie size ≥ their greed factor. Maximize the number of content children.

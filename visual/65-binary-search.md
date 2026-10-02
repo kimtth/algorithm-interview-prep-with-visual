@@ -1,4 +1,7 @@
-# 65. Binary Search
+# Q65: Binary Search
+
+## Visualization
+[View v1: recursive](./65-binary-search-v1-recursive.html) | [View v2: iterative](./65-binary-search-v2-iterative.html) | [View v3: bisect](./65-binary-search-v3-bisect.html) | [View v4: index](./65-binary-search-v4-index.html)
 
 ## Problem Description
 Given a sorted array of integers `nums` and a target value `target`, return the index if the target is found. If not, return -1.

@@ -10,10 +10,8 @@
 </head>
 <body>
     <div class="container">
-        <div class="header">
-            <h1>📊 Q75: Sliding Window Maximum</h1>
-            <p>LeetCode #239 | File: 75-2.py | Approach: Optimized Max Tracking</p>
-        </div>
+        <h1>Q75: Sliding Window Maximum</h1>
+        <p class="subtitle">Solution 75-2.py - Optimized Max Tracking (LeetCode #239)</p>
         
         <div class="problem-info">
             <h3>📋 Problem Description</h3>
@@ -27,10 +25,10 @@
                 <h4>Results</h4>
                 <div id="resultsContainer">(waiting...)</div>
             </div>
-        </div>
+        
 
         <div class="status" id="status">Ready to visualize optimized max tracking</div>
-    </div>
+    
 
         <div class="controls">
             <button class="btn btn-primary" onclick="step()">Step</button>
@@ -47,6 +45,8 @@
                 <div class="info-item" id="currentMax">Current Max: <strong>-∞</strong></div>
                 <div class="info-item" id="windowContent">Window: <strong>[]</strong></div>
     
+        </div>
+        </div>
         <div class="code-section">
             <h3>📄 Python Solution (75-2.py)</h3>
             <pre><span class="keyword">import</span> collections
@@ -76,7 +76,6 @@
                 current_max = <span class="function">float</span>('-inf')
         <span class="keyword">return</span> results</pre>
         </div>
-
     </div>
 
     <script>

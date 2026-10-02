@@ -3,22 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Q67: Intersection of Two Arrays II - Two Pointers</title>
+    <title>Q67: Intersection of Two Arrays - Two Pointers</title>
     <link rel="stylesheet" href="visual.css">
     <script src="https://d3js.org/d3.v7.min.js"></script>
     
 </head>
 <body>
     <div class="container">
-        <div class="header">
-            <h1>🔍 Q67: Intersection of Two Arrays II</h1>
-            <p>LeetCode #350 | File: 67-3.py | Approach: Two Pointers (Set Result)</p>
-        </div>
+        <h1>Q67: Intersection of Two Arrays</h1>
+        <p class="subtitle">Solution 67-3.py - Two Pointers (Set Result) (LeetCode #349)</p>
         
         <div class="problem-info">
             <h3>📋 Problem Description</h3>
             <p>Given two integer arrays nums1 and nums2, return an array of their intersection. 
-            Each element must appear as many times as it shows in both arrays.</p>
+            Each element in the result must be unique.</p>
             <p class="mt-10"><strong>Key Insight:</strong> Sort both arrays, use two pointers. 
             If nums1[i] < nums2[j], advance i; if nums1[i] > nums2[j], advance j; if equal, add to result and advance both.</p>
         </div>
@@ -32,10 +30,9 @@
                 <h4>Result Set</h4>
                 <div id="resultContainer"></div>
             </div>
-        </div>
+        
 
         <div class="status" id="status">Ready to visualize two-pointer intersection</div>
-    </div>
 
         <div class="controls">
             <button class="btn btn-primary" onclick="step()">Step</button>
@@ -50,6 +47,8 @@
                 <div class="array-label">nums1 (sorted): [1, 2, 2, 4, 9]</div>
                 <div class="array-container" id="array1Container"></div>
     
+        </div>
+        </div>
         <div class="code-section">
             <h3>📄 Python Solution (67-3.py)</h3>
             <pre><span class="keyword">from</span> typing <span class="keyword">import</span> List, Set
@@ -75,7 +74,6 @@
 
         <span class="keyword">return</span> result</pre>
         </div>
-
     </div>
 
     <script>

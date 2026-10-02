@@ -1,4 +1,4 @@
-# Question 6: Longest Palindromic Substring
+# Q6: Longest Palindromic Substring
 
 ## Layman's Explanation
 We want to find the longest piece inside a string that reads the same forwards and backwards. For example, in "babad", "bab" is a palindrome, and "aba" is also a palindrome. Both have length 3.

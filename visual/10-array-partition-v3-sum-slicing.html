@@ -10,10 +10,8 @@
 </head>
 <body>
     <div class="container">
-        <div class="header">
-            <h1>🔢 Q10: Array Partition I</h1>
-            <p>LeetCode #561 | File: 10-3.py | Approach: Pythonic Sum with Slicing</p>
-        </div>
+        <h1>Q10: Array Partition I</h1>
+        <p class="subtitle">Solution 10-3.py - Pythonic Sum with Slicing (LeetCode #561)</p>
         
         <div class="problem-info">
             <h3>📋 Problem Description</h3>
@@ -25,7 +23,7 @@
         
 
         <div class="status" id="status">Ready to visualize the one-liner solution</div>
-    </div>
+    
 
         <div class="controls">
             <button class="btn btn-primary" onclick="step()">Step</button>
@@ -40,6 +38,7 @@
             <div class="array-container" id="arrayContainer"></div>
             <div class="result-display" id="result"></div>
     
+        </div>
         <div class="code-section">
             <h3>📄 Python Solution (10-3.py)</h3>
             <pre><span class="keyword">from</span> typing <span class="keyword">import</span> List
@@ -49,7 +48,6 @@
     <span class="keyword">def</span> <span class="function">arrayPairSum</span>(<span class="keyword">self</span>, nums: List[int]) -&gt; int:
         <span class="keyword">return</span> <span class="function">sum</span>(<span class="function">sorted</span>(nums)[::<span class="number">2</span>])</pre>
         </div>
-
     </div>
 
     <script>

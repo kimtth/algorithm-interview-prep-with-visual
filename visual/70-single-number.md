@@ -1,4 +1,7 @@
-# 70. Single Number
+# Q70: Single Number
+
+## Visualization
+[Open Visualization](./70-single-number-v1-xor.html)
 
 ## Problem Description
 Given a non-empty array of integers `nums`, every element appears twice except for one. Find that single one.

@@ -61,7 +61,6 @@
                 <div class="traversal-items" id="traversalItems"></div>
             </div>
         </div>
-    </div>
         
         <div class="code-section">
             <h3>📄 Python Solution (53-1.py)</h3>
@@ -215,7 +214,6 @@
                 minDiff = Math.min(minDiff, diff);
             }
             
-            document.getElementById('prevValue').textContent = prev === null ? '-∞' : prev;
             document.getElementById('minDiff').textContent = minDiff === Infinity ? '∞' : minDiff;
             
             if (prev !== null) {
@@ -228,6 +226,7 @@
             
             visited.add(currentNode);
             prev = currentNode;
+            document.getElementById('prevValue').textContent = prev;
             
             renderTree();
             renderTraversal();

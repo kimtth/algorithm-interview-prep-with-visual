@@ -1,4 +1,7 @@
-# 87. Climbing Stairs
+# Q87: Climbing Stairs
+
+## Visualization
+[View v1: dp](./87-climbing-stairs-v1-dp.html) | [View v2: memoization](./87-climbing-stairs-v2-memoization.html)
 
 ## Problem Description
 You are climbing a staircase. It takes `n` steps to reach the top. Each time you can climb 1 or 2 steps. How many distinct ways can you climb to the top?

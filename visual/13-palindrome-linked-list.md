@@ -1,4 +1,4 @@
-# Question 13: Palindrome Linked List
+# Q13: Palindrome Linked List
 
 ## Layman's Explanation
 A **linked list** is like a chain of boxes, where each box contains a value and a pointer to the next box. We want to check if the values in this chain read the same forwards and backwards (like a palindrome).

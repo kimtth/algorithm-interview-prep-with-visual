@@ -1,4 +1,4 @@
-# Problem 45: Invert Binary Tree
+# Q45: Invert Binary Tree
 
 ## Visualization
 [View v1: recursive](./45-invert-binary-tree-v1-recursive.html) | [View v2: bfs](./45-invert-binary-tree-v2-bfs.html) | [View v3: dfs preorder](./45-invert-binary-tree-v3-dfs-preorder.html) | [View v4: dfs postorder](./45-invert-binary-tree-v4-dfs-postorder.html)

@@ -58,7 +58,6 @@
                 </div>
             </div>
         </div>
-    </div>
         
         <div class="code-section">
             <h3>📄 Python Solution (45-3.py)</h3>
@@ -136,6 +135,13 @@
             
             renderTree();
             renderStack();
+        }
+        
+        function shiftSubtree(id, dx) {
+            if (id === null) return;
+            tree[id].x += dx;
+            shiftSubtree(tree[id].left, dx);
+            shiftSubtree(tree[id].right, dx);
         }
         
         function renderTree() {
@@ -220,13 +226,11 @@
             node.left = tempRight;
             node.right = tempLeft;
             
-            // Also swap positions for visualization
+            // Also swap positions for visualization (move whole subtrees)
             if (tempLeft !== null && tempRight !== null) {
-                const leftChild = tree[tempLeft];
-                const rightChild = tree[tempRight];
-                const tempX = leftChild.x;
-                leftChild.x = rightChild.x;
-                rightChild.x = tempX;
+                const d = tree[tempRight].x - tree[tempLeft].x;
+                shiftSubtree(tempLeft, d);
+                shiftSubtree(tempRight, -d);
             }
             
             swapped.add(nodeId);

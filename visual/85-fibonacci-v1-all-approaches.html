@@ -32,7 +32,7 @@
             <div class="complexity" id="complexity">Time: O(2ⁿ) | Space: O(n)</div>
         </div>
 
-        <div class="panel" id="memo-panel" class="d-none">
+        <div class="panel d-none" id="memo-panel">
             <div class="panel-title">💾 Memoization Cache</div>
             <div class="memo-table" id="memo"></div>
         </div>
@@ -112,6 +112,8 @@
         let memo = {};
         let currentIdx = 0;
         let calls = 0;
+        let events = [];
+        let evIdx = 0;
         let done = false;
         let autoInterval = null;
         let prevTwo = [0, 1];
@@ -141,35 +143,57 @@
             document.getElementById('complexity').textContent = complexities[method];
         }
 
+        // Real call trace of 85-1.py (recursion) and 85-2.py (memoization)
+        function buildTrace(useMemo) {
+            const trace = [];
+            const dp = {};
+            function fib(n, stack) {
+                const path = stack.concat(n);
+                if (n <= 1) { trace.push({ type: 'base', n, val: n, path }); return n; }
+                if (useMemo && dp[n]) { trace.push({ type: 'hit', n, val: dp[n], path }); return dp[n]; }
+                trace.push({ type: 'call', n, path });
+                const val = fib(n - 1, path) + fib(n - 2, path);
+                if (useMemo) dp[n] = val;
+                trace.push({ type: 'return', n, val, path });
+                return val;
+            }
+            fib(N, []);
+            return trace;
+        }
+
         function step() {
             if (done) return;
 
-            calls++;
-
             if (method === 'recursive' || method === 'memo') {
-                // Simulate bottom-up for visualization (actual recursive would be complex to visualize)
-                if (currentIdx <= N) {
-                    if (currentIdx <= 1) {
-                        fibValues[currentIdx] = currentIdx;
-                        if (method === 'memo') memo[currentIdx] = currentIdx;
-                        document.getElementById('status').innerHTML = `Base case: F(${currentIdx}) = ${currentIdx}`;
-                    } else {
-                        fibValues[currentIdx] = fibValues[currentIdx - 1] + fibValues[currentIdx - 2];
-                        if (method === 'memo') memo[currentIdx] = fibValues[currentIdx];
-                        document.getElementById('status').innerHTML = 
-                            `F(${currentIdx}) = F(${currentIdx-1}) + F(${currentIdx-2}) = ${fibValues[currentIdx-1]} + ${fibValues[currentIdx-2]} = ${fibValues[currentIdx]}`;
-                    }
-                    currentIdx++;
+                if (evIdx === 0) events = buildTrace(method === 'memo');
+                const ev = events[evIdx++];
+                const stack = ev.path.map(n => `fib(${n})`).join(' → ');
+                currentIdx = ev.n;
+                if (ev.type !== 'return') calls++;
+
+                if (ev.type === 'base') {
+                    fibValues[ev.n] = ev.val;
+                    document.getElementById('status').innerHTML = `Base case: fib(${ev.n}) = ${ev.val} &nbsp;|&nbsp; ${stack}`;
+                } else if (ev.type === 'hit') {
+                    document.getElementById('status').innerHTML = `Cache hit: dp[${ev.n}] = ${ev.val}, no recursion &nbsp;|&nbsp; ${stack}`;
+                } else if (ev.type === 'call') {
+                    document.getElementById('status').innerHTML = `Call fib(${ev.n}) &nbsp;|&nbsp; ${stack}`;
+                } else {
+                    fibValues[ev.n] = ev.val;
+                    if (method === 'memo') memo[ev.n] = ev.val;
+                    document.getElementById('status').innerHTML =
+                        `Return fib(${ev.n}) = fib(${ev.n - 1}) + fib(${ev.n - 2}) = ${fibValues[ev.n - 1]} + ${fibValues[ev.n - 2]} = ${ev.val}`;
                 }
 
-                if (currentIdx > N) {
+                if (evIdx >= events.length) {
                     done = true;
-                    document.getElementById('status').innerHTML = `✅ F(${N}) = ${fibValues[N]}`;
+                    document.getElementById('status').innerHTML = `✅ F(${N}) = ${fibValues[N]} (${calls} calls)`;
                     document.getElementById('stepBtn').disabled = true;
                     document.getElementById('autoBtn').disabled = true;
                     stopAuto();
                 }
             } else if (method === 'tabulation') {
+                calls++;
                 if (currentIdx <= N) {
                     if (currentIdx <= 1) {
                         fibValues[currentIdx] = currentIdx;
@@ -191,6 +215,7 @@
                 }
             } else {
                 // Space optimized
+                calls++;
                 if (currentIdx <= N) {
                     if (currentIdx <= 1) {
                         fibValues[currentIdx] = currentIdx;
@@ -223,6 +248,8 @@
             memo = {};
             currentIdx = 0;
             calls = 0;
+            events = [];
+            evIdx = 0;
             prevTwo = [0, 1];
             done = false;
             document.getElementById('stepBtn').disabled = false;
@@ -248,7 +275,7 @@
         document.getElementById('stepBtn').onclick = () => { stopAuto(); step(); };
         document.getElementById('autoBtn').onclick = () => {
             if (autoInterval) { stopAuto(); }
-            else { autoInterval = setInterval(step, 600); document.getElementById('autoBtn').textContent = '⏸ Pause'; }
+            else { autoInterval = setInterval(step, method === 'recursive' || method === 'memo' ? 250 : 600); document.getElementById('autoBtn').textContent = '⏸ Pause'; }
         };
         document.getElementById('resetBtn').onclick = reset;
 

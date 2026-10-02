@@ -1,4 +1,4 @@
-# Problem 55: Kth Largest Element in an Array
+# Q55: Kth Largest Element in an Array
 
 ## Visualization
 [View v1: max heap](./55-kth-largest-v1-max-heap.html) | [View v2: heapify](./55-kth-largest-v2-heapify.html) | [View v3: nlargest](./55-kth-largest-v3-nlargest.html) | [View v4: sort](./55-kth-largest-v4-sort.html)

@@ -10,10 +10,8 @@
 </head>
 <body>
     <div class="container">
-        <div class="header">
-            <h1>📊 Q86: Maximum Subarray - Kadane's Variant</h1>
-            <p>LeetCode #53 | File: 86-2.py | Approach: Kadane's with max()</p>
-        </div>
+        <h1>Q86: Maximum Subarray - Kadane's Variant</h1>
+        <p class="subtitle">Solution 86-2.py - Kadane's with max() (LeetCode #53)</p>
         
         <div class="problem-info">
             <h3>📋 Problem Description</h3>
@@ -31,17 +29,17 @@
                     <div class="metric-label">best_sum</div>
                     <div class="metric-value positive" id="bestSum">-∞</div>
                 </div>
-            </div>
+            
             
             <div class="decision-box" id="decisionBox">
                 Decision: max(num, current_sum + num) = ?
             </div>
             
             <div class="result-display" id="result"></div>
-        </div>
+        
 
         <div class="status" id="status">Ready to find maximum subarray sum</div>
-    </div>
+    
 
         <div class="controls">
             <button class="btn btn-primary" onclick="step()">Step</button>
@@ -59,6 +57,8 @@
                     <div class="metric-label">Current Element</div>
                     <div class="metric-value" id="currentNum">-</div>
     
+        </div>
+        </div></div>
         <div class="code-section">
             <h3>📄 Python Solution (86-2.py)</h3>
             <pre><span class="keyword">import</span> sys
@@ -75,7 +75,6 @@
 
         <span class="keyword">return</span> best_sum</pre>
         </div>
-
     </div>
 
     <script>

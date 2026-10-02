@@ -1,4 +1,4 @@
-# Problem 43: Diameter of Binary Tree
+# Q43: Diameter of Binary Tree
 
 ## Visualization
 [Open Visualization](./43-diameter-of-binary-tree-v1.html)

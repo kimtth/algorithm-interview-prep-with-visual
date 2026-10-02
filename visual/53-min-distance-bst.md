@@ -1,4 +1,4 @@
-# Problem 53: Minimum Distance Between BST Nodes
+# Q53: Minimum Distance Between BST Nodes
 
 ## Visualization
 [View v1: recursive](./53-min-distance-bst-v1-recursive.html) | [View v2: iterative](./53-min-distance-bst-v2-iterative.html)

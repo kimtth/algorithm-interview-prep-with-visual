@@ -10,10 +10,8 @@
 </head>
 <body>
     <div class="container">
-        <div class="header">
-            <h1>🏠 Q88: House Robber - OrderedDict DP</h1>
-            <p>LeetCode #198 | File: 88-2.py | Approach: OrderedDict with popitem()</p>
-        </div>
+        <h1>Q88: House Robber - OrderedDict DP</h1>
+        <p class="subtitle">Solution 88-2.py - OrderedDict with popitem() (LeetCode #198)</p>
         
         <div class="problem-info">
             <h3>📋 Problem Description</h3>
@@ -29,10 +27,10 @@
             </div>
             
             <div class="result-display" id="result"></div>
-        </div>
+        
 
         <div class="status" id="status">Ready to plan the heist</div>
-    </div>
+    
 
         <div class="controls">
             <button class="btn btn-primary" onclick="step()">Step</button>
@@ -50,6 +48,8 @@
                 <h4>OrderedDict (sliding window of 2)</h4>
                 <div class="dict-items" id="dictItems"></div>
     
+        </div>
+        </div>
         <div class="code-section">
             <h3>📄 Python Solution (88-2.py)</h3>
             <pre><span class="keyword">import</span> collections
@@ -70,7 +70,6 @@
 
         <span class="keyword">return</span> dp.<span class="function">popitem</span>()[<span class="number">1</span>]</pre>
         </div>
-
     </div>
 
     <script>

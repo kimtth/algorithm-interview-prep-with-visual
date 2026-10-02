@@ -63,7 +63,6 @@
                 <div class="popped-items" id="poppedItems"><span class="text-gray">None yet</span></div>
             </div>
         </div>
-    </div>
         
         <div class="code-section">
             <h3>📄 Python Solution (55-1.py)</h3>
@@ -241,7 +240,7 @@
                     phase = 'pop';
                     document.getElementById('phase').textContent = 'Popping';
                     document.getElementById('statusMessage').textContent = 
-                        `Heap built! Now pop ${k} times to find ${k}th largest.`;
+                        `Heap built! Now pop ${k} times to find the k=${k} largest.`;
                 }
             } else if (phase === 'pop') {
                 if (popsCount < k) {
@@ -253,7 +252,7 @@
                     
                     if (popsCount === k) {
                         document.getElementById('statusMessage').textContent = 
-                            `✅ Pop #${popsCount}: ${val}. This is the ${k}th largest!`;
+                            `✅ Pop #${popsCount}: ${val}. This is the k=${k} largest!`;
                         document.getElementById('stepBtn').disabled = true;
                         stopAuto();
                     } else {

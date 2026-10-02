@@ -56,7 +56,6 @@
                 </div>
             </div>
         </div>
-    </div>
         
         <div class="code-section">
             <h3>📄 Python Solution (46-1.py)</h3>
@@ -115,7 +114,7 @@
         
         function init() {
             result = [];
-            stack = [{ pos: 'root', t1: tree1[0], t2: tree2[0] }];
+            stack = [{ pos: 'root', t1: tree1[0], t2: tree2[0], parent: null, side: null, depth: 0 }];
             currentPos = null;
             merged = new Set();
             done = false;
@@ -179,6 +178,22 @@
             renderTree("#result", result);
         }
         
+        // Create a result node under its parent (same layout spacing as the input trees)
+        function place(entry, val) {
+            const node = { id: result.length, val: val, merged: true };
+            if (entry.parent) {
+                const dx = 50 / Math.pow(2, entry.depth - 1);
+                node.x = entry.parent.x + (entry.side === 'left' ? -dx : dx);
+                node.y = entry.parent.y + 60;
+                entry.parent[entry.side] = node.id;
+            } else {
+                node.x = 100;
+                node.y = 30;
+            }
+            result.push(node);
+            return node;
+        }
+        
         function step() {
             if (done || stack.length === 0) {
                 done = true;
@@ -193,15 +208,8 @@
             const { pos, t1, t2 } = current;
             
             if (t1 && t2) {
-                const newVal = t1.val + t2.val;
-                const newNode = { 
-                    id: result.length, 
-                    val: newVal, 
-                    x: t1.x, 
-                    y: t1.y,
-                    merged: true
-                };
-                result.push(newNode);
+                const newNode = place(current, t1.val + t2.val);
+                const newVal = newNode.val;
                 
                 document.getElementById('statusMessage').textContent = 
                     `Position ${pos}: ${t1.val} + ${t2.val} = ${newVal}`;
@@ -212,16 +220,15 @@
                 const t1Right = t1.right !== undefined ? tree1.find(n => n.id === t1.right) : null;
                 const t2Right = t2.right !== undefined ? tree2.find(n => n.id === t2.right) : null;
                 
-                if (t1Left || t2Left) stack.push({ pos: 'left', t1: t1Left, t2: t2Left });
-                if (t1Right || t2Right) stack.push({ pos: 'right', t1: t1Right, t2: t2Right });
+                // Push right first so left is processed first (same order as the recursive solution)
+                if (t1Right || t2Right) stack.push({ pos: 'right', t1: t1Right, t2: t2Right, parent: newNode, side: 'right', depth: current.depth + 1 });
+                if (t1Left || t2Left) stack.push({ pos: 'left', t1: t1Left, t2: t2Left, parent: newNode, side: 'left', depth: current.depth + 1 });
             } else if (t1) {
-                const newNode = { id: result.length, val: t1.val, x: t1.x, y: t1.y, merged: true };
-                result.push(newNode);
+                place(current, t1.val);
                 document.getElementById('statusMessage').textContent = 
                     `Position ${pos}: only t1 has value ${t1.val}`;
             } else if (t2) {
-                const newNode = { id: result.length, val: t2.val, x: t2.x, y: t2.y, merged: true };
-                result.push(newNode);
+                place(current, t2.val);
                 document.getElementById('statusMessage').textContent = 
                     `Position ${pos}: only t2 has value ${t2.val}`;
             }

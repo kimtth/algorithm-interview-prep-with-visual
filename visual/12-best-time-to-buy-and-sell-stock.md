@@ -1,4 +1,4 @@
-# Question 12: Best Time to Buy and Sell Stock
+# Q12: Best Time to Buy and Sell Stock
 
 ## Layman's Explanation
 You have a list of stock prices for each day. You want to buy on one day and sell on a later day to make the most money.

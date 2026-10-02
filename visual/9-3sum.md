@@ -1,4 +1,4 @@
-# Question 9: 3Sum
+# Q9: 3Sum
 
 ## Layman's Explanation
 We need to find three numbers in a list that add up to exactly zero. We want to find all such unique triplets.

@@ -1,4 +1,7 @@
-# 66. Search in Rotated Sorted Array
+# Q66: Search in Rotated Sorted Array
+
+## Visualization
+[Open Visualization](./66-search-rotated-array-v1.html)
 
 ## Problem Description
 You are given a rotated sorted array (originally sorted, then rotated at some pivot). Search for a target value. Return its index if found, or -1 if not.

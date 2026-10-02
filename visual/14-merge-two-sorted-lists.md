@@ -1,4 +1,4 @@
-# Question 14: Merge Two Sorted Lists
+# Q14: Merge Two Sorted Lists
 
 ## Layman's Explanation
 We have two sorted linked lists (chains of numbers in order). We want to merge them into one single sorted linked list.

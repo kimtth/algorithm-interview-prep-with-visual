@@ -1,4 +1,4 @@
-# Problem 58: Sort List
+# Q58: Sort List
 
 ## Visualization
 [View v1: merge sort](./58-sort-list-v1-merge-sort.html) | [View v2: builtin sort](./58-sort-list-v2-builtin-sort.html)

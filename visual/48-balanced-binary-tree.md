@@ -1,4 +1,4 @@
-# Problem 48: Balanced Binary Tree
+# Q48: Balanced Binary Tree
 
 ## Visualization
 [Open Visualization](./48-balanced-binary-tree-v1.html)

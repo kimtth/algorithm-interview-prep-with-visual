@@ -1,4 +1,7 @@
-# 78. Best Time to Buy and Sell Stock II
+# Q78: Best Time to Buy and Sell Stock II
+
+## Visualization
+[View v1: greedy](./78-stock-ii-v1-greedy.html) | [View v2: pythonic](./78-stock-ii-v2-pythonic.html)
 
 ## Problem Description
 Given an array `prices` where `prices[i]` is the price of a stock on day i, find the maximum profit. You can buy and sell multiple times (but must sell before buying again).

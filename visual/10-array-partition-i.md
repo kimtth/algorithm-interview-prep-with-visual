@@ -1,4 +1,4 @@
-# Question 10: Array Partition I
+# Q10: Array Partition I
 
 ## Layman's Explanation
 We have a list of numbers (e.g., `[1, 4, 3, 2]`). We need to group them into pairs (like `(1, 4)` and `(2, 3)`).

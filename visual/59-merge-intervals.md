@@ -1,4 +1,4 @@
-# Problem 59: Merge Intervals
+# Q59: Merge Intervals
 
 ## Visualization
 [Open Visualization](./59-merge-intervals-v1.html)

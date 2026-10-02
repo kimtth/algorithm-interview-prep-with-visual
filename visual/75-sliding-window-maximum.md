@@ -1,4 +1,7 @@
-# 75. Sliding Window Maximum
+# Q75: Sliding Window Maximum
+
+## Visualization
+[View v1: deque](./75-sliding-window-max-v1-deque.html) | [View v2: optimized](./75-sliding-window-max-v2-optimized.html)
 
 ## Problem Description
 Given an array `nums` and sliding window size `k`, return the maximum value in each window as it slides from left to right.

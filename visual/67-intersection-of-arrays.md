@@ -1,4 +1,4 @@
-# 67. Intersection of Two Arrays
+# Q67: Intersection of Two Arrays
 
 ## Problem Description
 Given two integer arrays `nums1` and `nums2`, return an array of their intersection. Each element in the result must be unique.

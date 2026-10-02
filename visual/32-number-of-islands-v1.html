@@ -57,7 +57,6 @@
                 <div class="legend-item"><div class="legend-color bg-green-light"></div> Visited</div>
             </div>
         </div>
-    </div>
         
         <div class="code-section">
             <h3>📄 Python Solution (32-1.py)</h3>
@@ -196,6 +195,10 @@
                 
                 if (i < 0 || i >= grid.length || j < 0 || j >= grid[0].length || 
                     grid[i][j] !== '1' || visited[i][j]) {
+                    const why = (i < 0 || i >= grid.length || j < 0 || j >= grid[0].length) ? 'out of bounds'
+                        : visited[i][j] ? 'already visited' : 'water';
+                    document.getElementById('statusMessage').textContent = 
+                        `(${i}, ${j}) is ${why} → return`;
                     render();
                     return;
                 }
@@ -205,11 +208,11 @@
                 document.getElementById('statusMessage').textContent = 
                     `Visiting (${i}, ${j}), exploring neighbors...`;
                 
-                // Add neighbors (in reverse order for proper DFS)
-                stack.push([i - 1, j]); // Up
-                stack.push([i + 1, j]); // Down
-                stack.push([i, j - 1]); // Left
+                // Push in reverse so pops follow the solution's order: down, up, right, left
+                stack.push([i, j - 1]); // Left  (dfs(i, j - 1) last)
                 stack.push([i, j + 1]); // Right
+                stack.push([i - 1, j]); // Up
+                stack.push([i + 1, j]); // Down (dfs(i + 1, j) first)
                 
                 render();
             }

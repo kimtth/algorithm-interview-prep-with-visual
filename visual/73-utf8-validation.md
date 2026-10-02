@@ -1,4 +1,7 @@
-# 73. UTF-8 Validation
+# Q73: UTF-8 Validation
+
+## Visualization
+[Open Visualization](./73-utf8-validation-v1.html)
 
 ## Problem Description
 Given an array of integers representing bytes, determine if it's a valid UTF-8 encoding.

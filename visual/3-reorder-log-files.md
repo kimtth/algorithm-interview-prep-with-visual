@@ -1,4 +1,4 @@
-# Question 3: Reorder Data in Log Files
+# Q3: Reorder Data in Log Files
 
 ## Layman's Explanation
 Imagine you have a pile of messy log files. Each log has an ID (like "dig1" or "let1") followed by some content.

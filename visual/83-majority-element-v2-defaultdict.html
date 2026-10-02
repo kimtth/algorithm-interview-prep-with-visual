@@ -10,10 +10,8 @@
 </head>
 <body>
     <div class="container">
-        <div class="header">
-            <h1>🗳️ Q83: Majority Element</h1>
-            <p>LeetCode #169 | File: 83-2.py | Approach: defaultdict Counter</p>
-        </div>
+        <h1>Q83: Majority Element</h1>
+        <p class="subtitle">Solution 83-2.py - defaultdict Counter (LeetCode #169)</p>
         
         <div class="problem-info">
             <h3>📋 Problem Description</h3>
@@ -25,7 +23,7 @@
         
 
         <div class="status" id="status">Ready to find majority element</div>
-    </div>
+    
 
         <div class="controls">
             <button class="btn btn-primary" onclick="step()">Step</button>
@@ -44,6 +42,7 @@
             
             <div class="result-display" id="result"></div>
     
+        </div>
         <div class="code-section">
             <h3>📄 Python Solution (83-2.py)</h3>
             <pre><span class="keyword">import</span> collections
@@ -60,7 +59,6 @@
             <span class="keyword">if</span> counts[num] &gt; <span class="function">len</span>(nums) // <span class="number">2</span>:
                 <span class="keyword">return</span> num</pre>
         </div>
-
     </div>
 
     <script>

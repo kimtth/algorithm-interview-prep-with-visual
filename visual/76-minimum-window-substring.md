@@ -1,4 +1,7 @@
-# 76. Minimum Window Substring
+# Q76: Minimum Window Substring
+
+## Visualization
+[View v1: two pointers](./76-min-window-substring-v1-two-pointers.html) | [View v2: missing counter](./76-min-window-substring-v2-missing-counter.html) | [View v3: counter and](./76-min-window-substring-v3-counter-and.html)
 
 ## Problem Description
 Given strings `s` and `t`, find the minimum window in `s` that contains all characters of `t`. If no such window exists, return empty string.

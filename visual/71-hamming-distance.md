@@ -1,4 +1,7 @@
-# 71. Hamming Distance
+# Q71: Hamming Distance
+
+## Visualization
+[Open Visualization](./71-hamming-distance-v1-xor.html)
 
 ## Problem Description
 The Hamming distance between two integers is the number of positions at which the corresponding bits are different. Given two integers `x` and `y`, return the Hamming distance.

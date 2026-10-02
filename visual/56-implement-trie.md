@@ -1,4 +1,4 @@
-# Problem 56: Implement Trie (Prefix Tree)
+# Q56: Implement Trie (Prefix Tree)
 
 ## Visualization
 [Open Visualization](./56-implement-trie-v1.html)

@@ -1,4 +1,7 @@
-# 74. Number of 1 Bits (Hamming Weight)
+# Q74: Number of 1 Bits (Hamming Weight)
+
+## Visualization
+[View v1: built-in count](./74-number-of-1-bits-v1-built-in-count.html) | [View v2: kernighan](./74-number-of-1-bits-v2-kernighan.html)
 
 ## Problem Description
 Given an unsigned integer, return the number of '1' bits it has (also known as the Hamming weight).

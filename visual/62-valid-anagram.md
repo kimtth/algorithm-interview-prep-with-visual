@@ -1,4 +1,7 @@
-# 62. Valid Anagram
+# Q62: Valid Anagram
+
+## Visualization
+[Open Visualization](./62-valid-anagram-v1.html)
 
 ## Problem Description
 Given two strings `s` and `t`, return `true` if `t` is an anagram of `s`, and `false` otherwise. An anagram uses exactly the same characters with the same frequencies, just in a different order.

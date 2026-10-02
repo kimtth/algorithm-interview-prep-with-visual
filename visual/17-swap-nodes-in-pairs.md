@@ -1,4 +1,4 @@
-# Question 17: Swap Nodes in Pairs
+# Q17: Swap Nodes in Pairs
 
 ## Layman's Explanation
 We have a linked list and we want to swap every two adjacent nodes. For example:
